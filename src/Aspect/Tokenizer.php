@@ -25,32 +25,6 @@ class Tokenizer {
     const LINE = 3;
 
     /**
-     * Strip whitespace tokens (default)
-     */
-    const DECODE_TEXT = 0;
-    /**
-     * Strip whitespace tokens, exclude newlines
-     */
-    const DECODE_NEW_LINES = 1;
-    /**
-     * Allow all whitespace tokens
-     */
-    const DECODE_WHITESPACES = 2;
-    /**
-     * Decode mask
-     */
-    const DECODE = 3;
-
-    /**
-     * Strip duplicate whitespaces. For example \n\n => \n
-     */
-    const FILTER_DUP_WHITESPACES = 128;
-    /**
-     * Filter mask
-     */
-    const FILTERS = 4080;
-
-    /**
      * Some text value: foo, bar, new, class ...
      */
     const MACRO_STRING = 1000;
@@ -157,14 +131,12 @@ class Tokenizer {
      *
      * @static
      * @param string $query
-     * @param int    $options one of DECODE_*, FILTER_* constants
      * @return array
      */
-    public static function decode($query, $options = 0) {
+    public static function decode($query) {
         $tokens = array(-1 => array(\T_WHITESPACE, '', '', 1));
         $_tokens = token_get_all("<?php ".$query);
         $line = 1;
-        $decode =  $options & self::DECODE;
         array_shift($_tokens);
         $i = 0;
         foreach($_tokens as &$token) {
@@ -177,36 +149,7 @@ class Tokenizer {
                 );
                 $i++;
             } elseif ($token[0] === \T_WHITESPACE) {
-                if(!$decode) {
-                    $tokens[$i-1][2] = $token[1];
-                } elseif($decode == 1) {
-                    if(strpos($token[1], "\n") !== false) {
-                        $frags = explode("\n", $token[1]);
-                        $ws = array_shift($frags);
-                        if($ws) {
-                            $tokens[$i-1][2] .= $ws;
-                        }
-                        foreach($frags as $frag) {
-                            $tokens[] = array(
-                                \T_WHITESPACE,
-                                "\n",
-                                $frag,
-                                $line = $token[2],
-                            );
-                            $i++;
-                        }
-                    } else {
-                        $tokens[$i-1][2] .= $token[1];
-                    }
-                } else {
-                    $tokens[] = array(
-                        $token[0],
-                        $token[1],
-                        "",
-                        $line = $token[2],
-                    );
-                    $i++;
-                }
+                $tokens[$i-1][2] = $token[1];
             } else {
                 $tokens[] = array(
                     $token[0],
@@ -217,19 +160,6 @@ class Tokenizer {
                 $i++;
             }
 
-        }
-
-
-        if($options & self::FILTER_DUP_WHITESPACES) {
-            $prev = null;
-            foreach($tokens as &$token) {
-                if($token[0] === T_WHITESPACE && $prev && $prev[0] === T_WHITESPACE) {
-                    $prev = false;
-                }
-
-                $prev = &$token;
-            }
-            $tokens = array_values(array_filter($tokens));
         }
 
         return $tokens;
