@@ -5,9 +5,6 @@ use Aspect;
 
 /**
  * Aspect template compiler
- *
- * @author Ivan Shalganov <bzick@megagroup.ru>
- * @copyright MegaGroup.ru
  */
 class Template extends Render {
 

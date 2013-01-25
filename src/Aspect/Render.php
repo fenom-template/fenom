@@ -4,8 +4,6 @@ use Aspect;
 
 /**
  * Primitive template
- * @author Ivan Shalganov <bzick@megagroup.ru>
- * @copyright MegaGroup.ru
  */
 class Render extends \ArrayObject {
 	/**

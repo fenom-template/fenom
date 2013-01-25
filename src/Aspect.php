@@ -1,6 +1,9 @@
 <?php
 use Aspect\Template;
 
+/**
+ * Templater
+ */
 class Aspect {
 
     const INLINE_COMPILER = 1;

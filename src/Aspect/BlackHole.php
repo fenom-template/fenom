@@ -2,8 +2,6 @@
 namespace Aspect;
 /**
  * Class blackhole
- * @author Ivan Shalganov <bzick@megagroup.ru>
- * @copyright MegaGroup.ru
  */
 class BlackHole implements \ArrayAccess, \Countable, \Iterator {
 
