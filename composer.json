@@ -1,0 +1,23 @@
+{
+    "name": "megagroup/aspect",
+    "type": "library",
+    "description": "Aspect - faster templater for PHP",
+    "keywords": ["aspect", "templater", "templating"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ivan Shalganov",
+            "email": "a.cobest@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.3",
+        "ext-tokenizer": "*"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "3.7.*"
+    },
+    "autoload": {
+        "psr-0": { "Aspect": "src/" }
+    }
+}
