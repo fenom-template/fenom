@@ -8,26 +8,24 @@ Aspect templater
 Отрисовать шаблон `pages/about.tpl`:
 
 ```php
-  $aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
-  $aspect->display("pages/about.tpl", $data);
+$aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
+$aspect->display("pages/about.tpl", $data);
 ```
 
 Получить результат отрисовки шаблона:
 
 ```php
-  $aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
-  $content = $aspect->fetch("pages/about.tpl", $data);
+$aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
+$content = $aspect->fetch("pages/about.tpl", $data);
 ```
 
 Создание шаблона в реальном времени:
 
 ```php
-  use MF\Aspect;
-  $aspect = new Aspect();
-  $tempate = $aspect->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
-
-  $tempate->display($data);
-  $content = $tempate->fetch($data);
+$aspect = new Aspect();
+$tempate = $aspect->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
+$tempate->display($data);
+$content = $tempate->fetch($data);
 ```
 
 ## Синтаксис
