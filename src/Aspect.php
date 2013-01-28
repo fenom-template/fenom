@@ -63,10 +63,10 @@ class Aspect {
     );
 
     public $blocks = array();
-	/**
-	 * @var array Templates storage
-	 */
-	protected $_storage = array();
+    /**
+     * @var array Templates storage
+     */
+    protected $_storage = array();
     /**
      * @var array template directory
      */
@@ -426,8 +426,8 @@ class Aspect {
         if(!$_dir) {
             throw new \InvalidArgumentException("Invalid template dir: $dir");
         }
-		$this->_tpl_path[] = $_dir;
-	}
+        $this->_tpl_path[] = $_dir;
+    }
 
     /**
      * Set options. May be bitwise mask of constants DENY_METHODS, DENY_INLINE_FUNCS, DENY_SET_VARS, INCLUDE_SOURCES,
@@ -464,9 +464,9 @@ class Aspect {
      * @param array $vars
      * @return Aspect\Render
      */
-	public function display($template, array $vars = array()) {
+    public function display($template, array $vars = array()) {
         return $this->getTemplate($template)->display($vars);
-	}
+    }
 
     /**
      *
@@ -475,9 +475,9 @@ class Aspect {
      * @internal param int $options
      * @return mixed
      */
-	public function fetch($template, array $vars = array()) {
-		return $this->getTemplate($template)->fetch($vars);
-	}
+    public function fetch($template, array $vars = array()) {
+        return $this->getTemplate($template)->fetch($vars);
+    }
 
     /**
      * Return template by name
@@ -485,19 +485,19 @@ class Aspect {
      * @param string $template
      * @return Aspect\Template
      */
-	public function getTemplate($template) {
+    public function getTemplate($template) {
         if(isset($this->_storage[ $template ])) {
             if(($this->_options & self::CHECK_MTIME) && !$this->_check($template)) {
                 return $this->_storage[ $template ] = $this->compile($template);
             } else {
-			    return $this->_storage[ $template ];
+                return $this->_storage[ $template ];
             }
-		} elseif($this->_options & self::FORCE_COMPILE) {
+        } elseif($this->_options & self::FORCE_COMPILE) {
             return $this->compile($template);
         } else {
             return $this->_storage[ $template ] = $this->_load($template);
         }
-	}
+    }
 
     /**
      * Add custom template into storage
@@ -516,16 +516,16 @@ class Aspect {
      * @return Aspect\Template|mixed
      */
     protected function _load($tpl) {
-		$file_name = $this->_getHash($tpl);
-		if(!is_file($this->_compile_dir."/".$file_name) || ($this->_options & self::CHECK_MTIME) && !$this->_check($tpl)) {
+        $file_name = $this->_getHash($tpl);
+        if(!is_file($this->_compile_dir."/".$file_name) || ($this->_options & self::CHECK_MTIME) && !$this->_check($tpl)) {
             return $this->compile($tpl);
-		} else {
+        } else {
             /** @var Aspect\Render $tpl */
             $tpl = include($this->_compile_dir."/".$file_name);
             $tpl->setStorage($this);
             return $tpl;
-		}
-	}
+        }
+    }
 
     /**
      * @param string $template

@@ -60,26 +60,26 @@ class Template extends Render {
      * @throws CompileException
      */
     public function __construct(Aspect $aspect, $code, $name = "runtime template") {
-		$this->_src = $code;
-		$this->_name = $name;
-		$this->_aspect = $aspect;
-		$this->_options = $aspect->getOptions();
+        $this->_src = $code;
+        $this->_name = $name;
+        $this->_aspect = $aspect;
+        $this->_options = $aspect->getOptions();
         $pos = 0;
         while(($start = strpos($code, '{', $pos)) !== false) { // search open-char of tags
             switch($code[$start + 1]) { // check next char
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
-	                $pos = $start + 1; // trying finding tags after the current char
-                    continue 2;
+                $pos = $start + 1; // trying finding tags after the current char
+                continue 2;
                 case "*": // if comment block
                     $end = strpos($code, '*}', $start); // finding end of the comment block
                     $frag = substr($code, $this->_pos, $start - $end); // read the comment block for precessing
                     $this->_line += substr_count($frag, "\n"); // count skipped lines
-	                $pos = $end + 1; // trying finding tags after the comment block
+                    $pos = $end + 1; // trying finding tags after the comment block
                     continue 2;
             }
             $end = strpos($code, '}', $start); // search close-char of the tag
             if(!$end) { // if unexpected end of template
-                throw new CompileException("Unclosed tag in line $this->_line", 0, 1, $this->_name, $this->_line);
+                throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
             }
             $frag = substr($code, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after last '}' and new '{'
             $tag = substr($code, $start, $end - $start + 1); // variable $tag contains aspect tag '{...}'
@@ -103,7 +103,7 @@ class Template extends Render {
                 if(!$_line) {
                     $_line = $scope->line;
                 }
-                $_names[] = $scope->name.' (line '.$scope->line.')';
+                $_names[] = $scope->name.' defined on line '.$scope->line;
             }
             throw new CompileException("Unclosed tags: ".implode(", ", $_names), 0, 1, $this->_name, $_line);
         }
@@ -113,7 +113,7 @@ class Template extends Render {
                 call_user_func_array($cb, array(&$this->_body, $this));
             }
         }
-	}
+    }
 
     public function addPostCompile($cb) {
         $this->_post[] = $cb;
@@ -124,8 +124,8 @@ class Template extends Render {
      * @return string
      */
     public function getBody() {
-		return $this->_body;
-	}
+        return $this->_body;
+    }
 
     /**
      * Return PHP code of PHP file of template
@@ -133,8 +133,8 @@ class Template extends Render {
      */
     public function getTemplateCode() {
         return "<?php \n".
-               "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-               "return new Aspect\\Render('{$this->_name}', ".$this->_getClosureCode().", ".$this->_options.");\n";
+            "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
+            "return new Aspect\\Render('{$this->_name}', ".$this->_getClosureCode().", ".$this->_options.");\n";
     }
 
     /**
@@ -208,23 +208,23 @@ class Template extends Render {
         }
 
         $tokens = new Tokenizer($token);
-		try {
-			switch($token[0]) {
+        try {
+            switch($token[0]) {
                 case '"':
                 case '\'':
-				case '$':
+                case '$':
                     $code = "echo ".$this->parseExp($tokens).";";
                     break;
-				case '/':
+                case '/':
                     $code = $this->_end($tokens);
                     break;
-				default:
+                default:
                     $code = $this->_parseAct($tokens);
                     if($code === null) {
 
                     }
                     break;
-			}
+            }
 
             if($tokens->key()) { // if tokenizer still have tokens
                 throw new UnexpectedException($tokens);
@@ -236,10 +236,10 @@ class Template extends Render {
             }
         } catch (\LogicException $e) {
             throw new SecurityException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, 1, $this->_name, $this->_line, $e);
-		} catch (\Exception $e) {
-			throw new CompileException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, 1, $this->_name, $this->_line, $e);
-		}
-	}
+        } catch (\Exception $e) {
+            throw new CompileException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, 1, $this->_name, $this->_line, $e);
+        }
+    }
 
     /**
      * Close tag handler
@@ -248,18 +248,18 @@ class Template extends Render {
      * @throws TokenizeException
      */
     private function _end(Tokenizer $tokens) {
-		$name = $tokens->getNext(Tokenizer::MACRO_STRING);
-		$tokens->next();
-		if(!$this->_stack) {
-			throw new TokenizeException("Unexpected closing of the tag '$name', the tag hasn't been opened");
-		}
-		/** @var Scope $scope */
-		$scope = array_pop($this->_stack);
-		if($scope->name !== $name) {
-			throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$scope->name}, opened on line {$scope->line})");
-		}
-		return $scope->close($tokens);
-	}
+        $name = $tokens->getNext(Tokenizer::MACRO_STRING);
+        $tokens->next();
+        if(!$this->_stack) {
+            throw new TokenizeException("Unexpected closing of the tag '$name', the tag hasn't been opened");
+        }
+        /** @var Scope $scope */
+        $scope = array_pop($this->_stack);
+        if($scope->name !== $name) {
+            throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$scope->name}, opened on line {$scope->line})");
+        }
+        return $scope->close($tokens);
+    }
 
     /**
      * Parse action {action ...} or {action(...) ...}
@@ -269,10 +269,10 @@ class Template extends Render {
      * @throws TokenizeException
      * @return string
      */
-	private function _parseAct(Tokenizer $tokens) {
+    private function _parseAct(Tokenizer $tokens) {
 
         if($tokens->is(Tokenizer::MACRO_STRING)) {
-		    $action = $tokens->current();
+            $action = $tokens->current();
         } else {
             return 'echo '.$this->parseExp($tokens).';';
         }
@@ -286,7 +286,7 @@ class Template extends Render {
             return "echo ".$this->parseExp($tokens).";";
         }
 
-		if($act = $this->_aspect->getFunction($action)) {
+        if($act = $this->_aspect->getFunction($action)) {
             $tokens->next();
             switch($act["type"]) {
                 case Aspect::BLOCK_COMPILER:
@@ -303,20 +303,20 @@ class Template extends Render {
                     array_push($this->_stack, $scope);
                     return $scope->open($tokens);
             }
-		}
+        }
 
-		for($j = $i = count($this->_stack)-1; $i>=0; $i--) {
-			if($this->_stack[$i]->hasTag($action, $j - $i)) {
+        for($j = $i = count($this->_stack)-1; $i>=0; $i--) {
+            if($this->_stack[$i]->hasTag($action, $j - $i)) {
                 $tokens->next();
-				return $this->_stack[$i]->tag($action, $tokens);
-			}
-		}
+                return $this->_stack[$i]->tag($action, $tokens);
+            }
+        }
         if($tags = $this->_aspect->getTagOwners($action)) {
             throw new TokenizeException("Unexpected tag '$action' (this tag can be used with '".implode("', '", $tags)."')");
         } else {
             throw new TokenizeException("Unexpected tag $action");
         }
-	}
+    }
 
     /**
      * Parse expressions. The mix of math operations, boolean operations, scalars, arrays and variables.
@@ -329,21 +329,21 @@ class Template extends Render {
      * @throws TokenizeException
      * @return string
      */
-	public function parseExp(Tokenizer $tokens, $required = false) {
-		$_exp = "";
+    public function parseExp(Tokenizer $tokens, $required = false) {
+        $_exp = "";
         $brackets = 0;
-		$term = false;
-		$cond = false;
+        $term = false;
+        $cond = false;
         while($tokens->valid()) {
             if(!$term && $tokens->is(Tokenizer::MACRO_SCALAR, '"', '`', T_ENCAPSED_AND_WHITESPACE)) {
 
                 $_exp .= $this->parseScalar($tokens, true);
-	            $term = 1;
+                $term = 1;
             } elseif(!$term && $tokens->is(T_VARIABLE)) {
                 $pp = $tokens->isPrev(Tokenizer::MACRO_INCDEC);
                 $_exp .= $this->parseVar($tokens, 0, $only_var);
                 if($only_var && !$pp) {
-	                $term = 2;
+                    $term = 2;
                 } else {
                     $term = 1;
                 }
@@ -352,23 +352,23 @@ class Template extends Render {
                 $brackets++;
                 $term = false;
             } elseif($term && $tokens->is(")")) {
-	            if(!$brackets) {
-		            break;
-	            }
-	            $brackets--;
-	            $_exp .= $tokens->getAndNext();
-				$term = 1;
+                if(!$brackets) {
+                    break;
+                }
+                $brackets--;
+                $_exp .= $tokens->getAndNext();
+                $term = 1;
             } elseif(!$term && $tokens->is(T_STRING)) {
-	            if($tokens->isSpecialVal()) {
-		            $_exp .= $tokens->getAndNext();
-	            } elseif($tokens->isNext("(")) {
+                if($tokens->isSpecialVal()) {
+                    $_exp .= $tokens->getAndNext();
+                } elseif($tokens->isNext("(")) {
                     $func = $this->_aspect->getModifier($tokens->current());
                     $tokens->next();
-		            $_exp .= $func.$this->parseArgs($tokens);
-	            } else {
-		            break;
-	            }
-	            $term = 1;
+                    $_exp .= $func.$this->parseArgs($tokens);
+                } else {
+                    break;
+                }
+                $term = 1;
             } elseif(!$term && $tokens->is(T_ISSET, T_EMPTY)) {
                 $_exp .= $tokens->getAndNext();
                 if($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
@@ -378,28 +378,28 @@ class Template extends Render {
                 }
                 $term = 1;
             } elseif(!$term && $tokens->is(Tokenizer::MACRO_UNARY)) {
-	            if(!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY)) {
-		            break;
-	            }
-	            $_exp .= $tokens->getAndNext();
-	            $term = 0;
+                if(!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY)) {
+                    break;
+                }
+                $_exp .= $tokens->getAndNext();
+                $term = 0;
             } elseif($tokens->is(Tokenizer::MACRO_BINARY)) {
                 if(!$term) {
                     throw new UnexpectedException($tokens);
                 }
-	            if($tokens->isLast()) {
-		            break;
-	            }
-	            if($tokens->is(Tokenizer::MACRO_COND)) {
-		            if($cond) {
-			            break;
-		            }
-		            $cond = true;
-	            } elseif ($tokens->is(Tokenizer::MACRO_BOOLEAN)) {
-		            $cond = false;
-	            }
-	            $_exp .= " ".$tokens->getAndNext()." ";
-	            $term = 0;
+                if($tokens->isLast()) {
+                    break;
+                }
+                if($tokens->is(Tokenizer::MACRO_COND)) {
+                    if($cond) {
+                        break;
+                    }
+                    $cond = true;
+                } elseif ($tokens->is(Tokenizer::MACRO_BOOLEAN)) {
+                    $cond = false;
+                }
+                $_exp .= " ".$tokens->getAndNext()." ";
+                $term = 0;
             } elseif($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 if($term === 2) {
                     $term = 1;
@@ -408,17 +408,17 @@ class Template extends Render {
                 }
                 $_exp .= $tokens->getAndNext();
             } elseif($term && !$cond && !$tokens->isLast()) {
-	            if($tokens->is(Tokenizer::MACRO_EQUALS) && $term === 2) {
+                if($tokens->is(Tokenizer::MACRO_EQUALS) && $term === 2) {
                     if($this->_options & Aspect::DENY_SET_VARS) {
                         throw new \LogicException("Forbidden to set a variable");
                     }
-		            $_exp .= ' '.$tokens->getAndNext().' ';
-		            $term = 0;
-	            } else {
-		            break;
-	            }
+                    $_exp .= ' '.$tokens->getAndNext().' ';
+                    $term = 0;
+                } else {
+                    break;
+                }
             } else {
-	            break;
+                break;
             }
         }
 
@@ -431,8 +431,8 @@ class Template extends Render {
         if($required && $_exp === "") {
             throw new UnexpectedException($tokens);
         }
-		return $_exp;
-	}
+        return $_exp;
+    }
 
 
     /**
@@ -447,7 +447,7 @@ class Template extends Render {
      * @throws \LogicException
      * @return string
      */
-	public function parseVar(Tokenizer $tokens, $deny = 0, &$pure_var = true) {
+    public function parseVar(Tokenizer $tokens, $deny = 0, &$pure_var = true) {
         $var = $tokens->get(T_VARIABLE);
         $pure_var = true;
         if(isset(self::$sysvar[ $var ])) {
@@ -524,8 +524,8 @@ class Template extends Render {
                 break;
             }
         }
-		return $_var;
-	}
+        return $_var;
+    }
 
     /**
      * Parse scalar values
@@ -751,33 +751,33 @@ class Template extends Render {
      * @throws TokenizeException
      * @return string
      */
-	public function parseArgs(Tokenizer $tokens) {
-		$_args = "(";
-		$tokens->next();
-		$arg = $colon = false;
-		while($tokens->valid()) {
-			if(!$arg && $tokens->is(T_VARIABLE, T_STRING, "(", Tokenizer::MACRO_SCALAR, '"', Tokenizer::MACRO_UNARY, Tokenizer::MACRO_INCDEC)) {
-				$_args .= $this->parseExp($tokens, true);
-				$arg = true;
-				$colon = false;
-			} elseif(!$arg && $tokens->is('[')) {
-				$_args .= $this->parseArray($tokens);
-				$arg = true;
-				$colon = false;
-			} elseif($arg && $tokens->is(',')) {
-				$_args .= $tokens->getAndNext().' ';
-				$arg = false;
-				$colon = true;
-			} elseif(!$colon && $tokens->is(')')) {
-				$tokens->next();
-				return $_args.')';
-			} else {
-				break;
-			}
-		}
+    public function parseArgs(Tokenizer $tokens) {
+        $_args = "(";
+        $tokens->next();
+        $arg = $colon = false;
+        while($tokens->valid()) {
+            if(!$arg && $tokens->is(T_VARIABLE, T_STRING, "(", Tokenizer::MACRO_SCALAR, '"', Tokenizer::MACRO_UNARY, Tokenizer::MACRO_INCDEC)) {
+                $_args .= $this->parseExp($tokens, true);
+                $arg = true;
+                $colon = false;
+            } elseif(!$arg && $tokens->is('[')) {
+                $_args .= $this->parseArray($tokens);
+                $arg = true;
+                $colon = false;
+            } elseif($arg && $tokens->is(',')) {
+                $_args .= $tokens->getAndNext().' ';
+                $arg = false;
+                $colon = true;
+            } elseif(!$colon && $tokens->is(')')) {
+                $tokens->next();
+                return $_args.')';
+            } else {
+                break;
+            }
+        }
 
-		throw new TokenizeException("Unexpected token '".$tokens->current()."' in argument list");
-	}
+        throw new TokenizeException("Unexpected token '".$tokens->current()."' in argument list");
+    }
 
     /**
      * Parse parameters as $key=$value
@@ -789,8 +789,8 @@ class Template extends Render {
      * @throws \Exception
      * @return array
      */
-	public function parseParams(Tokenizer $tokens, array $defaults = null) {
-		$params = array();
+    public function parseParams(Tokenizer $tokens, array $defaults = null) {
+        $params = array();
         while($tokens->valid()) {
             if($tokens->is(Tokenizer::MACRO_STRING)) {
                 $key = $tokens->getAndNext();
@@ -815,7 +815,7 @@ class Template extends Render {
         }
 
         return $params;
-	}
+    }
 }
 
 
