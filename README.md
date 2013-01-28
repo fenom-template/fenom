@@ -236,7 +236,7 @@ Aspect templater
 Добавить папку с шаблонами:
 
 ```php
-  $aspect->addTemplateDir($dir);
+$aspect->addTemplateDir($dir);
 ```
 
 Шаблонизатор последовательно будет перебирать папки и искать указанный шаблон.
@@ -246,13 +246,13 @@ Aspect templater
 Задаёт папку в которую будут сохранятся преобразованные в PHP шаблоны
 
 ```php
-  $aspect->setCompileDir($dir);
+$aspect->setCompileDir($dir);
 ```
 
 #### Опции
 
 ```php
-  $aspect->setOptions($options);
+$aspect->setOptions($options);
 ```
 
 Массив `'option_name' => boolean` (если ключ не указан автоматически задаётся false)
@@ -278,7 +278,7 @@ Aspect templater
 Добавить модификатор:
 
 ```php
-  $aspect->addModifier($modifier, $callback);
+$aspect->addModifier($modifier, $callback);
 ```
 
 * `$modifier` - имя модификатора
@@ -292,7 +292,7 @@ Aspect templater
 Добавить компилер:
 
 ```php
-  $aspect->addCompiler($compiler, $parser);
+$aspect->addCompiler($compiler, $parser);
 ```
 
 * `$compiler` - имя модификатора
@@ -301,5 +301,5 @@ Aspect templater
 Добавить блочный компилер:
 
 ```php
-  $aspect->addBlockCompiler($compiler, $parsers, $tags);
+$aspect->addBlockCompiler($compiler, $parsers, $tags);
 ```
