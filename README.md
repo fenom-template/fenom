@@ -24,6 +24,7 @@ Templates looks like Smarty:
 Display template
 
 ```php
+<?php
 $aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
 $aspect->display("pages/about.tpl", $data);
 ```
@@ -31,6 +32,7 @@ $aspect->display("pages/about.tpl", $data);
 Fetch template's result^
 
 ```php
+<?php
 $aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
 $content = $aspect->fetch("pages/about.tpl", $data);
 ```
@@ -38,6 +40,7 @@ $content = $aspect->fetch("pages/about.tpl", $data);
 Runtime compilation
 
 ```php
+<?php
 $aspect = new Aspect();
 $tempate = $aspect->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
 $tempate->display($data);
