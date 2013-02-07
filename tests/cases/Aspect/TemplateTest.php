@@ -775,7 +775,7 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
 	/**
 	 * @group extends
 	 */
-	public function testExtends() {
+	public function ___testExtends() {
 		echo(self::$aspect->getTemplate("child1.tpl")->getBody()); exit;
 	}
 
