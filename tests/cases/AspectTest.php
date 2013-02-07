@@ -33,11 +33,11 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
 
     public function testAddRender() {
         $test = $this;
-        $this->aspect->storeTemplate(new Render('render.tpl', function($tpl) use ($test) {
+        $this->aspect->addTemplate(new Render('render.tpl', function($tpl) use ($test) {
             /** @var \PHPUnit_Framework_TestCase $test  */
             $test->assertInstanceOf('Aspect\Render', $tpl);
             echo "Inline render";
-        }));
+        }, array()));
 
         $this->assertSame("Inline render", $this->aspect->fetch('render.tpl', array()));
     }
@@ -85,15 +85,15 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testSetModifier() {
-        $this->aspect->setModifier("mymod", "myMod");
+        $this->aspect->addModifier("mymod", "myMod");
         $this->tpl('Custom modifier {$a|mymod}');
         $this->assertSame("Custom modifier (myMod)Custom(/myMod)", $this->aspect->fetch('custom.tpl', array("a" => "Custom")));
     }
 
     public function testSetFunctions() {
         $this->aspect->setForceCompile(true);
-        $this->aspect->setFunction("myfunc", "myFunc");
-        $this->aspect->setBlockFunction("myblockfunc", "myBlockFunc");
+        $this->aspect->addFunction("myfunc", "myFunc");
+        $this->aspect->addBlockFunction("myblockfunc", "myBlockFunc");
         $this->tpl('Custom function {myfunc name="foo"}');
         $this->assertSame("Custom function MyFunc:foo", $this->aspect->fetch('custom.tpl', array()));
         $this->tpl('Custom function {myblockfunc name="foo"} this block1 {/myblockfunc}');
@@ -102,11 +102,8 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
 
     public function testSetCompilers() {
         $this->aspect->setForceCompile(true);
-        $this->aspect->setCompiler("mycompiler", 'myCompiler');
-        $this->aspect->setBlockCompiler("myblockcompiler", array(
-            'open' => 'myBlockCompilerOpen',
-            'close' => 'myBlockCompilerClose'
-        ), array(
+        $this->aspect->addCompiler("mycompiler", 'myCompiler');
+        $this->aspect->addBlockCompiler("myblockcompiler", 'myBlockCompilerOpen', 'myBlockCompilerClose', array(
             'tag' => 'myBlockCompilerTag'
         ));
         $this->tpl('Custom compiler {mycompiler name="bar"}');

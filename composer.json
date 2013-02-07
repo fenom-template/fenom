@@ -1,8 +1,8 @@
 {
     "name": "megagroup/aspect",
     "type": "library",
-    "description": "Aspect - faster templater for PHP",
-    "keywords": ["aspect", "templater", "templating", "yohoho"],
+    "description": "Aspect - faster template engine",
+    "keywords": ["aspect", "templater", "templating", "template", "yohoho"],
     "license": "MIT",
     "authors": [
         {

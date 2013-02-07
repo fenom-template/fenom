@@ -1,7 +1,9 @@
-Aspect Template Engine
-================
+Aspect PHP Template Engine
+==========================
 
-Templates looks like Smarty:
+## [About](./docs/about.md) | [Documentation](./docs/main.md) | [Benchmark](./docs/benchmark.md) | [Bugs](https://github.com/bzick/aspect/issues) | [Articles](./docs/articles.md)
+
+Smarty-like syntax:
 
 ```smarty
 <html>
@@ -9,11 +11,13 @@ Templates looks like Smarty:
         <title>Aspect</title>
     </head>
     <body>
-    {if $user?} {* or {if !empty($user)} *}
-        <div>User name: {$user.name}</div>
+    {if $templaters.aspect?}
+        {var $tpl = $templaters.aspect}
+        <div>Name: {$tpl.name}</div>
+        <div>Description: {$tpl.name|truncate:80}</div>
         <ul>
-        {foreach $user.actions as $action}
-            <li>{$action.name} ({$action.timestamp|gmdate:"Y-m-d H:i:s"})</li>
+        {foreach $tpl.features as $feature}
+            <li>{$feature.name} (from {$feature.timestamp|gmdate:"Y-m-d H:i:s"})</li>
         {/foreach}
         </ul>
     {/if}
@@ -29,7 +33,7 @@ $aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
 $aspect->display("pages/about.tpl", $data);
 ```
 
-Fetch template's result^
+Get content
 
 ```php
 <?php
@@ -44,5 +48,6 @@ Runtime compilation
 $aspect = new Aspect();
 $tempate = $aspect->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
 $tempate->display($data);
+// or
 $content = $tempate->fetch($data);
 ```

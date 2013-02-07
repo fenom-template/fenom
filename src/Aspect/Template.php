@@ -19,7 +19,7 @@ class Template extends Render {
      * Template PHP code
      * @var string
      */
-    private $_body;
+    public $_body;
     /**
      * Call stack
      * @var Scope[]
@@ -41,7 +41,7 @@ class Template extends Render {
     /**
      * @var bool
      */
-    private $_literal = false;
+    private $_ignore = false;
     /**
      * Options
      * @var int
@@ -57,45 +57,57 @@ class Template extends Render {
      * @param Aspect $aspect Template storage
      * @param string $code template source
      * @param string $name template name
-     * @throws CompileException
+     * @param bool $auto_compile
      */
-    public function __construct(Aspect $aspect, $code, $name = "runtime template") {
+    public function __construct(Aspect $aspect, $code, $name = "runtime template", $auto_compile = true) {
         $this->_src = $code;
         $this->_name = $name;
         $this->_aspect = $aspect;
         $this->_options = $aspect->getOptions();
+        if($auto_compile) {
+            $this->compile();
+        }
+    }
+
+    public function compile() {
+        if(!isset($this->_src)) {
+            return;
+        }
+        $this->_time = microtime(true);
         $pos = 0;
-        while(($start = strpos($code, '{', $pos)) !== false) { // search open-char of tags
-            switch($code[$start + 1]) { // check next char
+        while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-char of tags
+            switch($this->_src[$start + 1]) { // check next char
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
-                $pos = $start + 1; // trying finding tags after the current char
+                $pos = $start + 1; // try find tags after the current char
                 continue 2;
                 case "*": // if comment block
-                    $end = strpos($code, '*}', $start); // finding end of the comment block
-                    $frag = substr($code, $this->_pos, $start - $end); // read the comment block for precessing
+                    $end = strpos($this->_src, '*}', $start); // finding end of the comment block
+                    $frag = substr($this->_src, $this->_pos, $start - $end); // read the comment block for precessing
                     $this->_line += substr_count($frag, "\n"); // count skipped lines
                     $pos = $end + 1; // trying finding tags after the comment block
                     continue 2;
             }
-            $end = strpos($code, '}', $start); // search close-char of the tag
+            $end = strpos($this->_src, '}', $start); // search close-char of the tag
             if(!$end) { // if unexpected end of template
                 throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
             }
-            $frag = substr($code, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after last '}' and new '{'
-            $tag = substr($code, $start, $end - $start + 1); // variable $tag contains aspect tag '{...}'
-            $this->_line += substr_count($code, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
-            $pos = $this->_pos = $end + 1; // move search pointer to end of the tag
+            $frag = substr($this->_src, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after last '}' and next '{'
+            $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains aspect tag '{...}'
+            $this->_line += substr_count($this->_src, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
+            $pos = $this->_pos = $end + 1; // move search-pointer to end of the tag
             if($this->_trim) { // if previous tag has trim flag
                 $frag = ltrim($frag);
             }
-            $tag = $this->_tag($tag, $this->_trim);
+
+            $tag = $this->_tag($tag, $this->_trim); // dispatching tags
+
             if($this->_trim) { // if current tag has trim flag
                 $frag = rtrim($frag);
             }
-            $this->_body .= $frag.$tag;
+            $this->_body .= str_replace("<?", '<?php echo "<?" ?>', $frag).$tag;
 
         }
-        $this->_body .= substr($code, $this->_pos);
+        $this->_body .= substr($this->_src, $this->_pos);
         if($this->_stack) {
             $_names = array();
             $_line = 0;
@@ -105,7 +117,7 @@ class Template extends Render {
                 }
                 $_names[] = $scope->name.' defined on line '.$scope->line;
             }
-            throw new CompileException("Unclosed tags: ".implode(", ", $_names), 0, 1, $this->_name, $_line);
+            throw new CompileException("Unclosed block tags: ".implode(", ", $_names), 0, 1, $this->_name, $_line);
         }
         unset($this->_src);
         if($this->_post) {
@@ -128,13 +140,18 @@ class Template extends Render {
     }
 
     /**
-     * Return PHP code of PHP file of template
+     * Return PHP code for saving to file
      * @return string
      */
     public function getTemplateCode() {
         return "<?php \n".
             "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Aspect\\Render('{$this->_name}', ".$this->_getClosureCode().", ".$this->_options.");\n";
+            "return new Aspect\\Render('{$this->_name}', ".$this->_getClosureCode().", ".var_export(array(
+	            "options" => $this->_options,
+	            //"provider" =>
+                "time" => $this->_time,
+	            "depends" => $this->_depends
+            ), true).");\n";
     }
 
     /**
@@ -163,6 +180,14 @@ class Template extends Render {
         return parent::display($values);
 
     }
+
+	/**
+	 * Add depends from template
+	 * @param Render $tpl
+	 */
+	public function addDepend(Render $tpl) {
+		$this->_depends[$tpl->getName()] = $tpl->getCompileTime();
+	}
 
     /**
      * Execute template and return result as string
@@ -198,9 +223,9 @@ class Template extends Render {
             $trim = false;
         }
         $token = trim($token);
-        if($this->_literal) {
-            if($token === '/literal') {
-                $this->_literal = false;
+        if($this->_ignore) {
+            if($token === '/ignore') {
+                $this->_ignore = false;
                 return '';
             } else {
                 return $src;
@@ -229,15 +254,17 @@ class Template extends Render {
             if($tokens->key()) { // if tokenizer still have tokens
                 throw new UnexpectedException($tokens);
             }
-            if($this->_options & Aspect::INCLUDE_SOURCES) {
+	        if(!$code) {
+		        return "";
+	        } else {
                 return "<?php\n/* {$this->_name}:{$this->_line}: {$src} */\n {$code} ?>";
-            } else {
-                return "<?php {$code} ?>";
             }
+        } catch (ImproperUseException $e) {
+	        throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
-            throw new SecurityException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, 1, $this->_name, $this->_line, $e);
+            throw new SecurityException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
-            throw new CompileException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, 1, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         }
     }
 
@@ -277,8 +304,8 @@ class Template extends Render {
             return 'echo '.$this->parseExp($tokens).';';
         }
 
-        if($action === "literal") {
-            $this->_literal = true;
+        if($action === "ignore") {
+            $this->_ignore = true;
             $tokens->next();
             return '';
         }
@@ -409,9 +436,6 @@ class Template extends Render {
                 $_exp .= $tokens->getAndNext();
             } elseif($term && !$cond && !$tokens->isLast()) {
                 if($tokens->is(Tokenizer::MACRO_EQUALS) && $term === 2) {
-                    if($this->_options & Aspect::DENY_SET_VARS) {
-                        throw new \LogicException("Forbidden to set a variable");
-                    }
                     $_exp .= ' '.$tokens->getAndNext().' ';
                     $term = 0;
                 } else {
@@ -507,14 +531,34 @@ class Template extends Render {
                 }
             } elseif($t === T_DNUMBER) {
                 $_var .= '['.substr($tokens->getAndNext(), 1).']';
-            } elseif($t === "?") {
+            } elseif($t === "?" || $t === "!") {
                 $pure_var = false;
+                $empty = ($t === "?");
                 $tokens->next();
                 if($tokens->is(":")) {
                     $tokens->next();
-                    return '(empty('.$_var.') ? ('.$this->parseExp($tokens, true).') : '.$_var.')';
+                    if($empty) {
+                        return '(empty('.$_var.') ? ('.$this->parseExp($tokens, true).') : '.$_var.')';
+                    } else {
+                        return '(isset('.$_var.') ? '.$_var.' : ('.$this->parseExp($tokens, true).'))';
+                    }
+                } elseif($tokens->is(Tokenizer::MACRO_BINARY, Tokenizer::MACRO_BOOLEAN, Tokenizer::MACRO_MATH) || !$tokens->valid()) {
+                    if($empty) {
+                        return '!empty('.$_var.')';
+                    } else {
+                        return 'isset('.$_var.')';
+                    }
                 } else {
-                    return '!empty('.$_var.')';
+	                $expr1 = $this->parseExp($tokens, true);
+	                if(!$tokens->is(":")) {
+		                throw new UnexpectedException($tokens, null, "ternary operator");
+	                }
+	                $expr2 = $this->parseExp($tokens, true);
+                    if($empty) {
+	                    return '(empty('.$_var.') ? '.$expr2.' : '.$expr1;
+                    } else {
+                        return '(isset('.$_var.') ? '.$expr1.' : '.$expr2;
+                    }
                 }
             } elseif($t === "!") {
                 $pure_var = false;
@@ -802,7 +846,7 @@ class Template extends Render {
                     $params[ $key ] = $this->parseExp($tokens);
                 } else {
                     $params[ $key ] = true;
-                    $params[] = "'".$key."'";
+                    $params[] = '"'.$key.'"';
                 }
             } elseif($tokens->is(Tokenizer::MACRO_SCALAR, '"', '`', T_VARIABLE, "[", '(')) {
                 $params[] = $this->parseExp($tokens);
@@ -822,3 +866,4 @@ class Template extends Render {
 
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
+class ImproperUseException extends \LogicException {}

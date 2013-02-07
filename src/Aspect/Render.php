@@ -20,20 +20,23 @@ class Render extends \ArrayObject {
      */
     protected $_aspect;
     /**
-     * Signature of the template
-     * @var mixed
+     * Timestamp of compilation
+     * @var float
      */
-    protected $_fingerprint;
+    protected $_time = 0.0;
+
+    protected $_depends = array();
 
     /**
      * @param string $name template name
      * @param callable $code template body
-     * @param mixed $fingerprint signature
+     * @param mixed $props signature
      */
-    public function __construct($name, \Closure $code, $fingerprint = null) {
+    public function __construct($name, \Closure $code, $props = array()) {
         $this->_name = $name;
 		$this->_code = $code;
-		$this->_fingerprint = $fingerprint;
+        $this->_time = isset($props["time"]) ? $props["time"] : microtime(true);
+        $this->_depends = isset($props["depends"]) ? $props["depends"] : array();
 	}
 
     /**
@@ -67,17 +70,26 @@ class Render extends \ArrayObject {
         return $this->_name;
     }
 
+	public function getCompileTime() {
+		return $this->_time;
+	}
+
+
     /**
-     * Validate template version
-     * @param mixed $fingerprint of the template
+     * Validate template
      * @return bool
      */
-    public function isValid($fingerprint) {
-        if($this->_fingerprint) {
-            return $fingerprint === $this->_fingerprint;
-        } else {
-            return true;
-        }
+    public function isValid() {
+	    $provider = $this->_aspect->getProvider(strstr($this->_name, ":"), true);
+	    if($provider->getLastModified($this->_name) >= $this->_time) {
+		    return false;
+	    }
+	    foreach($this->_depends as $tpl => $time) {
+			if($this->_aspect->getTemplate($tpl)->getCompileTime() !== $time) {
+				return false;
+			}
+	    }
+        return true;
     }
 
     /**

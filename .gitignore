@@ -1,4 +1,8 @@
 .idea
 vendor
 composer.lock
+composer.phar
 tests/resources/compile/*
+benchmark/compile/*
+benchmark/templates/inheritance/smarty
+benchmark/templates/inheritance/twig

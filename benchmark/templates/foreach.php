@@ -5,7 +5,7 @@ exec("rm -rf ".__DIR__."/../compile/*");
 
 require(__DIR__.'/../../vendor/autoload.php');
 $smarty = new Smarty();
-$smarty->compile_check = false;
+$smarty->compile_check = true;
 
 $smarty->setTemplateDir(__DIR__);
 $smarty->setCompileDir(__DIR__."/../compile/");

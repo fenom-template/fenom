@@ -1,6 +1,6 @@
 <?php
-
 namespace Aspect;
+
 
 class Misc {
 

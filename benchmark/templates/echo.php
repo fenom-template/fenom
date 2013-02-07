@@ -1,7 +1,22 @@
 <?php
-$data = json_decode(file_get_contents(__DIR__.'/echo/data.json'), true);
-
+//$data = json_decode(file_get_contents(__DIR__.'/echo/data.json'), true);
+require_once __DIR__.'/../scripts/bootstrap.php';
 exec("rm -rf ".__DIR__."/../compile/*");
+
+echo "A lot outputs...\n";
+
+Benchmark::run("smarty3", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, '!compiled and !loaded');
+Benchmark::run("smarty3", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, 'compiled and !loaded');
+Benchmark::run("smarty3", 'echo/smarty.tpl', __DIR__.'/echo/data.json', true, 'compiled and loaded');
+
+Benchmark::run("twig", 'echo/twig.tpl', __DIR__.'/echo/data.json', false, '!compiled and !loaded');
+Benchmark::run("twig", 'echo/twig.tpl', __DIR__.'/echo/data.json', false, 'compiled and !loaded');
+Benchmark::run("twig", 'echo/twig.tpl', __DIR__.'/echo/data.json', true, 'compiled and loaded');
+
+Benchmark::run("aspect", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, '!compiled and !loaded');
+Benchmark::run("aspect", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, 'compiled and !loaded');
+Benchmark::run("aspect", 'echo/smarty.tpl', __DIR__.'/echo/data.json', true, 'compiled and loaded');
+exit;
 
 require(__DIR__.'/../../vendor/autoload.php');
 $smarty = new Smarty();

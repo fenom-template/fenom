@@ -13,13 +13,13 @@ class RenderTest extends \PHPUnit_Framework_TestCase {
     public static function setUpBeforeClass() {
         self::$render = new Render("render.tpl", function ($tpl) {
             echo "It is render function ".$tpl["render"];
-        });
+        }, array());
     }
 
     public function testCreate() {
         $r = new Render("test.render.tpl", function () {
             echo "Test render";
-        });
+        }, array());
         $this->assertSame("Test render", $r->fetch(array()));
     }
 

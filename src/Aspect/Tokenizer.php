@@ -6,7 +6,6 @@ defined('T_TRAIT')      || define('T_TRAIT', 355);
 defined('T_TRAIT_C')    || define('T_TRAIT_C', 365);
 
 /**
- * This iterator cannot be rewinded.
  * Each token have structure
  *  - Token (constant T_* or text)
  *  - Token name (textual representation of the token)
@@ -28,14 +27,14 @@ class Tokenizer {
      * Some text value: foo, bar, new, class ...
      */
     const MACRO_STRING = 1000;
-	/**
-	 * Unary operation: ~, !, ^
-	 */
-	const MACRO_UNARY = 1001;
-	/**
-	 * Binary operation (operation between two values): +, -, *, /, &&, or , ||, >=, !=, ...
-	 */
-	const MACRO_BINARY = 1002;
+    /**
+     * Unary operation: ~, !, ^
+     */
+    const MACRO_UNARY = 1001;
+    /**
+     * Binary operation (operation between two values): +, -, *, /, &&, or , ||, >=, !=, ...
+     */
+    const MACRO_BINARY = 1002;
     /**
      * Equal operation
      */
@@ -44,14 +43,14 @@ class Tokenizer {
      * Scalar values (such as int, float, escaped strings): 2, 0.5, "foo", 'bar\'s'
      */
     const MACRO_SCALAR = 1004;
-	/**
-	 * Increment or decrement: ++ --
-	 */
-	const MACRO_INCDEC = 1005;
-	/**
-	 * Boolean operations: &&, ||, or, xor
-	 */
-	const MACRO_BOOLEAN = 1006;
+    /**
+     * Increment or decrement: ++ --
+     */
+    const MACRO_INCDEC = 1005;
+    /**
+     * Boolean operations: &&, ||, or, xor
+     */
+    const MACRO_BOOLEAN = 1006;
     /**
      * Math operation
      */
@@ -61,8 +60,8 @@ class Tokenizer {
      */
     const MACRO_COND = 1008;
 
-	public $tokens;
-	public $p = 0;
+    public $tokens;
+    public $p = 0;
     private $_max = 0;
     private $_last_no = 0;
 
@@ -73,45 +72,45 @@ class Tokenizer {
     private static $_macros = array(
         self::MACRO_STRING => array(
             \T_ABSTRACT => 1,    \T_ARRAY => 1,       \T_AS => 1,      \T_BREAK => 1,       \T_BREAK => 1,       \T_CASE => 1,
-	        \T_CATCH => 1,       \T_CLASS => 1,       \T_CLASS_C => 1, \T_CLONE => 1,       \T_CONST => 1,       \T_CONTINUE => 1,
+            \T_CATCH => 1,       \T_CLASS => 1,       \T_CLASS_C => 1, \T_CLONE => 1,       \T_CONST => 1,       \T_CONTINUE => 1,
             \T_DECLARE => 1,     \T_DEFAULT => 1,     \T_DIR => 1,     \T_DO => 1,          \T_ECHO => 1,        \T_ELSE => 1,
-	        \T_ELSEIF => 1,      \T_EMPTY => 1,       \T_ENDDECLARE => 1, \T_ENDFOR => 1,   \T_ENDFOREACH => 1,  \T_ENDIF => 1,
-	        \T_ENDSWITCH => 1,   \T_ENDWHILE => 1,    \T_EVAL => 1,    \T_EXIT => 1,        \T_EXTENDS => 1,     \T_FILE => 1,
-	        \T_FINAL => 1,       \T_FOR => 1,         \T_FOREACH => 1, \T_FUNCTION => 1,    \T_FUNC_C => 1,      \T_GLOBAL => 1,
-	        \T_GOTO => 1,        \T_HALT_COMPILER => 1, \T_IF => 1,    \T_IMPLEMENTS => 1,  \T_INCLUDE => 1,    \T_INCLUDE_ONCE => 1,
-	        \T_INSTANCEOF => 1,  \T_INSTEADOF => 1,   \T_INTERFACE => 1, \T_ISSET => 1,     \T_LINE => 1,        \T_LIST => 1,
-	        \T_LOGICAL_AND => 1, \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1, \T_METHOD_C => 1, \T_NAMESPACE => 1,  \T_NS_C => 1,
-	        \T_NEW => 1,         \T_PRINT => 1,       \T_PRIVATE => 1, \T_PUBLIC => 1,      \T_PROTECTED => 1,   \T_REQUIRE => 1,
-	        \T_REQUIRE_ONCE => 1,\T_RETURN => 1,      \T_RETURN => 1,  \T_STRING => 1,      \T_SWITCH => 1,      \T_THROW => 1,
-	        \T_TRAIT => 1,       \T_TRAIT_C => 1,     \T_TRY => 1,     \T_UNSET => 1,       \T_UNSET => 1,      \T_VAR => 1,
-	        \T_WHILE => 1
+            \T_ELSEIF => 1,      \T_EMPTY => 1,       \T_ENDDECLARE => 1, \T_ENDFOR => 1,   \T_ENDFOREACH => 1,  \T_ENDIF => 1,
+            \T_ENDSWITCH => 1,   \T_ENDWHILE => 1,    \T_EVAL => 1,    \T_EXIT => 1,        \T_EXTENDS => 1,     \T_FILE => 1,
+            \T_FINAL => 1,       \T_FOR => 1,         \T_FOREACH => 1, \T_FUNCTION => 1,    \T_FUNC_C => 1,      \T_GLOBAL => 1,
+            \T_GOTO => 1,        \T_HALT_COMPILER => 1, \T_IF => 1,    \T_IMPLEMENTS => 1,  \T_INCLUDE => 1,     \T_INCLUDE_ONCE => 1,
+            \T_INSTANCEOF => 1,  \T_INSTEADOF => 1,   \T_INTERFACE => 1, \T_ISSET => 1,     \T_LINE => 1,        \T_LIST => 1,
+            \T_LOGICAL_AND => 1, \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1, \T_METHOD_C => 1, \T_NAMESPACE => 1,  \T_NS_C => 1,
+            \T_NEW => 1,         \T_PRINT => 1,       \T_PRIVATE => 1, \T_PUBLIC => 1,      \T_PROTECTED => 1,   \T_REQUIRE => 1,
+            \T_REQUIRE_ONCE => 1,\T_RETURN => 1,      \T_RETURN => 1,  \T_STRING => 1,      \T_SWITCH => 1,      \T_THROW => 1,
+            \T_TRAIT => 1,       \T_TRAIT_C => 1,     \T_TRY => 1,     \T_UNSET => 1,       \T_UNSET => 1,       \T_VAR => 1,
+            \T_WHILE => 1
         ),
-	    self::MACRO_INCDEC => array(
-		    \T_INC => 1, \T_DEC => 1
-	    ),
+        self::MACRO_INCDEC => array(
+            \T_INC => 1, \T_DEC => 1
+        ),
         self::MACRO_UNARY => array(
             "!" => 1, "~" => 1, "-" => 1
         ),
         self::MACRO_BINARY => array(
             \T_BOOLEAN_AND => 1, \T_BOOLEAN_OR => 1,  \T_IS_GREATER_OR_EQUAL => 1,         \T_IS_EQUAL => 1,    \T_IS_IDENTICAL => 1,
-	        \T_IS_NOT_EQUAL => 1,\T_IS_NOT_IDENTICAL => 1,            \T_IS_SMALLER_OR_EQUAL => 1,             \T_LOGICAL_AND => 1,
-	        \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1,  \T_SL => 1,     \T_SR => 1,
-	        "+" => 1, "-" => 1, "*" => 1, "/" => 1, ">" => 1, "<" => 1, "^" => 1, "%" => 1, "&" => 1
+            \T_IS_NOT_EQUAL => 1,\T_IS_NOT_IDENTICAL => 1,            \T_IS_SMALLER_OR_EQUAL => 1,             \T_LOGICAL_AND => 1,
+            \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1,  \T_SL => 1,     \T_SR => 1,
+            "+" => 1, "-" => 1, "*" => 1, "/" => 1, ">" => 1, "<" => 1, "^" => 1, "%" => 1, "&" => 1
         ),
-	    self::MACRO_BOOLEAN => array(
-		    \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1, \T_BOOLEAN_AND => 1, \T_BOOLEAN_OR => 1
-	    ),
-	    self::MACRO_MATH => array(
-		    "+" => 1, "-" => 1, "*" => 1, "/" => 1, "^" => 1, "%" => 1, "&" => 1, "|" => 1
-	    ),
-	    self::MACRO_COND => array(
-		    \T_IS_EQUAL => 1,    \T_IS_IDENTICAL => 1, ">" => 1, "<" => 1, \T_SL => 1,     \T_SR => 1,
-		    \T_IS_NOT_EQUAL => 1,\T_IS_NOT_IDENTICAL => 1,            \T_IS_SMALLER_OR_EQUAL => 1,
-	    ),
+        self::MACRO_BOOLEAN => array(
+            \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1, \T_BOOLEAN_AND => 1, \T_BOOLEAN_OR => 1
+        ),
+        self::MACRO_MATH => array(
+            "+" => 1, "-" => 1, "*" => 1, "/" => 1, "^" => 1, "%" => 1, "&" => 1, "|" => 1
+        ),
+        self::MACRO_COND => array(
+            \T_IS_EQUAL => 1,    \T_IS_IDENTICAL => 1, ">" => 1, "<" => 1, \T_SL => 1,     \T_SR => 1,
+            \T_IS_NOT_EQUAL => 1,\T_IS_NOT_IDENTICAL => 1,            \T_IS_SMALLER_OR_EQUAL => 1,
+        ),
         self::MACRO_EQUALS => array(
             \T_AND_EQUAL => 1,   \T_CONCAT_EQUAL => 1,\T_DIV_EQUAL => 1,                   \T_MINUS_EQUAL => 1, \T_MOD_EQUAL => 1,
-	        \T_MUL_EQUAL => 1,   \T_OR_EQUAL => 1,    \T_PLUS_EQUAL => 1,                  \T_SL_EQUAL => 1,    \T_SR_EQUAL => 1,
-	        \T_XOR_EQUAL => 1,   '=' => 1
+            \T_MUL_EQUAL => 1,   \T_OR_EQUAL => 1,    \T_PLUS_EQUAL => 1,                  \T_SL_EQUAL => 1,    \T_SR_EQUAL => 1,
+            \T_XOR_EQUAL => 1,   '=' => 1
         ),
         self::MACRO_SCALAR => array(
             \T_LNUMBER => 1,     \T_DNUMBER => 1,     \T_CONSTANT_ENCAPSED_STRING => 1
@@ -165,12 +164,12 @@ class Tokenizer {
         return $tokens;
     }
 
-	public function __construct($query, $decode = 0) {
-		$this->tokens = self::decode($query, $decode);
+    public function __construct($query, $decode = 0) {
+        $this->tokens = self::decode($query, $decode);
         unset($this->tokens[-1]);
         $this->_max = count($this->tokens) - 1;
         $this->_last_no = $this->tokens[$this->_max][3];
-	}
+    }
 
     /**
      * Set the filter callback. Token may be changed by reference or skipped if callback return false.
@@ -188,15 +187,15 @@ class Tokenizer {
         $this->_max = count($this->tokens) - 1;
     }
 
-	/**
-	 * Return the current element
-	 *
-	 * @link http://php.net/manual/en/iterator.current.php
-	 * @return mixed Can return any type.
-	 */
-	public function current() {
-		return $this->curr[1];
-	}
+    /**
+     * Return the current element
+     *
+     * @link http://php.net/manual/en/iterator.current.php
+     * @return mixed Can return any type.
+     */
+    public function current() {
+        return $this->curr[1];
+    }
 
     /**
      * Move forward to next element
@@ -204,14 +203,14 @@ class Tokenizer {
      * @link http://php.net/manual/en/iterator.next.php
      * @return Tokenizer
      */
-	public function next() {
+    public function next() {
         if($this->p > $this->_max) {
             return $this;
         }
-		$this->p++;
+        $this->p++;
         unset($this->prev, $this->curr, $this->next);
         return $this;
-	}
+    }
 
     /**
      * Check token type. If token type is one of expected types return true. Otherwise return false
@@ -243,7 +242,7 @@ class Tokenizer {
      * @return mixed
      */
     public function _next($tokens) {
-		$this->next();
+        $this->next();
         if(!$this->curr) {
             throw new TokenizeException("Unexpected end of expression");
         }
@@ -260,16 +259,16 @@ class Tokenizer {
             $expect = "";
         }
         throw new TokenizeException("Unexpected token '".$this->current()."'$expect");
-	}
+    }
 
     /**
      * Fetch next specified token or throw an exception
      * @return mixed
      */
     public function getNext(/*int|string $token1, int|string $token2, ... */) {
-		$this->_next(func_get_args());
-		return $this->current();
-	}
+        $this->_next(func_get_args());
+        return $this->current();
+    }
 
     /**
      * Concatenate tokens from the current one to one of the specified and returns the string.
@@ -356,12 +355,12 @@ class Tokenizer {
      * @return mixed
      */
     public function get($token1 /*, $token2 ...*/) {
-		if($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
-			return $this->curr[1];
-		} else {
+        if($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
+            return $this->curr[1];
+        } else {
             throw new UnexpectedException($this, func_get_args());
         }
-	}
+    }
 
     /**
      * Step back
@@ -374,7 +373,7 @@ class Tokenizer {
         $this->p--;
         unset($this->prev, $this->curr, $this->next);
         return $this;
-	}
+    }
 
     /**
      * Lazy load properties
@@ -395,31 +394,31 @@ class Tokenizer {
         }
     }
 
-	/**
-	 * Return the key of the current element
-	 * @link http://php.net/manual/en/iterator.key.php
-	 * @return mixed scalar on success, or null on failure.
-	 */
-	public function key() {
-		return $this->curr ? $this->curr[0] : null;
-	}
+    /**
+     * Return the key of the current element
+     * @link http://php.net/manual/en/iterator.key.php
+     * @return mixed scalar on success, or null on failure.
+     */
+    public function key() {
+        return $this->curr ? $this->curr[0] : null;
+    }
 
-	/**
-	 * Checks if current position is valid
-	 * @link http://php.net/manual/en/iterator.valid.php
-	 * @return boolean The return value will be casted to boolean and then evaluated.
-	 *       Returns true on success or false on failure.
-	 */
-	public function valid() {
-		return (bool)$this->curr;
-	}
+    /**
+     * Checks if current position is valid
+     * @link http://php.net/manual/en/iterator.valid.php
+     * @return boolean The return value will be casted to boolean and then evaluated.
+     *       Returns true on success or false on failure.
+     */
+    public function valid() {
+        return (bool)$this->curr;
+    }
 
-	/**
-	 * Rewind the Iterator to the first element. Disabled.
-	 * @link http://php.net/manual/en/iterator.rewind.php
-	 * @return void Any returned value is ignored.
-	 */
-	public function rewind() {}
+    /**
+     * Rewind the Iterator to the first element. Disabled.
+     * @link http://php.net/manual/en/iterator.rewind.php
+     * @return void Any returned value is ignored.
+     */
+    public function rewind() {}
 
     /**
      * Get token name
@@ -428,16 +427,16 @@ class Tokenizer {
      * @return string
      */
     public static function getName($token) {
-		if(is_string($token)) {
-			return $token;
-		} elseif(is_integer($token)) {
-			return token_name($token);
-		} elseif(is_array($token)) {
+        if(is_string($token)) {
+            return $token;
+        } elseif(is_integer($token)) {
+            return token_name($token);
+        } elseif(is_array($token)) {
             return token_name($token[0]);
         } else {
             return null;
         }
-	}
+    }
 
     /**
      * Return whitespace of current token
@@ -499,15 +498,15 @@ class Tokenizer {
         }
     }
 
-	/**
-	 * Count elements of an object
-	 * @link http://php.net/manual/en/countable.count.php
-	 * @return int The custom count as an integer.
-	 * The return value is cast to an integer.
-	 */
-	public function count() {
-		return $this->_max;
-	}
+    /**
+     * Count elements of an object
+     * @link http://php.net/manual/en/countable.count.php
+     * @return int The custom count as an integer.
+     * The return value is cast to an integer.
+     */
+    public function count() {
+        return $this->_max;
+    }
 
     /**
      * Get tokens near current token
@@ -516,20 +515,20 @@ class Tokenizer {
      * @return array
      */
     public function getSnippet($before = 0, $after = 0) {
-		$from = 0;
-		$to = $this->p;
-		if($before > 0) {
-			if($before > $this->p) {
-				$from = $this->p;
-			} else {
-				$from = $before;
-			}
-		} elseif($before < 0) {
-			$from = $this->p + $before;
-			if($from < 0) {
-				$from = 0;
-			}
-		}
+        $from = 0;
+        $to = $this->p;
+        if($before > 0) {
+            if($before > $this->p) {
+                $from = $this->p;
+            } else {
+                $from = $before;
+            }
+        } elseif($before < 0) {
+            $from = $this->p + $before;
+            if($from < 0) {
+                $from = 0;
+            }
+        }
         if($after > 0) {
             $to = $this->p + $after;
             if($to > $this->_max) {
@@ -543,13 +542,13 @@ class Tokenizer {
         } elseif($this->p > $this->_max) {
             $to = $this->_max;
         }
-		$code = array();
-		for($i=$from; $i<=$to; $i++) {
-			$code[] = $this->tokens[ $i ];
-		}
+        $code = array();
+        for($i=$from; $i<=$to; $i++) {
+            $code[] = $this->tokens[ $i ];
+        }
 
-		return $code;
-	}
+        return $code;
+    }
 
     /**
      * Return snippet as string
@@ -597,19 +596,6 @@ class Tokenizer {
     }
 
     /**
-     * Dump (append) token into variable
-     *
-     * @param mixed $var
-     * @param bool $whitespace include whitespace
-     */
-    /*public function appendTo(&$var, $whitespace = false) {
-        $var .= $this->curr[1];
-        if($whitespace && $this->curr[2]) {
-            $var .= $this->curr[2];
-        }
-    }*/
-
-    /**
      * Parse code and append tokens. This method move pointer to offset.
      * @param string $code
      * @param int $offset
@@ -642,20 +628,20 @@ class TokenizeException extends \RuntimeException {}
  * Unexpected token
  */
 class UnexpectedException extends TokenizeException {
-    public function __construct(Tokenizer $tokens, $expect = null) {
+    public function __construct(Tokenizer $tokens, $expect = null, $where = null) {
         if($expect && count($expect) == 1 && is_string($expect[0])) {
             $expect = ", expect '".$expect[0]."'";
         } else {
             $expect = "";
         }
         if(!$tokens->curr) {
-            $this->message = "Unexpected end of expression$expect";
+            $this->message = "Unexpected end of ".($where?:"expression")."$expect";
         } elseif($tokens->curr[1] === "\n") {
             $this->message = "Unexpected new line$expect";
         } elseif($tokens->curr[0] === T_WHITESPACE) {
             $this->message = "Unexpected whitespace$expect";
         } else {
-            $this->message = "Unexpected token '".$tokens->current()."'$expect";
+            $this->message = "Unexpected token '".$tokens->current()."' in ".($where?:"expression")."$expect";
         }
     }
 };

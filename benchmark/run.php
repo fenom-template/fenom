@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/scripts/bootstrap.php';
+exec("rm -rf ".__DIR__."/compile/*");
 
 echo "Smarty3 vs Twig vs Aspect\n\n";
 
@@ -7,14 +9,23 @@ passthru("php ".__DIR__."/templates/inheritance/smarty.gen.php");
 passthru("php ".__DIR__."/templates/inheritance/twig.gen.php");
 echo "Done\n";
 
-echo "Testing large output...\n";
-passthru("php ".__DIR__."/templates/echo.php");
+echo "Testing a lot output...\n";
+
+Benchmark::runs("smarty3", 'echo/smarty.tpl', __DIR__.'/templates/echo/data.json');
+Benchmark::runs("twig", 'echo/twig.tpl', __DIR__.'/templates/echo/data.json');
+Benchmark::runs("aspect", 'echo/smarty.tpl', __DIR__.'/templates/echo/data.json');
 
 echo "\nTesting 'foreach' of big array...\n";
-passthru("php ".__DIR__."/templates/foreach.php");
+
+Benchmark::runs("smarty3", 'foreach/smarty.tpl', __DIR__.'/templates/foreach/data.json');
+Benchmark::runs("twig", 'foreach/twig.tpl', __DIR__.'/templates/foreach/data.json');
+Benchmark::runs("aspect", 'foreach/smarty.tpl', __DIR__.'/templates/foreach/data.json');
 
 echo "\nTesting deep 'inheritance'...\n";
-passthru("php ".__DIR__."/templates/inheritance.php");
+
+Benchmark::runs("smarty3", 'inheritance/smarty/b100.tpl', __DIR__.'/templates/foreach/data.json');
+Benchmark::runs("twig", 'inheritance/twig/b100.tpl', __DIR__.'/templates/foreach/data.json');
+Benchmark::runs("aspect", 'inheritance/smarty/b100.tpl', __DIR__.'/templates/foreach/data.json');
 
 echo "\nDone. Cleanup.\n";
 passthru("rm -rf ".__DIR__."/compile/*");

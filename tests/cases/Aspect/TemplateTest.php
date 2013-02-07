@@ -16,15 +16,7 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
             echo "<b>Welcome, {block name='username'}{/block} ({block name='usermail'}{/block})</b>";
         }));*/
         try {
-            drop(self::$aspect->compileCode(<<<EOT
-{if \$data?}
-	echo lot
-{/if}
-<doc></doc>
-literal: function () { return 1; } end
-asdasd
-EOT
-)->fetch([]));
+
         } catch(\Exception $e) {
             echo $e->getTraceAsString();
             drop($e->getMessage(), $e->getFile().":".$e->getLine());
@@ -32,10 +24,16 @@ EOT
     }
 
     public function setUp() {
-        self::$aspect = new Aspect();
-        self::$aspect->storeTemplate(new Render("welcome.tpl", function ($tpl) {
+	    exec("rm -f ".ASPECT_RESOURCES.'/compile/*');
+        self::$aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
+        self::$aspect->addTemplate(new Render("welcome.tpl", function ($tpl) {
             echo "<b>Welcome, ".$tpl["username"]." (".$tpl["email"].")</b>";
-        }));
+        }, array()));
+	    /*$parent = self::$aspect->compileCode('Parent template block1: {block name="bk1"}{/block}
+	    block2: {block "bk2"} default block 2{/block}
+	    {var $bk="bk3"}
+	    block3: {block "$bk"} default block 3{/block} ', "parent.tpl");
+	    self::$aspect->addTemplate($parent);*/
     }
 
 
@@ -102,7 +100,6 @@ EOT
             array('hello, {$b[3]$c}!',         'Aspect\CompileException', "Unexpected token '\$c'"),
             array('hello, {$b[3]c}!',          'Aspect\CompileException', "Unexpected token 'c'"),
             array('hello, {$b.obj->valid()}!', 'Aspect\SecurityException', "Forbidden to call methods", Aspect::DENY_METHODS),
-            array('hello, {$b = 5}!',          'Aspect\SecurityException', "Forbidden to set a variable", Aspect::DENY_SET_VARS),
         );
     }
 
@@ -157,8 +154,8 @@ EOT
 
     public static function providerModifiersInvalid() {
         return array(
-            array('Mod: {$lorem|}!',                    'Aspect\CompileException', "Unexpected end of expression"),
-            array('Mod: {$lorem|json_encode}!',         'Aspect\CompileException', "Modifier json_encode not found", Aspect::DENY_INLINE_FUNCS),
+            array('Mod: {$lorem|}!',                     'Aspect\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|str_rot13}!',           'Aspect\CompileException', "Modifier str_rot13 not found", Aspect::DENY_INLINE_FUNCS),
             array('Mod: {$lorem|my_encode}!',           'Aspect\CompileException', "Modifier my_encode not found"),
             array('Mod: {$lorem|truncate:}!',           'Aspect\CompileException', "Unexpected end of expression"),
             array('Mod: {$lorem|truncate:abs}!',        'Aspect\CompileException', "Unexpected token 'abs'"),
@@ -189,16 +186,16 @@ EOT
             array('Exp: {!$x} result',                          $b, 'Exp: result'),
             array('Exp: {!5} result',                           $b, 'Exp: result'),
             array('Exp: {-1} result',                           $b, 'Exp: -1 result'),
-            array('Exp: {$z = 5} {$z} result',                  $b, 'Exp: 5 5 result'),
-            array('Exp: {$k.i = "str"} {$k.i} result',          $b, 'Exp: str str result'),
+            array('Exp: {$z = 5} {$z} result',                 $b, 'Exp: 5 5 result'),
+            array('Exp: {$k.i = "str"} {$k.i} result',        $b, 'Exp: str str result'),
 
             array('Exp: {($y*$x - (($x+$y) + $y/$x) ^ $y)/4} result',
-                                                                $b, 'Exp: 53.75 result'),
-            array('Exp: {$x+max($x, $y)} result',               $b, 'Exp: 36 result'),
+                                                                   $b, 'Exp: 53.75 result'),
+            array('Exp: {$x+max($x, $y)} result',              $b, 'Exp: 36 result'),
             array('Exp: {max(1,2)} result',                     $b, 'Exp: 2 result'),
-            array('Exp: {round(sin(pi()), 8)} result',          $b, 'Exp: 0 result'),
+            array('Exp: {round(sin(pi()), 8)} result',        $b, 'Exp: 0 result'),
             array('Exp: {max($x, $y) + round(sin(pi()), 8) - min($x, $y) +3} result',
-                                                                $b, 'Exp: 21 result'),
+                                                                   $b, 'Exp: 21 result'),
         );
     }
 
@@ -213,7 +210,6 @@ EOT
             array('If: {$a != 5 => 4} end',  'Aspect\CompileException', "Unexpected token '=>'"),
             array('If: {$a + (*6)} end',     'Aspect\CompileException', "Unexpected token '*'"),
             array('If: {$a + ( 6} end',      'Aspect\CompileException', "Brackets don't match"),
-            array('If: {$a = 4} end',        'Aspect\SecurityException', "Forbidden to set a variable", Aspect::DENY_SET_VARS),
         );
     }
 
@@ -250,7 +246,7 @@ EOT
 
     public static function providerIncludeInvalid() {
         return array(
-            array('Include {include} template',   'Aspect\CompileException', "{include} require 'file' parameter"),
+            array('Include {include} template',   'Aspect\CompileException', "The tag {include} requires 'file' parameter"),
         );
     }
 
@@ -292,7 +288,7 @@ EOT
         return array(
             array('If: {if} block1 {/if} end',                                   'Aspect\CompileException', "Unexpected end of expression"),
             array('If: {if 1} block1 {elseif} block2 {/if} end',                 'Aspect\CompileException', "Unexpected end of expression"),
-            array('If: {if 1} block1 {else} block2 {elseif 0} block3 {/if} end', 'Aspect\CompileException', "Incorrect use of the tag {else if}"),
+            array('If: {if 1} block1 {else} block2 {elseif 0} block3 {/if} end', 'Aspect\CompileException', "Incorrect use of the tag {elseif}"),
             array('If: {if 1} block1 {else} block2 {/if} block3 {elseif 0} end', 'Aspect\CompileException', "Unexpected tag 'elseif' (this tag can be used with 'if')"),
         );
     }
@@ -349,6 +345,67 @@ EOT
         );
     }
 
+    public static function providerTernary() {
+        $a = array(
+            "a" => 1,
+            "em" => "empty",
+            "empty" => array(
+                "array" => array(),
+                "int" => 0,
+                "string" => "",
+                "double" => 0.0,
+                "bool" => false,
+            ),
+            "nonempty" => array(
+                "array" => array(1,2),
+                "int" => 2,
+                "string" => "abc",
+                "double" => 0.2,
+                "bool" => true,
+            )
+        );
+        return array(
+            // ?
+            array('{if $a?} right {/if}',                           $a),
+            array('{if $unexists?} no way {else} right {/if}',      $a),
+            array('{if $empty.array?} no way {else} right {/if}',   $a),
+            array('{if $empty.int?} no way {else} right {/if}',     $a),
+            array('{if $empty.string?} no way {else} right {/if}',  $a),
+            array('{if $empty.double?} no way {else} right {/if}',  $a),
+            array('{if $empty.bool?} no way {else} right {/if}',    $a),
+            array('{if $empty.unexist?} no way {else} right {/if}', $a),
+            array('{if $nonempty.array?} right {/if}',              $a),
+            array('{if $nonempty.int?} right {/if}',                $a),
+            array('{if $nonempty.string?} right {/if}',             $a),
+            array('{if $nonempty.double?} right {/if}',             $a),
+            array('{if $nonempty.bool?} right {/if}',               $a),
+            // ?: ...
+            array('{$a?:"empty"}',                                  $a, "1"),
+            array('{$unexists?:"empty"}',                           $a, "empty"),
+            array('{$empty.array?:"empty"}',                        $a, "empty"),
+            array('{$empty.int?:"empty"}',                          $a, "empty"),
+            array('{$empty.string?:"empty"}',                       $a, "empty"),
+            array('{$empty.double?:"empty"}',                       $a, "empty"),
+            array('{$empty.bool?:"empty"}',                         $a, "empty"),
+            array('{$empty.unexist?:"empty"}',                      $a, "empty"),
+            // ? ... : ....
+            // !
+            array('{if $a!} right {/if}',                           $a),
+            array('{if $unexists!} no way {else} right {/if}',      $a),
+            array('{if $empty.array!} right {/if}',                 $a),
+            array('{if $empty.int!} right {/if}',                   $a),
+            array('{if $empty.string!} right {/if}',                $a),
+            array('{if $empty.double!} right {/if}',                $a),
+            array('{if $empty.bool!} right {/if}',                  $a),
+            array('{if $empty.unexist!} no way {else} right {/if}', $a),
+            array('{if $nonempty.array!} right {/if}',              $a),
+            array('{if $nonempty.int!} right {/if}',                $a),
+            array('{if $nonempty.string!} right {/if}',             $a),
+            array('{if $nonempty.double!} right {/if}',             $a),
+            array('{if $nonempty.bool!} right {/if}',               $a),
+        );
+    }
+
     public static function providerForeach() {
         $a = array(
             "list" => array(1 => "one", 2 => "two", 3 => "three"),
@@ -376,7 +433,7 @@ EOT
 
     public static function providerForeachInvalid() {
         return array(
-            array('Foreach: {foreach} {$e}, {/foreach} end',              'Aspect\CompileException', "Unexpected end of 'foreach'"),
+            array('Foreach: {foreach} {$e}, {/foreach} end',              'Aspect\CompileException', "Unexpected end of tag {foreach}"),
             array('Foreach: {foreach $list} {$e}, {/foreach} end',              'Aspect\CompileException', "Unexpected end of expression"),
             array('Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
             array('Foreach: {foreach array_random() as $e} {$e}, {/foreach} end', 'Aspect\CompileException', "Unexpected token 'array_random'"),
@@ -387,7 +444,7 @@ EOT
             array('Foreach: {foreach $list => $e} {$e}, {/foreach} end',        'Aspect\CompileException', "Unexpected token '=>'"),
             array('Foreach: {foreach $list $k => $e} {$e}, {/foreach} end',     'Aspect\CompileException', "Unexpected token '\$k'"),
             array('Foreach: {foreach $list as $k =>} {$e}, {/foreach} end',     'Aspect\CompileException', "Unexpected end of expression"),
-            array('Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end', 'Aspect\CompileException', "Unexpected token 'last' in 'foreach'"),
+            array('Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end', 'Aspect\CompileException', "Unexpected token 'last' in tag {foreach}"),
             array('Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end', 'Aspect\CompileException', "Unknown parameter 'unknown'"),
 	        array('Foreach: {foreach $list as $e index=$i+1} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
 	        array('Foreach: {foreach $list as $e first=$f+1} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
@@ -395,16 +452,16 @@ EOT
 	        array('Foreach: {foreach $list as $e index=max($i,1)} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
 	        array('Foreach: {foreach $list as $e first=max($i,1)} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
 	        array('Foreach: {foreach $list as $e last=max($i,1)} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {break} {/foreach} end',     'Aspect\CompileException', "Incorrect use of the tag {break}"),
-            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {continue} {/foreach} end',  'Aspect\CompileException', "Incorrect use of the tag {continue}"),
+            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {break} {/foreach} end',     'Aspect\CompileException', "Improper usage of the tag {break}"),
+            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {continue} {/foreach} end',  'Aspect\CompileException', "Improper usage of the tag {continue}"),
         );
     }
 
-    public static function providerLiteral() {
+    public static function providerIgnores() {
         $a = array("a" => "lit. A");
         return array(
             array('{if 0}none{/if} literal: {$a} end',                      $a, 'literal: lit. A end'),
-            array('{if 0}none{/if} literal:{literal} {$a} {/literal} end',  $a, 'literal: {$a} end'),
+            array('{if 0}none{/if} literal:{ignore} {$a} {/ignore} end',  $a, 'literal: {$a} end'),
             array('{if 0}none{/if} literal: { $a} end',                     $a, 'literal: { $a} end'),
             array('{if 0}none{/if} literal: {
             $a} end',                                       $a, 'literal: { $a} end'),
@@ -443,7 +500,7 @@ EOT
         return array(
             array('Switch: {switch}{case 1} one {break}{/switch} end',         'Aspect\CompileException', "Unexpected end of expression"),
             array('Switch: {switch 1}{case} one {break}{/switch} end',         'Aspect\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{break}{case} one {/switch} end',         'Aspect\CompileException', "Incorrect use of the tag {break}"),
+            array('Switch: {switch 1}{break}{case} one {/switch} end',         'Aspect\CompileException', "Improper usage of the tag {break}"),
         );
     }
 
@@ -496,8 +553,8 @@ EOT
             array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Aspect\CompileException', "Unexpected token 'first'"),
             array('For: {for last=$i $a=3 to=6} block1 {/for} end',  'Aspect\CompileException', "Unexpected token 'last'"),
             array('For: {for $a=4 to=6 unk=4} block1 {/for} end',    'Aspect\CompileException', "Unknown parameter 'unk'"),
-            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end',     'Aspect\CompileException', "Incorrect use of the tag {break}"),
-            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end',  'Aspect\CompileException', "Incorrect use of the tag {continue}"),
+            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end',     'Aspect\CompileException', "Improper usage of the tag {break}"),
+            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end',  'Aspect\CompileException', "Improper usage of the tag {continue}"),
         );
     }
 
@@ -509,19 +566,20 @@ EOT
             array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end',                        'Aspect\CompileException', "Unexpected closing of the tag 'for'"),
             array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end',                         'Aspect\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
             array('Layers: {/switch} end',                                                          'Aspect\CompileException', "Unexpected closing of the tag 'switch'"),
-            array('Layers: {if 1} end',                                                             'Aspect\CompileException', "Unclosed tags: if"),
+            array('Layers: {if 1} end',                                                             'Aspect\CompileException', "Unclosed block tags: if"),
         );
     }
 
-    /*public static function providerExtends() {
+    public static function providerExtends() {
         return array(
-            array('{extends file="proto.tpl"}{block name="bk1"} block1 {/block}', "Template extended by block1"),
-            array('{extends file="proto.tpl"}{block name=bk1} block1 {/block}', "Template extended by block1"),
-            array('{extends "proto.tpl"}{block "bk1"} block1 {/block}', "Template extended by block1"),
-            array('{extends "proto.tpl"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} garbage', "Template extended by block1"),
-            array('{extends "proto2.tpl"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} garbage', "Template multi-extended by block1"),
+            array('{extends file="parent.tpl"}{block name="bk1"} block1 {/block}', "Template extended by block1"),
+            array('{extends "parent.tpl"}{block "bk1"} block1 {/block}', "Template extended by block1"),
+            array('{extends "parent.tpl"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} garbage', "Template extended by block1"),
+            array('{extends file="parent.tpl"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} garbage', "Template multi-extended by block1"),
+            array('{extends "parent.tpl"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} {block "bk3"} block3 {/block} garbage', "Template multi-extended by block1"),
+            array('{extends "parent.tpl"}{var $bk = "bk3"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} {block "$bk"} block3 {/block} garbage', "Template multi-extended by block1"),
         );
-    }*/
+    }
 
     public function exec($code, $vars, $result, $dump = false) {
         $tpl = self::$aspect->compileCode($code, "inline.tpl");
@@ -630,6 +688,14 @@ EOT
     }
 
     /**
+     * @group ternary
+     * @dataProvider providerTernary
+     */
+    public function testTernary($code, $vars, $result = 'right') {
+        $this->exec(__FUNCTION__.": $code end", $vars, __FUNCTION__.": $result end");
+    }
+
+    /**
      * @dataProvider providerForeach
      */
     public function testForeach($code, $vars, $result) {
@@ -658,9 +724,9 @@ EOT
     }
 
     /**
-     * @dataProvider providerLiteral
+     * @dataProvider providerIgnores
      */
-    public function testLiterals($code, $vars, $result) {
+    public function testIgnores($code, $vars, $result) {
         $this->exec($code, $vars, $result);
     }
 
@@ -700,10 +766,24 @@ EOT
     }
 
     /**
-     * @dataProvider providerExtends
+     * @group extends
      */
-    public function _testExtends($code, $exception, $message, $options = 0) {
-        $this->execError($code, $exception, $message, $options);
+    public function _testExtends() {
+	    echo(self::$aspect->getTemplate("parent.tpl")->getBody()); exit;
     }
+
+	/**
+	 * @group extends
+	 */
+	public function testExtends() {
+		echo(self::$aspect->getTemplate("child1.tpl")->getBody()); exit;
+	}
+
+	/**
+	 * @group extends
+	 */
+	public function __testExtends() {
+		echo(self::$aspect->fetch("child1.tpl", array("a" => "value", "z" => ""))."\n"); exit;
+	}
 }
 
