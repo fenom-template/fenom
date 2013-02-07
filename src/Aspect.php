@@ -586,7 +586,7 @@ class Aspect {
      */
     private function _getHash($tpl) {
         $hash = $tpl.":".$this->_options;
-        return basename($tpl).".".crc32($hash).".".strlen($hash).".php";
+        return sprintf("%s.%u.%d.php", basename($tpl), crc32($hash), strlen($hash));
     }
 
 	/**

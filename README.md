@@ -3,6 +3,8 @@ Aspect PHP Template Engine
 
 ## [About](./docs/about.md) | [Documentation](./docs/main.md) | [Benchmark](./docs/benchmark.md) | [Bugs](https://github.com/bzick/aspect/issues) | [Articles](./docs/articles.md)
 
+[![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/aspect)
+
 Smarty-like syntax:
 
 ```smarty

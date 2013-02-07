@@ -16,7 +16,7 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
 
     public function setUp() {
         self::tearDownAfterClass();
-        $this->aspect = $aspect = new Aspect();
+        $this->aspect = $aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
         $aspect->setCompileDir(ASPECT_RESOURCES.'/compile');
         $aspect->addTemplateDir(ASPECT_RESOURCES.'/template');
         $aspect->setForceCompile(false);
