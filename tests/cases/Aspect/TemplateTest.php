@@ -10,30 +10,13 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
      */
     public static $aspect;
 
-    public function _testSandbox() {
-        //self::$aspect->storeTemplate(self::$aspect->compileCode("<b>Welcome, {block username}{/block} ({block name='email'}{/block})</b>", "parent.tpl"));
-        /*self::$aspect->storeTemplate(new Render("parent.tpl", function () {
-            echo "<b>Welcome, {block name='username'}{/block} ({block name='usermail'}{/block})</b>";
-        }));*/
-        try {
-
-        } catch(\Exception $e) {
-            echo $e->getTraceAsString();
-            drop($e->getMessage(), $e->getFile().":".$e->getLine());
-        }
-    }
-
     public function setUp() {
 	    exec("rm -f ".ASPECT_RESOURCES.'/compile/*');
+        mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
         self::$aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
         self::$aspect->addTemplate(new Render("welcome.tpl", function ($tpl) {
             echo "<b>Welcome, ".$tpl["username"]." (".$tpl["email"].")</b>";
         }, array()));
-	    /*$parent = self::$aspect->compileCode('Parent template block1: {block name="bk1"}{/block}
-	    block2: {block "bk2"} default block 2{/block}
-	    {var $bk="bk3"}
-	    block3: {block "$bk"} default block 3{/block} ', "parent.tpl");
-	    self::$aspect->addTemplate($parent);*/
     }
 
 

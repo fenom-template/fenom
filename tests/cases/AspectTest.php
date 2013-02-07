@@ -15,6 +15,7 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function setUp() {
+        mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
         self::tearDownAfterClass();
         $this->aspect = $aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
         $aspect->setCompileDir(ASPECT_RESOURCES.'/compile');
