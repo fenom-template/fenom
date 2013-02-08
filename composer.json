@@ -1,5 +1,5 @@
 {
-    "name": "megagroup/aspect",
+    "name": "bzick/aspect",
     "type": "library",
     "description": "Aspect - fast template engine for PHP",
     "homepage": "https://github.com/bzick/aspect",
