@@ -11,8 +11,11 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
     public static $aspect;
 
     public function setUp() {
-	    exec("rm -f ".ASPECT_RESOURCES.'/compile/*');
-        mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
+        if(!file_exists(ASPECT_RESOURCES.'/compile')) {
+            mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
+        } else {
+            exec("rm -f ".ASPECT_RESOURCES.'/compile/*');
+        }
         self::$aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
         self::$aspect->addTemplate(new Render("welcome.tpl", function ($tpl) {
             echo "<b>Welcome, ".$tpl["username"]." (".$tpl["email"].")</b>";
