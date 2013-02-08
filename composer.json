@@ -1,17 +1,18 @@
 {
     "name": "megagroup/aspect",
     "type": "library",
-    "description": "Aspect - faster template engine",
+    "description": "Aspect - fast template engine for PHP",
+    "homepage": "https://github.com/bzick/aspect",
     "keywords": ["aspect", "templater", "templating", "template", "yohoho"],
     "license": "MIT",
     "authors": [
         {
             "name": "Ivan Shalganov",
-            "email": "a.cobest@gmail.com"
+            "email": "a.beast@gmail.com"
         }
     ],
     "require": {
-        "php": ">=5.3.3",
+        "php": ">=5.3.0",
         "ext-tokenizer": "*"
     },
     "require-dev": {
