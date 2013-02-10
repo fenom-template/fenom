@@ -1,10 +1,8 @@
 Tag {for}
 =========
 
-### {for}
-
 ```smarty
-{for $counter=<start> to=<end>[ step=<step>][ index=$index][ first=$first][ last=$last]}
+{for $counter=<start..end> [to=<end>] [step=<step>] [index=$index] [first=$first] [last=$last]}
    {* ...code... *}
    {break}
    {* ...code... *}
@@ -14,6 +12,8 @@ Tag {for}
    {* ...code... *}
 {/for}
 ```
+
+### {for}
 
 Переменная `$counter` принимает значение <start> и увеличивает своё значение на <step> на каждой итерации цикла пока не достигнет или не станет больше <end>.
 <step> является необязательным аргументом. Если не указан, считается равным единице.
