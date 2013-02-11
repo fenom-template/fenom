@@ -1,13 +1,23 @@
 Tag {foreach}
 =============
 
-Перебор значений массива или итератора
+```smarty
+{foreach $list as [$key =>] $value [index=$index] [first=$first] [last=$last]}
+   {* ...code... *}
+   {break}
+   {* ...code... *}
+   {continue}
+   {* ...code... *}
+{foreachelse}
+   {* ...code... *}
+{/foreach}
+```
 
 ### {foreach}
 
 Перебор значений массива $list
 
-```smaert
+```smarty
 {foreach $list as $value}
  <div>{$value}</div>
 {/foreach}

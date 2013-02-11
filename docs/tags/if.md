@@ -1,7 +1,17 @@
 Tag {if}
 ========
 
-Реализация оператора if из PHP
+Реализация оператора [if](http://docs.php.net/if) из PHP
+
+```smarty
+{if <expression>}
+   {* ...code... *}
+{elseif <expresion>}
+   {* ...code... *}
+{else}
+   {* ...code... *}
+{/if}
+```
 
 ### {if}
 
