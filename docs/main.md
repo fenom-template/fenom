@@ -32,7 +32,6 @@ Conversation about [tags](./tags.md)
 * [if](./tags/if.md), `elseif` and `else`
 * [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue`
 * [for](./tags/for.md), `forelse`, `break` and `continue`
-* [while](./tags/while.md), `break` and `continue`
 * [switch](./tags/switch.md), `case`, `default` and `break`
 * [cycle](./tags/cycle.md)
 * [include](./tags/include.md)
