@@ -1,13 +1,17 @@
 <?php
-namespace Aspect;
+namespace Aspect\Provider;
 /**
  * Templates provider
  * @author Ivan Shalganov
  */
-class Provider implements ProviderInterface {
+class Provider extends FS {
     private $_tpl_path = array();
 
-    public function setTemplateDirs($dirs) {
+    public function __construct($template_dir) {
+        $this->addTemplateDirs($template_dir);
+    }
+
+    public function addTemplateDirs($dirs) {
         foreach((array)$dirs as $dir) {
             $this->addTemplateDir($dir);
         }
@@ -23,29 +27,12 @@ class Provider implements ProviderInterface {
     }
 
     /**
-     * @param string $tpl
-     * @return string
-     */
-    public function loadCode($tpl) {
-        return file_get_contents($tpl = $this->_getTemplatePath($tpl));
-    }
-
-    public function getLastModified($tpl) {
-        clearstatcache(null, $tpl = $this->_getTemplatePath($tpl));
-        return filemtime($tpl);
-    }
-
-    public function getAll() {
-
-    }
-
-    /**
      * Get template path
      * @param $tpl
      * @return string
      * @throws \RuntimeException
      */
-    private function _getTemplatePath($tpl) {
+    protected function _getTemplatePath($tpl) {
         foreach($this->_tpl_path as $tpl_path) {
             if(($path = realpath($tpl_path."/".$tpl)) && strpos($path, $tpl_path) === 0) {
                 return $path;
@@ -60,19 +47,11 @@ class Provider implements ProviderInterface {
 	 */
 	public function isTemplateExists($tpl) {
 		foreach($this->_tpl_path as $tpl_path) {
-			if(($path = realpath($tpl_path."/".$tpl)) && strpos($path, $tpl_path) === 0) {
+			if(file_exists($tpl_path."/".$tpl)) {
 				return true;
 			}
 		}
 
 		return false;
 	}
-
-    public function getLastModifiedBatch($tpls) {
-        $tpls = array_flip($tpls);
-        foreach($tpls as $tpl => &$time) {
-            $time = $this->getLastModified($tpl);
-        }
-        return $tpls;
-    }
 }

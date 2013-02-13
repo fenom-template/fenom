@@ -9,9 +9,10 @@ interface ProviderInterface {
     public function isTemplateExists($tpl);
     /**
      * @param string $tpl
+     * @param int $time
      * @return string
      */
-    public function loadCode($tpl);
+    public function getSource($tpl, &$time);
 
     /**
      * @param string $tpl
@@ -24,5 +25,5 @@ interface ProviderInterface {
     /**
      * @return array
      */
-    public function getAll();
+    public function getList();
 }
