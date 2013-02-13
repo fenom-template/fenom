@@ -357,16 +357,6 @@ class Compiler {
         }
 	}
 
-    /**
-     * check if value is scalar, like "string", 2, 2.2, true, false, null
-     * @param string $value
-     * @return bool
-     * @todo add 'string' support
-     */
-    public static function isScalar($value) {
-        return json_decode($value);
-    }
-
 	/**
 	 * Dispatch {extends} tag
 	 * @param Tokenizer $tokens
@@ -378,18 +368,11 @@ class Compiler {
         if(!empty($tpl->_extends)) {
             throw new ImproperUseException("Only one {extends} allowed");
         }
-        $p = $tpl->parseParams($tokens);
-        if(isset($p[0])) {
-            $tpl_name = $p[0];
-        } elseif (isset($p["file"])) {
-            $tpl_name = $p["file"];
-        } else {
-            throw new ImproperUseException("{extends} require 'file' parameter");
-        }
+        $tpl_name = $tpl->parseFirstArg($tokens, $name);
 		$tpl->addPostCompile(__CLASS__."::extendBody");
-        if($name = self::isScalar($tpl_name)) { // static extends
-	        $tpl->_extends = $tpl->getStorage()->compile($name, false);
-	        $tpl->addDepend($tpl->getStorage()->getTemplate($name)); // for valid compile-time need take template from storage
+        if($name) { // static extends
+	        $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
+	        $tpl->addDepend($tpl->_extends); // for valid compile-time need take template from storage
 	        return "/* Static extends */";
         } else { // dynamic extends
 	        $tpl->_extends = $tpl_name;
@@ -443,9 +426,7 @@ class Compiler {
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
         $p = $scope->tpl->parseParams($tokens);
-        if(isset($p["name"])) {
-            $scope["name"] = $p["name"];
-        } elseif (isset($p[0])) {
+        if (isset($p[0])) {
             $scope["name"] = $p[0];
         } else {
             throw new ImproperUseException("{block} must be named");
@@ -476,7 +457,7 @@ class Compiler {
      * @return string
      */
     public static function tagBlockClose($tokens, Scope $scope) {
-	    $scope->tpl->_blocks[ self::isScalar($scope["name"]) ] = substr($scope->tpl->getBody(), $scope["offset"]);
+	    $scope->tpl->_blocks[ $scope["name"] ] = substr($scope->tpl->getBody(), $scope["offset"]);
 	    if(isset($scope->tpl->_extends)) { // is child
 		    if(is_object($scope->tpl->_extends)) {  // static extends
 			    return "";

@@ -6,6 +6,13 @@ use Aspect;
  * Primitive template
  */
 class Render extends \ArrayObject {
+    private static $_props = array(
+        "name" => "runtime",
+        "base_name" => "",
+        "scm" => false,
+        "time" => 0,
+        "depends" => array()
+    );
 	/**
 	 * @var \Closure
 	 */
@@ -14,7 +21,9 @@ class Render extends \ArrayObject {
      * Template name
      * @var string
      */
-    protected $_name = 'runtime template';
+    protected $_name = 'runtime';
+    protected $_scm = false;
+    protected $_base_name = 'runtime';
     /**
      * @var Aspect
      */
@@ -28,24 +37,26 @@ class Render extends \ArrayObject {
     protected $_depends = array();
 
     /**
-     * @param string $name template name
-     * @param callable $code template body
-     * @param mixed $props signature
+     * Template provider
+     * @var ProviderInterface
      */
-    public function __construct($name, \Closure $code, $props = array()) {
-        $this->_name = $name;
-		$this->_code = $code;
-        $this->_time = isset($props["time"]) ? $props["time"] : microtime(true);
-        $this->_depends = isset($props["depends"]) ? $props["depends"] : array();
-	}
+    protected $_provider;
 
     /**
-     * Set template storage
      * @param Aspect $aspect
+     * @param callable $code template body
+     * @param array $props
      */
-    public function setStorage(Aspect $aspect) {
+    public function __construct(Aspect $aspect, \Closure $code, $props = array()) {
         $this->_aspect = $aspect;
-    }
+        $props += self::$_props;
+        $this->_name = $props["name"];
+        $this->_provider = $this->_aspect->getProvider($props["scm"]);
+        $this->_scm = $props["scm"];
+        $this->_time = $props["time"];
+        $this->_depends = $props["depends"];
+		$this->_code = $code;
+	}
 
     /**
      * Get template storage
@@ -55,11 +66,23 @@ class Render extends \ArrayObject {
         return $this->_aspect;
     }
 
+    public function getScm() {
+        return $this->_scm;
+    }
+
+    public function getProvider() {
+        return $this->_provider;
+    }
+
+    public function getBaseName() {
+        return $this->_base_name;
+    }
+
     /**
      * @return string
      */
     public function __toString() {
-		return "Template({$this->_name})";
+		return $this->_name;
 	}
 
     /**

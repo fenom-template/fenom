@@ -94,7 +94,7 @@ class Aspect {
     protected $_on_post_cmp = array();
 
 	/**
-	 * @var Aspect\Provider
+	 * @var ProviderInterface
 	 */
 	private $_provider;
 	/**
@@ -107,7 +107,9 @@ class Aspect {
      */
     protected $_modifiers = array(
         "upper" => 'strtoupper',
+        "up" => 'strtoupper',
         "lower" => 'strtolower',
+        "low" => 'strtolower',
         "date_format" => 'Aspect\Modifier::dateFormat',
         "date" => 'Aspect\Modifier::date',
         "truncate" => 'Aspect\Modifier::truncate',
@@ -123,9 +125,9 @@ class Aspect {
      * @var array of allowed PHP functions
      */
     protected $_allowed_funcs = array(
-        "empty" => 1, "isset" => 1, "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
+        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
         "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
-	    "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1
+	    "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
     );
 
     /**
@@ -215,18 +217,25 @@ class Aspect {
 
     );
 
-	/**
-	 * Factory
-	 * @param string $template_dir path to templates
-	 * @param string $compile_dir path to compiled files
-	 * @param int $options
-	 * @param \Aspect\Provider $provider
-	 * @return Aspect
-	 */
-    public static function factory($template_dir, $compile_dir, $options = 0, Aspect\Provider $provider = null) {
+    /**
+     * Just factory
+     *
+     * @param string|Aspect\ProviderInterface $source path to templates or custom provider
+     * @param string $compile_dir path to compiled files
+     * @param int $options
+     * @throws InvalidArgumentException
+     * @return Aspect
+     */
+    public static function factory($source, $compile_dir = '/tmp', $options = 0) {
+        if(is_string($source)) {
+            $provider = new \Aspect\Provider\FS($source);
+        } elseif($source instanceof Aspect\ProviderInterface) {
+            $provider = $source;
+        } else {
+            throw new InvalidArgumentException("Source must be a valid path or provider object");
+        }
         $aspect = new static($provider);
         $aspect->setCompileDir($compile_dir);
-        $aspect->setTemplateDirs($template_dir);
         if($options) {
             $aspect->setOptions($options);
         }
@@ -234,10 +243,10 @@ class Aspect {
     }
 
 	/**
-	 * @param Aspect\Provider $provider
+	 * @param Aspect\ProviderInterface $provider
 	 */
-	public function __construct(Aspect\Provider $provider = null) {
-		$this->_provider = $provider ?: new Aspect\Provider();
+	public function __construct(Aspect\ProviderInterface $provider) {
+		$this->_provider = $provider;
 	}
 
     /**
@@ -268,16 +277,6 @@ class Aspect {
      */
     public function setCompileDir($dir) {
         $this->_compile_dir = $dir;
-        return $this;
-    }
-
-    /**
-     * Set template directory
-     * @param string|array $dirs directory(s) of template sources
-     * @return Aspect
-     */
-    public function setTemplateDirs($dirs) {
-	    $this->_provider->setTemplateDirs($dirs);
         return $this;
     }
 
@@ -446,19 +445,8 @@ class Aspect {
         return $tags;
     }
 
-    /**
-     * Add template directory
-     * @static
-     * @param string $dir
-     * @return \Aspect
-     * @throws \InvalidArgumentException
-     */
-    public function addTemplateDir($dir) {
-	    $this->_provider->addTemplateDir($dir);
-	    return $this;
-    }
 
-    public function addProvider($scm, \Aspect\Provider $provider) {
+    public function addProvider($scm, \Aspect\ProviderInterface $provider) {
         $this->_providers[$scm] = $provider;
     }
 
@@ -489,7 +477,7 @@ class Aspect {
 
 	/**
 	 * @param bool|string $scm
-	 * @return Aspect\Provider
+	 * @return Aspect\ProviderInterface
 	 * @throws InvalidArgumentException
 	 */
 	public function getProvider($scm = false) {
@@ -503,6 +491,10 @@ class Aspect {
 			return $this->_provider;
 		}
 	}
+
+    public function getRawTemplate() {
+        return new \Aspect\Template($this);
+    }
 
     /**
      * Execute template and write result into stdout
@@ -556,7 +548,6 @@ class Aspect {
      */
     public function addTemplate(Aspect\Render $template) {
         $this->_storage[ $template->getName() ] = $template;
-        $template->setStorage($this);
     }
 
     /**
@@ -572,9 +563,7 @@ class Aspect {
             return $this->compile($tpl);
         } else {
             /** @var Aspect\Render $tpl */
-            $tpl = include($this->_compile_dir."/".$file_name);
-            $tpl->setStorage($this);
-            return $tpl;
+            return include($this->_compile_dir."/".$file_name);
         }
     }
 
@@ -593,24 +582,23 @@ class Aspect {
 	 * Compile and save template
 	 *
 	 * @param string $tpl
-	 * @param bool $store
+	 * @param bool $store store template on disk
 	 * @throws RuntimeException
 	 * @return \Aspect\Template
 	 */
     public function compile($tpl, $store = true) {
-	    $provider = $this->getProvider(strstr($tpl, ":", true));
-        $template = new Template($this, $provider->loadCode($tpl), $tpl);
+        $template = Template::factory($this)->load($tpl);
 	    if($store) {
 	        $tpl_tmp = tempnam($this->_compile_dir, basename($tpl));
 	        $tpl_fp = fopen($tpl_tmp, "w");
 	        if(!$tpl_fp) {
-	            throw new \RuntimeException("Can not open temporary file $tpl_tmp. Directory ".$this->_compile_dir." is writable?");
+	            throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory ".$this->_compile_dir." is writable?");
 	        }
 	        fwrite($tpl_fp, $template->getTemplateCode());
 	        fclose($tpl_fp);
 		    $file_name = $this->_compile_dir."/".$this->_getHash($tpl);
 	        if(!rename($tpl_tmp, $file_name)) {
-	            throw new \RuntimeException("Can not to move $tpl_tmp to $tpl");
+	            throw new \RuntimeException("Can't to move $tpl_tmp to $tpl");
 	        }
 	    }
         return $template;
@@ -654,7 +642,7 @@ class Aspect {
      * @return Aspect\Template
      */
     public function compileCode($code, $name = 'Runtime compile') {
-        return new Template($this, $code, $name);
+        return Template::factory($this)->source($name, $code);
     }
 
 }

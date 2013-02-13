@@ -53,27 +53,65 @@ class Template extends Render {
      */
     public static $sysvar = array('$aspect' => 1, '$smarty' => 1);
 
-    /**
-     * @param Aspect $aspect Template storage
-     * @param string $code template source
-     * @param string $name template name
-     * @param bool $auto_compile
-     */
-    public function __construct(Aspect $aspect, $code, $name = "runtime template", $auto_compile = true) {
-        $this->_src = $code;
-        $this->_name = $name;
-        $this->_aspect = $aspect;
-        $this->_options = $aspect->getOptions();
-        if($auto_compile) {
-            $this->compile();
-        }
+    public static function factory(Aspect $aspect) {
+        return new static($aspect);
     }
 
+    /**
+     * @param Aspect $aspect Template storage
+     */
+    public function __construct(Aspect $aspect) {
+        $this->_aspect = $aspect;
+        $this->_options = $this->_aspect->getOptions();
+    }
+
+    /**
+     * Load source from provider
+     * @param string $name
+     * @param bool $compile
+     * @return \Aspect\Template
+     */
+    public function load($name, $compile = true) {
+        $this->_name = $name;
+        if($provider = strstr($name, ":", true)) {
+            $this->_scm = $provider;
+            $this->_base_name = substr($name, strlen($provider));
+        } else {
+            $this->_base_name = $name;
+        }
+        $this->_provider = $this->_aspect->getProvider($provider);
+        $this->_src = $this->_provider->getSource($name, $this->_time);
+        if($compile) {
+            $this->compile();
+        }
+        return $this;
+    }
+
+    /**
+     * Load custom source
+     * @param string $name template name
+     * @param string $src template source
+     * @param bool $compile
+     * @return \Aspect\Template
+     */
+    public function source($name, $src, $compile = true) {
+        $this->_name = $name;
+        $this->_src = $src;
+        if($compile) {
+            $this->compile();
+        }
+        return $this;
+    }
+
+    /**
+     * Convert template to PHP code
+     *
+     * @throws CompileException
+     */
     public function compile() {
         if(!isset($this->_src)) {
             return;
         }
-        $this->_time = microtime(true);
         $pos = 0;
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-char of tags
             switch($this->_src[$start + 1]) { // check next char
@@ -95,19 +133,20 @@ class Template extends Render {
             $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains aspect tag '{...}'
             $this->_line += substr_count($this->_src, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
             $pos = $this->_pos = $end + 1; // move search-pointer to end of the tag
-            if($this->_trim) { // if previous tag has trim flag
-                $frag = ltrim($frag);
-            }
+            //if($this->_trim) { // if previous tag has trim flag
+            //    $frag = ltrim($frag);
+            //}
+
+            $this->_body .= str_replace("<?", '<?php echo "<?" ?>', $frag);
 
             $tag = $this->_tag($tag, $this->_trim); // dispatching tags
 
-            if($this->_trim) { // if current tag has trim flag
-                $frag = rtrim($frag);
-            }
-            $this->_body .= str_replace("<?", '<?php echo "<?" ?>', $frag).$tag;
-
+            //if($this->_trim) { // if current tag has trim flag
+            //    $frag = rtrim($frag);
+            //}
+            $this->_body .= $tag;
         }
-        $this->_body .= substr($this->_src, $this->_pos);
+        $this->_body .= str_replace("<?", '<?php echo "<?" ?>', substr($this->_src, $this->_pos));
         if($this->_stack) {
             $_names = array();
             $_line = 0;
@@ -146,9 +185,11 @@ class Template extends Render {
     public function getTemplateCode() {
         return "<?php \n".
             "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Aspect\\Render('{$this->_name}', ".$this->_getClosureCode().", ".var_export(array(
-	            "options" => $this->_options,
-	            //"provider" =>
+            "return new Aspect\\Render(\$this, ".$this->_getClosureSource().", ".var_export(array(
+	            //"options" => $this->_options,
+                "provider" => $this->_scm,
+                "name" => $this->_name,
+                "base_name" => $this->_base_name,
                 "time" => $this->_time,
 	            "depends" => $this->_depends
             ), true).");\n";
@@ -158,7 +199,7 @@ class Template extends Render {
      * Return closure code
      * @return string
      */
-    private function _getClosureCode() {
+    private function _getClosureSource() {
         return "function (\$tpl) {\n?>{$this->_body}<?php\n}";
     }
 
@@ -172,7 +213,7 @@ class Template extends Render {
     public function display(array $values) {
         if(!$this->_code) {
             // evaluate template's code
-            eval("\$this->_code = ".$this->_getClosureCode().";");
+            eval("\$this->_code = ".$this->_getClosureSource().";");
             if(!$this->_code) {
                 throw new CompileException("Fatal error while creating the template");
             }
@@ -186,6 +227,7 @@ class Template extends Render {
 	 * @param Render $tpl
 	 */
 	public function addDepend(Render $tpl) {
+
 		$this->_depends[$tpl->getName()] = $tpl->getCompileTime();
 	}
 
@@ -197,7 +239,7 @@ class Template extends Render {
      */
     public function fetch(array $values) {
         if(!$this->_code) {
-            eval("\$this->_code = ".$this->_getClosureCode().";");
+            eval("\$this->_code = ".$this->_getClosureSource().";");
             if(!$this->_code) {
                 throw new CompileException("Fatal error while creating the template");
             }
@@ -245,9 +287,6 @@ class Template extends Render {
                     break;
                 default:
                     $code = $this->_parseAct($tokens);
-                    if($code === null) {
-
-                    }
                     break;
             }
 
@@ -821,6 +860,18 @@ class Template extends Render {
         }
 
         throw new TokenizeException("Unexpected token '".$tokens->current()."' in argument list");
+    }
+
+    public function parseFirstArg(Tokenizer $tokens, &$static) {
+        if($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
+            $str = $tokens->getAndNext();
+            $static = stripslashes(substr($str, 1, -1));
+            return $str;
+        } elseif($tokens->is(Tokenizer::MACRO_STRING)) {
+            return $static = $tokens->getAndNext();
+        } else {
+            return $this->parseExp($tokens, true);
+        }
     }
 
     /**

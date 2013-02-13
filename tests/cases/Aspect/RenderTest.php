@@ -11,15 +11,19 @@ class RenderTest extends \PHPUnit_Framework_TestCase {
     public static $render;
 
     public static function setUpBeforeClass() {
-        self::$render = new Render("render.tpl", function ($tpl) {
-            echo "It is render function ".$tpl["render"];
-        }, array());
+        self::$render = new Render(Aspect::factory("."), function ($tpl) {
+            echo "It is render's function ".$tpl["render"];
+        }, array(
+            "name" => "render.tpl"
+        ));
     }
 
     public function testCreate() {
-        $r = new Render("test.render.tpl", function () {
+        $r = new Render(Aspect::factory("."), function () {
             echo "Test render";
-        }, array());
+        }, array(
+            "name" => "test.render.tpl"
+        ));
         $this->assertSame("Test render", $r->fetch(array()));
     }
 
@@ -27,22 +31,24 @@ class RenderTest extends \PHPUnit_Framework_TestCase {
         ob_start();
         self::$render->display(array("render" => "display"));
         $out = ob_get_clean();
-        $this->assertSame("It is render function display", $out);
+        $this->assertSame("It is render's function display", $out);
     }
 
     public function testFetch() {
-        $this->assertSame("It is render function fetch", self::$render->fetch(array("render" => "fetch")));
+        $this->assertSame("It is render's function fetch", self::$render->fetch(array("render" => "fetch")));
     }
 
     /**
-     * @expectedException     RuntimeException
+     * @expectedException     \RuntimeException
      * @expectedExceptionMessage template error
      */
     public function testFetchException() {
-        $render = new Render("render.tpl", function ($tpl) {
+        $render = new Render(Aspect::factory("."), function () {
             echo "error";
             throw new \RuntimeException("template error");
-        });
+        }, array(
+            "name" => "render.tpl"
+        ));
         $render->fetch(array());
     }
 

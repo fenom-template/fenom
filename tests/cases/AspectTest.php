@@ -21,7 +21,6 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
         self::tearDownAfterClass();
         $this->aspect = $aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
         $aspect->setCompileDir(ASPECT_RESOURCES.'/compile');
-        $aspect->addTemplateDir(ASPECT_RESOURCES.'/template');
         $aspect->setForceCompile(false);
         $aspect->setCompileCheck(false);
     }
@@ -36,11 +35,13 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
 
     public function testAddRender() {
         $test = $this;
-        $this->aspect->addTemplate(new Render('render.tpl', function($tpl) use ($test) {
+        $this->aspect->addTemplate(new Render($this->aspect, function($tpl) use ($test) {
             /** @var \PHPUnit_Framework_TestCase $test  */
             $test->assertInstanceOf('Aspect\Render', $tpl);
             echo "Inline render";
-        }, array()));
+        }, array(
+            "name" => 'render.tpl'
+        )));
 
         $this->assertSame("Inline render", $this->aspect->fetch('render.tpl', array()));
     }
