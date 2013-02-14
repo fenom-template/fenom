@@ -526,7 +526,6 @@ class Aspect {
      * @return Aspect\Template
      */
     public function getTemplate($template) {
-
         if(isset($this->_storage[ $template ])) {
 	        /** @var Aspect\Template $tpl  */
 	        $tpl = $this->_storage[ $template ];
@@ -562,6 +561,7 @@ class Aspect {
         if(!is_file($this->_compile_dir."/".$file_name)) {
             return $this->compile($tpl);
         } else {
+            $aspect = $this;
             /** @var Aspect\Render $tpl */
             return include($this->_compile_dir."/".$file_name);
         }

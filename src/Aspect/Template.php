@@ -137,16 +137,29 @@ class Template extends Render {
             //    $frag = ltrim($frag);
             //}
 
-            $this->_body .= str_replace("<?", '<?php echo "<?" ?>', $frag);
+            $this->_body .= str_replace("<?", '<?php echo "<?"; ?>', $frag);
 
-            $tag = $this->_tag($tag, $this->_trim); // dispatching tags
+            $this->_body .= $this->_tag($tag, $this->_trim); // dispatching tags
 
+            // duplicate new line http://docs.php.net/manual/en/language.basic-syntax.instruction-separation.php
+            /*if(isset($this->_src[ $end+1 ])) {
+                $c = $this->_src[ $end+1 ];
+                if($c === "\n") {
+                    $this->_body .= "\n";
+                } elseif($c === "\r") {
+                    if(isset($this->_src[ $end+2 ]) && $this->_src[ $end+2 ] == "\n") {
+                        $this->_body .= "\r\n";
+                    } else {
+                        $this->_body .= "\r";
+                    }
+                }
+            }*/
             //if($this->_trim) { // if current tag has trim flag
             //    $frag = rtrim($frag);
             //}
-            $this->_body .= $tag;
+            //$this->_body .= $tag;
         }
-        $this->_body .= str_replace("<?", '<?php echo "<?" ?>', substr($this->_src, $this->_pos));
+        $this->_body .= str_replace("<?", '<?php echo "<?"; ?>', substr($this->_src, $this->_pos));
         if($this->_stack) {
             $_names = array();
             $_line = 0;
@@ -185,7 +198,7 @@ class Template extends Render {
     public function getTemplateCode() {
         return "<?php \n".
             "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Aspect\\Render(\$this, ".$this->_getClosureSource().", ".var_export(array(
+            "return new Aspect\\Render(\$aspect, ".$this->_getClosureSource().", ".var_export(array(
 	            //"options" => $this->_options,
                 "provider" => $this->_scm,
                 "name" => $this->_name,
@@ -227,8 +240,7 @@ class Template extends Render {
 	 * @param Render $tpl
 	 */
 	public function addDepend(Render $tpl) {
-
-		$this->_depends[$tpl->getName()] = $tpl->getCompileTime();
+		$this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
 	}
 
     /**

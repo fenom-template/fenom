@@ -388,28 +388,18 @@ class Compiler {
     public static function extendBody(&$body, $tpl) {
 	    if(isset($tpl->_extends)) { // is child
 		    if(is_object($tpl->_extends)) {  // static extends
-			    $t = $tpl;
-			    while(isset($t->_extends)) {
+                $t = $tpl->_extends;
+                /* @var Template $t */
+                do {
+                    $t->_blocks = &$tpl->_blocks;
                     $t->compile();
-				    $t->_blocks += (array)$t->_extends->_blocks;
-					$t = $t->_extends;
-
-			    }
-
-                if(empty($t->_blocks)) {
-                    $body = $t->getBody();
-                } else {
-                    $b = $t->getBody();
-                    foreach($t->_blocks as $name => $pos) {
-
-                    }
-                }
+                    $tpl->addDepend($t);
+                } while(isset($t->_extends) && $t = $t->_extends);
+                $body = $t->_body;
 		    } else {        // dynamic extends
 			    $body .= '<?php $parent->blocks = &$tpl->blocks; $parent->display((array)$tpl); unset($tpl->blocks, $parent->blocks); ?>';
-			    //return '$tpl->blocks['.$scope["name"].'] = ob_get_clean();';
 		    }
 	    }
-        /*$body = '<?php if(!isset($tpl->blocks)) {$tpl->blocks = array();}  ob_start(); ?>'.$body.'<?php ob_end_clean(); $parent->blocks = &$tpl->blocks; $parent->display((array)$tpl); unset($tpl->blocks, $parent->blocks); ?>';*/
     }
 
 
@@ -425,25 +415,30 @@ class Compiler {
      * @throws ImproperUseException
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
-        $p = $scope->tpl->parseParams($tokens);
-        if (isset($p[0])) {
-            $scope["name"] = $p[0];
+        $p = $scope->tpl->parseFirstArg($tokens, $name);
+        if ($name) {
+            $scope["static"] = true;
+            $scope["name"] = $name;
+            $scope["cname"] = '"'.addslashes($name).'"';
         } else {
-            throw new ImproperUseException("{block} must be named");
+            $scope["static"] = false;
+            $scope["name"] = $scope["cname"]  = $p;
         }
 	    if(isset($scope->tpl->_extends)) { // is child
-			if(is_object($scope->tpl->_extends)) {  // static extends
+			if(is_object($scope->tpl->_extends) && $scope["static"]) {  // static extends
 				$code = "";
 			} else {        // dynamic extends
-				$code = 'if(empty($tpl->blocks['.$scope["name"].'])) { ob_start();';
+				$code = 'if(empty($tpl->blocks['.$scope["cname"].'])) { $tpl->blocks['.$scope["cname"].'] = function($tpl) {';
 			}
 	    } else {        // is parent
-            if(isset($scope->tpl->_blocks[ $scope["name"] ])) { // skip own block and insert child's block after
-                $scope["body"] = $scope->tpl->_body;
-                $scope->tpl->_body = "";
+            if(isset($scope->tpl->_blocks)) { // has blocks from child
+                if(isset($scope->tpl->_blocks[ $scope["name"] ])) { // skip own block and insert child's block after
+                    $scope["body"] = $scope->tpl->_body;
+                    $scope->tpl->_body = "";
+                } // else just put block content as is
                 return '';
             } else {
-		        $code = 'if(isset($tpl->blocks['.$scope["name"].'])) { echo $tpl->blocks['.$scope["name"].']; } else {';
+		        $code = 'if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {';
             }
 	    }
 	    $scope["offset"] = strlen($scope->tpl->getBody()) + strlen($code);
@@ -457,35 +452,26 @@ class Compiler {
      * @return string
      */
     public static function tagBlockClose($tokens, Scope $scope) {
-	    $scope->tpl->_blocks[ $scope["name"] ] = substr($scope->tpl->getBody(), $scope["offset"]);
+
 	    if(isset($scope->tpl->_extends)) { // is child
-		    if(is_object($scope->tpl->_extends)) {  // static extends
+		    if(is_object($scope->tpl->_extends) && $scope["static"]) {  // static extends
+                if(!isset($scope->tpl->_blocks[ $scope["name"] ])) {
+                    $scope->tpl->_blocks[ $scope["name"] ] = substr($scope->tpl->getBody(), $scope["offset"]);
+                }
 			    return "";
 		    } else {        // dynamic extends
-			    return '$tpl->blocks['.$scope["name"].'] = ob_get_clean(); }';
+			    return '} }';
 		    }
 	    } else {     // is parent
-            if(isset($scope["body"])) {
-                $scope->tpl->_body = $scope["body"].$scope->tpl->_blocks[ $scope["name"] ];
+            if(isset($scope->tpl->_blocks)) {
+                if(isset($scope["body"])) {
+                    $scope->tpl->_body = $scope["body"].$scope->tpl->_blocks[ $scope["name"] ];
+                }
                 return "";
             } else {
 		        return '}';
             }
 	    }
-		/*    $scope->tpl->_blocks[ $scope["name"] ] = substr($scope->tpl->getBody(), $scope["offset"]);
-	    return '}';*/
-	    /*if(isset($scope->tpl->_extends) && is_object($scope->tpl->_extends)) {
-
-		    //var_dump("fetched block ".$scope->tpl->_blocks[ $scope["name"] ]);
-	    } else {
-			return '}';
-	    }*/
-        /*if(isset($scope->tpl->_extends)) {
-            $var = '$i'.$scope->tpl->i++;
-            return $var.' = ob_get_clean(); if('.$var.') $tpl->blocks['.$scope["name"].'] = '.$var.';';
-        } else {
-            return 'if(empty($tpl->blocks['.$scope["name"].'])) { ob_end_flush(); } else { print($tpl->blocks['.$scope["name"].']); ob_end_clean(); }';
-        }*/
     }
 
     /**

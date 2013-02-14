@@ -50,19 +50,23 @@ class Benchmark {
         if($double) {
             $aspect->fetch($tpl, $data);
         }
-        $start = microtime(true);
+        $_SERVER["t"] = $start = microtime(true);
         $aspect->fetch($tpl, $data);
         printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
     }
 
     public static function run($engine, $template, $data, $double, $message) {
-        passthru(sprintf("php %s/run.php --engine '%s' --template '%s' --data '%s' --message '%s' %s", __DIR__, $engine, $template, $data, $message, $double ? '--double' : ''));
+        passthru(sprintf("php -dmemory_limit=512M %s/run.php --engine '%s' --template '%s' --data '%s' --message '%s' %s", __DIR__, $engine, $template, $data, $message, $double ? '--double' : ''));
     }
 
     public static function runs($engine, $template, $data) {
         self::run($engine, $template, $data, false, '!compiled and !loaded');
-        self::run($engine, $template, $data, false, 'compiled and !loaded');
-        self::run($engine, $template, $data, true, 'compiled and loaded');
+        self::run($engine, $template, $data, false, ' compiled and !loaded');
+        self::run($engine, $template, $data, true,  ' compiled and  loaded');
         echo "\n";
     }
+}
+
+function t() {
+    if(isset($_SERVER["t"])) var_dump(round(microtime(1) - $_SERVER["t"], 4));
 }

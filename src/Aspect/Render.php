@@ -66,6 +66,10 @@ class Render extends \ArrayObject {
         return $this->_aspect;
     }
 
+    public function getDepends() {
+        return $this->_depends;
+    }
+
     public function getScm() {
         return $this->_scm;
     }
@@ -93,7 +97,7 @@ class Render extends \ArrayObject {
         return $this->_name;
     }
 
-	public function getCompileTime() {
+	public function getTime() {
 		return $this->_time;
 	}
 
@@ -108,7 +112,7 @@ class Render extends \ArrayObject {
 		    return false;
 	    }
 	    foreach($this->_depends as $tpl => $time) {
-			if($this->_aspect->getTemplate($tpl)->getCompileTime() !== $time) {
+			if($this->_aspect->getTemplate($tpl)->getTime() !== $time) {
 				return false;
 			}
 	    }

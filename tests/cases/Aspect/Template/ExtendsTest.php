@@ -1,22 +1,8 @@
 <?php
 namespace Aspect\Template;
-use Aspect, Aspect\Modifier;
+use Aspect, Aspect\Modifier, Aspect\TestCase;
 
-class ExtendsTest extends \PHPUnit_Framework_TestCase {
-    /**
-     * @var Aspect
-     */
-    public static $aspect;
-
-    public function setUp() {
-        if(!file_exists(ASPECT_RESOURCES.'/compile')) {
-            mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
-        } else {
-            exec("rm -f ".ASPECT_RESOURCES.'/compile/*');
-        }
-        self::$aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
-    }
-
+class ExtendsTest extends TestCase {
     public static function providerExtends() {
         return array(
             array('{extends "parent.tpl"}{block "bk1"} block1 {/block}', "Template extended by block1"),
@@ -26,47 +12,26 @@ class ExtendsTest extends \PHPUnit_Framework_TestCase {
         );
     }
 
-    public function exec($code, $vars, $result, $dump = false) {
-        $tpl = self::$aspect->compileCode($code, "inline.tpl");
-        if($dump) {
-            echo "\n===========================\n".$code.": ".$tpl->getBody();
-        }
-        $this->assertSame(Modifier::strip($result), Modifier::strip($tpl->fetch($vars), true), "Test $code");
-    }
-
-    public function execError($code, $exception, $message, $options) {
-        self::$aspect->setOptions($options);
-        try {
-            self::$aspect->compileCode($code, "inline.tpl");
-        } catch(\Exception $e) {
-            $this->assertSame($exception, get_class($e), "Exception $code");
-            $this->assertStringStartsWith($message, $e->getMessage());
-            self::$aspect->setOptions(0);
-            return;
-        }
-        self::$aspect->setOptions(0);
-        $this->fail("Code $code must be invalid");
-    }
-
     /**
      * @group extends
      */
-    public function testParent() {
-	    //echo(self::$aspect->getTemplate("parent.tpl")->getBody()); exit;
+    public function testParentLevel() {
+	    //echo($this->aspect->getTemplate("parent.tpl")->_body); exit;
+	    $this->assertSame($this->aspect->fetch("parent.tpl", array("a" => "a char")), "Parent template\nBlock1: Block2: Block3: default");
     }
 
 	/**
 	 * @group extends
 	 */
-	public function ___testChildLevel1() {
-		echo(self::$aspect->getTemplate("child1.tpl")->getBody()); exit;
+	public function testChildLevel1() {
+		//echo($this->aspect->fetch("child1.tpl", array("a" => "a char"))); exit;
 	}
 
 	/**
 	 * @group extends
 	 */
-	public function __testExtends() {
-		echo(self::$aspect->fetch("child1.tpl", array("a" => "value", "z" => ""))."\n"); exit;
+	public function _testChildLevel3() {
+        echo($this->aspect->getTemplate("child3.tpl")->getBody()); exit;
 	}
 }
 

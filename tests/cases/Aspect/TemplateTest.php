@@ -4,20 +4,11 @@ use Aspect\Template,
     Aspect,
     Aspect\Render;
 
-class TemplateTest extends \PHPUnit_Framework_TestCase {
-    /**
-     * @var Aspect
-     */
-    public static $aspect;
+class TemplateTest extends TestCase {
 
     public function setUp() {
-        if(!file_exists(ASPECT_RESOURCES.'/compile')) {
-            mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
-        } else {
-            exec("rm -f ".ASPECT_RESOURCES.'/compile/*');
-        }
-        self::$aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
-        self::$aspect->addTemplate(new Render(self::$aspect, function ($tpl) {
+        parent::setUp();
+        $this->aspect->addTemplate(new Render($this->aspect, function ($tpl) {
             echo "<b>Welcome, ".$tpl["username"]." (".$tpl["email"].")</b>";
         }, array(
             "name" => "welcome.tpl"
@@ -567,28 +558,6 @@ class TemplateTest extends \PHPUnit_Framework_TestCase {
             array('{extends "parent.tpl"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} {block "bk3"} block3 {/block} garbage', "Template multi-extended by block1"),
             array('{extends "parent.tpl"}{var $bk = "bk3"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} {block "$bk"} block3 {/block} garbage', "Template multi-extended by block1"),
         );
-    }
-
-    public function exec($code, $vars, $result, $dump = false) {
-        $tpl = self::$aspect->compileCode($code, "inline.tpl");
-        if($dump) {
-            echo "\n===========================\n".$code.": ".$tpl->getBody();
-        }
-        $this->assertSame(Modifier::strip($result), Modifier::strip($tpl->fetch($vars), true), "Test $code");
-    }
-
-    public function execError($code, $exception, $message, $options) {
-        self::$aspect->setOptions($options);
-        try {
-            self::$aspect->compileCode($code, "inline.tpl");
-        } catch(\Exception $e) {
-            $this->assertSame($exception, get_class($e), "Exception $code");
-            $this->assertStringStartsWith($message, $e->getMessage());
-            self::$aspect->setOptions(0);
-            return;
-        }
-        self::$aspect->setOptions(0);
-        $this->fail("Code $code must be invalid");
     }
 
     /**

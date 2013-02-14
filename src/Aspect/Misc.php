@@ -28,6 +28,11 @@ class Misc {
         return $mask;
     }
 
+    /**
+     * Clean directory from files
+     *
+     * @param string $path
+     */
     public static function clean($path) {
         if(is_file($path)) {
             unlink($path);
@@ -46,6 +51,11 @@ class Misc {
         }
     }
 
+    /**
+     * Recursive remove directory
+     *
+     * @param string $path
+     */
     public static function rm($path) {
         self::clean($path);
         if(is_dir($path)) {
