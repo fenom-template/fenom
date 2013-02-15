@@ -167,7 +167,7 @@
 <style>
 	h1 {font-size: 24px; color: #F00;}
 </style>
-{/literal}
+{/ignore}
 <script>
 	(function (text) {
 		var e = document.createElement('P');
