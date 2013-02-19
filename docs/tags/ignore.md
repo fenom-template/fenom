@@ -6,5 +6,10 @@ Tag {ignore}
 ```smarty
 {ignore}
     var data = {"time": obj.ts};
-{ignore}
+{/ignore}
+```
+
+You may ignore delimiters without tag `{ignore}`
+```smarty
+var data = { "time": obj.ts };
 ```

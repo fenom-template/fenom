@@ -8,10 +8,11 @@ Documentation
 * [Syntax](./syntax.md)
 * [Settings](./settings.md)
 * [Callbacks and filters](./callbacks.md)
+* [Operators](./operators.md)
 
 **Modifiers**
 
-Conversation about [modifiers](./modifiers.md)
+Conversation about [modifiers](./syntax.md#modifiers)
 
 * [upper](./mods/upper.md) aka `up`
 * [lower](./mods/lower.md) aka `low`
@@ -26,7 +27,7 @@ Conversation about [modifiers](./modifiers.md)
 
 **Tags**
 
-Conversation about [tags](./tags.md)
+Conversation about [tags](./syntax.md#tags)
 
 * [var](./tags/var.md)
 * [if](./tags/if.md), `elseif` and `else`
