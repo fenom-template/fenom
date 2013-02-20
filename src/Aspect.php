@@ -194,27 +194,33 @@ class Aspect {
             'type' => self::INLINE_COMPILER,
             'parser' => 'Aspect\Compiler::assign'
         ),
-        'block' => array(   // {block ...} {/block}
+        'block' => array(   // {block ...} {parent} {/block}
             'type' => self::BLOCK_COMPILER,
             'open' => 'Aspect\Compiler::tagBlockOpen',
             'close' => 'Aspect\Compiler::tagBlockClose',
+            'tags' => array(
+                'parent' => 'Aspect\Compiler::tagParent'
+            ),
+            'float_tags' => array('parent' => 1)
         ),
         'extends' => array( // {extends ...}
             'type' => self::INLINE_COMPILER,
             'parser' => 'Aspect\Compiler::tagExtends'
         ),
-        'capture' => array( // {capture ...} {/capture}
-            'type' => self::BLOCK_FUNCTION,
-            'open' => 'Aspect\Compiler::stdFuncOpen',
-            'close' => 'Aspect\Compiler::stdFuncClose',
-            'function' => 'Aspect\Func::capture',
+        'use' => array( // {use}
+            'type' => self::INLINE_COMPILER,
+            'parser' => 'Aspect\Compiler::tagUse'
         ),
-        'mailto' => array(
-            'type' => self::INLINE_FUNCTION,
-            'parser' => 'Aspect\Compiler::stdFuncParser',
-            'function' => 'Aspect\Func::mailto',
+        'capture' => array( // {capture ...} {/capture}
+            'type' => self::BLOCK_COMPILER,
+            'open' => 'Aspect\Compiler::captureOpen',
+            'close' => 'Aspect\Compiler::captureClose'
+        ),
+        'filter' => array( // {filter} ... {/filter}
+            'type' => self::BLOCK_COMPILER,
+            'open' => 'Aspect\Compiler::filterOpen',
+            'close' => 'Aspect\Compiler::filterClose'
         )
-
     );
 
     /**
@@ -248,27 +254,6 @@ class Aspect {
 	public function __construct(Aspect\ProviderInterface $provider) {
 		$this->_provider = $provider;
 	}
-
-    /**
-     * Set checks template for modifications
-     * @param $state
-     * @return Aspect
-     */
-    public function setCompileCheck($state) {
-        $state && ($this->_options |= self::CHECK_MTIME);
-        return $this;
-    }
-
-    /**
-     * Set force template compiling
-     * @param $state
-     * @return Aspect
-     */
-    public function setForceCompile($state) {
-        $state && ($this->_options |= self::FORCE_COMPILE);
-        $this->_storage = $state ? new Aspect\BlackHole() : array();
-        return $this;
-    }
 
     /**
      * Set compile directory
@@ -316,8 +301,10 @@ class Aspect {
     }
 
     /**
+     * Add inline tag compiler
+     *
      * @param string $compiler
-     * @param string $parser
+     * @param callable $parser
      * @return Aspect
      */
     public function addCompiler($compiler, $parser) {
@@ -329,9 +316,11 @@ class Aspect {
     }
 
     /**
+     * Add block compiler
+     *
      * @param string $compiler
-     * @param string $open_parser
-     * @param string $close_parser
+     * @param callable $open_parser
+     * @param callable $close_parser
      * @param array $tags
      * @return Aspect
      */
@@ -348,7 +337,7 @@ class Aspect {
     /**
      * @param string $function
      * @param callable $callback
-     * @param string $parser
+     * @param callable $parser
      * @return Aspect
      */
     public function addFunction($function, $callback, $parser = self::DEFAULT_FUNC_PARSER) {
@@ -375,10 +364,10 @@ class Aspect {
     }
 
     /**
-     * @param $function
-     * @param $callback
-     * @param null $parser_open
-     * @param null $parser_close
+     * @param string $function
+     * @param callable $callback
+     * @param callable $parser_open
+     * @param callable $parser_close
      * @return Aspect
      */
     public function addBlockFunction($function, $callback, $parser_open = null, $parser_close = null) {
@@ -401,6 +390,8 @@ class Aspect {
     }
 
     /**
+     * Return modifier function
+     *
      * @param $modifier
      * @return mixed
      * @throws \Exception
@@ -416,6 +407,8 @@ class Aspect {
     }
 
     /**
+     * Return function
+     *
      * @param string $function
      * @return string|bool
      */
@@ -427,6 +420,10 @@ class Aspect {
         }
     }
 
+    /**
+     * @param string $function
+     * @return bool
+     */
     public function isAllowedFunction($function) {
         if($this->_options & self::DENY_INLINE_FUNCS) {
             return isset($this->_allowed_funcs[$function]);
@@ -434,6 +431,7 @@ class Aspect {
             return is_callable($function);
         }
     }
+
 
     public function getTagOwners($tag) {
         $tags = array();
@@ -445,7 +443,12 @@ class Aspect {
         return $tags;
     }
 
-
+    /**
+     * Add source template provider by scheme
+     *
+     * @param string $scm scheme name
+     * @param Aspect\ProviderInterface $provider provider object
+     */
     public function addProvider($scm, \Aspect\ProviderInterface $provider) {
         $this->_providers[$scm] = $provider;
     }
@@ -463,7 +466,7 @@ class Aspect {
         if(is_array($options)) {
             $options = Aspect\Misc::makeMask($options, self::$_option_list);
         }
-        $this->_storage = ($options & self::FORCE_COMPILE) ? new Aspect\BlackHole() : array();
+        $this->_storage = array();
         $this->_options = $options;
     }
 
@@ -492,6 +495,11 @@ class Aspect {
 		}
 	}
 
+    /**
+     * Return empty template
+     *
+     * @return Aspect\Template
+     */
     public function getRawTemplate() {
         return new \Aspect\Template($this);
     }
@@ -499,9 +507,8 @@ class Aspect {
     /**
      * Execute template and write result into stdout
      *
-     *
-     * @param string $template
-     * @param array $vars
+     * @param string $template name of template
+     * @param array $vars array of data for template
      * @return Aspect\Render
      */
     public function display($template, array $vars = array()) {
@@ -510,8 +517,8 @@ class Aspect {
 
     /**
      *
-     * @param string $template
-     * @param array $vars
+     * @param string $template name of template
+     * @param array $vars array of data for template
      * @internal param int $options
      * @return mixed
      */
@@ -535,7 +542,7 @@ class Aspect {
                 return $this->_storage[ $template ];
             }
         } elseif($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template);
+            return $this->compile($template, false);
         } else {
             return $this->_storage[ $template ] = $this->_load($template);
         }
