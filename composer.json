@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Aspect - fast template engine for PHP",
     "homepage": "https://github.com/bzick/aspect",
-    "keywords": ["aspect", "templater", "templating", "template", "yohoho"],
+    "keywords": ["aspect", "templater", "templating", "template"],
     "license": "MIT",
     "authors": [
         {
@@ -18,7 +18,8 @@
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
         "smarty/smarty": "3.*",
-        "twig/twig": "1.*"
+        "twig/twig": "1.*",
+        "latte/latte": "dev-master"
     },
     "autoload": {
         "psr-0": { "Aspect": "src/" }
