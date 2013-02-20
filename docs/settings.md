@@ -1,7 +1,7 @@
 Настройка
 =========
 
-### Параметры шаблонизатора
+### Engine settings
 
 Что бы установить папку для хранения кеша собранных шаблонов
 
@@ -9,7 +9,7 @@
 $aspect->setCompileDir($dir);
 ```
 
-### Пакаметры компилятора
+### Template settings
 
 ```php
 // set options using factory
