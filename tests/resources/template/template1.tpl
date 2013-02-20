@@ -1,1 +1,0 @@
-Template 1 {$a}
