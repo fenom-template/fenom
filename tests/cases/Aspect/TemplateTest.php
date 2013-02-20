@@ -165,16 +165,16 @@ class TemplateTest extends TestCase {
             array('Exp: {!$x} result',                          $b, 'Exp: result'),
             array('Exp: {!5} result',                           $b, 'Exp: result'),
             array('Exp: {-1} result',                           $b, 'Exp: -1 result'),
-            array('Exp: {$z = 5} {$z} result',                 $b, 'Exp: 5 5 result'),
-            array('Exp: {$k.i = "str"} {$k.i} result',        $b, 'Exp: str str result'),
+            array('Exp: {$z = 5} {$z} result',                  $b, 'Exp: 5 5 result'),
+            array('Exp: {$k.i = "str"} {$k.i} result',          $b, 'Exp: str str result'),
 
             array('Exp: {($y*$x - (($x+$y) + $y/$x) ^ $y)/4} result',
-                                                                   $b, 'Exp: 53.75 result'),
-            array('Exp: {$x+max($x, $y)} result',              $b, 'Exp: 36 result'),
+                                                                $b, 'Exp: 53.75 result'),
+            array('Exp: {$x+max($x, $y)} result',               $b, 'Exp: 36 result'),
             array('Exp: {max(1,2)} result',                     $b, 'Exp: 2 result'),
-            array('Exp: {round(sin(pi()), 8)} result',        $b, 'Exp: 0 result'),
+            array('Exp: {round(sin(pi()), 8)} result',          $b, 'Exp: 0 result'),
             array('Exp: {max($x, $y) + round(sin(pi()), 8) - min($x, $y) +3} result',
-                                                                   $b, 'Exp: 21 result'),
+                                                                $b, 'Exp: 21 result'),
         );
     }
 
@@ -207,25 +207,26 @@ class TemplateTest extends TestCase {
         $result3 = 'Include <b>Welcome, Master (flame@dev.null)</b>  template';
         $result4 = 'Include <b>Welcome, Flame (flame@dev.null)</b>  template';
         return array(
-            array('Include {include file="welcome.tpl"} template',                              $a, $result),
-            array('Include {include file=$tpl} template',                                       $a, $result),
-            array('Include {include file="$tpl"} template',                                     $a, $result),
-            array('Include {include file="{$tpl}"} template',                                   $a, $result),
-            array('Include {include file="$name.tpl"} template',                                $a, $result),
-            array('Include {include file="{$name}.tpl"} template',                              $a, $result),
-            array('Include {include file="{$pr_name|lower}.tpl"} template',                     $a, $result),
-            array('Include {include file="wel{$fragment}.tpl"} template',                       $a, $result),
-            array('Include {include file="wel{$pr_fragment|lower}.tpl"} template',              $a, $result),
-            array('Include {include file="welcome.tpl" username="Flame"} template',             $a, $result2),
-            array('Include {include file="welcome.tpl" email="flame@dev.null"} template',    $a, $result3),
-            array('Include {include file="welcome.tpl" username="Flame" email="flame@dev.null"} template',
+            array('Include {include "welcome.tpl"} template',                              $a, $result),
+            array('Include {include $tpl} template',                                       $a, $result),
+            array('Include {include "$tpl"} template',                                     $a, $result),
+            array('Include {include "{$tpl}"} template',                                   $a, $result),
+            array('Include {include "$name.tpl"} template',                                $a, $result),
+            array('Include {include "{$name}.tpl"} template',                              $a, $result),
+            array('Include {include "{$pr_name|lower}.tpl"} template',                     $a, $result),
+            array('Include {include "wel{$fragment}.tpl"} template',                       $a, $result),
+            array('Include {include "wel{$pr_fragment|lower}.tpl"} template',              $a, $result),
+            array('Include {include "welcome.tpl" username="Flame"} template',             $a, $result2),
+            array('Include {include "welcome.tpl" email="flame@dev.null"} template',    $a, $result3),
+            array('Include {include "welcome.tpl" username="Flame" email="flame@dev.null"} template',
                                                                                                 $a, $result4),
         );
     }
 
     public static function providerIncludeInvalid() {
         return array(
-            array('Include {include} template',   'Aspect\CompileException', "The tag {include} requires 'file' parameter"),
+            array('Include {include} template',   'Aspect\CompileException', "Unexpected end of expression"),
+            array('Include {include another="welcome.tpl"} template',   'Aspect\CompileException', "Unexpected token '=' in expression"),
         );
     }
 
@@ -721,26 +722,5 @@ class TemplateTest extends TestCase {
     public function testLayersInvalid($code, $exception, $message, $options = 0) {
         $this->execError($code, $exception, $message, $options);
     }
-
-    /**
-     * @group extends
-     */
-    public function _testExtends() {
-	    echo(self::$aspect->getTemplate("parent.tpl")->getBody()); exit;
-    }
-
-	/**
-	 * @group extends
-	 */
-	public function ___testExtends() {
-		echo(self::$aspect->getTemplate("child1.tpl")->getBody()); exit;
-	}
-
-	/**
-	 * @group extends
-	 */
-	public function __testExtends() {
-		echo(self::$aspect->fetch("child1.tpl", array("a" => "value", "z" => ""))."\n"); exit;
-	}
 }
 

@@ -48,7 +48,7 @@ class Tokenizer {
      */
     const MACRO_INCDEC = 1005;
     /**
-     * Boolean operations: &&, ||, or, xor
+     * Boolean operations: &&, ||, or, xor, and
      */
     const MACRO_BOOLEAN = 1006;
     /**
@@ -98,7 +98,7 @@ class Tokenizer {
             "+" => 1, "-" => 1, "*" => 1, "/" => 1, ">" => 1, "<" => 1, "^" => 1, "%" => 1, "&" => 1
         ),
         self::MACRO_BOOLEAN => array(
-            \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1, \T_BOOLEAN_AND => 1, \T_BOOLEAN_OR => 1
+            \T_LOGICAL_OR => 1,  \T_LOGICAL_XOR => 1, \T_BOOLEAN_AND => 1, \T_BOOLEAN_OR => 1, \T_LOGICAL_AND => 1
         ),
         self::MACRO_MATH => array(
             "+" => 1, "-" => 1, "*" => 1, "/" => 1, "^" => 1, "%" => 1, "&" => 1, "|" => 1
@@ -169,22 +169,6 @@ class Tokenizer {
         unset($this->tokens[-1]);
         $this->_max = count($this->tokens) - 1;
         $this->_last_no = $this->tokens[$this->_max][3];
-    }
-
-    /**
-     * Set the filter callback. Token may be changed by reference or skipped if callback return false.
-     *
-     * @param $callback
-     */
-    public function filter(\Closure $callback) {
-        $tokens = array();
-        foreach($this->tokens as $token) {
-            if($callback($token) !== false) {
-                $tokens[] = $token;
-            }
-        }
-        $this->tokens = $tokens;
-        $this->_max = count($this->tokens) - 1;
     }
 
     /**
@@ -270,20 +254,6 @@ class Tokenizer {
         return $this->current();
     }
 
-    /**
-     * Concatenate tokens from the current one to one of the specified and returns the string.
-     * @param string|int $token
-     * @param ...
-     * @return string
-     */
-    public function getStringUntil($token/*, $token2 */) {
-        $str = '';
-        while($this->valid() && !$this->_valid(func_get_args(), $this->curr[0])) {
-            $str .= $this->curr[1].$this->curr[2];
-            $this->next();
-        }
-        return $str;
-    }
 
     /**
      * Return substring. This method doesn't move pointer.
@@ -313,11 +283,10 @@ class Tokenizer {
         if($this->curr) {
             $cur = $this->curr[1];
             $this->next();
+            return $cur;
         } else {
             throw new UnexpectedException($this, func_get_args());
         }
-
-        return $cur;
     }
 
     /**
@@ -396,7 +365,6 @@ class Tokenizer {
 
     /**
      * Return the key of the current element
-     * @link http://php.net/manual/en/iterator.key.php
      * @return mixed scalar on success, or null on failure.
      */
     public function key() {
@@ -405,20 +373,12 @@ class Tokenizer {
 
     /**
      * Checks if current position is valid
-     * @link http://php.net/manual/en/iterator.valid.php
      * @return boolean The return value will be casted to boolean and then evaluated.
      *       Returns true on success or false on failure.
      */
     public function valid() {
         return (bool)$this->curr;
     }
-
-    /**
-     * Rewind the Iterator to the first element. Disabled.
-     * @link http://php.net/manual/en/iterator.rewind.php
-     * @return void Any returned value is ignored.
-     */
-    public function rewind() {}
 
     /**
      * Get token name
@@ -433,18 +393,6 @@ class Tokenizer {
             return token_name($token);
         } elseif(is_array($token)) {
             return token_name($token[0]);
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * Return whitespace of current token
-     * @return null
-     */
-    public function getWhiteSpace() {
-        if($this->curr) {
-            return $this->curr[2];
         } else {
             return null;
         }
@@ -471,19 +419,6 @@ class Tokenizer {
     }
 
     /**
-     * Skip specific token or do nothing
-     *
-     * @param int|string $token1
-     * @return Tokenizer
-     */
-    public function skipIf($token1/*, $token2, ...*/) {
-        if($this->_valid(func_get_args(), $this->curr[0])) {
-            $this->next();
-        }
-        return $this;
-    }
-
-    /**
      * Check current token's type
      *
      * @param int|string $token1
@@ -496,16 +431,6 @@ class Tokenizer {
         } else {
             throw new UnexpectedException($this, func_get_args());
         }
-    }
-
-    /**
-     * Count elements of an object
-     * @link http://php.net/manual/en/countable.count.php
-     * @return int The custom count as an integer.
-     * The return value is cast to an integer.
-     */
-    public function count() {
-        return $this->_max;
     }
 
     /**
@@ -636,8 +561,6 @@ class UnexpectedException extends TokenizeException {
         }
         if(!$tokens->curr) {
             $this->message = "Unexpected end of ".($where?:"expression")."$expect";
-        } elseif($tokens->curr[1] === "\n") {
-            $this->message = "Unexpected new line$expect";
         } elseif($tokens->curr[0] === T_WHITESPACE) {
             $this->message = "Unexpected whitespace$expect";
         } else {

@@ -137,12 +137,12 @@ class Template extends Render {
             //    $frag = ltrim($frag);
             //}
 
-            $this->_body .= str_replace("<?", '<?php echo "<?"; ?>', $frag);
+            $frag = str_replace("<?", '<?php echo "<?"; ?>'."\n", $frag);
 
-            $this->_body .= $this->_tag($tag, $this->_trim); // dispatching tags
+            $this->_body .= $this->_tag($tag, $frag); // dispatching tags
 
             // duplicate new line http://docs.php.net/manual/en/language.basic-syntax.instruction-separation.php
-            /*if(isset($this->_src[ $end+1 ])) {
+            if(substr($this->_body, -2) === "?>" && isset($this->_src[ $end+1 ])) {
                 $c = $this->_src[ $end+1 ];
                 if($c === "\n") {
                     $this->_body .= "\n";
@@ -153,7 +153,7 @@ class Template extends Render {
                         $this->_body .= "\r";
                     }
                 }
-            }*/
+            }
             //if($this->_trim) { // if current tag has trim flag
             //    $frag = rtrim($frag);
             //}
@@ -262,20 +262,21 @@ class Template extends Render {
     /**
      * Internal tags router
      * @param string $src
-     * @param bool $trim
+     * @param string $frag
      * @throws UnexpectedException
      * @throws CompileException
      * @throws SecurityException
      * @return string
      */
-    private function _tag($src, &$trim = false) {
+    private function _tag($src, &$frag) {
         if($src[strlen($src) - 2] === "-") {
             $token = substr($src, 1, -2);
-            $trim = true;
+            //$frag = ltrim($frag);
         } else {
             $token = substr($src, 1, -1);
-            $trim = false;
         }
+
+        $this->_body .= $frag;
         $token = trim($token);
         if($this->_ignore) {
             if($token === '/ignore') {
@@ -298,10 +299,14 @@ class Template extends Render {
                     $code = $this->_end($tokens);
                     break;
                 default:
-                    $code = $this->_parseAct($tokens);
-                    break;
+                    if($tokens->current() === "ignore") {
+                        $this->_ignore = true;
+                        $tokens->next();
+                        $code = '';
+                    }  else {
+                        $code = $this->_parseAct($tokens);
+                    }
             }
-
             if($tokens->key()) { // if tokenizer still have tokens
                 throw new UnexpectedException($tokens);
             }
@@ -344,6 +349,7 @@ class Template extends Render {
      *
      * @static
      * @param Tokenizer $tokens
+     * @throws \LogicException
      * @throws TokenizeException
      * @return string
      */
@@ -355,11 +361,6 @@ class Template extends Render {
             return 'echo '.$this->parseExp($tokens).';';
         }
 
-        if($action === "ignore") {
-            $this->_ignore = true;
-            $tokens->next();
-            return '';
-        }
         if($tokens->isNext("(")) {
             return "echo ".$this->parseExp($tokens).";";
         }
@@ -368,7 +369,7 @@ class Template extends Render {
             $tokens->next();
             switch($act["type"]) {
                 case Aspect::BLOCK_COMPILER:
-                    $scope = new Scope($action, $this, $this->_line, $act);
+                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack));
                     array_push($this->_stack, $scope);
                     return $scope->open($tokens);
                 case Aspect::INLINE_COMPILER:
@@ -376,10 +377,12 @@ class Template extends Render {
                 case Aspect::INLINE_FUNCTION:
                     return call_user_func($act["parser"], $act["function"], $tokens, $this);
                 case Aspect::BLOCK_FUNCTION:
-                    $scope = new Scope($action, $this, $this->_line, $act);
+                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack));
                     $scope->setFuncName($act["function"]);
                     array_push($this->_stack, $scope);
                     return $scope->open($tokens);
+                default:
+                    throw new \LogicException("Unknown function type");
             }
         }
 
@@ -520,6 +523,7 @@ class Template extends Render {
      * @param int                $deny
      * @param bool               $pure_var
      * @throws \LogicException
+     * @throws UnexpectedException
      * @return string
      */
     public function parseVar(Tokenizer $tokens, $deny = 0, &$pure_var = true) {
@@ -707,6 +711,10 @@ class Template extends Render {
         }
     }
 
+    /**
+     * @param string $after
+     * @return bool|string
+     */
     private function _getMoreSubstr($after) {
         $end = strpos($this->_src, $after, $this->_pos);
         $end = strpos($this->_src, "}", $end);
@@ -874,13 +882,25 @@ class Template extends Render {
         throw new TokenizeException("Unexpected token '".$tokens->current()."' in argument list");
     }
 
+    /**
+     * Parse first unnamed argument
+     *
+     * @param Tokenizer $tokens
+     * @param string $static
+     * @return mixed|string
+     */
     public function parseFirstArg(Tokenizer $tokens, &$static) {
         if($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
-            $str = $tokens->getAndNext();
-            $static = stripslashes(substr($str, 1, -1));
-            return $str;
+            if($tokens->isNext('|')) {
+                return $this->parseExp($tokens, true);
+            } else {
+                $str = $tokens->getAndNext();
+                $static = stripslashes(substr($str, 1, -1));
+                return $str;
+            }
         } elseif($tokens->is(Tokenizer::MACRO_STRING)) {
-            return $static = $tokens->getAndNext();
+            $static = $tokens->getAndNext();
+            return '"'.addslashes($static).'"';
         } else {
             return $this->parseExp($tokens, true);
         }
@@ -924,8 +944,6 @@ class Template extends Render {
         return $params;
     }
 }
-
-
 
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}

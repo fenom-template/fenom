@@ -60,7 +60,6 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase {
         $this->assertTrue($tokens->valid());
         $this->assertSame("3", $tokens->current());
         $this->assertSame(T_LNUMBER, $tokens->key());
-        $this->assertSame(" ", $tokens->getWhiteSpace());
         $tokens->next();
     }
 }

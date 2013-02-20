@@ -17,6 +17,18 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         $this->aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
     }
 
+    public static function setUpBeforeClass() {
+        if(!file_exists(ASPECT_RESOURCES.'/template')) {
+            mkdir(ASPECT_RESOURCES.'/template', 0777, true);
+        } else {
+            Misc::clean(ASPECT_RESOURCES.'/template/');
+        }
+    }
+
+    public function tpl($name, $code) {
+        file_put_contents(ASPECT_RESOURCES.'/template/'.$name, $code);
+    }
+
     /**
      * Compile and execute template
      *
@@ -31,6 +43,15 @@ class TestCase extends \PHPUnit_Framework_TestCase {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
         }
         $this->assertSame(Modifier::strip($result), Modifier::strip($tpl->fetch($vars), true), "Test $code");
+    }
+
+    public function execTpl($name, $code, $vars, $result, $dump = false) {
+        $this->tpl($name, $code);
+        $tpl = $this->aspect->getTemplate($name);
+        if($dump) {
+            echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
+        }
+        $this->assertSame(Modifier::strip($result, true), Modifier::strip($tpl->fetch($vars), true), "Test tpl $name");
     }
 
     /**
