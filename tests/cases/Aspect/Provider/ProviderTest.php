@@ -2,13 +2,16 @@
 namespace Aspect\Provider;
 use Aspect;
 
-class FSTest extends \PHPUnit_Framework_TestCase {
+class FSTest extends \Aspect\TestCase {
     /**
      * @var Provider
      */
     public $provider;
 
     public function setUp() {
+        parent::setUp();
+        $this->tpl("template1.tpl", 'Template 1 {$a}');
+        $this->tpl("template2.tpl", 'Template 2 {$a}');
         $this->provider = new FS(ASPECT_RESOURCES.'/template');
     }
 
@@ -45,7 +48,8 @@ class FSTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testGetLastModifiedBatch() {
-        $times = $this->provider->getLastModifiedBatch(array("template1.tpl", "template2.tpl", "parent.tpl"));
+        $times = $this->provider->getLastModifiedBatch($tpls = array("template1.tpl", "template2.tpl"));
+        $this->assertSame($tpls, array_keys($times));
         clearstatcache();
         foreach($times as $template => $time) {
             $this->assertEquals(filemtime(ASPECT_RESOURCES."/template/$template"), $time);
