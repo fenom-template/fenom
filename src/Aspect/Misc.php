@@ -43,8 +43,9 @@ class Misc {
             foreach($iterator as $file) {
                 /* @var \splFileInfo $file*/
                 if($file->isFile()) {
-                    if(strpos($file->getBasename(), ",") !== 0)
+                    if(strpos($file->getBasename(), ",") !== 0) {
                         unlink($file->getRealPath());
+                    }
                 } elseif($file->isDir()) {
                     rmdir($file->getRealPath());
                 }

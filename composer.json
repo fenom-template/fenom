@@ -3,7 +3,7 @@
     "type": "library",
     "description": "Aspect - fast template engine for PHP",
     "homepage": "https://github.com/bzick/aspect",
-    "keywords": ["aspect", "templater", "templating", "template"],
+    "keywords": ["aspect", "template", "templating"],
     "license": "MIT",
     "authors": [
         {

@@ -22,6 +22,7 @@ Conversation about [modifiers](./syntax.md#modifiers)
 * [escape](./mods/escape.md) aka `e`, `url`
 * [unescape](./mods/unescape.md)
 * [strip](./mods/strip.md)
+* [length](./mods/lenght.md)
 * allowed functions: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
 
@@ -40,6 +41,8 @@ Conversation about [tags](./syntax.md#tags)
 * [capture](./tags/capture.md)
 * [filter](./tags/filter.md)
 * [ignore](./tags/ignore.md)
+* [macros](./tags/macros.md)
+* [import](./tags/import.md)
 
 **Extends**
 
