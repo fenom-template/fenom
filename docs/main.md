@@ -41,7 +41,7 @@ Conversation about [tags](./syntax.md#tags)
 * [capture](./tags/capture.md)
 * [filter](./tags/filter.md)
 * [ignore](./tags/ignore.md)
-* [macros](./tags/macros.md)
+* [macro](./tags/macro.md)
 * [import](./tags/import.md)
 
 **Extends**

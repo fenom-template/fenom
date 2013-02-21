@@ -234,9 +234,9 @@
 
 ```smarty
 {include 'control.tpl'
-    options=$list
-    name=$cp.name
-    type='select'
+    options = $list
+    name    = $cp.name
+    type    = 'select'
 }
 
 {foreach [

@@ -13,12 +13,6 @@ Tag {extends}
 {extends $parent_tpl}
 ```
 
-```smarty
-{if $theme?}
-    {extends $theme.template}
-{/if}
-```
-
 ### {block}
 
 ```smarty
