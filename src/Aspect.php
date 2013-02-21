@@ -76,10 +76,6 @@ class Aspect {
      */
     protected $_storage = array();
     /**
-     * @var array template directory
-     */
-    protected $_tpl_path = array();
-    /**
      * @var string compile directory
      */
     protected $_compile_dir = "/tmp";
@@ -115,7 +111,6 @@ class Aspect {
         "truncate" => 'Aspect\Modifier::truncate',
         "escape" => 'Aspect\Modifier::escape',
         "e" => 'Aspect\Modifier::escape', // alias of escape
-        "url" => 'urlencode',   // alias of escape:"url"
         "unescape" => 'Aspect\Modifier::unescape',
         "strip" => 'Aspect\Modifier::strip',
         "default" => 'Aspect\Modifier::defaultValue'
@@ -220,6 +215,15 @@ class Aspect {
             'type' => self::BLOCK_COMPILER,
             'open' => 'Aspect\Compiler::filterOpen',
             'close' => 'Aspect\Compiler::filterClose'
+        ),
+        'macro' => array(
+            'type' => self::BLOCK_COMPILER,
+            'open' => 'Aspect\Compiler::macroOpen',
+            'close' => 'Aspect\Compiler::macroClose'
+        ),
+        'import' => array(
+            'type' => self::INLINE_COMPILER,
+            'parser' => 'Aspect\Compiler::tagImport'
         )
     );
 
@@ -611,23 +615,18 @@ class Aspect {
         return $template;
     }
 
-    /**
-     * Remove all compiled templates.
-     *
-     * @param string $scm
-     * @return int
-     */
-    public function compileAll($scm = null) {
-        //return FS::rm($this->_compile_dir.'/*');
-    }
 
     /**
      * @param string $tpl
+     * @param bool $cache
      * @return bool
      */
-    public function clearCompiledTemplate($tpl) {
+    public function clearCompiledTemplate($tpl, $cache = true) {
         $file_name = $this->_compile_dir."/".$this->_getHash($tpl);
         if(file_exists($file_name)) {
+            if($cache) {
+                unset($this->_storage[$tpl]);
+            }
             return unlink($file_name);
         } else {
             return true;
@@ -635,10 +634,10 @@ class Aspect {
     }
 
     /**
-     * @return int
+     *
      */
     public function clearAllCompiles() {
-
+        \Aspect\FSProvider::clean($this->_compile_dir);
     }
 
     /**

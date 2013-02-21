@@ -24,7 +24,7 @@ class FSProvider implements ProviderInterface {
             foreach($iterator as $file) {
                 /* @var \splFileInfo $file*/
                 if($file->isFile()) {
-                    if(strpos($file->getBasename(), ",") !== 0) {
+                    if(strpos($file->getBasename(), ".") !== 0) {
                         unlink($file->getRealPath());
                     }
                 } elseif($file->isDir()) {
@@ -44,10 +44,6 @@ class FSProvider implements ProviderInterface {
         if(is_dir($path)) {
             rmdir($path);
         }
-    }
-
-    public static function put($path, $content) {
-        file_put_contents($path, $content);
     }
 
     public function __construct($template_dir) {

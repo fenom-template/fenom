@@ -688,9 +688,10 @@ class Compiler {
      *
      * @param Tokenizer $tokens
      * @param Scope $scope
+     * @throws ImproperUseException
      * @return string
      */
-    public static function macrosOpen(Tokenizer $tokens, Scope $scope) {
+    public static function macroOpen(Tokenizer $tokens, Scope $scope) {
         $tokens->get('.');
         $name = $tokens->get(Tokenizer::MACRO_STRING);
         if($tokens->is('(')) {
@@ -706,7 +707,7 @@ class Compiler {
         }
     }
 
-    public static function macrosClose(Tokenizer $tokens, Scope $scope) {
+    public static function macroClose(Tokenizer $tokens, Scope $scope) {
         $scope->tpl->_macros[ $scope["name"] ] = $scope->getContent();
     }
 

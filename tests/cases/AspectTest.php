@@ -1,37 +1,9 @@
 <?php
 
 use Aspect\Render,
-    Aspect\Misc;
+    Aspect\FSProvider as FS;
 
-class AspectTest extends \PHPUnit_Framework_TestCase {
-    /**
-     * @var Aspect
-     */
-    public $aspect;
-
-    public static function tearDownAfterClass() {
-        Misc::clean(ASPECT_RESOURCES.'/compile');
-        Misc::rm(ASPECT_RESOURCES.'/template/custom.tpl');
-    }
-
-    public function setUp() {
-        if(!file_exists(ASPECT_RESOURCES.'/compile')) {
-            mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
-        }
-        self::tearDownAfterClass();
-        $this->aspect = $aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
-        $aspect->setCompileDir(ASPECT_RESOURCES.'/compile');
-        $aspect->setForceCompile(false);
-        $aspect->setCompileCheck(false);
-    }
-
-    public function tpl($code) {
-        Misc::put(ASPECT_RESOURCES.'/template/custom.tpl', $code);
-    }
-
-    public function rmTpl() {
-        Misc::rm(ASPECT_RESOURCES.'/template/custom.tpl');
-    }
+class AspectTest extends \Aspect\TestCase {
 
     public function testAddRender() {
         $test = $this;
@@ -40,7 +12,8 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
             $test->assertInstanceOf('Aspect\Render', $tpl);
             echo "Inline render";
         }, array(
-            "name" => 'render.tpl'
+            "name" => 'render.tpl',
+            "scm" => false
         )));
 
         $this->assertSame("Inline render", $this->aspect->fetch('render.tpl', array()));
@@ -51,68 +24,69 @@ class AspectTest extends \PHPUnit_Framework_TestCase {
             "a" => "a",
             "b" => "b"
         );
-
+        $this->tpl('template1.tpl', 'Template 1 a');
+        $this->tpl('template2.tpl', 'Template 2 b');
         $this->assertSame("Template 1 a", $this->aspect->fetch('template1.tpl', $a));
         $this->assertSame("Template 2 b", $this->aspect->fetch('template2.tpl', $a));
         $this->assertInstanceOf('Aspect\Render', $this->aspect->getTemplate('template1.tpl'));
         $this->assertInstanceOf('Aspect\Render', $this->aspect->getTemplate('template2.tpl'));
-        $this->assertSame(2, iterator_count(new FilesystemIterator(ASPECT_RESOURCES.'/compile')));
+        $this->assertSame(3, iterator_count(new FilesystemIterator(ASPECT_RESOURCES.'/compile')));
     }
 
     public function testStorage() {
-        $this->tpl('Custom template');
+        $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->aspect->fetch('custom.tpl', array()));
-        $this->rmTpl();
+        $this->aspect->clearCompiledTemplate('custom.tpl', false);
 
         $this->assertSame("Custom template", $this->aspect->fetch('custom.tpl', array()));
 
-        $this->tpl('Custom template 2');
+        $this->tpl('custom.tpl', 'Custom template 2');
         $this->assertSame("Custom template", $this->aspect->fetch('custom.tpl', array()));
     }
 
     public function testCheckMTime() {
-        $this->aspect->setCompileCheck(true);
-        $this->tpl('Custom template');
+        $this->aspect->setOptions(Aspect::FORCE_COMPILE);
+        $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->aspect->fetch('custom.tpl', array()));
 
         sleep(1);
-        $this->tpl('Custom template (new)');
+        $this->tpl('custom.tpl', 'Custom template (new)');
         $this->assertSame("Custom template (new)", $this->aspect->fetch('custom.tpl', array()));
     }
 
     public function testForceCompile() {
-        $this->aspect->setForceCompile(true);
-        $this->tpl('Custom template');
+        $this->aspect->setOptions(Aspect::FORCE_COMPILE);
+        $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->aspect->fetch('custom.tpl', array()));
-        $this->tpl('Custom template (new)');
+        $this->tpl('custom.tpl', 'Custom template (new)');
         $this->assertSame("Custom template (new)", $this->aspect->fetch('custom.tpl', array()));
     }
 
     public function testSetModifier() {
         $this->aspect->addModifier("mymod", "myMod");
-        $this->tpl('Custom modifier {$a|mymod}');
+        $this->tpl('custom.tpl', 'Custom modifier {$a|mymod}');
         $this->assertSame("Custom modifier (myMod)Custom(/myMod)", $this->aspect->fetch('custom.tpl', array("a" => "Custom")));
     }
 
     public function testSetFunctions() {
-        $this->aspect->setForceCompile(true);
+        $this->aspect->setOptions(Aspect::FORCE_COMPILE);
         $this->aspect->addFunction("myfunc", "myFunc");
         $this->aspect->addBlockFunction("myblockfunc", "myBlockFunc");
-        $this->tpl('Custom function {myfunc name="foo"}');
+        $this->tpl('custom.tpl', 'Custom function {myfunc name="foo"}');
         $this->assertSame("Custom function MyFunc:foo", $this->aspect->fetch('custom.tpl', array()));
-        $this->tpl('Custom function {myblockfunc name="foo"} this block1 {/myblockfunc}');
+        $this->tpl('custom.tpl', 'Custom function {myblockfunc name="foo"} this block1 {/myblockfunc}');
         $this->assertSame("Custom function Block:foo:this block1:Block", $this->aspect->fetch('custom.tpl', array()));
     }
 
     public function testSetCompilers() {
-        $this->aspect->setForceCompile(true);
+        $this->aspect->setOptions(Aspect::FORCE_COMPILE);
         $this->aspect->addCompiler("mycompiler", 'myCompiler');
         $this->aspect->addBlockCompiler("myblockcompiler", 'myBlockCompilerOpen', 'myBlockCompilerClose', array(
             'tag' => 'myBlockCompilerTag'
         ));
-        $this->tpl('Custom compiler {mycompiler name="bar"}');
+        $this->tpl('custom.tpl', 'Custom compiler {mycompiler name="bar"}');
         $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar)", $this->aspect->fetch('custom.tpl', array()));
-        $this->tpl('Custom compiler {myblockcompiler name="bar"} block1 {tag name="baz"} block2 {/myblockcompiler}');
+        $this->tpl('custom.tpl', 'Custom compiler {myblockcompiler name="bar"} block1 {tag name="baz"} block2 {/myblockcompiler}');
         $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar) block1 Tag baz of compiler block2 End of compiler", $this->aspect->fetch('custom.tpl', array()));
     }
 }

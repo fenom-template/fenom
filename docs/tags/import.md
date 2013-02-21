@@ -1,6 +1,8 @@
 Tag {import}
 ============
 
+Import [macro](./macro.md) from another template
+
 ```smarty
 {import 'page.macros.tpl'}
 ```
