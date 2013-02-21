@@ -234,7 +234,7 @@ class Aspect {
      */
     public static function factory($source, $compile_dir = '/tmp', $options = 0) {
         if(is_string($source)) {
-            $provider = new \Aspect\Provider\FS($source);
+            $provider = new \Aspect\FSProvider($source);
         } elseif($source instanceof Aspect\ProviderInterface) {
             $provider = $source;
         } else {
@@ -464,7 +464,7 @@ class Aspect {
      */
     public function setOptions($options) {
         if(is_array($options)) {
-            $options = Aspect\Misc::makeMask($options, self::$_option_list);
+            $options = self::_makeMask($options, self::$_option_list);
         }
         $this->_storage = array();
         $this->_options = $options;
@@ -652,4 +652,28 @@ class Aspect {
         return Template::factory($this)->source($name, $code);
     }
 
+
+    /**
+     * Create bit-mask from associative array use fully associative array possible keys with bit values
+     * @static
+     * @param array $values custom assoc array, ["a" => true, "b" => false]
+     * @param array $options possible values, ["a" => 0b001, "b" => 0b010, "c" => 0b100]
+     * @param int $mask the initial value of the mask
+     * @return int result, ( $mask | a ) & ~b
+     * @throws \RuntimeException if key from custom assoc doesn't exists into possible values
+     */
+    private static function _makeMask(array $values, array $options, $mask = 0) {
+        foreach($values as $value) {
+            if(isset($options[$value])) {
+                if($options[$value]) {
+                    $mask |= $options[$value];
+                } else {
+                    $mask &= ~$options[$value];
+                }
+            } else {
+                throw new \RuntimeException("Undefined parameter $value");
+            }
+        }
+        return $mask;
+    }
 }

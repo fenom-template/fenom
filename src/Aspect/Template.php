@@ -1,10 +1,20 @@
 <?php
+/*
+ * This file is part of Aspect.
+ *
+ * (c) 2013 Ivan Shalganov
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Aspect;
-
 use Aspect;
 
 /**
- * Aspect template compiler
+ * Template compiler
+ *
+ * @package    aspect
+ * @author     Ivan Shalganov <owner@bzick.net>
  */
 class Template extends Render {
 
@@ -303,7 +313,7 @@ class Template extends Render {
                         $this->_ignore = true;
                         $tokens->next();
                         $code = '';
-                    }  else {
+                    } else {
                         $code = $this->_parseAct($tokens);
                     }
             }
@@ -326,6 +336,7 @@ class Template extends Render {
 
     /**
      * Close tag handler
+     *
      * @param Tokenizer $tokens
      * @return mixed
      * @throws TokenizeException
@@ -358,14 +369,14 @@ class Template extends Render {
         if($tokens->is(Tokenizer::MACRO_STRING)) {
             $action = $tokens->current();
         } else {
-            return 'echo '.$this->parseExp($tokens).';';
+            return 'echo '.$this->parseExp($tokens).';'; // may be math and boolean expression
         }
 
-        if($tokens->isNext("(")) {
+        if($tokens->isNext("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method
             return "echo ".$this->parseExp($tokens).";";
         }
 
-        if($act = $this->_aspect->getFunction($action)) {
+        if($act = $this->_aspect->getFunction($action)) { // call some function
             $tokens->next();
             switch($act["type"]) {
                 case Aspect::BLOCK_COMPILER:
@@ -386,16 +397,29 @@ class Template extends Render {
             }
         }
 
-        for($j = $i = count($this->_stack)-1; $i>=0; $i--) {
+        for($j = $i = count($this->_stack)-1; $i>=0; $i--) { // call function's internal tag
             if($this->_stack[$i]->hasTag($action, $j - $i)) {
                 $tokens->next();
                 return $this->_stack[$i]->tag($action, $tokens);
             }
         }
-        if($tags = $this->_aspect->getTagOwners($action)) {
+        if($tags = $this->_aspect->getTagOwners($action)) { // unknown template tag
             throw new TokenizeException("Unexpected tag '$action' (this tag can be used with '".implode("', '", $tags)."')");
         } else {
             throw new TokenizeException("Unexpected tag $action");
+        }
+    }
+
+    /**
+     * @param Tokenizer $tokens
+     */
+    private function _parseMacros(Tokenizer $tokens) {
+        $tokens->get('.');
+        $name = $tokens->get(Tokenizer::MACRO_STRING);
+        if($tokens->is('(')) {
+            $tokens->skip();
+        } else {
+
         }
     }
 
@@ -610,9 +634,9 @@ class Template extends Render {
 	                }
 	                $expr2 = $this->parseExp($tokens, true);
                     if($empty) {
-	                    return '(empty('.$_var.') ? '.$expr2.' : '.$expr1;
+	                    return '(empty('.$_var.') ? '.$expr2.' : '.$expr1.')';
                     } else {
-                        return '(isset('.$_var.') ? '.$expr1.' : '.$expr2;
+                        return '(isset('.$_var.') ? '.$expr1.' : '.$expr2.')';
                     }
                 }
             } elseif($t === "!") {
@@ -676,11 +700,42 @@ class Template extends Render {
                         $_str .= $tokens->current();
                         $tokens->next();
                     } elseif($t === T_VARIABLE) {
-                        $_str .= '".$tpl["'.substr($tokens->current(), 1).'"]."';
+                        if(strlen($_str) > 1) {
+                            $_str .= '".';
+                        } else {
+                            $_str = "";
+                        }
+                        $_str .= '$tpl["'.substr($tokens->current(), 1).'"]';
                         $tokens->next();
+                        if($tokens->is($stop)) {
+                            $tokens->skip();
+                            return $_str;
+                        } else {
+                            $_str .= '."';
+                        }
                     } elseif($t === T_CURLY_OPEN) {
+                        if(strlen($_str) > 1) {
+                            $_str .= '".';
+                        } else {
+                            $_str = "";
+                        }
                         $tokens->getNext(T_VARIABLE);
-                        $_str .= '".('.$this->parseExp($tokens).')."';
+                        $_str .= '('.$this->parseExp($tokens).')';
+                        /*if(!$tokens->valid()) {
+                            $more = $this->_getMoreSubstr($stop);
+                            //var_dump($more); exit;
+                            $tokens->append("}".$more, $p);
+                            var_dump("Curly", $more, $tokens->getSnippetAsString());
+                            exit;
+                        }*/
+
+                        //$tokens->skip('}');
+                        if($tokens->is($stop)) {
+                            $tokens->next();
+                            return $_str;
+                        } else {
+                            $_str .= '."';
+                        }
                     } elseif($t === "}") {
                         $tokens->next();
                     } elseif($t === $stop) {

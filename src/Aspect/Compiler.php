@@ -661,4 +661,53 @@ class Compiler {
         }
     }
 
+    /**
+     * Import macros from templates
+     *
+     * @param Tokenizer $tokens
+     * @param Template $tpl
+     * @return string
+     * @throws ImproperUseException
+     */
+    public static function tagImport(Tokenizer $tokens, Template $tpl) {
+        $tpl->parseFirstArg($tokens, $name);
+        if(!$name) {
+            throw new ImproperUseException("Invalid usage tag {import}");
+        }
+        $donor = $tpl->getStorage()->getRawTemplate()->load($name, true);
+        if(!empty($donor->_macros)) {
+            $tpl->_macros = array_merge($tpl->_macros, $donor->_macros);
+            $tpl->addDepend($donor);
+
+        }
+        return '';
+    }
+
+    /**
+     * Declare or invoke macros
+     *
+     * @param Tokenizer $tokens
+     * @param Scope $scope
+     * @return string
+     */
+    public static function macrosOpen(Tokenizer $tokens, Scope $scope) {
+        $tokens->get('.');
+        $name = $tokens->get(Tokenizer::MACRO_STRING);
+        if($tokens->is('(')) {
+            $tokens->skip();
+
+            return '';
+        } elseif(isset($scope->tpl->_macros[$name])) {
+            $p = $scope->tpl->parseParams($tokens);
+            $scope->closed = true;
+            return '$_tpl = $tpl; $tpl = '.self::_toArray($p).' + '.$scope->tpl->_macros[$name]["defaults"].'; '.$scope->tpl->_macros[$name]["body"].'; $tpl = $_tpl; unset($_tpl);';
+        } else {
+            throw new ImproperUseException("Unknown tag or macros {{$name}}");
+        }
+    }
+
+    public static function macrosClose(Tokenizer $tokens, Scope $scope) {
+        $scope->tpl->_macros[ $scope["name"] ] = $scope->getContent();
+    }
+
 }

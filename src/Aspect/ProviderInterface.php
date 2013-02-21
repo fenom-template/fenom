@@ -20,7 +20,13 @@ interface ProviderInterface {
      */
     public function getLastModified($tpl);
 
-    public function getLastModifiedBatch($tpls);
+    /**
+     * Verify templates by change time
+     *
+     * @param array $templates [template_name => modified, ...] By conversation you may trust the template's name
+     * @return bool
+     */
+    public function verify(array $templates);
 
     /**
      * @return array

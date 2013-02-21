@@ -1,6 +1,6 @@
 <?php
 namespace Aspect;
-use Aspect;
+use Aspect, Aspect\FSProvider as FS;
 
 class TestCase extends \PHPUnit_Framework_TestCase {
     /**
@@ -12,7 +12,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         if(!file_exists(ASPECT_RESOURCES.'/compile')) {
             mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
         } else {
-            Misc::clean(ASPECT_RESOURCES.'/compile/');
+            FS::clean(ASPECT_RESOURCES.'/compile/');
         }
         $this->aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
     }
@@ -21,7 +21,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         if(!file_exists(ASPECT_RESOURCES.'/template')) {
             mkdir(ASPECT_RESOURCES.'/template', 0777, true);
         } else {
-            Misc::clean(ASPECT_RESOURCES.'/template/');
+            FS::clean(ASPECT_RESOURCES.'/template/');
         }
     }
 

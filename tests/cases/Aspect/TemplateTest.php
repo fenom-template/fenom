@@ -15,6 +15,10 @@ class TemplateTest extends TestCase {
         )));
     }
 
+    /*public function testSandbox() {
+        var_dump($this->aspect->compileCode('{"$s:{$b+1}f d {$d}"}')->_body);
+        exit;
+    }*/
 
     public static function providerVars() {
         $a = array("a" => "World");
@@ -66,6 +70,42 @@ class TemplateTest extends TestCase {
                                                 $b, 'hello, Username!'),
             array('hello, {"World"}!',          $a, 'hello, World!'),
             //array('hello, {"W{$a}d"}!',          $a, 'hello, WWorldd!'),
+        );
+    }
+
+    public static function providerScalars() {
+        return array(
+            array('77', 77),
+            array('-33', -33),
+            array('0.2', 0.2),
+            array('-0.3', -0.3),
+            array('1e6', 1e6),
+            array('-2e6', -2e6),
+            array('"str"', 'str'),
+            array('"str\nand\nmany\nlines"', "str\nand\nmany\nlines"),
+            array('"str and \'substr\'"', "str and 'substr'"),
+            array('"str and \"substr\""', 'str and "substr"'),
+            array("'str'", 'str'),
+            array("'str\\nin\\none\\nline'", 'str\nin\none\nline'),
+            array("'str and \"substr\"'", 'str and "substr"'),
+            array("'str and \'substr\''", "str and 'substr'"),
+            array('"$one"', '1'),
+            array('"$one $two"', '1 2'),
+            array('"$one and $two"', '1 and 2'),
+            array('"a $one and $two b"', 'a 1 and 2 b'),
+            array('"{$one}"', '1'),
+            array('"a {$one} b"', 'a 1 b'),
+            array('"{$one + 2}"', '3'),
+            array('"{$one * $two + 1}"', '3'),
+            array('"{$one} and {$two}"', '1 and 2'),
+            array('"$one and {$two}"', '1 and 2'),
+            array('"{$one} and $two"', '1 and 2'),
+            array('"a {$one} and {$two} b"', 'a 1 and 2 b'),
+            array('"{$one+1} and {$two-1}"', '2 and 1'),
+            array('"a {$one+1} and {$two-1} b"', 'a 2 and 1 b'),
+            array('"a {$one|dots} and {$two|dots} b"', 'a 1... and 2... b'),
+            array('"a {$one|dots} and $two b"', 'a 1... and 2 b'),
+            array('"a $one and {$two|dots} b"', 'a 1 and 2... b'),
         );
     }
 

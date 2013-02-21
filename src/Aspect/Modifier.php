@@ -1,19 +1,43 @@
 <?php
+/*
+ * This file is part of Aspect.
+ *
+ * (c) 2013 Ivan Shalganov
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Aspect;
 
-
+/**
+ * Collection of modifiers
+ *
+ * @package    aspect
+ * @author     Ivan Shalganov <owner@bzick.net>
+ */
 class Modifier {
 
-	public static function dateFormat($date, $format = "%b %e, %Y") {
+    /**
+     * Date format
+     *
+     * @param string|int $date
+     * @param string $format
+     * @return string
+     */
+    public static function dateFormat($date, $format = "%b %e, %Y") {
 		if(is_string($date) && !is_numeric($date)) {
 			$date = strtotime($date);
 			if(!$date) $date = time();
 		}
-		//dump($format, $date);
 		return strftime($format, $date);
 	}
 
-	public static function date($date, $format = "Y m d") {
+    /**
+     * @param string $date
+     * @param string $format
+     * @return string
+     */
+    public static function date($date, $format = "Y m d") {
 		if(is_string($date) && !is_numeric($date)) {
 			$date = strtotime($date);
 			if(!$date) $date = time();
@@ -21,6 +45,13 @@ class Modifier {
 		return date($format, $date);
 	}
 
+    /**
+     * Escape string
+     *
+     * @param string $text
+     * @param string $type
+     * @return string
+     */
     public static function escape($text, $type = 'html') {
 	    switch($type) {
 		    case "url":
@@ -32,7 +63,14 @@ class Modifier {
 	    }
     }
 
-	public static function unescape($text, $type = 'html') {
+    /**
+     * Unescape escaped string
+     *
+     * @param string $text
+     * @param string $type
+     * @return string
+     */
+    public static function unescape($text, $type = 'html') {
 		switch($type) {
 			case "url":
 				return urldecode($text);
@@ -43,10 +81,14 @@ class Modifier {
 		}
 	}
 
-    public static function defaultValue(&$value, $default = null) {
-        return ($value === null) ? $default : $value;
-    }
-
+    /**
+     * @param string $string
+     * @param int $length
+     * @param string $etc
+     * @param bool $break_words
+     * @param bool $middle
+     * @return string
+     */
     public static function truncate($string, $length = 80, $etc = '...', $break_words = false, $middle = false) {
         $length -= min($length, strlen($etc));
         if (!$break_words && !$middle) {
@@ -71,6 +113,20 @@ class Modifier {
             return preg_replace('#[\s]+#ms', ' ', $str);
         } else {
             return preg_replace('#[ \t]{2,}#', ' ', $str);
+        }
+    }
+
+    /**
+     * @param mixed $item
+     * @return int
+     */
+    public static function length($item) {
+        if(is_scalar($item)) {
+            return strlen($item);
+        } elseif (is_array($item)) {
+            return count($item);
+        } else {
+            return count((array)$item);
         }
     }
 }

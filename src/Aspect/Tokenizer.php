@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of Aspect.
+ *
+ * (c) 2013 Ivan Shalganov
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Aspect;
 
 defined('T_INSTEADOF')  || define('T_INSTEADOF', 341);
@@ -16,6 +24,9 @@ defined('T_TRAIT_C')    || define('T_TRAIT_C', 365);
  * @property array $prev the previous token
  * @property array $curr the current token
  * @property array $next the next token
+ *
+ * @package    aspect
+ * @author     Ivan Shalganov <owner@bzick.net>
  */
 class Tokenizer {
     const TOKEN = 0;
@@ -363,6 +374,10 @@ class Tokenizer {
         }
     }
 
+    public function count() {
+        return $this->_max;
+    }
+
     /**
      * Return the key of the current element
      * @return mixed scalar on success, or null on failure.
@@ -522,8 +537,9 @@ class Tokenizer {
 
     /**
      * Parse code and append tokens. This method move pointer to offset.
+     *
      * @param string $code
-     * @param int $offset
+     * @param int $offset if not -1 replace tokens from position $offset
      * @return Tokenizer
      */
     public function append($code, $offset = -1) {

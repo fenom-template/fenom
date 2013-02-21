@@ -43,7 +43,7 @@ class ExtendsTemplateTest extends TestCase {
      * @param $vars
      * @param $result
      */
-    public function testDynamicExtends($name, $code, $vars, $result) {
+    public function _testDynamicExtends($name, $code, $vars, $result) {
         static $i = 0;
         $vars["iteration"] = $i++;
         $this->execTpl($name, $code, $vars, $result);
@@ -60,7 +60,7 @@ class ExtendsTemplateTest extends TestCase {
 	/**
 	 * @group extends
 	 */
-	public function _testChildLevel1() {
+	public function testChildLevel1() {
 		//echo($this->aspect->fetch("child1.tpl", array("a" => "a char"))); exit;
 	}
 

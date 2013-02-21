@@ -1,10 +1,10 @@
 <?php
-namespace Aspect\Provider;
+namespace Aspect;
 use Aspect;
 
-class FSTest extends \Aspect\TestCase {
+class FSProviderTest extends \Aspect\TestCase {
     /**
-     * @var Provider
+     * @var FSProvider
      */
     public $provider;
 
@@ -12,7 +12,7 @@ class FSTest extends \Aspect\TestCase {
         parent::setUp();
         $this->tpl("template1.tpl", 'Template 1 {$a}');
         $this->tpl("template2.tpl", 'Template 2 {$a}');
-        $this->provider = new FS(ASPECT_RESOURCES.'/template');
+        $this->provider = new FSProvider(ASPECT_RESOURCES.'/template');
     }
 
     public function testIsTemplateExists() {
