@@ -1,7 +1,7 @@
 Aspect PHP Template Engine
 ==========================
 
-> Composer package: n/a
+> Composer package: `"bzick/aspect": "dev-master"`
 
 ## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Bugs](https://github.com/bzick/aspect/issues) :: [Articles](./docs/articles.md)
 
