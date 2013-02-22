@@ -1,4 +1,4 @@
-Requirements and installation
+Installation
 =============================
 
 For installation use [composer](http://getcompoer.org). Add in your `composer.json` requirements:
