@@ -24,9 +24,9 @@ class Compiler {
             if($name && ($tpl->getStorage()->getOptions() & \Aspect::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
-                return '$_tpl = (array)$tpl; $tpl->exchangeArray('.self::_toArray($p).'+$_tpl); ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
+                return '$_tpl = (array)$tpl; $tpl->exchangeArray('.self::toArray($p).'+$_tpl); ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
             } else {
-                return '$tpl->getStorage()->getTemplate('.$cname.')->display('.self::_toArray($p).'+(array)$tpl);';
+                return '$tpl->getStorage()->getTemplate('.$cname.')->display('.self::toArray($p).'+(array)$tpl);';
             }
         } else {
             if($name && ($tpl->getStorage()->getOptions() & \Aspect::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
@@ -523,7 +523,7 @@ class Compiler {
      * @return string
      */
     public static function stdFuncParser($function, Tokenizer $tokens, Template $tpl) {
-        return "echo $function(".self::_toArray($tpl->parseParams($tokens)).', $tpl);';
+        return "echo $function(".self::toArray($tpl->parseParams($tokens)).', $tpl);';
     }
 
     /**
@@ -564,7 +564,7 @@ class Compiler {
      * @return string
      */
     public static function stdFuncOpen(Tokenizer $tokens, Scope $scope) {
-        $scope["params"] = self::_toArray($scope->tpl->parseParams($tokens));
+        $scope["params"] = self::toArray($scope->tpl->parseParams($tokens));
         return 'ob_start();';
     }
 
@@ -580,7 +580,12 @@ class Compiler {
         return "echo ".$scope["function"].'('.$scope["params"].', ob_get_clean(), $tpl);';
     }
 
-    private static function _toArray($params) {
+    /**
+     * Convert array of code to string array
+     * @param $params
+     * @return string
+     */
+    public static function toArray($params) {
         $_code = array();
         foreach($params as $k => $v) {
             $_code[] = '"'.$k.'" => '.$v;
@@ -689,26 +694,45 @@ class Compiler {
      * @param Tokenizer $tokens
      * @param Scope $scope
      * @throws ImproperUseException
-     * @return string
      */
     public static function macroOpen(Tokenizer $tokens, Scope $scope) {
-        $tokens->get('.');
-        $name = $tokens->get(Tokenizer::MACRO_STRING);
-        if($tokens->is('(')) {
-            $tokens->skip();
-
-            return '';
-        } elseif(isset($scope->tpl->_macros[$name])) {
-            $p = $scope->tpl->parseParams($tokens);
-            $scope->closed = true;
-            return '$_tpl = $tpl; $tpl = '.self::_toArray($p).' + '.$scope->tpl->_macros[$name]["defaults"].'; '.$scope->tpl->_macros[$name]["body"].'; $tpl = $_tpl; unset($_tpl);';
-        } else {
-            throw new ImproperUseException("Unknown tag or macros {{$name}}");
+        $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
+        $scope["args"] = array();
+        $scope["defaults"] = array();
+        if(!$tokens->valid()) {
+            return;
         }
+        $tokens->next()->need('(')->next();
+        if($tokens->is(')')) {
+            return;
+        }
+        while($tokens->is(Tokenizer::MACRO_STRING)) {
+            $scope["args"][] = $param = $tokens->getAndNext();
+            if($tokens->is('=')) {
+                if($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
+                    $scope["defaults"][ $param ] = $tokens->current();
+                } else {
+                    throw new ImproperUseException("Macro parameters may have only scalar defaults");
+                }
+            }
+            $tokens->skipIf(',');
+        }
+        $tokens->skipIf(')');
+
+        return;
     }
 
+    /**
+     * @param Tokenizer $tokens
+     * @param Scope $scope
+     */
     public static function macroClose(Tokenizer $tokens, Scope $scope) {
-        $scope->tpl->_macros[ $scope["name"] ] = $scope->getContent();
+        $scope->tpl->macros[ $scope["name"] ] = array(
+            "body" => $content = $scope->getContent(),
+            "args" => $scope["args"],
+            "defaults" => $scope["defaults"]
+        );
+        $scope->tpl->_body = substr($scope->tpl->_body, 0, strlen($scope->tpl->_body) - strlen($content));
     }
 
 }

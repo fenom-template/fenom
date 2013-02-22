@@ -30,6 +30,11 @@ class Template extends Render {
      * @var string
      */
     public $_body;
+
+    /**
+     * @var array of macros
+     */
+    public $macros = array();
     /**
      * Call stack
      * @var Scope[]
@@ -58,11 +63,12 @@ class Template extends Render {
      */
     private $_options = 0;
 
-    /** System variables {$smarty.<...>} or {$aspect.<...>}
-     * @var array
+    /**
+     * Just factory
+     *
+     * @param \Aspect $aspect
+     * @return Template
      */
-    public static $sysvar = array('$aspect' => 1, '$smarty' => 1);
-
     public static function factory(Aspect $aspect) {
         return new static($aspect);
     }
@@ -305,6 +311,9 @@ class Template extends Render {
                 case '$':
                     $code = "echo ".$this->parseExp($tokens).";";
                     break;
+                case '#':
+                    $code = "echo ".$this->parseConst($tokens);
+                    break;
                 case '/':
                     $code = $this->_end($tokens);
                     break;
@@ -365,19 +374,24 @@ class Template extends Render {
      * @return string
      */
     private function _parseAct(Tokenizer $tokens) {
-
         if($tokens->is(Tokenizer::MACRO_STRING)) {
-            $action = $tokens->current();
+            $action = $tokens->getAndNext();
         } else {
             return 'echo '.$this->parseExp($tokens).';'; // may be math and boolean expression
         }
 
-        if($tokens->isNext("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method
+        if($tokens->is("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method
+            $tokens->back();
             return "echo ".$this->parseExp($tokens).";";
+        } elseif($tokens->is('.')) {
+            $name = $tokens->skip()->get(Tokenizer::MACRO_STRING);
+            if($action !== "macro") {
+                $name = $action.".".$name;
+            }
+            return $this->parseMacro($tokens, $name);
         }
 
         if($act = $this->_aspect->getFunction($action)) { // call some function
-            $tokens->next();
             switch($act["type"]) {
                 case Aspect::BLOCK_COMPILER:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack));
@@ -399,7 +413,6 @@ class Template extends Render {
 
         for($j = $i = count($this->_stack)-1; $i>=0; $i--) { // call function's internal tag
             if($this->_stack[$i]->hasTag($action, $j - $i)) {
-                $tokens->next();
                 return $this->_stack[$i]->tag($action, $tokens);
             }
         }
@@ -452,6 +465,9 @@ class Template extends Render {
                 } else {
                     $term = 1;
                 }
+            } elseif(!$term && $tokens->is('#')) {
+                $term = 1;
+                $_exp .= $this->parseConst($tokens);
             } elseif(!$term && $tokens->is("(")) {
                 $_exp .= $tokens->getAndNext();
                 $brackets++;
@@ -553,11 +569,7 @@ class Template extends Render {
     public function parseVar(Tokenizer $tokens, $deny = 0, &$pure_var = true) {
         $var = $tokens->get(T_VARIABLE);
         $pure_var = true;
-        if(isset(self::$sysvar[ $var ])) {
-            $_var = $this->_parseSystemVar($tokens);
-        } else {
-            $_var = '$tpl["'.ltrim($var,'$').'"]';
-        }
+        $_var = '$tpl["'.ltrim($var,'$').'"]';
         $tokens->next();
         while($t = $tokens->key()) {
             if($t === "." && !($deny & self::DENY_ARRAY)) {
@@ -846,7 +858,7 @@ class Template extends Render {
                     $key = true;
                     $val = false;
                     $_arr .= $tokens->getAndNext().' ';
-                } elseif($tokens->is(Tokenizer::MACRO_SCALAR, T_VARIABLE, T_STRING, T_EMPTY, T_ISSET, "(") && !$val) {
+                } elseif($tokens->is(Tokenizer::MACRO_SCALAR, T_VARIABLE, T_STRING, T_EMPTY, T_ISSET, "(", "#") && !$val) {
                     $_arr .= $this->parseExp($tokens, true);
                     $key = false;
                     $val = true;
@@ -874,29 +886,59 @@ class Template extends Render {
     }
 
     /**
-     * Parse system variable, like $aspect, $smarty
+     * Parse constant
+     * #Ns\MyClass::CONST1, #CONST1, #MyClass::CONST1
      *
      * @param Tokenizer $tokens
-     * @throws \LogicException
-     * @return mixed|string
+     * @return string
+     * @throws ImproperUseException
      */
-    private function _parseSystemVar(Tokenizer $tokens) {
-        $tokens->getNext(".");
-        $key = $tokens->getNext(T_STRING, T_CONST);
-        switch($key) {
-            case 'get':  return '$_GET';
-            case 'post': return '$_POST';
-            case 'cookies': return '$_COOKIES';
-            case 'session': return '$_SESSION';
-            case 'request': return '$_REQUEST';
-            case 'now': return 'time()';
-            case 'line': return $this->_line;
-            case 'tpl_name': return '$tpl->getName()';
-            case 'const':
-                $tokens->getNext(".");
-                return $tokens->getNext(T_STRING);
-            default:
-                throw new \LogicException("Unexpected key '".$tokens->current()."' in system variable");
+    public function parseConst(Tokenizer $tokens) {
+        $tokens->get('#');
+        $name = $tokens->getNext(T_STRING);
+        $tokens->next();
+        if($tokens->is(T_NAMESPACE)) {
+            $name .= '\\';
+            $name .= $tokens->getNext(T_STRING);
+            $tokens->next();
+        }
+        if($tokens->is(T_DOUBLE_COLON)) {
+            $name .= '::';
+            $name .= $tokens->getNext(T_STRING);
+            $tokens->next();
+        }
+        if(defined($name)) {
+            return $name;
+        } else {
+            throw new ImproperUseException("Use undefined constant $name");
+        }
+    }
+
+    /**
+     * @param Tokenizer $tokens
+     * @param $name
+     * @return string
+     * @throws ImproperUseException
+     */
+    public function parseMacro(Tokenizer $tokens, $name) {
+        if(isset($this->macros[ $name ])) {
+            $macro = $this->macros[ $name ];
+            $p = $this->parseParams($tokens);
+            $args = array();
+            foreach($macro["args"] as $arg) {
+                if(isset($p[ $arg ])) {
+                    $args[ $arg ] = $p[ $arg ];
+                } elseif(isset($macro["defaults"][ $arg ])) {
+                    $args[ $arg ] = $macro["defaults"][ $arg ];
+                } else {
+                    throw new ImproperUseException("Macro '$name' require '$arg' argument");
+                }
+            }
+            $args = $args ? '$tpl = '.Compiler::toArray($args).';' : '';
+            return '$_tpl = $tpl; '.$args.' ?>'.$macro["body"].'<?php $tpl = $_tpl; unset($_tpl);';
+        } else {
+            var_dump($this->macros);
+            throw new ImproperUseException("Undefined macro '$name'");
         }
     }
 
@@ -983,8 +1025,7 @@ class Template extends Render {
                     $tokens->next();
                     $params[ $key ] = $this->parseExp($tokens);
                 } else {
-                    $params[ $key ] = true;
-                    $params[] = '"'.$key.'"';
+                    $params[ $key ] = 'true';
                 }
             } elseif($tokens->is(Tokenizer::MACRO_SCALAR, '"', '`', T_VARIABLE, "[", '(')) {
                 $params[] = $this->parseExp($tokens);
