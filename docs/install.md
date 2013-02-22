@@ -1,19 +1,15 @@
-Requirements and installation
+Installation
 =============================
 
-Для установки через composer тебуется указать в `composer.json` вашего проекта
-
+For installation use [composer](http://getcompoer.org). Add in your `composer.json` requirements:
 ```json
 {
     "require": {
-        "bzick/aspect": "0.9.*"
-    },
-    "repositories": [
-    {
-        "type": "git",
-        "url": "https://github.com/bzick/aspect.git"
-    }]
+        "bzick/aspect": "dev-master"
+    }
 }
 ```
+or use shell
+`composer require bzick/aspect`
 
-Для работы шаблонизатора потребуется расширение tokenizer. Для загрузки классов используется `psr-0` формат.
+If you do not use composer - use `psr-0` format for loading Aspect's classes.
