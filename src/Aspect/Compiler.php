@@ -658,11 +658,9 @@ class Compiler {
                 throw new ImproperUseException("Cycle may contain only index attribute");
             } else {
                 return __CLASS__.'::cycle((array)'.$exp.', '.$p["index"].');';
-                //$index = $p["index"];
             }
         } else {
             return __CLASS__.'::cycle((array)'.$exp.', isset($i) ? $i++ : ($i = 0) );';
-            //$index = false;
         }
     }
 
@@ -679,11 +677,24 @@ class Compiler {
         if(!$name) {
             throw new ImproperUseException("Invalid usage tag {import}");
         }
+        if($tokens->is(T_AS)) {
+            $alias = $tokens->next()->get(Tokenizer::MACRO_STRING);
+            $tokens->next();
+        } else {
+            $alias = "";
+        }
         $donor = $tpl->getStorage()->getRawTemplate()->load($name, true);
-        if(!empty($donor->_macros)) {
-            $tpl->_macros = array_merge($tpl->_macros, $donor->_macros);
+        if($donor->macros) {
+            foreach($donor->macros as $name => $macro) {
+                if($p = strpos($name, ".")) {
+                    $name = substr($name, $p);
+                }
+                if($alias) {
+                    $name = $alias.'.'.$name;
+                }
+                $tpl->macros[$name] = $macro;
+            }
             $tpl->addDepend($donor);
-
         }
         return '';
     }
@@ -709,8 +720,9 @@ class Compiler {
         while($tokens->is(Tokenizer::MACRO_STRING)) {
             $scope["args"][] = $param = $tokens->getAndNext();
             if($tokens->is('=')) {
+                $tokens->next();
                 if($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
-                    $scope["defaults"][ $param ] = $tokens->current();
+                    $scope["defaults"][ $param ] = $tokens->getAndNext();
                 } else {
                     throw new ImproperUseException("Macro parameters may have only scalar defaults");
                 }

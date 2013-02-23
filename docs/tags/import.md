@@ -4,12 +4,12 @@ Tag {import}
 Import [macro](./macro.md) from another template
 
 ```smarty
-{import 'page.macros.tpl'}
+{import 'math.tpl'}
 ```
 
 ```smarty
-{import 'listing.tpl' as listing}
+{import 'math.tpl' as math}
 ...
-{listing.paginator current=5 count=100}
+{math.plus x=5 y=100}
 ```
 

@@ -35,6 +35,11 @@ class Template extends Render {
      * @var array of macros
      */
     public $macros = array();
+
+    /**
+     * @var array of blocks
+     */
+    public $blocks = array();
     /**
      * Call stack
      * @var Scope[]

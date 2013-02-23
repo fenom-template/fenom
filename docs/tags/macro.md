@@ -1,20 +1,18 @@
 Tag {macro}
 ============
 
-Declare
+Declare macro
 
 ```smarty
-declare macros
-
-{macro paginator(current, total, skip=true)}
-    ... paginator code ...
+{macro plus(x, y, z=0)}
+    x + y + z = {$x + $y + $z}
 {/macro}
 ```
 
-Invoke
+Invoke macro
 
 ```smarty
-{paginator current=$page total=100}
+{macro.plus x=$num y=100}
 ```
 
-Use tag [{import}](./import.md) for extending macros for another templates.
+Use tag [{import}](./import.md) for importing existing macroses into another template
