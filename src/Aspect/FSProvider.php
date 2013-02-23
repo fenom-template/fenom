@@ -90,13 +90,13 @@ class FSProvider implements ProviderInterface {
         }
     }
 
-	/**
-	 * @param string $tpl
-	 * @return bool
-	 */
-	public function isTemplateExists($tpl) {
+    /**
+     * @param string $tpl
+     * @return bool
+     */
+    public function isTemplateExists($tpl) {
         return file_exists($this->_path."/".$tpl);
-	}
+    }
 
     public function getLastModifiedBatch($tpls) {
         $tpls = array_flip($tpls);

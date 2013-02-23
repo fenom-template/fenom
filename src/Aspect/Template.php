@@ -220,13 +220,13 @@ class Template extends Render {
         return "<?php \n".
             "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
             "return new Aspect\\Render(\$aspect, ".$this->_getClosureSource().", ".var_export(array(
-	            //"options" => $this->_options,
-                "provider" => $this->_scm,
-                "name" => $this->_name,
-                "base_name" => $this->_base_name,
-                "time" => $this->_time,
-	            "depends" => $this->_depends
-            ), true).");\n";
+            //"options" => $this->_options,
+            "provider" => $this->_scm,
+            "name" => $this->_name,
+            "base_name" => $this->_base_name,
+            "time" => $this->_time,
+            "depends" => $this->_depends
+        ), true).");\n";
     }
 
     /**
@@ -256,13 +256,13 @@ class Template extends Render {
 
     }
 
-	/**
-	 * Add depends from template
-	 * @param Render $tpl
-	 */
-	public function addDepend(Render $tpl) {
-		$this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
-	}
+    /**
+     * Add depends from template
+     * @param Render $tpl
+     */
+    public function addDepend(Render $tpl) {
+        $this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
+    }
 
     /**
      * Execute template and return result as string
@@ -334,13 +334,13 @@ class Template extends Render {
             if($tokens->key()) { // if tokenizer still have tokens
                 throw new UnexpectedException($tokens);
             }
-	        if(!$code) {
-		        return "";
-	        } else {
+            if(!$code) {
+                return "";
+            } else {
                 return "<?php\n/* {$this->_name}:{$this->_line}: {$src} */\n {$code} ?>";
             }
         } catch (ImproperUseException $e) {
-	        throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
             throw new SecurityException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
@@ -645,13 +645,13 @@ class Template extends Render {
                         return 'isset('.$_var.')';
                     }
                 } else {
-	                $expr1 = $this->parseExp($tokens, true);
-	                if(!$tokens->is(":")) {
-		                throw new UnexpectedException($tokens, null, "ternary operator");
-	                }
-	                $expr2 = $this->parseExp($tokens, true);
+                    $expr1 = $this->parseExp($tokens, true);
+                    if(!$tokens->is(":")) {
+                        throw new UnexpectedException($tokens, null, "ternary operator");
+                    }
+                    $expr2 = $this->parseExp($tokens, true);
                     if($empty) {
-	                    return '(empty('.$_var.') ? '.$expr2.' : '.$expr1.')';
+                        return '(empty('.$_var.') ? '.$expr2.' : '.$expr1.')';
                     } else {
                         return '(isset('.$_var.') ? '.$expr1.' : '.$expr2.')';
                     }

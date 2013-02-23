@@ -1,6 +1,6 @@
 <?php
 use Aspect\Template,
-	Aspect\ProviderInterface;
+    Aspect\ProviderInterface;
 
 /**
  * Aspect Template Engine
@@ -89,14 +89,14 @@ class Aspect {
     protected $_on_cmp = array();
     protected $_on_post_cmp = array();
 
-	/**
-	 * @var ProviderInterface
-	 */
-	private $_provider;
-	/**
-	 * @var array of Aspect\ProviderInterface
-	 */
-	protected $_providers = array();
+    /**
+     * @var ProviderInterface
+     */
+    private $_provider;
+    /**
+     * @var array of Aspect\ProviderInterface
+     */
+    protected $_providers = array();
 
     /**
      * @var array of modifiers [modifier_name => callable]
@@ -122,7 +122,7 @@ class Aspect {
     protected $_allowed_funcs = array(
         "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
         "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
-	    "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
+        "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
     );
 
     /**
@@ -252,12 +252,12 @@ class Aspect {
         return $aspect;
     }
 
-	/**
-	 * @param Aspect\ProviderInterface $provider
-	 */
-	public function __construct(Aspect\ProviderInterface $provider) {
-		$this->_provider = $provider;
-	}
+    /**
+     * @param Aspect\ProviderInterface $provider
+     */
+    public function __construct(Aspect\ProviderInterface $provider) {
+        $this->_provider = $provider;
+    }
 
     /**
      * Set compile directory
@@ -482,22 +482,22 @@ class Aspect {
         return $this->_options;
     }
 
-	/**
-	 * @param bool|string $scm
-	 * @return Aspect\ProviderInterface
-	 * @throws InvalidArgumentException
-	 */
-	public function getProvider($scm = false) {
-		if($scm) {
-			if(isset($this->_provider[$scm])) {
-				return $this->_provider[$scm];
-			} else {
-				throw new InvalidArgumentException("Provider for '$scm' not found");
-			}
-		} else {
-			return $this->_provider;
-		}
-	}
+    /**
+     * @param bool|string $scm
+     * @return Aspect\ProviderInterface
+     * @throws InvalidArgumentException
+     */
+    public function getProvider($scm = false) {
+        if($scm) {
+            if(isset($this->_provider[$scm])) {
+                return $this->_provider[$scm];
+            } else {
+                throw new InvalidArgumentException("Provider for '$scm' not found");
+            }
+        } else {
+            return $this->_provider;
+        }
+    }
 
     /**
      * Return empty template
@@ -538,8 +538,8 @@ class Aspect {
      */
     public function getTemplate($template) {
         if(isset($this->_storage[ $template ])) {
-	        /** @var Aspect\Template $tpl  */
-	        $tpl = $this->_storage[ $template ];
+            /** @var Aspect\Template $tpl  */
+            $tpl = $this->_storage[ $template ];
             if(($this->_options & self::CHECK_MTIME) && !$tpl->isValid()) {
                 return $this->_storage[ $template ] = $this->compile($template);
             } else {
@@ -589,29 +589,29 @@ class Aspect {
         return sprintf("%s.%u.%d.php", basename($tpl), crc32($hash), strlen($hash));
     }
 
-	/**
-	 * Compile and save template
-	 *
-	 * @param string $tpl
-	 * @param bool $store store template on disk
-	 * @throws RuntimeException
-	 * @return \Aspect\Template
-	 */
+    /**
+     * Compile and save template
+     *
+     * @param string $tpl
+     * @param bool $store store template on disk
+     * @throws RuntimeException
+     * @return \Aspect\Template
+     */
     public function compile($tpl, $store = true) {
         $template = Template::factory($this)->load($tpl);
-	    if($store) {
-	        $tpl_tmp = tempnam($this->_compile_dir, basename($tpl));
-	        $tpl_fp = fopen($tpl_tmp, "w");
-	        if(!$tpl_fp) {
-	            throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory ".$this->_compile_dir." is writable?");
-	        }
-	        fwrite($tpl_fp, $template->getTemplateCode());
-	        fclose($tpl_fp);
-		    $file_name = $this->_compile_dir."/".$this->_getHash($tpl);
-	        if(!rename($tpl_tmp, $file_name)) {
-	            throw new \RuntimeException("Can't to move $tpl_tmp to $tpl");
-	        }
-	    }
+        if($store) {
+            $tpl_tmp = tempnam($this->_compile_dir, basename($tpl));
+            $tpl_fp = fopen($tpl_tmp, "w");
+            if(!$tpl_fp) {
+                throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory ".$this->_compile_dir." is writable?");
+            }
+            fwrite($tpl_fp, $template->getTemplateCode());
+            fclose($tpl_fp);
+            $file_name = $this->_compile_dir."/".$this->_getHash($tpl);
+            if(!rename($tpl_tmp, $file_name)) {
+                throw new \RuntimeException("Can't to move $tpl_tmp to $tpl");
+            }
+        }
         return $template;
     }
 

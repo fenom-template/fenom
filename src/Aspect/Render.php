@@ -13,10 +13,10 @@ class Render extends \ArrayObject {
         "time" => 0,
         "depends" => array()
     );
-	/**
-	 * @var \Closure
-	 */
-	protected $_code;
+    /**
+     * @var \Closure
+     */
+    protected $_code;
     /**
      * Template name
      * @var string
@@ -55,8 +55,8 @@ class Render extends \ArrayObject {
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
-		$this->_code = $code;
-	}
+        $this->_code = $code;
+    }
 
     /**
      * Get template storage
@@ -86,8 +86,8 @@ class Render extends \ArrayObject {
      * @return string
      */
     public function __toString() {
-		return $this->_name;
-	}
+        return $this->_name;
+    }
 
     /**
      * Get template name
@@ -97,9 +97,9 @@ class Render extends \ArrayObject {
         return $this->_name;
     }
 
-	public function getTime() {
-		return $this->_time;
-	}
+    public function getTime() {
+        return $this->_time;
+    }
 
 
     /**
@@ -107,15 +107,15 @@ class Render extends \ArrayObject {
      * @return bool
      */
     public function isValid() {
-	    $provider = $this->_aspect->getProvider(strstr($this->_name, ":"), true);
-	    if($provider->getLastModified($this->_name) >= $this->_time) {
-		    return false;
-	    }
-	    foreach($this->_depends as $tpl => $time) {
-			if($this->_aspect->getTemplate($tpl)->getTime() !== $time) {
-				return false;
-			}
-	    }
+        $provider = $this->_aspect->getProvider(strstr($this->_name, ":"), true);
+        if($provider->getLastModified($this->_name) >= $this->_time) {
+            return false;
+        }
+        foreach($this->_depends as $tpl => $time) {
+            if($this->_aspect->getTemplate($tpl)->getTime() !== $time) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -125,10 +125,10 @@ class Render extends \ArrayObject {
      * @return Render
      */
     public function display(array $values) {
-		$this->exchangeArray($values);
-		$this->_code->__invoke($this);
+        $this->exchangeArray($values);
+        $this->_code->__invoke($this);
         return $this;
-	}
+    }
 
     /**
      * Execute template and return result as string
@@ -154,6 +154,6 @@ class Render extends \ArrayObject {
      * @throws \BadMethodCallException
      */
     public function __call($method, $args) {
-		throw new \BadMethodCallException("Unknown method ".$method);
-	}
+        throw new \BadMethodCallException("Unknown method ".$method);
+    }
 }

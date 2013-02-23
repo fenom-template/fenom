@@ -7,17 +7,17 @@ namespace Aspect;
 class Scope extends \ArrayObject {
 
     public $id = 0;
-	public $line = 0;
-	public $name;
+    public $line = 0;
+    public $name;
     public $level = 0;
-	/**
-	 * @var Template
-	 */
-	public $tpl;
+    /**
+     * @var Template
+     */
+    public $tpl;
     public $closed = false;
     public $is_next_close = false;
-	public $is_compiler = true;
-	private $_action;
+    public $is_compiler = true;
+    private $_action;
     private static $count = 0;
 
     /**
@@ -29,12 +29,12 @@ class Scope extends \ArrayObject {
      */
     public function __construct($name, $tpl, $line, $action, $level) {
         $this->id = ++self::$count;
-		$this->line = $line;
-		$this->name = $name;
-		$this->tpl = $tpl;
-		$this->_action = $action;
-		$this->level = $level;
-	}
+        $this->line = $line;
+        $this->name = $name;
+        $this->tpl = $tpl;
+        $this->_action = $action;
+        $this->level = $level;
+    }
 
     /**
      *
@@ -63,7 +63,7 @@ class Scope extends \ArrayObject {
      * @return bool
      */
     public function hasTag($tag, $level) {
-		if(isset($this->_action["tags"][$tag])) {
+        if(isset($this->_action["tags"][$tag])) {
             if($level) {
                 return isset($this->_action["float_tags"][$tag]);
             } else {
@@ -71,7 +71,7 @@ class Scope extends \ArrayObject {
             }
         }
         return false;
-	}
+    }
 
     /**
      * Call tag callback
@@ -81,8 +81,8 @@ class Scope extends \ArrayObject {
      * @return string
      */
     public function tag($tag, $tokenizer) {
-		return call_user_func($this->_action["tags"][$tag], $tokenizer, $this);
-	}
+        return call_user_func($this->_action["tags"][$tag], $tokenizer, $this);
+    }
 
     /**
      * Close callback

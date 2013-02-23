@@ -25,12 +25,12 @@ class Modifier {
      * @return string
      */
     public static function dateFormat($date, $format = "%b %e, %Y") {
-		if(is_string($date) && !is_numeric($date)) {
-			$date = strtotime($date);
-			if(!$date) $date = time();
-		}
-		return strftime($format, $date);
-	}
+        if(is_string($date) && !is_numeric($date)) {
+            $date = strtotime($date);
+            if(!$date) $date = time();
+        }
+        return strftime($format, $date);
+    }
 
     /**
      * @param string $date
@@ -38,12 +38,12 @@ class Modifier {
      * @return string
      */
     public static function date($date, $format = "Y m d") {
-		if(is_string($date) && !is_numeric($date)) {
-			$date = strtotime($date);
-			if(!$date) $date = time();
-		}
-		return date($format, $date);
-	}
+        if(is_string($date) && !is_numeric($date)) {
+            $date = strtotime($date);
+            if(!$date) $date = time();
+        }
+        return date($format, $date);
+    }
 
     /**
      * Escape string
@@ -53,14 +53,14 @@ class Modifier {
      * @return string
      */
     public static function escape($text, $type = 'html') {
-	    switch($type) {
-		    case "url":
+        switch($type) {
+            case "url":
                 return urlencode($text);
-		    case "html";
-			    return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
-		    default:
-			    return $text;
-	    }
+            case "html";
+                return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
+            default:
+                return $text;
+        }
     }
 
     /**
@@ -71,15 +71,15 @@ class Modifier {
      * @return string
      */
     public static function unescape($text, $type = 'html') {
-		switch($type) {
-			case "url":
-				return urldecode($text);
-			case "html";
-				return htmlspecialchars_decode($text);
-			default:
-				return $text;
-		}
-	}
+        switch($type) {
+            case "url":
+                return urldecode($text);
+            case "html";
+                return htmlspecialchars_decode($text);
+            default:
+                return $text;
+        }
+    }
 
     /**
      * @param string $string
