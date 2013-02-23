@@ -129,4 +129,17 @@ class Modifier {
             return count((array)$item);
         }
     }
+
+    /**
+     *
+     * @param $value
+     * @param $list
+     * @return bool
+     */
+    public static function in($value, $list) {
+        if(is_array($list)) {
+            return in_array($value, $list);
+        }
+        return false;
+    }
 }

@@ -4,7 +4,7 @@ Documentation
 **Aspect**
 
 * [About](./about.md)
-* [Requirements and installation](./install.md)
+* [Install](./install.md)
 * [Syntax](./syntax.md)
 * [Settings](./settings.md)
 * [Callbacks and filters](./callbacks.md)
@@ -12,23 +12,22 @@ Documentation
 
 **Modifiers**
 
-Conversation about [modifiers](./syntax.md#modifiers)
-
 * [upper](./mods/upper.md) aka `up`
 * [lower](./mods/lower.md) aka `low`
 * [date_format](./mods/date_format.md)
 * [date](./mods/date.md)
 * [truncate](./mods/truncate.md)
-* [escape](./mods/escape.md) aka `e`, `url`
+* [escape](./mods/escape.md) aka `e`
 * [unescape](./mods/unescape.md)
 * [strip](./mods/strip.md)
 * [length](./mods/lenght.md)
+* [in](./mods/in.md)
 * allowed functions: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
 
-**Tags**
+[Using](./syntax.md#modifiers) and [addition](./ext/mods.md) of modifiers.
 
-Conversation about [tags](./syntax.md#tags)
+**Tags**
 
 * [var](./tags/var.md)
 * [if](./tags/if.md), `elseif` and `else`
@@ -43,6 +42,8 @@ Conversation about [tags](./syntax.md#tags)
 * [ignore](./tags/ignore.md)
 * [macro](./tags/macro.md)
 * [import](./tags/import.md)
+
+[Using](./syntax.md#tags) and [addition](./ext/tags.md) of tags.
 
 **Extends**
 
