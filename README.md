@@ -1,11 +1,9 @@
 Aspect PHP Template Engine
 ==========================
 
-> Composer package: `"bzick/aspect": "dev-master"`. [How to install](./docs/install.md).
->
-> Build status: [![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/aspect)
+> Composer package: `{"bzick/aspect": "dev-master"}` [![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/aspect)
 
-## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Bugs](https://github.com/bzick/aspect/issues) :: [Articles](./docs/articles.md)
+## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)
 
 Primitive template
 
