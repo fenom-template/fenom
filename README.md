@@ -5,6 +5,13 @@ Aspect PHP Template Engine
 
 ## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)
 
+Features:
+
+* Simple Smarty-like syntax
+* Fast
+* Secure
+* No one regexp
+
 Primitive template
 
 ```smarty
