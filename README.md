@@ -14,6 +14,7 @@ Features:
 * Without regexp
 * [Flexible](./docs/main.md#extends)
 * [Lightweight](./docs/benchmark.md#satistic)
+* [Powerful](./docs/main.md)
 * Easy to use
 
 Primitive template
