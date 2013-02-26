@@ -1,4 +1,4 @@
-Aspect - awesome template engine fro PHP
+Aspect - awesome template engine for PHP
 ==========================
 
 > Composer package: `{"bzick/aspect": "dev-master"}` 
