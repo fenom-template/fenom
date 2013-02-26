@@ -134,6 +134,7 @@ class Template extends Render {
             return;
         }
         $pos = 0;
+        $frag = "";
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-char of tags
             switch($this->_src[$start + 1]) { // check next char
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
@@ -141,8 +142,8 @@ class Template extends Render {
                 continue 2;
                 case "*": // if comment block
                     $end = strpos($this->_src, '*}', $start); // finding end of the comment block
-                    $frag = substr($this->_src, $this->_pos, $start - $end); // read the comment block for precessing
-                    $this->_line += substr_count($frag, "\n"); // count skipped lines
+                    $_frag = substr($this->_src, $this->_pos, $start - $end); // read the comment block for precessing
+                    $this->_line += substr_count($_frag, "\n"); // count skipped lines
                     $pos = $end + 1; // trying finding tags after the comment block
                     continue 2;
             }
@@ -150,37 +151,33 @@ class Template extends Render {
             if(!$end) { // if unexpected end of template
                 throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
             }
-            $frag = substr($this->_src, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after last '}' and next '{'
+            $frag .= substr($this->_src, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after last '}' and next '{'
             $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains aspect tag '{...}'
             $this->_line += substr_count($this->_src, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
             $pos = $this->_pos = $end + 1; // move search-pointer to end of the tag
-            //if($this->_trim) { // if previous tag has trim flag
-            //    $frag = ltrim($frag);
-            //}
 
-            $frag = str_replace("<?", '<?php echo "<?"; ?>'."\n", $frag);
-
-            $this->_body .= $this->_tag($tag, $frag); // dispatching tags
-
-            // duplicate new line http://docs.php.net/manual/en/language.basic-syntax.instruction-separation.php
-            if(substr($this->_body, -2) === "?>" && isset($this->_src[ $end+1 ])) {
-                $c = $this->_src[ $end+1 ];
-                if($c === "\n") {
-                    $this->_body .= "\n";
-                } elseif($c === "\r") {
-                    if(isset($this->_src[ $end+2 ]) && $this->_src[ $end+2 ] == "\n") {
-                        $this->_body .= "\r\n";
-                    } else {
-                        $this->_body .= "\r";
-                    }
-                }
+            if($tag[strlen($tag) - 2] === "-") {
+                $_tag = substr($tag, 1, -2);
+                $_frag = rtrim($frag);
+            } else {
+                $_tag = substr($tag, 1, -1);
+                $_frag = $frag;
             }
-            //if($this->_trim) { // if current tag has trim flag
-            //    $frag = rtrim($frag);
-            //}
-            //$this->_body .= $tag;
+            if($this->_ignore) {
+                if($_tag === '/ignore') {
+                    $this->_ignore = false;
+                    $this->_appendText($_frag);
+                } else {
+                    $frag .= $tag;
+                    continue;
+                }
+            } else {
+                $this->_appendText($_frag);
+                $this->_appendCode($this->_tag($_tag));
+            }
+            $frag = "";
         }
-        $this->_body .= str_replace("<?", '<?php echo "<?"; ?>', substr($this->_src, $this->_pos));
+        $this->_appendText(substr($this->_src, $this->_pos));
         if($this->_stack) {
             $_names = array();
             $_line = 0;
@@ -200,7 +197,28 @@ class Template extends Render {
         }
     }
 
-    public function addPostCompile($cb) {
+    /**
+     * Append plain text to template body
+     *
+     * @param string $text
+     */
+    private function _appendText($text) {
+        $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);
+    }
+
+    /**
+     * Append PHP code to template body
+     *
+     * @param string $code
+     */
+    private function _appendCode($code) {
+        $this->_body .= $code;
+    }
+
+    /**
+     * @param callable[] $cb
+     */
+    public function addPostCompile(array $cb) {
         $this->_post[] = $cb;
     }
 
@@ -283,34 +301,15 @@ class Template extends Render {
     /**
      * Internal tags router
      * @param string $src
-     * @param string $frag
      * @throws UnexpectedException
      * @throws CompileException
      * @throws SecurityException
-     * @return string
+     * @return string executable PHP code
      */
-    private function _tag($src, &$frag) {
-        if($src[strlen($src) - 2] === "-") {
-            $token = substr($src, 1, -2);
-            //$frag = ltrim($frag);
-        } else {
-            $token = substr($src, 1, -1);
-        }
-
-        $this->_body .= $frag;
-        $token = trim($token);
-        if($this->_ignore) {
-            if($token === '/ignore') {
-                $this->_ignore = false;
-                return '';
-            } else {
-                return $src;
-            }
-        }
-
-        $tokens = new Tokenizer($token);
+    private function _tag($src) {
+        $tokens = new Tokenizer($src);
         try {
-            switch($token[0]) {
+            switch($src[0]) {
                 case '"':
                 case '\'':
                 case '$':
@@ -429,19 +428,6 @@ class Template extends Render {
     }
 
     /**
-     * @param Tokenizer $tokens
-     */
-    private function _parseMacros(Tokenizer $tokens) {
-        $tokens->get('.');
-        $name = $tokens->get(Tokenizer::MACRO_STRING);
-        if($tokens->is('(')) {
-            $tokens->skip();
-        } else {
-
-        }
-    }
-
-    /**
      * Parse expressions. The mix of math operations, boolean operations, scalars, arrays and variables.
      *
      * @static
@@ -459,7 +445,6 @@ class Template extends Render {
         $cond = false;
         while($tokens->valid()) {
             if(!$term && $tokens->is(Tokenizer::MACRO_SCALAR, '"', '`', T_ENCAPSED_AND_WHITESPACE)) {
-
                 $_exp .= $this->parseScalar($tokens, true);
                 $term = 1;
             } elseif(!$term && $tokens->is(T_VARIABLE)) {

@@ -377,13 +377,12 @@ class Compiler {
         $tpl_name = $tpl->parseFirstArg($tokens, $name);
         $tpl->addPostCompile(__CLASS__."::extendBody");
         if($name) { // static extends
-            //$tpl->_static = true;
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
+            $tpl->_compatible = &$tpl->_extends->_compatible;
             $tpl->addDepend($tpl->_extends); // for valid compile-time need take template from storage
             return "";
         } else { // dynamic extends
             $tpl->_extends = $tpl_name;
-            //$tpl->_static = false;
             return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.');';
         }
     }
@@ -397,7 +396,14 @@ class Compiler {
         if(isset($tpl->_extends)) { // is child
             if(is_object($tpl->_extends)) {  // static extends
                 /* @var Template $t */
-                $t = $tpl->_extends;
+                $tpl->_extends->_extended = true;
+                $tpl->_extends->blocks = &$tpl->blocks;
+                $tpl->_extends->compile();
+                if($tpl->_compatible) {
+                    $body .= $tpl->_extends->_body;
+                } else {
+                    $body = $tpl->_extends->_body;
+                }
                 if(empty($tpl->_dynamic)) {
                     do {
                         $t->_blocks = &$tpl->_blocks;
@@ -419,7 +425,7 @@ class Compiler {
                     $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->_body;
                 }
             } else {        // dynamic extends
-                $body .= '<?php $parent->blocks = &$tpl->blocks; $parent->display((array)$tpl); unset($tpl->blocks, $parent->blocks); ?>';
+                $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
             }
         }
     }
@@ -444,29 +450,8 @@ class Compiler {
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
         $p = $scope->tpl->parseFirstArg($tokens, $name);
-        if ($name) {
-            $scope["name"] = $name;
-            $scope["cname"] = $p;
-        } else {
-            $scope->tpl->_dynamic = true;
-            $scope["name"] = $scope["cname"]  = $p;
-        }
-        /*if($scope->level) {
-            $scope->tpl->_static = false;
-        }*/
-        if(isset($scope->tpl->_extends)) { // is child
-            return 'if(empty($tpl->blocks['.$scope["cname"].'])) { $tpl->blocks['.$scope["cname"].'] = function($tpl) {';
-        } else {        // is parent
-            if(isset($scope->tpl->_blocks)) { // has blocks from child
-                if(isset($scope->tpl->_blocks[ $scope["name"] ])) { // skip own block and insert child's block after
-                    $scope["body"] = $scope->tpl->_body;
-                    $scope->tpl->_body = "";
-                } // else just put block content as is
-                return '';
-            } else {
-                return 'if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {';
-            }
-        }
+        $scope["name"]  = false;
+        $scope["cname"] = $p;
     }
 
     /**
@@ -476,25 +461,59 @@ class Compiler {
      * @return string
      */
     public static function tagBlockClose($tokens, Scope $scope) {
-
-        if(isset($scope->tpl->_extends)) { // is child
-            if(!isset($scope->tpl->_blocks[ $scope["name"] ])) {
-                $scope->tpl->_blocks[ $scope["name"] ] = $scope->getContent();
-            }     // dynamic extends
-            return '}; }';
-        } else {     // is parent
-            if(isset($scope->tpl->_blocks)) {
-                if(isset($scope["body"])) {
-                    $scope->tpl->_body = $scope["body"].
-                        '<?php if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {?>'.
-                        $scope->tpl->_blocks[ $scope["name"] ].'}';
-                    return "";
+        $tpl = $scope->tpl;
+        if(isset($tpl->_extends)) { // is child
+            if($scope["name"]) { // is scalar name
+                if(!isset($tpl->blocks[ $scope["name"] ])) { // is block still doesn't preset
+                    if($tpl->_compatible) { // is compatible mode
+                        $scope->replace(
+                            'if(empty($tpl->blocks['.$scope["cname"].'])) { '.
+                                '$tpl->b['.$scope["cname"].'] = function($tpl) {'.
+                                    $scope->getContent().
+                                "};".
+                            "}\n"
+                        );
+                    } else {
+                        $tpl->blocks[ $scope["name"] ] = $scope->getContent();
+                        $scope->replace(
+                            '$tpl->b['.$scope["cname"].'] = function($tpl) {'.
+                                $scope->getContent().
+                            "};\n"
+                        );
+                    }
                 }
-                return "";
+            } else { // dynamic name
+                $tpl->_compatible = true; // go to compatible mode
+                $scope->replace(
+                    'if(empty($tpl->b['.$scope["cname"].'])) { '.
+                        '$tpl->b['.$scope["cname"].'] = function($tpl) {'.
+                            $scope->getContent().
+                        "};".
+                    "}\n"
+                );
+            }
+        } else {     // is parent
+            if(isset($tpl->blocks[ $scope["name"] ])) { // has block
+                if($tpl->_compatible) {
+                    $scope->tpl->replace(
+                        '<?php if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {?>'.
+                            $tpl->blocks[ $scope["body"] ].
+                        '}'
+                    );
+                } else {
+                    $tpl->replace($tpl->blocks[ $scope["name"] ]);
+                }
             } else {
-                return '}';
+                if(isset($tpl->_extended)) {
+                    $scope->tpl->replace(
+                    '<?php if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {?>'.
+                        $scope->getContent().
+                    '}'
+                    );
+                }
             }
         }
+        return '';
     }
 
     public static function tagParent($tokens, Scope $scope) {

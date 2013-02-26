@@ -14,8 +14,6 @@ class Scope extends \ArrayObject {
      * @var Template
      */
     public $tpl;
-    public $closed = false;
-    public $is_next_close = false;
     public $is_compiler = true;
     private $_action;
     private static $count = 0;
@@ -106,6 +104,21 @@ class Scope extends \ArrayObject {
             return substr($this->tpl->_body, $begin + 2);
         } else {
             throw new \LogicException("Trying get content of non-block scope");
+        }
+    }
+
+    /**
+     * @return string
+     * @throws \LogicException
+     */
+    public function cutContent() {
+        if($pos = strpos($this->tpl->_body, "/*#{$this->id}#*/")) {
+            $begin = strpos($this->tpl->_body, "?>", $pos);
+            $content = substr($this->tpl->_body, $begin + 2);
+            $this->tpl->_body = substr($this->tpl->_body, 0, $begin + 1);
+            return $content;
+        } else {
+            throw new \LogicException("Trying cut content of non-block scope");
         }
     }
 }

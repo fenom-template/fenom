@@ -7,10 +7,13 @@ Aspect PHP Template Engine
 
 Features:
 
-* Simple Smarty-like syntax
-* Fast
-* Secure
-* No one regexp
+* Simple Smarty-like [syntax](./docs/syntax.md)
+* [Fast](./docs/benchmark.md)
+* [Secure](./docs/settings.md)
+* Without regexp
+* [Flexible](./docs/main.md#extends)
+* [Lightweight](./docs/benchmark.md#satistic)
+* Easy to use
 
 Primitive template
 

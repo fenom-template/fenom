@@ -102,18 +102,18 @@ class Aspect {
      * @var array of modifiers [modifier_name => callable]
      */
     protected $_modifiers = array(
-        "upper" => 'strtoupper',
-        "up" => 'strtoupper',
-        "lower" => 'strtolower',
-        "low" => 'strtolower',
+        "upper"       => 'strtoupper',
+        "up"          => 'strtoupper',
+        "lower"       => 'strtolower',
+        "low"         => 'strtolower',
         "date_format" => 'Aspect\Modifier::dateFormat',
-        "date" => 'Aspect\Modifier::date',
-        "truncate" => 'Aspect\Modifier::truncate',
-        "escape" => 'Aspect\Modifier::escape',
-        "e" => 'Aspect\Modifier::escape', // alias of escape
-        "unescape" => 'Aspect\Modifier::unescape',
-        "strip" => 'Aspect\Modifier::strip',
-        "default" => 'Aspect\Modifier::defaultValue'
+        "date"        => 'Aspect\Modifier::date',
+        "truncate"    => 'Aspect\Modifier::truncate',
+        "escape"      => 'Aspect\Modifier::escape',
+        "e"           => 'Aspect\Modifier::escape', // alias of escape
+        "unescape"    => 'Aspect\Modifier::unescape',
+        "strip"       => 'Aspect\Modifier::strip',
+        "default"     => 'Aspect\Modifier::defaultValue'
     );
 
     /**
@@ -341,7 +341,7 @@ class Aspect {
     /**
      * @param string $function
      * @param callable $callback
-     * @param callable $parser
+     * @param callable|string $parser
      * @return Aspect
      */
     public function addFunction($function, $callback, $parser = self::DEFAULT_FUNC_PARSER) {
@@ -436,7 +436,10 @@ class Aspect {
         }
     }
 
-
+    /**
+     * @param string $tag
+     * @return array
+     */
     public function getTagOwners($tag) {
         $tags = array();
         foreach($this->_actions as $owner => $params) {
