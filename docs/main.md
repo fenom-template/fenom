@@ -1,7 +1,7 @@
 Documentation
 =============
 
-**Aspect**
+### Aspect
 
 * [About](./about.md)
 * [Install](./install.md)
@@ -10,7 +10,7 @@ Documentation
 * [Callbacks and filters](./callbacks.md)
 * [Operators](./operators.md)
 
-**Modifiers**
+### Modifiers
 
 * [upper](./mods/upper.md) aka `up`
 * [lower](./mods/lower.md) aka `low`
@@ -27,7 +27,7 @@ Documentation
 
 [Using](./syntax.md#modifiers) and [addition](./ext/mods.md) of modifiers.
 
-**Tags**
+### Tags
 
 * [var](./tags/var.md)
 * [if](./tags/if.md), `elseif` and `else`
@@ -45,7 +45,7 @@ Documentation
 
 [Using](./syntax.md#tags) and [addition](./ext/tags.md) of tags.
 
-**Extends**
+### Extends
 
 * [Add tags](./ext/tags.md)
 * [Add modificators](./ext/mods.md)
