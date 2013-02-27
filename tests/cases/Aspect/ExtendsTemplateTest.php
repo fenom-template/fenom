@@ -30,7 +30,7 @@ class ExtendsTemplateTest extends TestCase {
      * @param $vars
      * @param $result
      */
-    public function _testStaticExtends($name, $code, $vars, $result) {
+    public function testStaticExtends($name, $code, $vars, $result) {
         static $i = 0;
         $vars["iteration"] = $i++;
         $this->execTpl($name, $code, $vars, $result);

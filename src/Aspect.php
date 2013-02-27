@@ -20,6 +20,7 @@ class Aspect {
 
     const CHECK_MTIME = 0x80;
     const FORCE_COMPILE = 0xF0;
+    const DISABLE_CACHE = 0x1F0;
 
     const DEFAULT_CLOSE_COMPILER = 'Aspect\Compiler::stdClose';
     const DEFAULT_FUNC_PARSER = 'Aspect\Compiler::stdFuncParser';

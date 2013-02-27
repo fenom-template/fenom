@@ -404,7 +404,7 @@ class Compiler {
                 } else {
                     $body = $tpl->_extends->_body;
                 }
-                if(empty($tpl->_dynamic)) {
+                /*if(empty($tpl->_dynamic)) {
                     do {
                         $t->_blocks = &$tpl->_blocks;
                         $t->compile();
@@ -423,7 +423,7 @@ class Compiler {
                     $t->compile();
                     $tpl->addDepend($t);
                     $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->_body;
-                }
+                }*/
             } else {        // dynamic extends
                 $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
             }
@@ -450,7 +450,7 @@ class Compiler {
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
         $p = $scope->tpl->parseFirstArg($tokens, $name);
-        $scope["name"]  = false;
+        $scope["name"]  = $name;
         $scope["cname"] = $p;
     }
 
@@ -466,51 +466,49 @@ class Compiler {
             if($scope["name"]) { // is scalar name
                 if(!isset($tpl->blocks[ $scope["name"] ])) { // is block still doesn't preset
                     if($tpl->_compatible) { // is compatible mode
-                        $scope->replace(
-                            'if(empty($tpl->blocks['.$scope["cname"].'])) { '.
-                                '$tpl->b['.$scope["cname"].'] = function($tpl) {'.
+                        $scope->replaceContent(
+                            '<?php if(empty($tpl->blocks['.$scope["cname"].'])) { '.
+                                '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                                     $scope->getContent().
                                 "};".
-                            "}\n"
+                            "<?php } ?>".PHP_EOL
                         );
                     } else {
                         $tpl->blocks[ $scope["name"] ] = $scope->getContent();
-                        $scope->replace(
-                            '$tpl->b['.$scope["cname"].'] = function($tpl) {'.
+                        $scope->replaceContent(
+                            '<?php $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                                 $scope->getContent().
-                            "};\n"
+                            "<?php }; ?php".PHP_EOL
                         );
                     }
                 }
             } else { // dynamic name
-                $tpl->_compatible = true; // go to compatible mode
-                $scope->replace(
-                    'if(empty($tpl->b['.$scope["cname"].'])) { '.
-                        '$tpl->b['.$scope["cname"].'] = function($tpl) {'.
+                $tpl->_compatible = true; // enable compatible mode
+                $scope->replaceContent(
+                    '<?php if(empty($tpl->b['.$scope["cname"].'])) { '.
+                        '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                             $scope->getContent().
                         "};".
-                    "}\n"
+                    "<?php } ?>".PHP_EOL
                 );
             }
         } else {     // is parent
             if(isset($tpl->blocks[ $scope["name"] ])) { // has block
-                if($tpl->_compatible) {
-                    $scope->tpl->replace(
-                        '<?php if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {?>'.
+                if($tpl->_compatible) { // compatible mode enabled
+                    $scope->replaceContent(
+                        '<?php if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
                             $tpl->blocks[ $scope["body"] ].
-                        '}'
+                        '<?php } ?>'.PHP_EOL
                     );
                 } else {
-                    $tpl->replace($tpl->blocks[ $scope["name"] ]);
+                    $scope->replaceContent($tpl->blocks[ $scope["name"] ]);
                 }
-            } else {
-                if(isset($tpl->_extended)) {
-                    $scope->tpl->replace(
-                    '<?php if(isset($tpl->blocks['.$scope["cname"].'])) { echo $tpl->blocks['.$scope["cname"].']->__invoke($tpl); } else {?>'.
+            } elseif(isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
+                $scope->replaceContent(
+                    '<?php if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
                         $scope->getContent().
-                    '}'
-                    );
-                }
+                    '<?php } ?>'.PHP_EOL
+                );
             }
         }
         return '';

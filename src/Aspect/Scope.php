@@ -6,7 +6,6 @@ namespace Aspect;
  */
 class Scope extends \ArrayObject {
 
-    public $id = 0;
     public $line = 0;
     public $name;
     public $level = 0;
@@ -16,22 +15,27 @@ class Scope extends \ArrayObject {
     public $tpl;
     public $is_compiler = true;
     private $_action;
-    private static $count = 0;
+    private $_body;
+    private $_offset;
 
     /**
+     * Creating cope
+     *
      * @param string   $name
      * @param Template $tpl
      * @param int      $line
      * @param array    $action
      * @param int      $level
+     * @param $body
      */
-    public function __construct($name, $tpl, $line, $action, $level) {
-        $this->id = ++self::$count;
+    public function __construct($name, $tpl, $line, $action, $level, &$body) {
         $this->line = $line;
         $this->name = $name;
         $this->tpl = $tpl;
         $this->_action = $action;
         $this->level = $level;
+        $this->_body = &$body;
+        $this->_offset = strlen($body);
     }
 
     /**
@@ -50,7 +54,7 @@ class Scope extends \ArrayObject {
      * @return mixed
      */
     public function open($tokenizer) {
-        return call_user_func($this->_action["open"], $tokenizer, $this)." /*#{$this->id}#*/";
+        return call_user_func($this->_action["open"], $tokenizer, $this);
     }
 
     /**
@@ -99,26 +103,28 @@ class Scope extends \ArrayObject {
      * @return string
      */
     public function getContent() {
-        if($pos = strpos($this->tpl->_body, "/*#{$this->id}#*/")) {
-            $begin = strpos($this->tpl->_body, "?>", $pos);
-            return substr($this->tpl->_body, $begin + 2);
-        } else {
-            throw new \LogicException("Trying get content of non-block scope");
-        }
+        return substr($this->_body, $this->_offset);
     }
 
     /**
+     * Cut scope content
+     *
      * @return string
      * @throws \LogicException
      */
     public function cutContent() {
-        if($pos = strpos($this->tpl->_body, "/*#{$this->id}#*/")) {
-            $begin = strpos($this->tpl->_body, "?>", $pos);
-            $content = substr($this->tpl->_body, $begin + 2);
-            $this->tpl->_body = substr($this->tpl->_body, 0, $begin + 1);
-            return $content;
-        } else {
-            throw new \LogicException("Trying cut content of non-block scope");
-        }
+        $content = substr($this->_body, $this->_offset + 1);
+        $this->_body = substr($this->_body, 0, $this->_offset);
+        return $content;
+    }
+
+    /**
+     * Replace scope content
+     *
+     * @param $new_content
+     */
+    public function replaceContent($new_content) {
+        $this->cutContent();
+        $this->_body .= $new_content;
     }
 }

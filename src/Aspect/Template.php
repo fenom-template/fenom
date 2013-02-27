@@ -156,18 +156,18 @@ class Template extends Render {
             $this->_line += substr_count($this->_src, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
             $pos = $this->_pos = $end + 1; // move search-pointer to end of the tag
 
-            if($tag[strlen($tag) - 2] === "-") {
+            if($tag[strlen($tag) - 2] === "-") { // check right trim flag
                 $_tag = substr($tag, 1, -2);
                 $_frag = rtrim($frag);
             } else {
                 $_tag = substr($tag, 1, -1);
                 $_frag = $frag;
             }
-            if($this->_ignore) {
+            if($this->_ignore) { // check ignore scope
                 if($_tag === '/ignore') {
                     $this->_ignore = false;
                     $this->_appendText($_frag);
-                } else {
+                } else { // still ignore
                     $frag .= $tag;
                     continue;
                 }
@@ -195,6 +195,7 @@ class Template extends Render {
                 call_user_func_array($cb, array(&$this->_body, $this));
             }
         }
+        $this->_body = str_replace(array('?>'.PHP_EOL.'<?php ', '?><?php'), array(PHP_EOL, ' '), $this->_body);
     }
 
     /**
@@ -206,24 +207,43 @@ class Template extends Render {
         $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);
     }
 
+    public static function escapeCode($code) {
+        $c = "";
+        foreach(token_get_all($code) as $token) {
+            if(is_string($token)) {
+                $c .= $token;
+            } elseif($token[0] == T_CLOSE_TAG) {
+                $c .= $token[1].PHP_EOL;
+            } else {
+                $c .= $token[1];
+            }
+        }
+        return $c;
+    }
+
     /**
      * Append PHP code to template body
      *
      * @param string $code
      */
     private function _appendCode($code) {
-        $this->_body .= $code;
+        if(!$code) {
+            return;
+        } else {
+            $this->_body .= self::escapeCode($code);
+        }
     }
 
     /**
      * @param callable[] $cb
      */
-    public function addPostCompile(array $cb) {
+    public function addPostCompile($cb) {
         $this->_post[] = $cb;
     }
 
     /**
      * Return PHP code of template
+     *
      * @return string
      */
     public function getBody() {
@@ -232,6 +252,7 @@ class Template extends Render {
 
     /**
      * Return PHP code for saving to file
+     *
      * @return string
      */
     public function getTemplateCode() {
@@ -398,7 +419,7 @@ class Template extends Render {
         if($act = $this->_aspect->getFunction($action)) { // call some function
             switch($act["type"]) {
                 case Aspect::BLOCK_COMPILER:
-                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack));
+                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     array_push($this->_stack, $scope);
                     return $scope->open($tokens);
                 case Aspect::INLINE_COMPILER:
@@ -406,7 +427,7 @@ class Template extends Render {
                 case Aspect::INLINE_FUNCTION:
                     return call_user_func($act["parser"], $act["function"], $tokens, $this);
                 case Aspect::BLOCK_FUNCTION:
-                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack));
+                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     $scope->setFuncName($act["function"]);
                     array_push($this->_stack, $scope);
                     return $scope->open($tokens);
