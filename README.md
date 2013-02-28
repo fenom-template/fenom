@@ -6,7 +6,7 @@ Aspect - awesome template engine for PHP
 [![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/aspect)
 ## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)
 
-* Simple Smarty-like [syntax](./docs/syntax.md)
+* Simplest known [syntax](./docs/syntax.md)
 * [Fast](./docs/benchmark.md)
 * [Secure](./docs/settings.md)
 * Without regexp
@@ -15,7 +15,7 @@ Aspect - awesome template engine for PHP
 * [Powerful](./docs/main.md)
 * Easy to use:
 
-Primitive template
+Simple template
 
 ```smarty
 <html>
