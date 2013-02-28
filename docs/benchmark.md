@@ -47,6 +47,6 @@ To start benchmark run script `benchmark/run.php`.
       aspect:  compiled and !loaded      0.0004 sec,        2.4 MiB
       aspect:  compiled and  loaded      0.0000 sec,        2.4 MiB
 
-*!compiled and !loaded* - template engine object created but parsers not initialized and templates not compiled
-* compiled and !loaded* - template engine object created, template compiled but not loaded
-* compiled and  loaded* - template engine object created, template compiled and loaded
+**!compiled and !loaded** - template engine object created but parsers not initialized and templates not compiled
+**compiled and !loaded** - template engine object created, template compiled but not loaded
+**compiled and  loaded** - template engine object created, template compiled and loaded
