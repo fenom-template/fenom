@@ -40,8 +40,7 @@ Documentation
 * [capture](./tags/capture.md)
 * [filter](./tags/filter.md)
 * [ignore](./tags/ignore.md)
-* [macro](./tags/macro.md)
-* [import](./tags/import.md)
+* [macro](./tags/macro.md) and `import`
 
 [Using](./syntax.md#tags) and [addition](./ext/tags.md) of tags.
 

@@ -15,4 +15,16 @@ Invoke macro
 {macro.plus x=$num y=100}
 ```
 
-Use tag [{import}](./import.md) for importing existing macroses into another template
+### {import}
+
+Import [macro](./macro.md) from another template
+
+```smarty
+{import 'math.tpl'}
+```
+
+```smarty
+{import 'math.tpl' as math}
+...
+{math.plus x=5 y=100}
+```
