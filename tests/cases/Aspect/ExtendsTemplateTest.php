@@ -43,10 +43,10 @@ class ExtendsTemplateTest extends TestCase {
      * @param $vars
      * @param $result
      */
-    public function _testDynamicExtends($name, $code, $vars, $result) {
+    public function testDynamicExtends($name, $code, $vars, $result) {
         static $i = 0;
         $vars["iteration"] = $i++;
-        $this->execTpl($name, $code, $vars, $result);
+        $this->execTpl($name, $code, $vars, $result, 0);
     }
 
     /**

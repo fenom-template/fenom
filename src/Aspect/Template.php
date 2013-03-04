@@ -195,7 +195,7 @@ class Template extends Render {
                 call_user_func_array($cb, array(&$this->_body, $this));
             }
         }
-        $this->_body = str_replace(array('?>'.PHP_EOL.'<?php ', '?><?php'), array(PHP_EOL, ' '), $this->_body);
+        /*$this->_body = str_replace(array('?>'.PHP_EOL.'<?php ', '?><?php'), array(PHP_EOL, ' '), $this->_body);*/
     }
 
     /**

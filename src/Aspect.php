@@ -320,6 +320,10 @@ class Aspect {
         return $this;
     }
 
+    public function addCompilerSmart($class) {
+        return $this;
+    }
+
     /**
      * Add block compiler
      *
@@ -336,6 +340,16 @@ class Aspect {
             'close' => $close_parser ?: self::DEFAULT_CLOSE_COMPILER,
             'tags' => $tags,
         );
+        return $this;
+    }
+
+    /**
+     * @param string $class
+     * @param array $tags
+     * @param array $floats
+     * @return Aspect
+     */
+    public function addBlockCompilerSmart($class, array $tags, array $floats = array()) {
         return $this;
     }
 

@@ -375,7 +375,9 @@ class Compiler {
             throw new ImproperUseException("Only one {extends} allowed");
         }
         $tpl_name = $tpl->parseFirstArg($tokens, $name);
-        $tpl->addPostCompile(__CLASS__."::extendBody");
+        if(empty($tpl->_extended)) {
+            $tpl->addPostCompile(__CLASS__."::extendBody");
+        }
         if($name) { // static extends
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
             $tpl->_compatible = &$tpl->_extends->_compatible;
@@ -388,44 +390,32 @@ class Compiler {
     }
 
     /**
-     * Post compile method for {extends ...} tag
+     * Post compile action for {extends ...} tag
      * @param $body
      * @param Template $tpl
      */
     public static function extendBody(&$body, $tpl) {
-        if(isset($tpl->_extends)) { // is child
-            if(is_object($tpl->_extends)) {  // static extends
-                /* @var Template $t */
-                $tpl->_extends->_extended = true;
-                $tpl->_extends->blocks = &$tpl->blocks;
-                $tpl->_extends->compile();
-                if($tpl->_compatible) {
-                    $body .= $tpl->_extends->_body;
+        $t = $tpl;
+        while(isset($t->_extends)) {
+            $t = $t->_extends;
+            if(is_object($t)) {
+                $t->_extended = true;
+                $t->_compatible = &$tpl->_compatible;
+                $t->blocks = &$tpl->blocks;
+                $t->compile();
+                if(!isset($t->_extends)) { // last item => parent
+                    if(empty($tpl->_compatible)) {
+                        $body = $t->getBody();
+                    } else {
+                        $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->getBody();
+                    }
+                    return;
                 } else {
-                    $body = $tpl->_extends->_body;
+                    $body .= $t->getBody();
                 }
-                /*if(empty($tpl->_dynamic)) {
-                    do {
-                        $t->_blocks = &$tpl->_blocks;
-                        $t->compile();
-                        $tpl->addDepend($t);
-                        if(!empty($t->_dynamic)) {
-                            $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->_body;
-                            return;
-                        } else {
-                            $body .= $t->_body;
-                        }
-                    } while(isset($t->_extends) && $t = $t->_extends);
-                    $body = $t->_body;
-                } else {
-                    $t->_blocks = &$tpl->_blocks;
-                    $t->_dyn = &$tpl->_dynamic;
-                    $t->compile();
-                    $tpl->addDepend($t);
-                    $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->_body;
-                }*/
-            } else {        // dynamic extends
+            } else {
                 $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
+                return;
             }
         }
     }
@@ -433,11 +423,27 @@ class Compiler {
     /**
      * @param Tokenizer $tokens
      * @param Template $tpl
+     * @throws ImproperUseException
+     * @return string
      */
     public static function tagUse(Tokenizer $tokens, Template $tpl) {
-        $p = $tpl->parseFirstArg($tokens, $scalar);
-        if(!$scalar) {
-            $tpl->_static = false;
+        $tpl->parseFirstArg($tokens, $name);
+        if($name) {
+            $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
+            $donor->_extended = true;
+            $tpl->_compatible = &$donor->_compatible;
+            $donor->compile();
+            if(empty($tpl->_compatible)) {
+                $tpl->blocks += $donor->blocks;
+            }
+            return '?>'.$donor->getBody().'<?php ';
+        } else {
+            throw new ImproperUseException('template name must be given explicitly');
+            //return '';
+            //return '$donor = $tpl->getStorage()->getTemplate('.$cname.'); ';
+
+            //$tpl->_compatible = true;
+            //$tpl->_ = false;
         }
     }
 
@@ -470,15 +476,15 @@ class Compiler {
                             '<?php if(empty($tpl->blocks['.$scope["cname"].'])) { '.
                                 '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                                     $scope->getContent().
-                                "};".
-                            "<?php } ?>".PHP_EOL
+                                "<?php };".
+                            "} ?>".PHP_EOL
                         );
                     } else {
                         $tpl->blocks[ $scope["name"] ] = $scope->getContent();
                         $scope->replaceContent(
                             '<?php $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                                 $scope->getContent().
-                            "<?php }; ?php".PHP_EOL
+                            "<?php }; ?>".PHP_EOL
                         );
                     }
                 }
@@ -488,8 +494,8 @@ class Compiler {
                     '<?php if(empty($tpl->b['.$scope["cname"].'])) { '.
                         '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                             $scope->getContent().
-                        "};".
-                    "<?php } ?>".PHP_EOL
+                        "<?php };".
+                    "} ?>".PHP_EOL
                 );
             }
         } else {     // is parent
@@ -497,9 +503,10 @@ class Compiler {
                 if($tpl->_compatible) { // compatible mode enabled
                     $scope->replaceContent(
                         '<?php if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
-                            $tpl->blocks[ $scope["body"] ].
+                            $tpl->blocks[ $scope["name"] ].
                         '<?php } ?>'.PHP_EOL
                     );
+
                 } else {
                     $scope->replaceContent($tpl->blocks[ $scope["name"] ]);
                 }
