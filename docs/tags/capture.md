@@ -1,6 +1,8 @@
 Tag {capture}
 =============
 
+
+
 ```smarty
 {capture $var}
 This content will be captured into variable $var

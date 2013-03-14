@@ -202,6 +202,10 @@ class Template extends Render {
         }
     }
 
+    public function tmpVar() {
+        return '$t'.($this->i++);
+    }
+
     /**
      * Append plain text to template body
      *

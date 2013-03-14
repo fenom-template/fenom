@@ -5,6 +5,6 @@ Tags {filter}
 
 ```smarty
 {filter|strip_tags|truncate:20}
-Remove all HTML <b>tags</b> and truncate text to 20 symbols
+Remove all HTML <b>tags</b> and truncate {$text} to 20 symbols
 {/filter}
 ```

@@ -1,5 +1,5 @@
-Tag {foreach}
-=============
+Tag {foreach} [RU]
+==================
 
 ```smarty
 {foreach $list as [$key =>] $value [index=$index] [first=$first] [last=$last]}
@@ -81,6 +81,6 @@ Tag {foreach}
 
 В блоке `{foreachelse}...{/foreach}` использование `{break}`, `{continue}` выбросит исключение `Aspect\CompileException` при компиляции
 
-### Perfomance
+### Notice
 
-Использование last замедляет работу цикла и требует от `$list` быть **countable**. Если есть возможность используйте **first** параметр.
+Использование last требует от `$list` быть **countable**.

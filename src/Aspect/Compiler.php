@@ -695,8 +695,13 @@ class Compiler {
                 return __CLASS__.'::cycle((array)'.$exp.', '.$p["index"].');';
             }
         } else {
-            return __CLASS__.'::cycle((array)'.$exp.', isset($i) ? $i++ : ($i = 0) );';
+            $var = $tpl->tmpVar();
+            return "is_array($exp) ? ".__CLASS__.'::cycle('.$exp.", isset($var) ? $var++ : ($var = 0) ) : $exp";
         }
+    }
+
+    public static function cycle($vals, $index) {
+        return $vals[$index % count($vals)];
     }
 
     /**

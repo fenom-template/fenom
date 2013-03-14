@@ -1,5 +1,5 @@
-Tag {include}
-=============
+Tag {include} [RU]
+==================
 
 `{include}` tags are used for including other templates in the current template. Any variables available in the current template are also available within the included template.
 

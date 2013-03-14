@@ -1,5 +1,5 @@
-Tag {if}
-========
+Tag {if} [RU]
+=============
 
 Реализация оператора [if](http://docs.php.net/if) из PHP
 
