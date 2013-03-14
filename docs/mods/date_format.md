@@ -1,14 +1,12 @@
-Modifier |date_format
-=====================
-
-**draft**
+Modifier date_format [RU]
+=========================
 
 Модификатор позволят вывести дату в произвольном формате, согласно форматированию [strftime()](http://docs.php.net/strftime).
 Модификатор принимает timestamp или строку, которую можно преобразовать через [strtotime()](http://docs.php.net/strtotime).
 Формат по умолчанию: `%b %e, %Y`.
 
 
-**[Допустимые квантификаторы формата](http://docs.php.net/strftime#refsect1-function.strftime-parameters)**
+**[Допустимые квантификаторы](http://docs.php.net/strftime#refsect1-function.strftime-parameters) в формате даты**
 
 
 ```smarty
