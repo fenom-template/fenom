@@ -288,7 +288,7 @@ class Tokenizer {
     /**
      * Return token and move pointer
      * @return mixed
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      */
     public function getAndNext() {
         if($this->curr) {
@@ -296,7 +296,7 @@ class Tokenizer {
             $this->next();
             return $cur;
         } else {
-            throw new UnexpectedException($this, func_get_args());
+            throw new UnexpectedTokenException($this, func_get_args());
         }
     }
 
@@ -331,14 +331,14 @@ class Tokenizer {
      * Get specified token
      *
      * @param string|int $token1
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @return mixed
      */
     public function get($token1 /*, $token2 ...*/) {
         if($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
             return $this->curr[1];
         } else {
-            throw new UnexpectedException($this, func_get_args());
+            throw new UnexpectedTokenException($this, func_get_args());
         }
     }
 
@@ -416,7 +416,7 @@ class Tokenizer {
     /**
      * Skip specific token or throw an exception
      *
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @return Tokenizer
      */
     public function skip(/*$token1, $token2, ...*/) {
@@ -425,7 +425,7 @@ class Tokenizer {
                 $this->next();
                 return $this;
             } else {
-                throw new UnexpectedException($this, func_get_args());
+                throw new UnexpectedTokenException($this, func_get_args());
             }
         } else {
             $this->next();
@@ -451,13 +451,13 @@ class Tokenizer {
      *
      * @param int|string $token1
      * @return Tokenizer
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      */
     public function need($token1/*, $token2, ...*/) {
         if($this->_valid(func_get_args(), $this->curr[0])) {
             return $this;
         } else {
-            throw new UnexpectedException($this, func_get_args());
+            throw new UnexpectedTokenException($this, func_get_args());
         }
     }
 
@@ -581,7 +581,7 @@ class TokenizeException extends \RuntimeException {}
 /**
  * Unexpected token
  */
-class UnexpectedException extends TokenizeException {
+class UnexpectedTokenException extends TokenizeException {
     public function __construct(Tokenizer $tokens, $expect = null, $where = null) {
         if($expect && count($expect) == 1 && is_string($expect[0])) {
             $expect = ", expect '".$expect[0]."'";

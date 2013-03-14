@@ -89,7 +89,7 @@ class Compiler {
      * @static
      * @param Tokenizer $tokens
      * @param Scope     $scope
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @throws ImproperUseException
      * @return string
      */
@@ -106,7 +106,7 @@ class Compiler {
             $prepend = $uid.' = '.$from.';';
             $from = $uid;
         } else {
-            throw new UnexpectedException($tokens, null, "tag {foreach}");
+            throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
         }
         $tokens->get(T_AS);
         $tokens->next();
@@ -704,8 +704,9 @@ class Compiler {
      *
      * @param Tokenizer $tokens
      * @param Template $tpl
-     * @return string
+     * @throws UnexpectedTokenException
      * @throws ImproperUseException
+     * @return string
      */
     public static function tagImport(Tokenizer $tokens, Template $tpl) {
         $import = array();
@@ -718,10 +719,14 @@ class Compiler {
                 } elseif($tokens->is(']')) {
                     $tokens->next();
                     break;
+                } elseif($tokens->is(',')) {
+                    $tokens->next();
+                } else {
+                    break;
                 }
             }
             if($tokens->current() != "from") {
-                throw new UnexpectedException($tokens);
+                throw new UnexpectedTokenException($tokens);
             }
             $tokens->next();
         }
@@ -745,9 +750,13 @@ class Compiler {
                 if($p = strpos($name, ".")) {
                     $name = substr($name, $p);
                 }
+                if($import && !isset($import[$name])) {
+                    continue;
+                }
                 if($alias) {
                     $name = $alias.'.'.$name;
                 }
+
                 $tpl->macros[$name] = $macro;
             }
             $tpl->addDepend($donor);

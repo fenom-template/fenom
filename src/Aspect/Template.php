@@ -330,7 +330,7 @@ class Template extends Render {
     /**
      * Internal tags router
      * @param Tokenizer $tokens
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @throws CompileException
      * @throws SecurityException
      * @return string executable PHP code
@@ -449,7 +449,7 @@ class Template extends Render {
      * @param Tokenizer $tokens
      * @param bool               $required
      * @throws \LogicException
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @throws TokenizeException
      * @return string
      */
@@ -511,7 +511,7 @@ class Template extends Render {
                 $term = 0;
             } elseif($tokens->is(Tokenizer::MACRO_BINARY)) {
                 if(!$term) {
-                    throw new UnexpectedException($tokens);
+                    throw new UnexpectedTokenException($tokens);
                 }
                 if($tokens->isLast()) {
                     break;
@@ -546,13 +546,13 @@ class Template extends Render {
         }
 
         if($term === 0) {
-            throw new UnexpectedException($tokens);
+            throw new UnexpectedTokenException($tokens);
         }
         if($brackets) {
             throw new TokenizeException("Brackets don't match");
         }
         if($required && $_exp === "") {
-            throw new UnexpectedException($tokens);
+            throw new UnexpectedTokenException($tokens);
         }
         return $_exp;
     }
@@ -568,7 +568,7 @@ class Template extends Render {
      * @param int                $deny
      * @param bool               $pure_var
      * @throws \LogicException
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @return string
      */
     public function parseVar(Tokenizer $tokens, $deny = 0, &$pure_var = true) {
@@ -647,7 +647,7 @@ class Template extends Render {
                 } else {
                     $expr1 = $this->parseExp($tokens, true);
                     if(!$tokens->is(":")) {
-                        throw new UnexpectedException($tokens, null, "ternary operator");
+                        throw new UnexpectedTokenException($tokens, null, "ternary operator");
                     }
                     $expr2 = $this->parseExp($tokens, true);
                     if($empty) {
@@ -702,7 +702,7 @@ class Template extends Render {
      * Parse string with or without variable
      *
      * @param Tokenizer $tokens
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @return string
      */
     public function parseSubstr(Tokenizer $tokens) {
@@ -767,7 +767,7 @@ class Template extends Render {
                     $tokens->append("}".$more, $p);
                     goto ref;
                 }
-                throw new UnexpectedException($tokens);
+                throw new UnexpectedTokenException($tokens);
             } elseif($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
                 return $tokens->getAndNext();
             } elseif($tokens->is(T_ENCAPSED_AND_WHITESPACE)) {
@@ -776,7 +776,7 @@ class Template extends Render {
                     $tokens->append("}".$more, $p);
                     goto ref;
                 }
-                throw new UnexpectedException($tokens);
+                throw new UnexpectedTokenException($tokens);
             } else {
                 return "";
             }
@@ -850,7 +850,7 @@ class Template extends Render {
      * [1, 2.3, 5+7/$var, 'string', "str {$var+3} ing", $var2, []]
      *
      * @param Tokenizer $tokens
-     * @throws UnexpectedException
+     * @throws UnexpectedTokenException
      * @return string
      */
     public function parseArray(Tokenizer $tokens) {
@@ -887,7 +887,7 @@ class Template extends Render {
                 }
             }
         }
-        throw new UnexpectedException($tokens);
+        throw new UnexpectedTokenException($tokens);
     }
 
     /**
@@ -942,7 +942,6 @@ class Template extends Render {
             $args = $args ? '$tpl = '.Compiler::toArray($args).';' : '';
             return '$_tpl = $tpl; '.$args.' ?>'.$macro["body"].'<?php $tpl = $_tpl; unset($_tpl);';
         } else {
-            var_dump($this->macros);
             throw new ImproperUseException("Undefined macro '$name'");
         }
     }
