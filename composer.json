@@ -18,10 +18,10 @@
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
         "smarty/smarty": "3.*",
-        "twig/twig": "1.*",
-        "latte/latte": "dev-master"
+        "twig/twig": "1.*"
     },
     "autoload": {
-        "psr-0": { "Aspect": "src/" }
+        "psr-0": { "Aspect\\": "src/" },
+        "classmap": [ "src/Aspect.php" ]
     }
 }
