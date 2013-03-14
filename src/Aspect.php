@@ -25,7 +25,7 @@ class Aspect {
     const DEFAULT_CLOSE_COMPILER = 'Aspect\Compiler::stdClose';
     const DEFAULT_FUNC_PARSER = 'Aspect\Compiler::stdFuncParser';
     const DEFAULT_FUNC_OPEN = 'Aspect\Compiler::stdFuncOpen';
-    const DEFAULT_FUNC_CLOSE = 'Aspect\Compiler::stdFuncOpen';
+    const DEFAULT_FUNC_CLOSE = 'Aspect\Compiler::stdFuncClose';
     const SMART_FUNC_PARSER = 'Aspect\Compiler::smartFuncParser';
 
     /**
@@ -320,7 +320,18 @@ class Aspect {
         return $this;
     }
 
-    public function addCompilerSmart($class) {
+    /**
+     * @param string $compiler
+     * @param string|object $storage
+     * @return $this
+     */
+    public function addCompilerSmart($compiler, $storage) {
+        if(method_exists($storage, "tag".$compiler)) {
+            $this->_actions[$compiler] = array(
+                'type' => self::INLINE_COMPILER,
+                'parser' => array($storage, "tag".$compiler)
+            );
+        }
         return $this;
     }
 
@@ -329,7 +340,7 @@ class Aspect {
      *
      * @param string $compiler
      * @param callable $open_parser
-     * @param callable $close_parser
+     * @param callable|string $close_parser
      * @param array $tags
      * @return Aspect
      */
@@ -344,12 +355,40 @@ class Aspect {
     }
 
     /**
-     * @param string $class
+     * @param $compiler
+     * @param $storage
      * @param array $tags
      * @param array $floats
+     * @throws LogicException
      * @return Aspect
      */
-    public function addBlockCompilerSmart($class, array $tags, array $floats = array()) {
+    public function addBlockCompilerSmart($compiler, $storage, array $tags, array $floats = array()) {
+        $c = array(
+            'type' => self::BLOCK_COMPILER,
+            "tags" => array(),
+            "float_tags" => array()
+        );
+        if(method_exists($storage, $compiler."Open")) {
+            $c["open"] = $compiler."Open";
+        } else {
+            throw new \LogicException("Open compiler {$compiler}Open not found");
+        }
+        if(method_exists($storage, $compiler."Close")) {
+            $c["close"] = $compiler."Close";
+        } else {
+            throw new \LogicException("Close compiler {$compiler}Close not found");
+        }
+        foreach($tags as $tag) {
+            if(method_exists($storage, "tag".$tag)) {
+                $c["tags"][ $tag ] = "tag".$tag;
+                if($floats && in_array($tag, $floats)) {
+                    $c['float_tags'][ $tag ] = 1;
+                }
+            } else {
+                throw new \LogicException("Tag compiler $tag (tag{$compiler}) not found");
+            }
+        }
+        $this->_actions[$compiler] = $c;
         return $this;
     }
 
@@ -362,7 +401,7 @@ class Aspect {
     public function addFunction($function, $callback, $parser = self::DEFAULT_FUNC_PARSER) {
         $this->_actions[$function] = array(
             'type' => self::INLINE_FUNCTION,
-            'parser' => $parser ?: self::DEFAULT_FUNC_PARSER,
+            'parser' => $parser,
             'function' => $callback,
         );
         return $this;
@@ -385,16 +424,16 @@ class Aspect {
     /**
      * @param string $function
      * @param callable $callback
-     * @param callable $parser_open
-     * @param callable $parser_close
+     * @param callable|string $parser_open
+     * @param callable|string $parser_close
      * @return Aspect
      */
-    public function addBlockFunction($function, $callback, $parser_open = null, $parser_close = null) {
+    public function addBlockFunction($function, $callback, $parser_open = self::DEFAULT_FUNC_OPEN, $parser_close = self::DEFAULT_FUNC_CLOSE) {
         $this->_actions[$function] = array(
-            'type' => self::BLOCK_FUNCTION,
-            'open' => $parser_open ?: 'Aspect\Compiler::stdFuncOpen',
-            'close' => $parser_close ?: 'Aspect\Compiler::stdFuncClose',
-            'function' => $callback,
+            'type'      => self::BLOCK_FUNCTION,
+            'open'      => $parser_open,
+            'close'     => $parser_close,
+            'function'  => $callback,
         );
         return $this;
     }
@@ -564,7 +603,7 @@ class Aspect {
                 return $this->_storage[ $template ];
             }
         } elseif($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template, false);
+            return $this->compile($template, $this->_options & self::DISABLE_CACHE);
         } else {
             return $this->_storage[ $template ] = $this->_load($template);
         }
@@ -583,7 +622,7 @@ class Aspect {
      *
      * @param string $tpl
      * @throws \RuntimeException
-     * @return Aspect\Template|mixed
+     * @return Aspect\Render
      */
     protected function _load($tpl) {
         $file_name = $this->_getHash($tpl);
@@ -591,7 +630,6 @@ class Aspect {
             return $this->compile($tpl);
         } else {
             $aspect = $this;
-            /** @var Aspect\Render $tpl */
             return include($this->_compile_dir."/".$file_name);
         }
     }
@@ -604,7 +642,7 @@ class Aspect {
      */
     private function _getHash($tpl) {
         $hash = $tpl.":".$this->_options;
-        return sprintf("%s.%u.%d.php", basename($tpl), crc32($hash), strlen($hash));
+        return sprintf("%s.%u.%d.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
     }
 
     /**

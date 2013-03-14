@@ -7,7 +7,7 @@ Math
 
 Bitwize
 
-`| & <<`
+`| & << >> |= &= <<= >>=`
 
 Unary
 
@@ -15,12 +15,8 @@ Unary
 
 Boolean
 
-`|| && and or < > <= >= == === !== != ≥ ≤ ≠`
+`|| && and or < > <= >= == === !== !=`
 
 Ternar
 
 `? :`
-
-Test
-
-`is in like`

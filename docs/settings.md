@@ -1,5 +1,5 @@
-Настройка
-=========
+Settings [RU]
+=============
 
 ### Engine settings
 

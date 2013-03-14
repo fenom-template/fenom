@@ -148,7 +148,6 @@ class Compiler {
         $before = $before ? implode("; ", $before).";" : "";
         $body = $body ? implode("; ", $body).";" : "";
         $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]).";" : "";
-
         if($key) {
             return "$prepend if($from) { $before foreach($from as $key => $value) { $body";
         } else {
@@ -160,8 +159,6 @@ class Compiler {
      * Tag {foreachelse}
      *
      * @param Tokenizer $tokens
-     * @param Scope              $scope
-     * @internal param $
      * @param Scope              $scope
      * @return string
      */
@@ -385,7 +382,7 @@ class Compiler {
             return "";
         } else { // dynamic extends
             $tpl->_extends = $tpl_name;
-            return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.');';
+            return '$parent = $tpl->getStorage()->getTemplate("extend:".'.$tpl_name.');';
         }
     }
 
@@ -561,7 +558,8 @@ class Compiler {
      */
     public static function smartFuncParser($function, Tokenizer $tokens, Template $tpl) {
         if(strpos($function, "::")) {
-            $ref = new \ReflectionMethod($function);
+            list($class, $method) = explode("::", $function, 2);
+            $ref = new \ReflectionMethod($class, $method);
         } else {
             $ref = new \ReflectionFunction($function);
         }
@@ -710,6 +708,24 @@ class Compiler {
      * @throws ImproperUseException
      */
     public static function tagImport(Tokenizer $tokens, Template $tpl) {
+        $import = array();
+        if($tokens->is('[')) {
+            $tokens->next();
+            while($tokens->valid()) {
+                if($tokens->is(Tokenizer::MACRO_STRING)) {
+                    $import[ $tokens->current() ] = true;
+                    $tokens->next();
+                } elseif($tokens->is(']')) {
+                    $tokens->next();
+                    break;
+                }
+            }
+            if($tokens->current() != "from") {
+                throw new UnexpectedException($tokens);
+            }
+            $tokens->next();
+        }
+
         $tpl->parseFirstArg($tokens, $name);
         if(!$name) {
             throw new ImproperUseException("Invalid usage tag {import}");

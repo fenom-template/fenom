@@ -68,6 +68,9 @@ class AspectTest extends \Aspect\TestCase {
         $this->assertSame("Custom modifier (myMod)Custom(/myMod)", $this->aspect->fetch('custom.tpl', array("a" => "Custom")));
     }
 
+    /**
+     * @group add_functions
+     */
     public function testSetFunctions() {
         $this->aspect->setOptions(Aspect::FORCE_COMPILE);
         $this->aspect->addFunction("myfunc", "myFunc");

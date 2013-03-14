@@ -138,8 +138,8 @@ class Template extends Render {
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-char of tags
             switch($this->_src[$start + 1]) { // check next char
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
-                $pos = $start + 1; // try find tags after the current char
-                continue 2;
+                    $pos = $start + 1; // try find tags after the current char
+                    continue 2;
                 case "*": // if comment block
                     $end = strpos($this->_src, '*}', $start); // finding end of the comment block
                     $_frag = substr($this->_src, $this->_pos, $start - $end); // read the comment block for precessing
@@ -163,7 +163,7 @@ class Template extends Render {
                 $_tag = substr($tag, 1, -1);
                 $_frag = $frag;
             }
-            if($this->_ignore) { // check ignore scope
+            if($this->_ignore) { // check ignore
                 if($_tag === '/ignore') {
                     $this->_ignore = false;
                     $this->_appendText($_frag);
@@ -173,7 +173,12 @@ class Template extends Render {
                 }
             } else {
                 $this->_appendText($_frag);
-                $this->_appendCode($this->_tag($_tag));
+                $tokens = new Tokenizer($_tag);
+                $this->_appendCode($this->_tag($tokens), $tag);
+                if($tokens->key()) { // if tokenizer still have tokens
+                    throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
+                }
+
             }
             $frag = "";
         }
@@ -195,7 +200,6 @@ class Template extends Render {
                 call_user_func_array($cb, array(&$this->_body, $this));
             }
         }
-        /*$this->_body = str_replace(array('?>'.PHP_EOL.'<?php ', '?><?php'), array(PHP_EOL, ' '), $this->_body);*/
     }
 
     /**
@@ -207,7 +211,7 @@ class Template extends Render {
         $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);
     }
 
-    public static function escapeCode($code) {
+    private function _escapeCode($code) {
         $c = "";
         foreach(token_get_all($code) as $token) {
             if(is_string($token)) {
@@ -225,12 +229,16 @@ class Template extends Render {
      * Append PHP code to template body
      *
      * @param string $code
+     * @param $source
      */
-    private function _appendCode($code) {
+    private function _appendCode($code, $source) {
         if(!$code) {
             return;
         } else {
-            $this->_body .= self::escapeCode($code);
+            if(strpos($code, '?>') !== false) {
+                $code = $this->_escapeCode($code); // paste PHP_EOL
+            }
+            $this->_body .= "<?php\n/* {$this->_name}:{$this->_line}: {$source} */\n $code ?>".PHP_EOL;
         }
     }
 
@@ -259,7 +267,7 @@ class Template extends Render {
         return "<?php \n".
             "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
             "return new Aspect\\Render(\$aspect, ".$this->_getClosureSource().", ".var_export(array(
-            //"options" => $this->_options,
+            "options" => $this->_options,
             "provider" => $this->_scm,
             "name" => $this->_name,
             "base_name" => $this->_base_name,
@@ -321,43 +329,28 @@ class Template extends Render {
 
     /**
      * Internal tags router
-     * @param string $src
+     * @param Tokenizer $tokens
      * @throws UnexpectedException
      * @throws CompileException
      * @throws SecurityException
      * @return string executable PHP code
      */
-    private function _tag($src) {
-        $tokens = new Tokenizer($src);
+    private function _tag(Tokenizer $tokens) {
         try {
-            switch($src[0]) {
-                case '"':
-                case '\'':
-                case '$':
-                    $code = "echo ".$this->parseExp($tokens).";";
-                    break;
-                case '#':
-                    $code = "echo ".$this->parseConst($tokens);
-                    break;
-                case '/':
-                    $code = $this->_end($tokens);
-                    break;
-                default:
-                    if($tokens->current() === "ignore") {
-                        $this->_ignore = true;
-                        $tokens->next();
-                        $code = '';
-                    } else {
-                        $code = $this->_parseAct($tokens);
-                    }
-            }
-            if($tokens->key()) { // if tokenizer still have tokens
-                throw new UnexpectedException($tokens);
-            }
-            if(!$code) {
-                return "";
+            if($tokens->is(Tokenizer::MACRO_STRING)) {
+                if($tokens->current() === "ignore") {
+                    $this->_ignore = true;
+                    $tokens->next();
+                    return '';
+                } else {
+                    return $this->_parseAct($tokens);
+                }
+            } elseif ($tokens->is('/')) {
+                return $this->_end($tokens);
+            } elseif ($tokens->is('#')) {
+                return "echo ".$this->parseConst($tokens).';';
             } else {
-                return "<?php\n/* {$this->_name}:{$this->_line}: {$src} */\n {$code} ?>";
+                return $code = "echo ".$this->parseExp($tokens).";";
             }
         } catch (ImproperUseException $e) {
             throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
@@ -376,6 +369,7 @@ class Template extends Render {
      * @throws TokenizeException
      */
     private function _end(Tokenizer $tokens) {
+        //return "end";
         $name = $tokens->getNext(Tokenizer::MACRO_STRING);
         $tokens->next();
         if(!$this->_stack) {
@@ -402,7 +396,7 @@ class Template extends Render {
         if($tokens->is(Tokenizer::MACRO_STRING)) {
             $action = $tokens->getAndNext();
         } else {
-            return 'echo '.$this->parseExp($tokens).';'; // may be math and boolean expression
+            return 'echo '.$this->parseExp($tokens).';'; // may be math and/or boolean expression
         }
 
         if($tokens->is("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method

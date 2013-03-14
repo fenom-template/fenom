@@ -266,7 +266,7 @@ class TemplateTest extends TestCase {
     public static function providerIncludeInvalid() {
         return array(
             array('Include {include} template',   'Aspect\CompileException', "Unexpected end of expression"),
-            array('Include {include another="welcome.tpl"} template',   'Aspect\CompileException', "Unexpected token '=' in expression"),
+            array('Include {include another="welcome.tpl"} template',   'Aspect\CompileException', "Unexpected token '='"),
         );
     }
 

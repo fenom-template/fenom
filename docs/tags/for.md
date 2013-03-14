@@ -2,7 +2,7 @@ Tag {for}
 =========
 
 ```smarty
-{for $counter=<start..end> [to=<end>] [step=<step>] [index=$index] [first=$first] [last=$last]}
+{for $counter=<start> to=<end> [step=<step>] [index=$index] [first=$first] [last=$last]}
    {* ...code... *}
    {break}
    {* ...code... *}

@@ -1,5 +1,5 @@
-Syntax
-======
+Syntax [RU]
+===========
 
 ### Output variables
 

@@ -28,7 +28,7 @@ Benchmark::runs("twig", 'inheritance/twig/b100.tpl', __DIR__.'/templates/foreach
 Benchmark::runs("aspect", 'inheritance/smarty/b100.tpl', __DIR__.'/templates/foreach/data.json');
 
 echo "\nDone. Cleanup.\n";
-passthru("rm -rf ".__DIR__."/compile/*");
+//passthru("rm -rf ".__DIR__."/compile/*");
 passthru("rm -f ".__DIR__."/templates/inheritance/smarty/*");
 passthru("rm -f ".__DIR__."/templates/inheritance/twig/*");
 
