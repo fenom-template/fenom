@@ -9,7 +9,7 @@ Aspect - awesome template engine for PHP
 * Simplest known [syntax](./docs/syntax.md)
 * [Fast](./docs/benchmark.md)
 * [Secure](./docs/settings.md)
-* Without regexp
+* [Simple](./ideology.md)
 * [Flexible](./docs/main.md#extends)
 * [Lightweight](./docs/benchmark.md#satistic)
 * [Powerful](./docs/main.md)
