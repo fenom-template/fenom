@@ -53,7 +53,7 @@ class Modifier {
      * @return string
      */
     public static function escape($text, $type = 'html') {
-        switch($type) {
+        switch(strtolower($type)) {
             case "url":
                 return urlencode($text);
             case "html";
@@ -115,7 +115,7 @@ class Modifier {
     }
 
     /**
-     * Strip spaces symbols on edge of string end multiple spaces into string
+     * Strip spaces symbols on edge of string end multiple spaces in string
      * @static
      * @param string $str
      * @param bool $to_line strip line ends
@@ -131,16 +131,19 @@ class Modifier {
     }
 
     /**
+     * Return length of UTF8 string, array, countable object
      * @param mixed $item
      * @return int
      */
     public static function length($item) {
         if(is_scalar($item)) {
-            return strlen($item);
+            return strlen(preg_replace('#[\x00-\x7F]|[\x80-\xDF][\x00-\xBF]|[\xE0-\xEF][\x00-\xBF]{2}#s', ' ', $item));
         } elseif (is_array($item)) {
             return count($item);
+        } elseif(is_object($item) && ($item instanceof \Countable)) {
+            return count($item);
         } else {
-            return count((array)$item);
+            return 0;
         }
     }
 
