@@ -71,7 +71,7 @@ class Modifier {
      * @return string
      */
     public static function unescape($text, $type = 'html') {
-        switch($type) {
+        switch(strtolower($type)) {
             case "url":
                 return urldecode($text);
             case "html";
@@ -82,22 +82,36 @@ class Modifier {
     }
 
     /**
+     * Crop string by length
+     * UTF8 support
      * @param string $string
      * @param int $length
      * @param string $etc
-     * @param bool $break_words
+     * @param bool $by_words
      * @param bool $middle
      * @return string
      */
-    public static function truncate($string, $length = 80, $etc = '...', $break_words = false, $middle = false) {
-        $length -= min($length, strlen($etc));
-        if (!$break_words && !$middle) {
-            $string = preg_replace('/\s+?(\S+)?$/', '', substr($string, 0, $length + 1));
+    public static function truncate($string, $length = 80, $etc = '...', $by_words = false, $middle = false) {
+        if($middle) {
+            if(preg_match('#^(.{'.$length.'}).*?(.{'.$length.'})?$#usS', $string, $match)) {
+                if(count($match) == 3) {
+                    if($by_words) {
+                        return preg_replace('#\s.*$#usS', "", $match[1]).$etc.preg_replace('#^.*\s#usS', "", $match[2]);
+                    } else {
+                        return $match[1].$etc.$match[2];
+                    }
+                }
+            }
+        } else {
+            if(preg_match('#^(.{'.$length.'})#usS', $string, $match)) {
+                if($by_words) {
+                    return preg_replace('#\s.*$#usS', "", $match[1]).$etc;
+                } else {
+                    return $match[1].$etc;
+                }
+            }
         }
-        if (!$middle) {
-            return substr($string, 0, $length) . $etc;
-        }
-        return substr($string, 0, $length / 2) . $etc . substr($string, - $length / 2);
+        return $string;
     }
 
     /**
