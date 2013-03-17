@@ -645,6 +645,7 @@ class TemplateTest extends TestCase {
     }
 
     /**
+     * @group include
      * @dataProvider providerInclude
      */
     public function testInclude($code, $vars, $result) {

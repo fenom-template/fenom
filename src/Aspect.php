@@ -561,21 +561,24 @@ class Aspect {
      * Return template by name
      *
      * @param string $template
+     * @param int $options
      * @return Aspect\Template
      */
-    public function getTemplate($template) {
-        if(isset($this->_storage[ $template ])) {
+    public function getTemplate($template, $options = 0) {
+        $options = $this->_options | $options;
+        $key = $template.".".dechex($options);
+        if(isset($this->_storage[ $key ])) {
             /** @var Aspect\Template $tpl  */
-            $tpl = $this->_storage[ $template ];
+            $tpl = $this->_storage[ $key ];
             if(($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
-                return $this->_storage[ $template ] = $this->compile($template);
+                return $this->_storage[ $key ] = $this->compile($template, true, $options);
             } else {
-                return $this->_storage[ $template ];
+                return $tpl;
             }
         } elseif($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template, $this->_options & self::DISABLE_CACHE);
+            return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
         } else {
-            return $this->_storage[ $template ] = $this->_load($template);
+            return $this->_storage[ $key ] = $this->_load($template, $options);
         }
     }
 
@@ -583,19 +586,19 @@ class Aspect {
      * Add custom template into storage
      * @param Aspect\Render $template
      */
-    public function addTemplate(Aspect\Render $template) {
-        $this->_storage[ $template->getName() ] = $template;
+    public function addTemplate(Aspect\Render $template, $options = 0) {
+        $this->_storage[ $template->getName().".".dechex($options) ] = $template;
     }
 
     /**
      * Return template from storage or create if template doesn't exists.
      *
      * @param string $tpl
-     * @throws \RuntimeException
+     * @param int $opts
      * @return Aspect\Render
      */
-    protected function _load($tpl) {
-        $file_name = $this->_getHash($tpl);
+    protected function _load($tpl, $opts) {
+        $file_name = $this->_getCacheName($tpl, $opts);
         if(!is_file($this->_compile_dir."/".$file_name)) {
             return $this->compile($tpl);
         } else {
@@ -608,11 +611,12 @@ class Aspect {
      * Generate unique name of compiled template
      *
      * @param string $tpl
+     * @param int $options
      * @return string
      */
-    private function _getHash($tpl) {
-        $hash = $tpl.":".$this->_options;
-        return sprintf("%s.%u.%d.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+    private function _getCacheName($tpl, $options) {
+        $hash = $tpl.":".$options;
+        return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
     }
 
     /**
@@ -620,20 +624,22 @@ class Aspect {
      *
      * @param string $tpl
      * @param bool $store store template on disk
+     * @param int $opts
      * @throws RuntimeException
      * @return \Aspect\Template
      */
-    public function compile($tpl, $store = true) {
+    public function compile($tpl, $store = true, $opts = 0) {
         $template = Template::factory($this)->load($tpl);
         if($store) {
-            $tpl_tmp = tempnam($this->_compile_dir, basename($tpl));
+            $cache = $this->_getCacheName($tpl, $opts);
+            $tpl_tmp = tempnam($this->_compile_dir, $cache);
             $tpl_fp = fopen($tpl_tmp, "w");
             if(!$tpl_fp) {
                 throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory ".$this->_compile_dir." is writable?");
             }
             fwrite($tpl_fp, $template->getTemplateCode());
             fclose($tpl_fp);
-            $file_name = $this->_compile_dir."/".$this->_getHash($tpl);
+            $file_name = $this->_compile_dir."/".$cache;
             if(!rename($tpl_tmp, $file_name)) {
                 throw new \RuntimeException("Can't to move $tpl_tmp to $tpl");
             }
@@ -647,8 +653,12 @@ class Aspect {
      * @param bool $cache
      * @return bool
      */
-    public function clearCompiledTemplate($tpl, $cache = true) {
-        $file_name = $this->_compile_dir."/".$this->_getHash($tpl);
+    /*public function clearCompiledTemplate($tpl, $cache = true) {
+        $file_name = $this->_compile_dir."/".$this->_getCacheName($tpl);
+        $it = new \GlobIterator($this->_compile_dir."/".str_replace(':', '_', basename($tpl)));
+        foreach() {
+
+        }
         if(file_exists($file_name)) {
             if($cache) {
                 unset($this->_storage[$tpl]);
@@ -657,7 +667,7 @@ class Aspect {
         } else {
             return true;
         }
-    }
+    }*/
 
     /**
      *
