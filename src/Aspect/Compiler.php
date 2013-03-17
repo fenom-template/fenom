@@ -98,7 +98,7 @@ class Compiler {
         $key = null;
         $before = $body = array();
         if($tokens->is(T_VARIABLE)) {
-            $from = $scope->tpl->parseVar($tokens, Template::DENY_MODS);
+            $from = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
             $prepend = "";
         } elseif($tokens->is('[')) {
             $from = $scope->tpl->parseArray($tokens);
@@ -110,11 +110,11 @@ class Compiler {
         }
         $tokens->get(T_AS);
         $tokens->next();
-        $value = $scope->tpl->parseVar($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
+        $value = $scope->tpl->parseVariable($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
         if($tokens->is(T_DOUBLE_ARROW)) {
             $tokens->next();
             $key = $value;
-            $value = $scope->tpl->parseVar($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
+            $value = $scope->tpl->parseVariable($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
         }
 
         $scope["after"] = array();
@@ -127,7 +127,7 @@ class Compiler {
             }
             $tokens->getNext("=");
             $tokens->next();
-            $p[ $param ] = $scope->tpl->parseVar($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
+            $p[ $param ] = $scope->tpl->parseVariable($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
         }
 
         if($p["index"]) {
@@ -195,7 +195,7 @@ class Compiler {
         $scope["after"] = $before = $body = array();
         $i = array('', '');
         $c = "";
-        $var = $scope->tpl->parseVar($tokens, Template::DENY_MODS);
+        $var = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
         $tokens->get("=");
         $tokens->next();
         $val = $scope->tpl->parseExp($tokens, true);
@@ -382,7 +382,7 @@ class Compiler {
             return "";
         } else { // dynamic extends
             $tpl->_extends = $tpl_name;
-            return '$parent = $tpl->getStorage()->getTemplate("extend:".'.$tpl_name.');';
+            return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Aspect\Template::EXTENDED);';
         }
     }
 
@@ -616,6 +616,15 @@ class Compiler {
         return 'array('.implode(",", $_code).')';
     }
 
+    public static function varOpen(Tokenizer $tokens, Scope $scope) {
+        $scope->is_closed = true;
+        return self::setVar($tokens, $scope->tpl).';';
+    }
+
+    public static function varClose() {
+        return '';
+    }
+
     /**
      * Tag {var ...}
      *
@@ -624,9 +633,9 @@ class Compiler {
      * @param Template           $tpl
      * @return string
      */
-    public static function assign(Tokenizer $tokens, Template $tpl) {
-        return self::setVar($tokens, $tpl).';';
-    }
+    //public static function assign(Tokenizer $tokens, Template $tpl) {
+      //  return self::setVar($tokens, $tpl).';';
+    //}
 
     /**
      * Set variable expression
@@ -636,7 +645,7 @@ class Compiler {
      * @return string
      */
     public static function setVar(Tokenizer $tokens, Template $tpl, $allow_array = true) {
-        $var = $tpl->parseVar($tokens, $tpl::DENY_MODS);
+        $var = $tpl->parseVariable($tokens, $tpl::DENY_MODS);
 
         $tokens->get('=');
         $tokens->next();
@@ -668,7 +677,7 @@ class Compiler {
             $scope["value"] = "ob_get_clean()";
         }
 
-        $scope["var"] = $scope->tpl->parseVar($tokens, Template::DENY_MODS);
+        $scope["var"] = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
 
         return "ob_start();";
     }

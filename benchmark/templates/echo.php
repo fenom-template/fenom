@@ -53,7 +53,7 @@ $template = $twig->loadTemplate('echo/twig.tpl');
 $template->render($data);
 var_dump("Twig cached: ".(microtime(true)-$start));
 
-$aspect = Aspect::factory(__DIR__, __DIR__."/../compile/", Aspect::CHECK_MTIME);
+$aspect = Aspect::factory(__DIR__, __DIR__."/../compile/", Aspect::AUTO_RELOAD);
 
 $start = microtime(true);
 $template = $aspect->fetch('echo/smarty.tpl', $data);

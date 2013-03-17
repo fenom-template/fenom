@@ -586,7 +586,7 @@ class TemplateTest extends TestCase {
             array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end',                        'Aspect\CompileException', "Unexpected closing of the tag 'for'"),
             array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end',                         'Aspect\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
             array('Layers: {/switch} end',                                                          'Aspect\CompileException', "Unexpected closing of the tag 'switch'"),
-            array('Layers: {if 1} end',                                                             'Aspect\CompileException', "Unclosed block tags: if"),
+            array('Layers: {if 1} end',                                                             'Aspect\CompileException', "Unclosed tag(s): {if}"),
         );
     }
 
@@ -630,6 +630,7 @@ class TemplateTest extends TestCase {
     }
 
     /**
+     * @group expression
      * @dataProvider providerExpressions
      */
     public function testExpressions($code, $vars, $result) {

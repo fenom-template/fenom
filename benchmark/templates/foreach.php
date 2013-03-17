@@ -38,7 +38,7 @@ $template = $twig->loadTemplate('foreach/twig.tpl');
 $template->render($data);
 var_dump("Twig cached: ".(microtime(true)-$start));
 
-$aspect = Aspect::factory(__DIR__, __DIR__."/../compile/", Aspect::CHECK_MTIME | Aspect::INCLUDE_SOURCES);
+$aspect = Aspect::factory(__DIR__, __DIR__."/../compile/", Aspect::AUTO_RELOAD | Aspect::INCLUDE_SOURCES);
 
 $start = microtime(true);
 $template = $aspect->fetch('foreach/smarty.tpl', $data);

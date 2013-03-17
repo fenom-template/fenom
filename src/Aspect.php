@@ -6,27 +6,27 @@ use Aspect\Template,
  * Aspect Template Engine
  */
 class Aspect {
-    const VERSION = 1.0;
+    const VERSION = '1.0.1';
 
-    const INLINE_COMPILER = 1;
-    const BLOCK_COMPILER = 2;
-    const INLINE_FUNCTION = 3;
-    const BLOCK_FUNCTION = 4;
-    const MODIFIER = 5;
+    const INLINE_COMPILER   = 1;
+    const BLOCK_COMPILER    = 2;
+    const INLINE_FUNCTION   = 3;
+    const BLOCK_FUNCTION    = 4;
+    const MODIFIER          = 5;
 
-    const DENY_METHODS = 0x10;
+    const DENY_METHODS      = 0x10;
     const DENY_INLINE_FUNCS = 0x20;
-    const FORCE_INCLUDE = 0x40;
+    const FORCE_INCLUDE     = 0x40;
 
-    const CHECK_MTIME = 0x80;
-    const FORCE_COMPILE = 0xF0;
-    const DISABLE_CACHE = 0x1F0;
+    const AUTO_RELOAD       = 0x80;
+    const FORCE_COMPILE     = 0xF0;
+    const DISABLE_CACHE     = 0x1F0;
 
     const DEFAULT_CLOSE_COMPILER = 'Aspect\Compiler::stdClose';
-    const DEFAULT_FUNC_PARSER = 'Aspect\Compiler::stdFuncParser';
-    const DEFAULT_FUNC_OPEN = 'Aspect\Compiler::stdFuncOpen';
-    const DEFAULT_FUNC_CLOSE = 'Aspect\Compiler::stdFuncClose';
-    const SMART_FUNC_PARSER = 'Aspect\Compiler::smartFuncParser';
+    const DEFAULT_FUNC_PARSER    = 'Aspect\Compiler::stdFuncParser';
+    const DEFAULT_FUNC_OPEN      = 'Aspect\Compiler::stdFuncOpen';
+    const DEFAULT_FUNC_CLOSE     = 'Aspect\Compiler::stdFuncClose';
+    const SMART_FUNC_PARSER      = 'Aspect\Compiler::smartFuncParser';
 
     /**
      * @var array of possible options, as associative array
@@ -35,41 +35,10 @@ class Aspect {
     private static $_option_list = array(
         "disable_methods" => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_INLINE_FUNCS,
+        "disable_cache" => self::DISABLE_CACHE,
         "force_compile" => self::FORCE_COMPILE,
-        "compile_check" => self::CHECK_MTIME,
+        "auto_reload" => self::AUTO_RELOAD,
         "force_include" => self::FORCE_INCLUDE,
-    );
-
-    /**
-     * Default options for functions
-     * @var array
-     */
-    private static $_actions_defaults = array(
-        self::BLOCK_FUNCTION => array(
-            'type' => self::BLOCK_FUNCTION,
-            'open' => self::DEFAULT_FUNC_OPEN,
-            'close' => self::DEFAULT_FUNC_CLOSE,
-            'function' => null,
-        ),
-        self::INLINE_FUNCTION => array(
-            'type' => self::INLINE_FUNCTION,
-            'parser' => self::DEFAULT_FUNC_PARSER,
-            'function' => null,
-        ),
-        self::INLINE_COMPILER => array(
-            'type' => self::INLINE_COMPILER,
-            'open' => null,
-            'close' => self::DEFAULT_CLOSE_COMPILER,
-            'tags' => array(),
-            'float_tags' => array()
-        ),
-        self::BLOCK_COMPILER => array(
-            'type' => self::BLOCK_COMPILER,
-            'open' => null,
-            'close' => null,
-            'tags' => array(),
-            'float_tags' => array()
-        )
     );
 
     /**
@@ -187,8 +156,9 @@ class Aspect {
             'parser' => 'Aspect\Compiler::tagInclude'
         ),
         'var' => array(     // {var ...}
-            'type' => self::INLINE_COMPILER,
-            'parser' => 'Aspect\Compiler::assign'
+            'type' => self::BLOCK_COMPILER,
+            'open' => 'Aspect\Compiler::varOpen',
+            'close' => 'Aspect\Compiler::varClose'
         ),
         'block' => array(   // {block ...} {parent} {/block}
             'type' => self::BLOCK_COMPILER,
@@ -597,7 +567,7 @@ class Aspect {
         if(isset($this->_storage[ $template ])) {
             /** @var Aspect\Template $tpl  */
             $tpl = $this->_storage[ $template ];
-            if(($this->_options & self::CHECK_MTIME) && !$tpl->isValid()) {
+            if(($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
                 return $this->_storage[ $template ] = $this->compile($template);
             } else {
                 return $this->_storage[ $template ];
