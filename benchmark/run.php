@@ -2,7 +2,7 @@
 require_once __DIR__.'/scripts/bootstrap.php';
 exec("rm -rf ".__DIR__."/compile/*");
 
-echo "Smarty3 vs Twig vs Aspect\n\n";
+echo "Smarty3 vs Twig vs Cytro\n\n";
 
 echo "Generate templates... ";
 passthru("php ".__DIR__."/templates/inheritance/smarty.gen.php");
@@ -32,6 +32,6 @@ echo "\nDone. Cleanup.\n";
 passthru("rm -f ".__DIR__."/templates/inheritance/smarty/*");
 passthru("rm -f ".__DIR__."/templates/inheritance/twig/*");
 
-echo "\nSmarty3 vs Aspect (more details)\n\n";
+echo "\nSmarty3 vs Cytro (more details)\n\n";
 
 echo "Coming soon\n";

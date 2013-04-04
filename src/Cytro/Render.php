@@ -1,6 +1,6 @@
 <?php
-namespace Aspect;
-use Aspect;
+namespace Cytro;
+use Cytro;
 
 /**
  * Primitive template
@@ -25,7 +25,7 @@ class Render extends \ArrayObject {
     protected $_scm = false;
     protected $_base_name = 'runtime';
     /**
-     * @var Aspect
+     * @var Cytro
      */
     protected $_aspect;
     /**
@@ -36,6 +36,8 @@ class Render extends \ArrayObject {
 
     protected $_depends = array();
 
+    protected $_options = 0;
+
     /**
      * Template provider
      * @var ProviderInterface
@@ -43,11 +45,11 @@ class Render extends \ArrayObject {
     protected $_provider;
 
     /**
-     * @param Aspect $aspect
+     * @param Cytro $aspect
      * @param callable $code template body
      * @param array $props
      */
-    public function __construct(Aspect $aspect, \Closure $code, $props = array()) {
+    public function __construct(Cytro $aspect, \Closure $code, $props = array()) {
         $this->_aspect = $aspect;
         $props += self::$_props;
         $this->_name = $props["name"];
@@ -60,7 +62,7 @@ class Render extends \ArrayObject {
 
     /**
      * Get template storage
-     * @return Aspect
+     * @return Cytro
      */
     public function getStorage() {
         return $this->_aspect;
@@ -80,6 +82,10 @@ class Render extends \ArrayObject {
 
     public function getBaseName() {
         return $this->_base_name;
+    }
+
+    public function getOptions() {
+        return $this->_options;
     }
 
     /**

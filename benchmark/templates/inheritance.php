@@ -49,13 +49,13 @@ $template = $twig->loadTemplate('inheritance/twig/b100.tpl');
 $template->render($data);
 var_dump("Twig cached: ".(microtime(true)-$start));
 
-$aspect = Aspect::factory(__DIR__, __DIR__."/../compile/", Aspect::AUTO_RELOAD);
+$cytro = Cytro::factory(__DIR__, __DIR__."/../compile/", Cytro::AUTO_RELOAD);
 
 $start = microtime(true);
-$template = $aspect->fetch('inheritance/smarty/b100.tpl', $data);
-var_dump("Aspect: ".(microtime(true)-$start));
+$template = $cytro->fetch('inheritance/smarty/b100.tpl', $data);
+var_dump("Cytro: ".(microtime(true)-$start));
 
 $start = microtime(true);
-$template = $aspect->fetch('inheritance/smarty/b100.tpl', $data);
-var_dump("Aspect cached: ".(microtime(true)-$start));
+$template = $cytro->fetch('inheritance/smarty/b100.tpl', $data);
+var_dump("Cytro cached: ".(microtime(true)-$start));
 

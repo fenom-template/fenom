@@ -1,17 +1,17 @@
 <?php
-namespace Aspect;
+namespace Cytro;
 
 class ScopeTest extends TestCase {
     public function openTag($tokenizer, $scope) {
-        $this->assertInstanceOf('Aspect\Tokenizer', $tokenizer);
-        $this->assertInstanceOf('Aspect\Scope', $scope);
+        $this->assertInstanceOf('Cytro\Tokenizer', $tokenizer);
+        $this->assertInstanceOf('Cytro\Scope', $scope);
         $scope["value"] = true;
         return "open-tag";
     }
 
     public function closeTag($tokenizer, $scope) {
-        $this->assertInstanceOf('Aspect\Tokenizer', $tokenizer);
-        $this->assertInstanceOf('Aspect\Scope', $scope);
+        $this->assertInstanceOf('Cytro\Tokenizer', $tokenizer);
+        $this->assertInstanceOf('Cytro\Scope', $scope);
         $this->assertTrue($scope["value"]);
         return "close-tag";
     }

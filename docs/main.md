@@ -1,7 +1,7 @@
 Documentation
 =============
 
-### Aspect
+### Cytro
 
 * [About](./about.md)
 * [Install](./install.md)

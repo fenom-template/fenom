@@ -1,13 +1,13 @@
 <?php
 /*
- * This file is part of Aspect.
+ * This file is part of Cytro.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Aspect;
+namespace Cytro;
 
 /**
  * Collection of modifiers
@@ -140,7 +140,7 @@ class Modifier {
             return strlen(preg_replace('#[\x00-\x7F]|[\x80-\xDF][\x00-\xBF]|[\xE0-\xEF][\x00-\xBF]{2}#s', ' ', $item));
         } elseif (is_array($item)) {
             return count($item);
-        } elseif(is_object($item) && ($item instanceof \Countable)) {
+        } elseif($item instanceof \Countable) {
             return count($item);
         } else {
             return 0;

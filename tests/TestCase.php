@@ -1,32 +1,41 @@
 <?php
-namespace Aspect;
-use Aspect, Aspect\FSProvider as FS;
+namespace Cytro;
+use Cytro, Cytro\FSProvider as FS;
 
 class TestCase extends \PHPUnit_Framework_TestCase {
     /**
-     * @var Aspect
+     * @var Cytro
      */
-    public $aspect;
+    public $cytro;
+
+    public $values = array(
+        "one" => 1,
+        "two" => 2,
+        "three" => 3,
+        1 => "one value",
+        2 => "two value",
+        3 => "three value",
+    );
 
     public function setUp() {
-        if(!file_exists(ASPECT_RESOURCES.'/compile')) {
-            mkdir(ASPECT_RESOURCES.'/compile', 0777, true);
+        if(!file_exists(CYTRO_RESOURCES.'/compile')) {
+            mkdir(CYTRO_RESOURCES.'/compile', 0777, true);
         } else {
-            FS::clean(ASPECT_RESOURCES.'/compile/');
+            FS::clean(CYTRO_RESOURCES.'/compile/');
         }
-        $this->aspect = Aspect::factory(ASPECT_RESOURCES.'/template', ASPECT_RESOURCES.'/compile');
+        $this->cytro = Cytro::factory(CYTRO_RESOURCES.'/template', CYTRO_RESOURCES.'/compile');
     }
 
     public static function setUpBeforeClass() {
-        if(!file_exists(ASPECT_RESOURCES.'/template')) {
-            mkdir(ASPECT_RESOURCES.'/template', 0777, true);
+        if(!file_exists(CYTRO_RESOURCES.'/template')) {
+            mkdir(CYTRO_RESOURCES.'/template', 0777, true);
         } else {
-            FS::clean(ASPECT_RESOURCES.'/template/');
+            FS::clean(CYTRO_RESOURCES.'/template/');
         }
     }
 
     public function tpl($name, $code) {
-        file_put_contents(ASPECT_RESOURCES.'/template/'.$name, $code);
+        file_put_contents(CYTRO_RESOURCES.'/template/'.$name, $code);
     }
 
     /**
@@ -38,7 +47,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param bool $dump dump source and result code (for debug)
      */
     public function exec($code, $vars, $result, $dump = false) {
-        $tpl = $this->aspect->compileCode($code, "runtime.tpl");
+        $tpl = $this->cytro->compileCode($code, "runtime.tpl");
         if($dump) {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
         }
@@ -47,7 +56,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 
     public function execTpl($name, $code, $vars, $result, $dump = false) {
         $this->tpl($name, $code);
-        $tpl = $this->aspect->getTemplate($name);
+        $tpl = $this->cytro->getTemplate($name);
         if($dump) {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
         }
@@ -59,20 +68,49 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param string $code source of the template
      * @param string $exception exception class
      * @param string $message exception message
-     * @param int $options Aspect's options
+     * @param int $options Cytro's options
      */
     public function execError($code, $exception, $message, $options = 0) {
-        $opt = $this->aspect->getOptions();
-        $this->aspect->setOptions($options);
+        $opt = $this->cytro->getOptions();
+        $this->cytro->setOptions($options);
         try {
-            $this->aspect->compileCode($code, "inline.tpl");
+            $this->cytro->compileCode($code, "inline.tpl");
         } catch(\Exception $e) {
             $this->assertSame($exception, get_class($e), "Exception $code");
             $this->assertStringStartsWith($message, $e->getMessage());
-            $this->aspect->setOptions($opt);
+            $this->cytro->setOptions($opt);
             return;
         }
-        self::$aspect->setOptions($opt);
+        $this->cytro->setOptions($opt);
         $this->fail("Code $code must be invalid");
+    }
+
+    public function assertRender($tpl, $result) {
+        $template = $this->cytro->compileCode($tpl);
+        $this->assertSame($result, $template->fetch($this->values));
+    }
+}
+
+class Fake implements \ArrayAccess {
+    public $vars;
+
+    public function offsetExists($offset) {
+        return true;
+    }
+
+    public function offsetGet($offset) {
+        if($offset == "object") {
+            return new self();
+        } else {
+            return new self($offset);
+        }
+    }
+
+    public function offsetSet($offset, $value) {
+        $this->vars[$offset] = $value;
+    }
+
+    public function offsetUnset($offset) {
+        unset($this->vars[$offset]);
     }
 }

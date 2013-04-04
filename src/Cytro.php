@@ -1,11 +1,11 @@
 <?php
-use Aspect\Template,
-    Aspect\ProviderInterface;
+use Cytro\Template,
+    Cytro\ProviderInterface;
 
 /**
- * Aspect Template Engine
+ * Cytro Template Engine
  */
-class Aspect {
+class Cytro {
     const VERSION = '1.0.1';
 
     const INLINE_COMPILER   = 1;
@@ -22,11 +22,11 @@ class Aspect {
     const FORCE_COMPILE     = 0xF0;
     const DISABLE_CACHE     = 0x1F0;
 
-    const DEFAULT_CLOSE_COMPILER = 'Aspect\Compiler::stdClose';
-    const DEFAULT_FUNC_PARSER    = 'Aspect\Compiler::stdFuncParser';
-    const DEFAULT_FUNC_OPEN      = 'Aspect\Compiler::stdFuncOpen';
-    const DEFAULT_FUNC_CLOSE     = 'Aspect\Compiler::stdFuncClose';
-    const SMART_FUNC_PARSER      = 'Aspect\Compiler::smartFuncParser';
+    const DEFAULT_CLOSE_COMPILER = 'Cytro\Compiler::stdClose';
+    const DEFAULT_FUNC_PARSER    = 'Cytro\Compiler::stdFuncParser';
+    const DEFAULT_FUNC_OPEN      = 'Cytro\Compiler::stdFuncOpen';
+    const DEFAULT_FUNC_CLOSE     = 'Cytro\Compiler::stdFuncClose';
+    const SMART_FUNC_PARSER      = 'Cytro\Compiler::smartFuncParser';
 
     /**
      * @var array of possible options, as associative array
@@ -64,7 +64,7 @@ class Aspect {
      */
     private $_provider;
     /**
-     * @var array of Aspect\ProviderInterface
+     * @var array of Cytro\ProviderInterface
      */
     protected $_providers = array();
 
@@ -76,14 +76,14 @@ class Aspect {
         "up"          => 'strtoupper',
         "lower"       => 'strtolower',
         "low"         => 'strtolower',
-        "date_format" => 'Aspect\Modifier::dateFormat',
-        "date"        => 'Aspect\Modifier::date',
-        "truncate"    => 'Aspect\Modifier::truncate',
-        "escape"      => 'Aspect\Modifier::escape',
-        "e"           => 'Aspect\Modifier::escape', // alias of escape
-        "unescape"    => 'Aspect\Modifier::unescape',
-        "strip"       => 'Aspect\Modifier::strip',
-        "default"     => 'Aspect\Modifier::defaultValue'
+        "date_format" => 'Cytro\Modifier::dateFormat',
+        "date"        => 'Cytro\Modifier::date',
+        "truncate"    => 'Cytro\Modifier::truncate',
+        "escape"      => 'Cytro\Modifier::escape',
+        "e"           => 'Cytro\Modifier::escape', // alias of escape
+        "unescape"    => 'Cytro\Modifier::unescape',
+        "strip"       => 'Cytro\Modifier::strip',
+        "default"     => 'Cytro\Modifier::defaultValue'
     );
 
     /**
@@ -101,116 +101,116 @@ class Aspect {
     protected $_actions = array(
         'foreach' => array( // {foreach ...} {break} {continue} {foreachelse} {/foreach}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::foreachOpen',
-            'close' => 'Aspect\Compiler::foreachClose',
+            'open' => 'Cytro\Compiler::foreachOpen',
+            'close' => 'Cytro\Compiler::foreachClose',
             'tags' => array(
-                'foreachelse' => 'Aspect\Compiler::foreachElse',
-                'break' => 'Aspect\Compiler::tagBreak',
-                'continue' => 'Aspect\Compiler::tagContinue',
+                'foreachelse' => 'Cytro\Compiler::foreachElse',
+                'break' => 'Cytro\Compiler::tagBreak',
+                'continue' => 'Cytro\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
         'if' => array(      // {if ...} {elseif ...} {else} {/if}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::ifOpen',
-            'close' => 'Aspect\Compiler::stdClose',
+            'open' => 'Cytro\Compiler::ifOpen',
+            'close' => 'Cytro\Compiler::stdClose',
             'tags' => array(
-                'elseif' => 'Aspect\Compiler::tagElseIf',
-                'else' => 'Aspect\Compiler::tagElse',
+                'elseif' => 'Cytro\Compiler::tagElseIf',
+                'else' => 'Cytro\Compiler::tagElse',
             )
         ),
         'switch' => array(  // {switch ...} {case ...} {break} {default} {/switch}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::switchOpen',
-            'close' => 'Aspect\Compiler::stdClose',
+            'open' => 'Cytro\Compiler::switchOpen',
+            'close' => 'Cytro\Compiler::stdClose',
             'tags' => array(
-                'case' => 'Aspect\Compiler::tagCase',
-                'default' => 'Aspect\Compiler::tagDefault',
-                'break' => 'Aspect\Compiler::tagBreak',
+                'case' => 'Cytro\Compiler::tagCase',
+                'default' => 'Cytro\Compiler::tagDefault',
+                'break' => 'Cytro\Compiler::tagBreak',
             ),
             'float_tags' => array('break' => 1)
         ),
         'for' => array(     // {for ...} {break} {continue} {/for}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::forOpen',
-            'close' => 'Aspect\Compiler::forClose',
+            'open' => 'Cytro\Compiler::forOpen',
+            'close' => 'Cytro\Compiler::forClose',
             'tags' => array(
-                'forelse' => 'Aspect\Compiler::forElse',
-                'break' => 'Aspect\Compiler::tagBreak',
-                'continue' => 'Aspect\Compiler::tagContinue',
+                'forelse' => 'Cytro\Compiler::forElse',
+                'break' => 'Cytro\Compiler::tagBreak',
+                'continue' => 'Cytro\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
         'while' => array(   // {while ...} {break} {continue} {/while}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::whileOpen',
-            'close' => 'Aspect\Compiler::stdClose',
+            'open' => 'Cytro\Compiler::whileOpen',
+            'close' => 'Cytro\Compiler::stdClose',
             'tags' => array(
-                'break' => 'Aspect\Compiler::tagBreak',
-                'continue' => 'Aspect\Compiler::tagContinue',
+                'break' => 'Cytro\Compiler::tagBreak',
+                'continue' => 'Cytro\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
         'include' => array( // {include ...}
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Aspect\Compiler::tagInclude'
+            'parser' => 'Cytro\Compiler::tagInclude'
         ),
         'var' => array(     // {var ...}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::varOpen',
-            'close' => 'Aspect\Compiler::varClose'
+            'open' => 'Cytro\Compiler::varOpen',
+            'close' => 'Cytro\Compiler::varClose'
         ),
         'block' => array(   // {block ...} {parent} {/block}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::tagBlockOpen',
-            'close' => 'Aspect\Compiler::tagBlockClose',
+            'open' => 'Cytro\Compiler::tagBlockOpen',
+            'close' => 'Cytro\Compiler::tagBlockClose',
             'tags' => array(
-                'parent' => 'Aspect\Compiler::tagParent'
+                'parent' => 'Cytro\Compiler::tagParent'
             ),
             'float_tags' => array('parent' => 1)
         ),
         'extends' => array( // {extends ...}
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Aspect\Compiler::tagExtends'
+            'parser' => 'Cytro\Compiler::tagExtends'
         ),
         'use' => array( // {use}
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Aspect\Compiler::tagUse'
+            'parser' => 'Cytro\Compiler::tagUse'
         ),
         'capture' => array( // {capture ...} {/capture}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::captureOpen',
-            'close' => 'Aspect\Compiler::captureClose'
+            'open' => 'Cytro\Compiler::captureOpen',
+            'close' => 'Cytro\Compiler::captureClose'
         ),
         'filter' => array( // {filter} ... {/filter}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::filterOpen',
-            'close' => 'Aspect\Compiler::filterClose'
+            'open' => 'Cytro\Compiler::filterOpen',
+            'close' => 'Cytro\Compiler::filterClose'
         ),
         'macro' => array(
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Aspect\Compiler::macroOpen',
-            'close' => 'Aspect\Compiler::macroClose'
+            'open' => 'Cytro\Compiler::macroOpen',
+            'close' => 'Cytro\Compiler::macroClose'
         ),
         'import' => array(
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Aspect\Compiler::tagImport'
+            'parser' => 'Cytro\Compiler::tagImport'
         )
     );
 
     /**
      * Just factory
      *
-     * @param string|Aspect\ProviderInterface $source path to templates or custom provider
+     * @param string|Cytro\ProviderInterface $source path to templates or custom provider
      * @param string $compile_dir path to compiled files
      * @param int $options
      * @throws InvalidArgumentException
-     * @return Aspect
+     * @return Cytro
      */
     public static function factory($source, $compile_dir = '/tmp', $options = 0) {
         if(is_string($source)) {
-            $provider = new \Aspect\FSProvider($source);
-        } elseif($source instanceof Aspect\ProviderInterface) {
+            $provider = new Cytro\FSProvider($source);
+        } elseif($source instanceof ProviderInterface) {
             $provider = $source;
         } else {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
@@ -224,16 +224,16 @@ class Aspect {
     }
 
     /**
-     * @param Aspect\ProviderInterface $provider
+     * @param Cytro\ProviderInterface $provider
      */
-    public function __construct(Aspect\ProviderInterface $provider) {
+    public function __construct(Cytro\ProviderInterface $provider) {
         $this->_provider = $provider;
     }
 
     /**
      * Set compile directory
      * @param string $dir directory to store compiled templates in
-     * @return Aspect
+     * @return Cytro
      */
     public function setCompileDir($dir) {
         $this->_compile_dir = $dir;
@@ -268,7 +268,7 @@ class Aspect {
      *
      * @param string $modifier
      * @param string $callback
-     * @return Aspect
+     * @return Cytro
      */
     public function addModifier($modifier, $callback) {
         $this->_modifiers[$modifier] = $callback;
@@ -280,7 +280,7 @@ class Aspect {
      *
      * @param string $compiler
      * @param callable $parser
-     * @return Aspect
+     * @return Cytro
      */
     public function addCompiler($compiler, $parser) {
         $this->_actions[$compiler] = array(
@@ -312,7 +312,7 @@ class Aspect {
      * @param callable $open_parser
      * @param callable|string $close_parser
      * @param array $tags
-     * @return Aspect
+     * @return Cytro
      */
     public function addBlockCompiler($compiler, $open_parser, $close_parser = self::DEFAULT_CLOSE_COMPILER, array $tags = array()) {
         $this->_actions[$compiler] = array(
@@ -330,7 +330,7 @@ class Aspect {
      * @param array $tags
      * @param array $floats
      * @throws LogicException
-     * @return Aspect
+     * @return Cytro
      */
     public function addBlockCompilerSmart($compiler, $storage, array $tags, array $floats = array()) {
         $c = array(
@@ -366,7 +366,7 @@ class Aspect {
      * @param string $function
      * @param callable $callback
      * @param callable|string $parser
-     * @return Aspect
+     * @return Cytro
      */
     public function addFunction($function, $callback, $parser = self::DEFAULT_FUNC_PARSER) {
         $this->_actions[$function] = array(
@@ -380,7 +380,7 @@ class Aspect {
     /**
      * @param string $function
      * @param callable $callback
-     * @return Aspect
+     * @return Cytro
      */
     public function addFunctionSmart($function, $callback) {
         $this->_actions[$function] = array(
@@ -396,7 +396,7 @@ class Aspect {
      * @param callable $callback
      * @param callable|string $parser_open
      * @param callable|string $parser_close
-     * @return Aspect
+     * @return Cytro
      */
     public function addBlockFunction($function, $callback, $parser_open = self::DEFAULT_FUNC_OPEN, $parser_close = self::DEFAULT_FUNC_CLOSE) {
         $this->_actions[$function] = array(
@@ -410,7 +410,7 @@ class Aspect {
 
     /**
      * @param array $funcs
-     * @return Aspect
+     * @return Cytro
      */
     public function addAllowedFunctions(array $funcs) {
         $this->_allowed_funcs = $this->_allowed_funcs + array_flip($funcs);
@@ -478,9 +478,9 @@ class Aspect {
      * Add source template provider by scheme
      *
      * @param string $scm scheme name
-     * @param Aspect\ProviderInterface $provider provider object
+     * @param Cytro\ProviderInterface $provider provider object
      */
-    public function addProvider($scm, \Aspect\ProviderInterface $provider) {
+    public function addProvider($scm, \Cytro\ProviderInterface $provider) {
         $this->_providers[$scm] = $provider;
     }
 
@@ -511,7 +511,7 @@ class Aspect {
 
     /**
      * @param bool|string $scm
-     * @return Aspect\ProviderInterface
+     * @return Cytro\ProviderInterface
      * @throws InvalidArgumentException
      */
     public function getProvider($scm = false) {
@@ -529,10 +529,10 @@ class Aspect {
     /**
      * Return empty template
      *
-     * @return Aspect\Template
+     * @return Cytro\Template
      */
     public function getRawTemplate() {
-        return new \Aspect\Template($this);
+        return new \Cytro\Template($this, $this->_options);
     }
 
     /**
@@ -540,7 +540,7 @@ class Aspect {
      *
      * @param string $template name of template
      * @param array $vars array of data for template
-     * @return Aspect\Render
+     * @return Cytro\Render
      */
     public function display($template, array $vars = array()) {
         return $this->getTemplate($template)->display($vars);
@@ -562,13 +562,13 @@ class Aspect {
      *
      * @param string $template
      * @param int $options
-     * @return Aspect\Template
+     * @return Cytro\Template
      */
     public function getTemplate($template, $options = 0) {
         $options = $this->_options | $options;
         $key = $template.".".dechex($options);
         if(isset($this->_storage[ $key ])) {
-            /** @var Aspect\Template $tpl  */
+            /** @var Cytro\Template $tpl  */
             $tpl = $this->_storage[ $key ];
             if(($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
                 return $this->_storage[ $key ] = $this->compile($template, true, $options);
@@ -584,10 +584,10 @@ class Aspect {
 
     /**
      * Add custom template into storage
-     * @param Aspect\Render $template
+     * @param Cytro\Render $template
      */
-    public function addTemplate(Aspect\Render $template, $options = 0) {
-        $this->_storage[ $template->getName().".".dechex($options) ] = $template;
+    public function addTemplate(Cytro\Render $template) {
+        $this->_storage[ $template->getName().".".dechex($template->getOptions()) ] = $template;
     }
 
     /**
@@ -595,7 +595,7 @@ class Aspect {
      *
      * @param string $tpl
      * @param int $opts
-     * @return Aspect\Render
+     * @return Cytro\Render
      */
     protected function _load($tpl, $opts) {
         $file_name = $this->_getCacheName($tpl, $opts);
@@ -624,14 +624,15 @@ class Aspect {
      *
      * @param string $tpl
      * @param bool $store store template on disk
-     * @param int $opts
+     * @param int $options
      * @throws RuntimeException
-     * @return \Aspect\Template
+     * @return \Cytro\Template
      */
-    public function compile($tpl, $store = true, $opts = 0) {
-        $template = Template::factory($this)->load($tpl);
+    public function compile($tpl, $store = true, $options = 0) {
+        $options = $this->_options | $options;
+        $template = Template::factory($this, $options)->load($tpl);
         if($store) {
-            $cache = $this->_getCacheName($tpl, $opts);
+            $cache = $this->_getCacheName($tpl, $options);
             $tpl_tmp = tempnam($this->_compile_dir, $cache);
             $tpl_fp = fopen($tpl_tmp, "w");
             if(!$tpl_fp) {
@@ -673,7 +674,7 @@ class Aspect {
      *
      */
     public function clearAllCompiles() {
-        \Aspect\FSProvider::clean($this->_compile_dir);
+        \Cytro\FSProvider::clean($this->_compile_dir);
     }
 
     /**
@@ -681,10 +682,10 @@ class Aspect {
      *
      * @param string $code
      * @param string $name
-     * @return Aspect\Template
+     * @return Cytro\Template
      */
     public function compileCode($code, $name = 'Runtime compile') {
-        return Template::factory($this)->source($name, $code);
+        return Template::factory($this, $this->_options)->source($name, $code);
     }
 
 

@@ -1,14 +1,14 @@
 <?php
 /*
- * This file is part of Aspect.
+ * This file is part of Cytro.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Aspect;
-use Aspect;
+namespace Cytro;
+use Cytro;
 
 /**
  * Template compiler
@@ -58,32 +58,26 @@ class Template extends Render {
      */
     private $_pos = 0;
     private $_line = 1;
-    private $_trim = false;
     private $_post = array();
     /**
      * @var bool
      */
     private $_ignore = false;
-    /**
-     * Options
-     * @var int
-     */
-    private $_options = 0;
 
     /**
      * Just factory
      *
-     * @param \Aspect $aspect
+     * @param \Cytro $aspect
      * @return Template
      */
-    public static function factory(Aspect $aspect) {
-        return new static($aspect);
+    public static function factory(Cytro $aspect, $options) {
+        return new static($aspect, $options);
     }
 
     /**
-     * @param Aspect $aspect Template storage
+     * @param Cytro $aspect Template storage
      */
-    public function __construct(Aspect $aspect) {
+    public function __construct(Cytro $aspect, $options) {
         $this->_aspect = $aspect;
         $this->_options = $this->_aspect->getOptions();
     }
@@ -92,7 +86,7 @@ class Template extends Render {
      * Load source from provider
      * @param string $name
      * @param bool $compile
-     * @return \Aspect\Template
+     * @return \Cytro\Template
      */
     public function load($name, $compile = true) {
         $this->_name = $name;
@@ -115,7 +109,7 @@ class Template extends Render {
      * @param string $name template name
      * @param string $src template source
      * @param bool $compile
-     * @return \Aspect\Template
+     * @return \Cytro\Template
      */
     public function source($name, $src, $compile = true) {
         $this->_name = $name;
@@ -275,8 +269,8 @@ class Template extends Render {
      */
     public function getTemplateCode() {
         return "<?php \n".
-            "/** Aspect template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Aspect\\Render(\$aspect, ".$this->_getClosureSource().", ".var_export(array(
+            "/** Cytro template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
+            "return new Cytro\\Render(\$aspect, ".$this->_getClosureSource().", ".var_export(array(
             "options" => $this->_options,
             "provider" => $this->_scm,
             "name" => $this->_name,
@@ -422,18 +416,18 @@ class Template extends Render {
 
         if($act = $this->_aspect->getFunction($action)) { // call some function
             switch($act["type"]) {
-                case Aspect::BLOCK_COMPILER:
+                case Cytro::BLOCK_COMPILER:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     $code = $scope->open($tokens);
                     if(!$scope->is_closed) {
                         array_push($this->_stack, $scope);
                     }
                     return $code;
-                case Aspect::INLINE_COMPILER:
+                case Cytro::INLINE_COMPILER:
                     return call_user_func($act["parser"], $tokens, $this);
-                case Aspect::INLINE_FUNCTION:
+                case Cytro::INLINE_FUNCTION:
                     return call_user_func($act["parser"], $act["function"], $tokens, $this);
-                case Aspect::BLOCK_FUNCTION:
+                case Cytro::BLOCK_FUNCTION:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     $scope->setFuncName($act["function"]);
                     array_push($this->_stack, $scope);
@@ -641,7 +635,7 @@ class Template extends Render {
             } elseif($t === T_OBJECT_OPERATOR) {
                 $prop = $tokens->getNext(T_STRING);
                 if($tokens->isNext("(")) {
-                    if($this->_options & Aspect::DENY_METHODS) {
+                    if($this->_options & Cytro::DENY_METHODS) {
                         throw new \LogicException("Forbidden to call methods");
                     }
                     $pure_var = false;

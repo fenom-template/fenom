@@ -1,5 +1,5 @@
 <?php
-namespace Aspect;
+namespace Cytro;
 
 interface ProviderInterface {
     /**

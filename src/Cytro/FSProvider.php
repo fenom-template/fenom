@@ -1,7 +1,7 @@
 <?php
-namespace Aspect;
+namespace Cytro;
 
-use Aspect\ProviderInterface;
+use Cytro\ProviderInterface;
 /**
  * Templates provider
  * @author Ivan Shalganov

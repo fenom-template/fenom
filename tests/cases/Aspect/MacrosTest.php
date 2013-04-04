@@ -1,5 +1,5 @@
 <?php
-namespace Aspect;
+namespace Cytro;
 
 class MacrosTest extends TestCase {
 
@@ -45,30 +45,30 @@ class MacrosTest extends TestCase {
     }
 
     public function testMacros() {
-        $tpl = $this->aspect->compile('math.tpl');
+        $tpl = $this->cytro->compile('math.tpl');
 
         $this->assertStringStartsWith('x + y = ', trim($tpl->macros["plus"]["body"]));
         $this->assertSame('Math: x + y = 5 , x - y - z = 6', Modifier::strip($tpl->fetch(array()), true));
     }
 
     public function testImport() {
-        $tpl = $this->aspect->compile('import.tpl');
+        $tpl = $this->cytro->compile('import.tpl');
 
         $this->assertSame('Imp: x + y = 3 , x - y - z = 3', Modifier::strip($tpl->fetch(array()), true));
     }
 
     public function testImportCustom() {
-        $tpl = $this->aspect->compile('import_custom.tpl');
+        $tpl = $this->cytro->compile('import_custom.tpl');
 
         $this->assertSame('a: x + y = 3 , x - y - z = 3 , new minus macros .', Modifier::strip($tpl->fetch(array()), true));
     }
 
     /**
      * @expectedExceptionMessage Undefined macro 'plus'
-     * @expectedException \Aspect\CompileException
+     * @expectedException \Cytro\CompileException
      */
     public function testImportMiss() {
-        $tpl = $this->aspect->compile('import_miss.tpl');
+        $tpl = $this->cytro->compile('import_miss.tpl');
 
         $this->assertSame('a: x + y = 3 , x - y - z = 3 , new minus macros .', Modifier::strip($tpl->fetch(array()), true));
     }

@@ -1,14 +1,14 @@
 <?php
-namespace Aspect;
-use Aspect\Template,
-    Aspect,
-    Aspect\Render;
+namespace Cytro;
+use Cytro\Template,
+    Cytro,
+    Cytro\Render;
 
 class TemplateTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->aspect->addTemplate(new Render($this->aspect, function ($tpl) {
+        $this->cytro->addTemplate(new Render($this->cytro, function ($tpl) {
             echo "<b>Welcome, ".$tpl["username"]." (".$tpl["email"].")</b>";
         }, array(
             "name" => "welcome.tpl"
@@ -111,14 +111,14 @@ class TemplateTest extends TestCase {
 
     public static function providerVarsInvalid() {
         return array(
-            array('hello, {$a.}!',             'Aspect\CompileException', "Unexpected end of expression"),
-            array('hello, {$b[c}!',            'Aspect\CompileException', "Unexpected end of expression"),
-            array('hello, {$b.c]}!',           'Aspect\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[ ]}!',           'Aspect\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[9/].c}!',        'Aspect\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[3]$c}!',         'Aspect\CompileException', "Unexpected token '\$c'"),
-            array('hello, {$b[3]c}!',          'Aspect\CompileException', "Unexpected token 'c'"),
-            array('hello, {$b.obj->valid()}!', 'Aspect\SecurityException', "Forbidden to call methods", Aspect::DENY_METHODS),
+            array('hello, {$a.}!',             'Cytro\CompileException', "Unexpected end of expression"),
+            array('hello, {$b[c}!',            'Cytro\CompileException', "Unexpected end of expression"),
+            array('hello, {$b.c]}!',           'Cytro\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[ ]}!',           'Cytro\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[9/].c}!',        'Cytro\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[3]$c}!',         'Cytro\CompileException', "Unexpected token '\$c'"),
+            array('hello, {$b[3]c}!',          'Cytro\CompileException', "Unexpected token 'c'"),
+            array('hello, {$b.obj->valid()}!', 'Cytro\SecurityException', "Forbidden to call methods", Cytro::DENY_METHODS),
         );
     }
 
@@ -173,12 +173,12 @@ class TemplateTest extends TestCase {
 
     public static function providerModifiersInvalid() {
         return array(
-            array('Mod: {$lorem|}!',                     'Aspect\CompileException', "Unexpected end of expression"),
-            array('Mod: {$lorem|str_rot13}!',           'Aspect\CompileException', "Modifier str_rot13 not found", Aspect::DENY_INLINE_FUNCS),
-            array('Mod: {$lorem|my_encode}!',           'Aspect\CompileException', "Modifier my_encode not found"),
-            array('Mod: {$lorem|truncate:}!',           'Aspect\CompileException', "Unexpected end of expression"),
-            array('Mod: {$lorem|truncate:abs}!',        'Aspect\CompileException', "Unexpected token 'abs'"),
-            array('Mod: {$lorem|truncate:80|}!',        'Aspect\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|}!',                     'Cytro\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|str_rot13}!',           'Cytro\CompileException', "Modifier str_rot13 not found", Cytro::DENY_INLINE_FUNCS),
+            array('Mod: {$lorem|my_encode}!',           'Cytro\CompileException', "Modifier my_encode not found"),
+            array('Mod: {$lorem|truncate:}!',           'Cytro\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|truncate:abs}!',        'Cytro\CompileException', "Unexpected token 'abs'"),
+            array('Mod: {$lorem|truncate:80|}!',        'Cytro\CompileException', "Unexpected end of expression"),
         );
     }
 
@@ -220,15 +220,15 @@ class TemplateTest extends TestCase {
 
     public static function providerExpressionsInvalid() {
         return array(
-            array('If: {-"hi"} end',         'Aspect\CompileException', "Unexpected token '-'"),
-            array('If: {($a++)++} end',      'Aspect\CompileException', "Unexpected token '++'"),
-            array('If: {$a + * $c} end',     'Aspect\CompileException', "Unexpected token '*'"),
-            array('If: {/$a} end',           'Aspect\CompileException', "Unexpected token '\$a'"),
-            array('If: {$a == 5 > 4} end',   'Aspect\CompileException', "Unexpected token '>'"),
-            array('If: {$a != 5 <= 4} end',  'Aspect\CompileException', "Unexpected token '<='"),
-            array('If: {$a != 5 => 4} end',  'Aspect\CompileException', "Unexpected token '=>'"),
-            array('If: {$a + (*6)} end',     'Aspect\CompileException', "Unexpected token '*'"),
-            array('If: {$a + ( 6} end',      'Aspect\CompileException', "Brackets don't match"),
+            array('If: {-"hi"} end',         'Cytro\CompileException', "Unexpected token '-'"),
+            array('If: {($a++)++} end',      'Cytro\CompileException', "Unexpected token '++'"),
+            array('If: {$a + * $c} end',     'Cytro\CompileException', "Unexpected token '*'"),
+            array('If: {/$a} end',           'Cytro\CompileException', "Unexpected token '\$a'"),
+            array('If: {$a == 5 > 4} end',   'Cytro\CompileException', "Unexpected token '>'"),
+            array('If: {$a != 5 <= 4} end',  'Cytro\CompileException', "Unexpected token '<='"),
+            array('If: {$a != 5 => 4} end',  'Cytro\CompileException', "Unexpected token '=>'"),
+            array('If: {$a + (*6)} end',     'Cytro\CompileException', "Unexpected token '*'"),
+            array('If: {$a + ( 6} end',      'Cytro\CompileException', "Brackets don't match"),
         );
     }
 
@@ -265,8 +265,8 @@ class TemplateTest extends TestCase {
 
     public static function providerIncludeInvalid() {
         return array(
-            array('Include {include} template',   'Aspect\CompileException', "Unexpected end of expression"),
-            array('Include {include another="welcome.tpl"} template',   'Aspect\CompileException', "Unexpected token '='"),
+            array('Include {include} template',   'Cytro\CompileException', "Unexpected end of expression"),
+            array('Include {include another="welcome.tpl"} template',   'Cytro\CompileException', "Unexpected token '='"),
         );
     }
 
@@ -306,10 +306,10 @@ class TemplateTest extends TestCase {
 
     public static function providerIfInvalid() {
         return array(
-            array('If: {if} block1 {/if} end',                                   'Aspect\CompileException', "Unexpected end of expression"),
-            array('If: {if 1} block1 {elseif} block2 {/if} end',                 'Aspect\CompileException', "Unexpected end of expression"),
-            array('If: {if 1} block1 {else} block2 {elseif 0} block3 {/if} end', 'Aspect\CompileException', "Incorrect use of the tag {elseif}"),
-            array('If: {if 1} block1 {else} block2 {/if} block3 {elseif 0} end', 'Aspect\CompileException', "Unexpected tag 'elseif' (this tag can be used with 'if')"),
+            array('If: {if} block1 {/if} end',                                   'Cytro\CompileException', "Unexpected end of expression"),
+            array('If: {if 1} block1 {elseif} block2 {/if} end',                 'Cytro\CompileException', "Unexpected end of expression"),
+            array('If: {if 1} block1 {else} block2 {elseif 0} block3 {/if} end', 'Cytro\CompileException', "Incorrect use of the tag {elseif}"),
+            array('If: {if 1} block1 {else} block2 {/if} block3 {elseif 0} end', 'Cytro\CompileException', "Unexpected tag 'elseif' (this tag can be used with 'if')"),
         );
     }
 
@@ -347,20 +347,20 @@ class TemplateTest extends TestCase {
 
     public static function providerCreateVarInvalid() {
         return array(
-            array('Create: {var $v} Result: {$v} end',               'Aspect\CompileException', "Unexpected end of expression"),
-            array('Create: {var $v = } Result: {$v} end',            'Aspect\CompileException', "Unexpected end of expression"),
-            array('Create: {var $v = 1++} Result: {$v} end',         'Aspect\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = c} Result: {$v} end',           'Aspect\CompileException', "Unexpected token 'c'"),
-            array('Create: {var $v = ($a)++} Result: {$v} end',      'Aspect\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = --$a++} Result: {$v} end',      'Aspect\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = $a|upper++} Result: {$v} end',  'Aspect\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Aspect\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = max($a,2)} Result: {$v} end',   'Aspect\CompileException', "Modifier max not found", Aspect::DENY_INLINE_FUNCS),
-            array('Create: {var $v = 4*} Result: {$v} end',          'Aspect\CompileException', "Unexpected token '*'"),
-            array('Create: {var $v = ""$a} Result: {$v} end',        'Aspect\CompileException', "Unexpected token '\$a'"),
-            array('Create: {var $v = [1,2} Result: {$v} end',        'Aspect\CompileException', "Unexpected end of expression"),
-            array('Create: {var $v = empty(2)} Result: {$v} end',    'Aspect\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
-            array('Create: {var $v = isset(2)} Result: {$v} end',    'Aspect\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
+            array('Create: {var $v} Result: {$v} end',               'Cytro\CompileException', "Unexpected end of expression"),
+            array('Create: {var $v = } Result: {$v} end',            'Cytro\CompileException', "Unexpected end of expression"),
+            array('Create: {var $v = 1++} Result: {$v} end',         'Cytro\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = c} Result: {$v} end',           'Cytro\CompileException', "Unexpected token 'c'"),
+            array('Create: {var $v = ($a)++} Result: {$v} end',      'Cytro\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = --$a++} Result: {$v} end',      'Cytro\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = $a|upper++} Result: {$v} end',  'Cytro\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Cytro\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = max($a,2)} Result: {$v} end',   'Cytro\CompileException', "Modifier max not found", Cytro::DENY_INLINE_FUNCS),
+            array('Create: {var $v = 4*} Result: {$v} end',          'Cytro\CompileException', "Unexpected token '*'"),
+            array('Create: {var $v = ""$a} Result: {$v} end',        'Cytro\CompileException', "Unexpected token '\$a'"),
+            array('Create: {var $v = [1,2} Result: {$v} end',        'Cytro\CompileException', "Unexpected end of expression"),
+            array('Create: {var $v = empty(2)} Result: {$v} end',    'Cytro\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
+            array('Create: {var $v = isset(2)} Result: {$v} end',    'Cytro\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
 
         );
     }
@@ -453,27 +453,27 @@ class TemplateTest extends TestCase {
 
     public static function providerForeachInvalid() {
         return array(
-            array('Foreach: {foreach} {$e}, {/foreach} end',              'Aspect\CompileException', "Unexpected end of tag {foreach}"),
-            array('Foreach: {foreach $list} {$e}, {/foreach} end',              'Aspect\CompileException', "Unexpected end of expression"),
-            array('Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach array_random() as $e} {$e}, {/foreach} end', 'Aspect\CompileException', "Unexpected token 'array_random'"),
-            array('Foreach: {foreach $list as $e+1} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as $k+1 => $e} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as max($i,1) => $e} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as max($e,1)} {$e}, {/foreach} end', 'Aspect\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list => $e} {$e}, {/foreach} end',        'Aspect\CompileException', "Unexpected token '=>'"),
-            array('Foreach: {foreach $list $k => $e} {$e}, {/foreach} end',     'Aspect\CompileException', "Unexpected token '\$k'"),
-            array('Foreach: {foreach $list as $k =>} {$e}, {/foreach} end',     'Aspect\CompileException', "Unexpected end of expression"),
-            array('Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end', 'Aspect\CompileException', "Unexpected token 'last' in tag {foreach}"),
-            array('Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end', 'Aspect\CompileException', "Unknown parameter 'unknown'"),
-	        array('Foreach: {foreach $list as $e index=$i+1} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
-	        array('Foreach: {foreach $list as $e first=$f+1} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
-	        array('Foreach: {foreach $list as $e last=$l+1} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token '+'"),
-	        array('Foreach: {foreach $list as $e index=max($i,1)} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
-	        array('Foreach: {foreach $list as $e first=max($i,1)} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
-	        array('Foreach: {foreach $list as $e last=max($i,1)} {$e}, {/foreach} end',      'Aspect\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {break} {/foreach} end',     'Aspect\CompileException', "Improper usage of the tag {break}"),
-            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {continue} {/foreach} end',  'Aspect\CompileException', "Improper usage of the tag {continue}"),
+            array('Foreach: {foreach} {$e}, {/foreach} end',              'Cytro\CompileException', "Unexpected end of tag {foreach}"),
+            array('Foreach: {foreach $list} {$e}, {/foreach} end',              'Cytro\CompileException', "Unexpected end of expression"),
+            array('Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach array_random() as $e} {$e}, {/foreach} end', 'Cytro\CompileException', "Unexpected token 'array_random'"),
+            array('Foreach: {foreach $list as $e+1} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as $k+1 => $e} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as max($i,1) => $e} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list as max($e,1)} {$e}, {/foreach} end', 'Cytro\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list => $e} {$e}, {/foreach} end',        'Cytro\CompileException', "Unexpected token '=>'"),
+            array('Foreach: {foreach $list $k => $e} {$e}, {/foreach} end',     'Cytro\CompileException', "Unexpected token '\$k'"),
+            array('Foreach: {foreach $list as $k =>} {$e}, {/foreach} end',     'Cytro\CompileException', "Unexpected end of expression"),
+            array('Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end', 'Cytro\CompileException', "Unexpected token 'last' in tag {foreach}"),
+            array('Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end', 'Cytro\CompileException', "Unknown parameter 'unknown'"),
+	        array('Foreach: {foreach $list as $e index=$i+1} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token '+'"),
+	        array('Foreach: {foreach $list as $e first=$f+1} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token '+'"),
+	        array('Foreach: {foreach $list as $e last=$l+1} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token '+'"),
+	        array('Foreach: {foreach $list as $e index=max($i,1)} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token 'max'"),
+	        array('Foreach: {foreach $list as $e first=max($i,1)} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token 'max'"),
+	        array('Foreach: {foreach $list as $e last=max($i,1)} {$e}, {/foreach} end',      'Cytro\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {break} {/foreach} end',     'Cytro\CompileException', "Improper usage of the tag {break}"),
+            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {continue} {/foreach} end',  'Cytro\CompileException', "Improper usage of the tag {continue}"),
         );
     }
 
@@ -518,9 +518,9 @@ class TemplateTest extends TestCase {
 
     public static function providerSwitchInvalid() {
         return array(
-            array('Switch: {switch}{case 1} one {break}{/switch} end',         'Aspect\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{case} one {break}{/switch} end',         'Aspect\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{break}{case} one {/switch} end',         'Aspect\CompileException', "Improper usage of the tag {break}"),
+            array('Switch: {switch}{case 1} one {break}{/switch} end',         'Cytro\CompileException', "Unexpected end of expression"),
+            array('Switch: {switch 1}{case} one {break}{/switch} end',         'Cytro\CompileException', "Unexpected end of expression"),
+            array('Switch: {switch 1}{break}{case} one {/switch} end',         'Cytro\CompileException', "Improper usage of the tag {break}"),
         );
     }
 
@@ -536,7 +536,7 @@ class TemplateTest extends TestCase {
 
     public static function providerWhileInvalid() {
         return array(
-            array('While: {while} block {/while} end',         'Aspect\CompileException', "Unexpected end of expression"),
+            array('While: {while} block {/while} end',         'Cytro\CompileException', "Unexpected end of expression"),
         );
     }
 
@@ -564,29 +564,29 @@ class TemplateTest extends TestCase {
 
     public static function providerForInvalid() {
         return array(
-            array('For: {for} block1 {/for} end',                    'Aspect\CompileException', "Unexpected end of expression"),
-            array('For: {for $a=} block1 {/for} end',                'Aspect\CompileException', "Unexpected end of expression"),
-            array('For: {for $a+1=3 to=6} block1 {/for} end',        'Aspect\CompileException', "Unexpected token '+'"),
-            array('For: {for max($a,$b)=3 to=6} block1 {/for} end',  'Aspect\CompileException', "Unexpected token 'max'"),
-            array('For: {for to=6 $a=3} block1 {/for} end',          'Aspect\CompileException', "Unexpected token 'to'"),
-            array('For: {for index=$i $a=3 to=6} block1 {/for} end', 'Aspect\CompileException', "Unexpected token 'index'"),
-            array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Aspect\CompileException', "Unexpected token 'first'"),
-            array('For: {for last=$i $a=3 to=6} block1 {/for} end',  'Aspect\CompileException', "Unexpected token 'last'"),
-            array('For: {for $a=4 to=6 unk=4} block1 {/for} end',    'Aspect\CompileException', "Unknown parameter 'unk'"),
-            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end',     'Aspect\CompileException', "Improper usage of the tag {break}"),
-            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end',  'Aspect\CompileException', "Improper usage of the tag {continue}"),
+            array('For: {for} block1 {/for} end',                    'Cytro\CompileException', "Unexpected end of expression"),
+            array('For: {for $a=} block1 {/for} end',                'Cytro\CompileException', "Unexpected end of expression"),
+            array('For: {for $a+1=3 to=6} block1 {/for} end',        'Cytro\CompileException', "Unexpected token '+'"),
+            array('For: {for max($a,$b)=3 to=6} block1 {/for} end',  'Cytro\CompileException', "Unexpected token 'max'"),
+            array('For: {for to=6 $a=3} block1 {/for} end',          'Cytro\CompileException', "Unexpected token 'to'"),
+            array('For: {for index=$i $a=3 to=6} block1 {/for} end', 'Cytro\CompileException', "Unexpected token 'index'"),
+            array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Cytro\CompileException', "Unexpected token 'first'"),
+            array('For: {for last=$i $a=3 to=6} block1 {/for} end',  'Cytro\CompileException', "Unexpected token 'last'"),
+            array('For: {for $a=4 to=6 unk=4} block1 {/for} end',    'Cytro\CompileException', "Unknown parameter 'unk'"),
+            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end',     'Cytro\CompileException', "Improper usage of the tag {break}"),
+            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end',  'Cytro\CompileException', "Improper usage of the tag {continue}"),
         );
     }
 
     public static function providerLayersInvalid() {
         return array(
-            array('Layers: {foreach $list as $e} block1 {if 1} {foreachelse} {/if} {/foreach} end', 'Aspect\CompileException', "Unexpected tag 'foreachelse' (this tag can be used with 'foreach')"),
-            array('Layers: {foreach $list as $e} block1 {if 1}  {/foreach} {/if} end',              'Aspect\CompileException', "Unexpected closing of the tag 'foreach'"),
-            array('Layers: {for $a=4 to=6} block1 {if 1} {forelse} {/if} {/for} end',               'Aspect\CompileException', "Unexpected tag 'forelse' (this tag can be used with 'for')"),
-            array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end',                        'Aspect\CompileException', "Unexpected closing of the tag 'for'"),
-            array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end',                         'Aspect\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
-            array('Layers: {/switch} end',                                                          'Aspect\CompileException', "Unexpected closing of the tag 'switch'"),
-            array('Layers: {if 1} end',                                                             'Aspect\CompileException', "Unclosed tag(s): {if}"),
+            array('Layers: {foreach $list as $e} block1 {if 1} {foreachelse} {/if} {/foreach} end', 'Cytro\CompileException', "Unexpected tag 'foreachelse' (this tag can be used with 'foreach')"),
+            array('Layers: {foreach $list as $e} block1 {if 1}  {/foreach} {/if} end',              'Cytro\CompileException', "Unexpected closing of the tag 'foreach'"),
+            array('Layers: {for $a=4 to=6} block1 {if 1} {forelse} {/if} {/for} end',               'Cytro\CompileException', "Unexpected tag 'forelse' (this tag can be used with 'for')"),
+            array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end',                        'Cytro\CompileException', "Unexpected closing of the tag 'for'"),
+            array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end',                         'Cytro\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
+            array('Layers: {/switch} end',                                                          'Cytro\CompileException', "Unexpected closing of the tag 'switch'"),
+            array('Layers: {if 1} end',                                                             'Cytro\CompileException', "Unclosed tag(s): {if}"),
         );
     }
 

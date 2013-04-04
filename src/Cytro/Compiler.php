@@ -1,8 +1,8 @@
 <?php
-namespace Aspect;
-use Aspect\Tokenizer;
-use Aspect\Template;
-use Aspect\Scope;
+namespace Cytro;
+use Cytro\Tokenizer;
+use Cytro\Template;
+use Cytro\Scope;
 
 /**
  * Compilers collection
@@ -21,7 +21,7 @@ class Compiler {
         $cname = $tpl->parseFirstArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
         if($p) { // if we have additionally variables
-            if($name && ($tpl->getStorage()->getOptions() & \Aspect::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
+            if($name && ($tpl->getStorage()->getOptions() & \Cytro::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 return '$_tpl = (array)$tpl; $tpl->exchangeArray('.self::toArray($p).'+$_tpl); ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
@@ -29,7 +29,7 @@ class Compiler {
                 return '$tpl->getStorage()->getTemplate('.$cname.')->display('.self::toArray($p).'+(array)$tpl);';
             }
         } else {
-            if($name && ($tpl->getStorage()->getOptions() & \Aspect::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
+            if($name && ($tpl->getStorage()->getOptions() & \Cytro::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 return '$_tpl = (array)$tpl; ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
@@ -375,14 +375,19 @@ class Compiler {
         if(empty($tpl->_extended)) {
             $tpl->addPostCompile(__CLASS__."::extendBody");
         }
+        /*if($tpl->getOptions() & Template::EXTENDED) {
+            $tpl->_compatible = true;
+        } else {
+            $tpl->_compatible = false;
+        }*/
         if($name) { // static extends
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
             $tpl->_compatible = &$tpl->_extends->_compatible;
-            $tpl->addDepend($tpl->_extends); // for valid compile-time need take template from storage
+            $tpl->addDepend($tpl->_extends);
             return "";
         } else { // dynamic extends
             $tpl->_extends = $tpl_name;
-            return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Aspect\Template::EXTENDED);';
+            return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Cytro\Template::EXTENDED);';
         }
     }
 

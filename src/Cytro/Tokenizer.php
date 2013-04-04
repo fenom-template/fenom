@@ -1,13 +1,13 @@
 <?php
 /*
- * This file is part of Aspect.
+ * This file is part of Cytro.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Aspect;
+namespace Cytro;
 
 defined('T_INSTEADOF')  || define('T_INSTEADOF', 341);
 defined('T_TRAIT')      || define('T_TRAIT', 355);

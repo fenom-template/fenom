@@ -1,9 +1,9 @@
-Aspect - awesome template engine for PHP
+Cytro - awesome template engine for PHP
 ==========================
 
-> Composer package: `{"bzick/aspect": "dev-master"}`. See on [Packagist.org](https://packagist.org/packages/bzick/aspect)
+> Composer package: `{"bzick/cytro": "dev-master"}`. See on [Packagist.org](https://packagist.org/packages/bzick/aspect)
 
-[![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/aspect)
+[![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/cytro)
 ## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)
 
 * Simplest known [syntax](./docs/syntax.md)
@@ -20,11 +20,11 @@ Simple template
 ```smarty
 <html>
     <head>
-        <title>Aspect</title>
+        <title>Cytro</title>
     </head>
     <body>
-    {if $templaters.aspect?}
-        {var $tpl = $templaters.aspect}
+    {if $templaters.cytro?}
+        {var $tpl = $templaters.cytro}
         <div>Name: {$tpl.name}</div>
         <div>Description: {$tpl.name|truncate:80}</div>
         <ul>
@@ -41,24 +41,24 @@ Display template
 
 ```php
 <?php
-$aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
-$aspect->display("pages/about.tpl", $data);
+$cytro = Cytro::factory('./templates', './compiled', Cytro::CHECK_MTIME);
+$cytro->display("pages/about.tpl", $data);
 ```
 
 Get content
 
 ```php
 <?php
-$aspect = Aspect::factory('./templates', './compiled', Aspect::CHECK_MTIME);
-$content = $aspect->fetch("pages/about.tpl", $data);
+$cytro = Cytro::factory('./templates', './compiled', Cytro::CHECK_MTIME);
+$content = $cytro->fetch("pages/about.tpl", $data);
 ```
 
 Runtime compilation
 
 ```php
 <?php
-$aspect = new Aspect();
-$tempate = $aspect->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
+$cytro = new Cytro();
+$tempate = $cytro->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
 $tempate->display($data);
 // or
 $content = $tempate->fetch($data);

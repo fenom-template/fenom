@@ -1,5 +1,5 @@
 <?php
-namespace Aspect;
+namespace Cytro;
 
 
 class ModifiersTest extends TestCase {
@@ -32,7 +32,7 @@ class ModifiersTest extends TestCase {
      * @param bool $by_word
      */
     public function testTruncate($in, $out, $count, $delim = '...', $by_words = false, $middle = false) {
-        $tpl = $this->aspect->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
+        $tpl = $this->cytro->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
         $this->assertEquals($out, $tpl->fetch(array(
             "text" => $in,
             "count" => $count,

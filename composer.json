@@ -1,9 +1,9 @@
 {
-    "name": "bzick/aspect",
+    "name": "bzick/cytro",
     "type": "library",
-    "description": "Aspect - fast template engine for PHP",
-    "homepage": "https://github.com/bzick/aspect",
-    "keywords": ["aspect", "template", "templating"],
+    "description": "Cytro - fast template engine for PHP",
+    "homepage": "http://cytro.org/",
+    "keywords": ["cytro", "template", "templating"],
     "license": "MIT",
     "authors": [
         {
@@ -21,7 +21,7 @@
         "twig/twig": "1.*"
     },
     "autoload": {
-        "psr-0": { "Aspect\\": "src/" },
-        "classmap": [ "src/Aspect.php" ]
+        "psr-0": { "Cytro\\": "src/" },
+        "classmap": [ "src/Cytro.php" ]
     }
 }

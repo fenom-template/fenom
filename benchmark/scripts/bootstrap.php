@@ -45,13 +45,13 @@ class Benchmark {
 
     public static function aspect($tpl, $data, $double, $message) {
 
-        $aspect = Aspect::factory(__DIR__.'/../templates', __DIR__."/../compile/");
+        $cytro = Cytro::factory(__DIR__.'/../templates', __DIR__."/../compile/");
 
         if($double) {
-            $aspect->fetch($tpl, $data);
+            $cytro->fetch($tpl, $data);
         }
         $_SERVER["t"] = $start = microtime(true);
-        $aspect->fetch($tpl, $data);
+        $cytro->fetch($tpl, $data);
         printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
     }
 

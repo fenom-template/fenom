@@ -1,8 +1,8 @@
 <?php
-namespace Aspect;
-use Aspect;
+namespace Cytro;
+use Cytro;
 
-class FSProviderTest extends \Aspect\TestCase {
+class FSProviderTest extends \Cytro\TestCase {
     /**
      * @var FSProvider
      */
@@ -12,7 +12,7 @@ class FSProviderTest extends \Aspect\TestCase {
         parent::setUp();
         $this->tpl("template1.tpl", 'Template 1 {$a}');
         $this->tpl("template2.tpl", 'Template 2 {$a}');
-        $this->provider = new FSProvider(ASPECT_RESOURCES.'/template');
+        $this->provider = new FSProvider(CYTRO_RESOURCES.'/template');
     }
 
     public function testIsTemplateExists() {
@@ -23,8 +23,8 @@ class FSProviderTest extends \Aspect\TestCase {
     public function testGetSource() {
         $src = $this->provider->getSource("template1.tpl", $time);
         clearstatcache();
-        $this->assertEquals(file_get_contents(ASPECT_RESOURCES.'/template/template1.tpl'), $src);
-        $this->assertEquals(filemtime(ASPECT_RESOURCES.'/template/template1.tpl'), $time);
+        $this->assertEquals(file_get_contents(CYTRO_RESOURCES.'/template/template1.tpl'), $src);
+        $this->assertEquals(filemtime(CYTRO_RESOURCES.'/template/template1.tpl'), $time);
     }
 
     /**
@@ -37,7 +37,7 @@ class FSProviderTest extends \Aspect\TestCase {
     public function testGetLastModified() {
         $time = $this->provider->getLastModified("template1.tpl");
         clearstatcache();
-        $this->assertEquals(filemtime(ASPECT_RESOURCES.'/template/template1.tpl'), $time);
+        $this->assertEquals(filemtime(CYTRO_RESOURCES.'/template/template1.tpl'), $time);
     }
 
     /**
@@ -52,7 +52,7 @@ class FSProviderTest extends \Aspect\TestCase {
         $this->assertSame($tpls, array_keys($times));
         clearstatcache();
         foreach($times as $template => $time) {
-            $this->assertEquals(filemtime(ASPECT_RESOURCES."/template/$template"), $time);
+            $this->assertEquals(filemtime(CYTRO_RESOURCES."/template/$template"), $time);
         }
     }
 
