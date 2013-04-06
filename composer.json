@@ -2,7 +2,7 @@
     "name": "bzick/cytro",
     "type": "library",
     "description": "Cytro - fast template engine for PHP",
-    "homepage": "http://cytro.org/",
+    "homepage": "http://bzick.github.io/cytro/",
     "keywords": ["cytro", "template", "templating"],
     "license": "MIT",
     "authors": [
