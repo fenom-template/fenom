@@ -43,7 +43,7 @@ class Benchmark {
         printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
     }
 
-    public static function aspect($tpl, $data, $double, $message) {
+    public static function cytro($tpl, $data, $double, $message) {
 
         $cytro = Cytro::factory(__DIR__.'/../templates', __DIR__."/../compile/");
 
@@ -56,9 +56,14 @@ class Benchmark {
     }
 
     public static function run($engine, $template, $data, $double, $message) {
-        passthru(sprintf("php -dmemory_limit=512M %s/run.php --engine '%s' --template '%s' --data '%s' --message '%s' %s", __DIR__, $engine, $template, $data, $message, $double ? '--double' : ''));
+        passthru(sprintf("php -dmemory_limit=512M -dxdebug.max_nesting_level=1024 %s/run.php --engine '%s' --template '%s' --data '%s' --message '%s' %s", __DIR__, $engine, $template, $data, $message, $double ? '--double' : ''));
     }
 
+    /**
+     * @param $engine
+     * @param $template
+     * @param $data
+     */
     public static function runs($engine, $template, $data) {
         self::run($engine, $template, $data, false, '!compiled and !loaded');
         self::run($engine, $template, $data, false, ' compiled and !loaded');

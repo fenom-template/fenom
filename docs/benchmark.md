@@ -3,7 +3,7 @@ Benchmark
 
 To start benchmark run script `benchmark/run.php`.
 
-### Smarty3 vs Twig vs Aspect
+### Smarty3 vs Twig vs Cytro
 
     Print varaibles
 
