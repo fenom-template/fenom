@@ -12,8 +12,6 @@ namespace Cytro;
 /**
  * Collection of modifiers
  *
- * @package    aspect
- * @author     Ivan Shalganov <owner@bzick.net>
  */
 class Modifier {
 
@@ -84,9 +82,9 @@ class Modifier {
     /**
      * Crop string by length
      * UTF8 support
-     * @param string $string
-     * @param int $length
-     * @param string $etc
+     * @param string $string text witch will be truncate
+     * @param int $length maximum symbols of result string
+     * @param string $etc place holder truncated symbols
      * @param bool $by_words
      * @param bool $middle
      * @return string
@@ -116,7 +114,7 @@ class Modifier {
 
     /**
      * Strip spaces symbols on edge of string end multiple spaces in string
-     * @static
+     *
      * @param string $str
      * @param bool $to_line strip line ends
      * @return string

@@ -4,7 +4,7 @@
     "description": "Cytro - fast template engine for PHP",
     "homepage": "http://bzick.github.io/cytro/",
     "keywords": ["cytro", "template", "templating"],
-    "license": "MIT",
+    "license": "BSD-3",
     "authors": [
         {
             "name": "Ivan Shalganov",

@@ -11,11 +11,11 @@ class ExtendsTemplateTest extends TestCase {
                 "name"  => "level.0.tpl",
                 "level" => 0,
                 "blocks" => array(
-                    "b1" => "",
+                    "b1" => "default 5",
                     "b2" => "empty 0"
                 ),
                 "result" => array(
-                    "b1" => "",
+                    "b1" => "default 5",
                     "b2" => "empty 0"
                 ),
             ),
@@ -79,10 +79,27 @@ class ExtendsTemplateTest extends TestCase {
      * @group static-extend
      */
     public function testTemplateExtends() {
-        foreach(self::generate('{block "%s"}%s{/block}', '{extends "level.%d.tpl"}') as $name => $tpl) {
+        $vars = array(
+            "b1" => "b1",
+            "b2" => "b2",
+            "b3" => "b3",
+            "b4" => "b4",
+            "level" => "level",
+            "default" => 5
+        );
+        $tpls = self::generate('{block "%s"}%s{/block}', '{extends "level.%d.tpl"}');
+        foreach($tpls as $name => $tpl) {
             $this->tpl($name, $tpl["src"]);
             //var_dump($src, "----\n\n----", $dst);ob_flush();fgetc(STDIN);
-            $this->assertSame($this->cytro->fetch($name, array()), $tpl["dst"]);
+            $this->assertSame($this->cytro->fetch($name, $vars), $tpl["dst"]);
+        }
+        $tpls = self::generate('{block "{$%s}"}%s{/block}', '{extends "level.%d.tpl"}');
+        arsort($tpls);
+        foreach($tpls as $name => $tpl) {
+            $this->tpl("d.".$name, $tpl["src"]);
+            //var_dump($src, "----\n\n----", $dst);ob_flush();fgetc(STDIN);
+            $this->assertSame($this->cytro->fetch("d.".$name, $vars), $tpl["dst"]);
+            //var_dump($name);ob_flush();fgets(STDIN);
         }
     }
 

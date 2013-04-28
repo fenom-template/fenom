@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of Cytro.
+ *
+ * (c) 2013 Ivan Shalganov
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cytro;
 use Cytro;
 
@@ -22,20 +30,34 @@ class Render extends \ArrayObject {
      * @var string
      */
     protected $_name = 'runtime';
+    /**
+     * Provider's schema
+     * @var bool
+     */
     protected $_scm = false;
+    /**
+     * Basic template name
+     * @var string
+     */
     protected $_base_name = 'runtime';
     /**
      * @var Cytro
      */
-    protected $_aspect;
+    protected $_cytro;
     /**
      * Timestamp of compilation
      * @var float
      */
     protected $_time = 0.0;
 
+    /**
+     * @var array depends list
+     */
     protected $_depends = array();
 
+    /**
+     * @var int tempalte options (see Cytro options)
+     */
     protected $_options = 0;
 
     /**
@@ -45,15 +67,15 @@ class Render extends \ArrayObject {
     protected $_provider;
 
     /**
-     * @param Cytro $aspect
+     * @param Cytro $cytro
      * @param callable $code template body
      * @param array $props
      */
-    public function __construct(Cytro $aspect, \Closure $code, $props = array()) {
-        $this->_aspect = $aspect;
+    public function __construct(Cytro $cytro, \Closure $code, $props = array()) {
+        $this->_cytro = $cytro;
         $props += self::$_props;
         $this->_name = $props["name"];
-        $this->_provider = $this->_aspect->getProvider($props["scm"]);
+        $this->_provider = $this->_cytro->getProvider($props["scm"]);
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
@@ -65,7 +87,7 @@ class Render extends \ArrayObject {
      * @return Cytro
      */
     public function getStorage() {
-        return $this->_aspect;
+        return $this->_cytro;
     }
 
     public function getDepends() {
@@ -113,12 +135,12 @@ class Render extends \ArrayObject {
      * @return bool
      */
     public function isValid() {
-        $provider = $this->_aspect->getProvider(strstr($this->_name, ":"), true);
+        $provider = $this->_cytro->getProvider(strstr($this->_name, ":"), true);
         if($provider->getLastModified($this->_name) >= $this->_time) {
             return false;
         }
         foreach($this->_depends as $tpl => $time) {
-            if($this->_aspect->getTemplate($tpl)->getTime() !== $time) {
+            if($this->_cytro->getTemplate($tpl)->getTime() !== $time) {
                 return false;
             }
         }

@@ -68,6 +68,7 @@ class Template extends Render {
      * Just factory
      *
      * @param \Cytro $aspect
+     * @param $options
      * @return Template
      */
     public static function factory(Cytro $aspect, $options) {
@@ -75,11 +76,12 @@ class Template extends Render {
     }
 
     /**
-     * @param Cytro $aspect Template storage
+     * @param Cytro $cytro Template storage
+     * @param $options
      */
-    public function __construct(Cytro $aspect, $options) {
-        $this->_aspect = $aspect;
-        $this->_options = $this->_aspect->getOptions();
+    public function __construct(Cytro $cytro, $options) {
+        $this->_cytro = $cytro;
+        $this->_options = $this->_cytro->getOptions();
     }
 
     /**
@@ -96,7 +98,7 @@ class Template extends Render {
         } else {
             $this->_base_name = $name;
         }
-        $this->_provider = $this->_aspect->getProvider($provider);
+        $this->_provider = $this->_cytro->getProvider($provider);
         $this->_src = $this->_provider->getSource($name, $this->_time);
         if($compile) {
             $this->compile();
@@ -143,12 +145,12 @@ class Template extends Render {
                     $pos = $end + 1; // trying finding tags after the comment block
                     continue 2;
             }
-            $end = strpos($this->_src, '}', $start); // search close-char of the tag
+            $end = strpos($this->_src, '}', $start); // search close-symbol of the tag
             if(!$end) { // if unexpected end of template
                 throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
             }
-            $frag .= substr($this->_src, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after last '}' and next '{'
-            $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains aspect tag '{...}'
+            $frag .= substr($this->_src, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after previous '}' and current '{'
+            $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains cytro tag '{...}'
             $this->_line += substr_count($this->_src, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
             $pos = $this->_pos = $end + 1; // move search-pointer to end of the tag
 
@@ -215,6 +217,11 @@ class Template extends Render {
         $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);
     }
 
+    /**
+     * Append PHP_EOL after each '?>'
+     * @param int $code
+     * @return string
+     */
     private function _escapeCode($code) {
         $c = "";
         foreach(token_get_all($code) as $token) {
@@ -414,7 +421,7 @@ class Template extends Render {
             return $this->parseMacro($tokens, $name);
         }
 
-        if($act = $this->_aspect->getFunction($action)) { // call some function
+        if($act = $this->_cytro->getFunction($action)) { // call some function
             switch($act["type"]) {
                 case Cytro::BLOCK_COMPILER:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
@@ -442,7 +449,7 @@ class Template extends Render {
                 return $this->_stack[$i]->tag($action, $tokens);
             }
         }
-        if($tags = $this->_aspect->getTagOwners($action)) { // unknown template tag
+        if($tags = $this->_cytro->getTagOwners($action)) { // unknown template tag
             throw new TokenizeException("Unexpected tag '$action' (this tag can be used with '".implode("', '", $tags)."')");
         } else {
             throw new TokenizeException("Unexpected tag $action");
@@ -496,7 +503,7 @@ class Template extends Render {
                 if($tokens->isSpecialVal()) {
                     $_exp .= $tokens->getAndNext();
                 } elseif($tokens->isNext("(")) {
-                    $func = $this->_aspect->getModifier($tokens->current());
+                    $func = $this->_cytro->getModifier($tokens->current());
                     $tokens->next();
                     $_exp .= $func.$this->parseArgs($tokens);
                 } else {
@@ -828,7 +835,7 @@ class Template extends Render {
      */
     public function parseModifier(Tokenizer $tokens, $value) {
         while($tokens->is("|")) {
-            $mods = $this->_aspect->getModifier( $tokens->getNext(Tokenizer::MACRO_STRING) );
+            $mods = $this->_cytro->getModifier( $tokens->getNext(Tokenizer::MACRO_STRING) );
             $tokens->next();
             $args = array();
 
@@ -1008,7 +1015,7 @@ class Template extends Render {
      * @param string $static
      * @return mixed|string
      */
-    public function parseFirstArg(Tokenizer $tokens, &$static) {
+    public function parsePlainArg(Tokenizer $tokens, &$static) {
         if($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
             if($tokens->isNext('|')) {
                 return $this->parseExp($tokens, true);

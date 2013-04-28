@@ -9,9 +9,16 @@
  */
 namespace Cytro;
 
+/**
+ * for <PHP 5.4 compatible
+ */
 defined('T_INSTEADOF')  || define('T_INSTEADOF', 341);
 defined('T_TRAIT')      || define('T_TRAIT', 355);
 defined('T_TRAIT_C')    || define('T_TRAIT_C', 365);
+/**
+ *  for PHP <5.5
+ */
+defined('T_YIELD')      || define('T_YIELD', 370);
 
 /**
  * Each token have structure

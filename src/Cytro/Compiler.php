@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of Cytro.
+ *
+ * (c) 2013 Ivan Shalganov
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cytro;
 use Cytro\Tokenizer;
 use Cytro\Template;
@@ -6,6 +14,7 @@ use Cytro\Scope;
 
 /**
  * Compilers collection
+ * @package Cytro
  */
 class Compiler {
     /**
@@ -18,7 +27,7 @@ class Compiler {
      * @return string
      */
     public static function tagInclude(Tokenizer $tokens, Template $tpl) {
-        $cname = $tpl->parseFirstArg($tokens, $name);
+        $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
         if($p) { // if we have additionally variables
             if($name && ($tpl->getStorage()->getOptions() & \Cytro::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
@@ -371,7 +380,7 @@ class Compiler {
         if(!empty($tpl->_extends)) {
             throw new ImproperUseException("Only one {extends} allowed");
         }
-        $tpl_name = $tpl->parseFirstArg($tokens, $name);
+        $tpl_name = $tpl->parsePlainArg($tokens, $name);
         if(empty($tpl->_extended)) {
             $tpl->addPostCompile(__CLASS__."::extendBody");
         }
@@ -423,13 +432,14 @@ class Compiler {
     }
 
     /**
+     * Tag {use ...}
      * @param Tokenizer $tokens
      * @param Template $tpl
      * @throws ImproperUseException
      * @return string
      */
     public static function tagUse(Tokenizer $tokens, Template $tpl) {
-        $tpl->parseFirstArg($tokens, $name);
+        $tpl->parsePlainArg($tokens, $name);
         if($name) {
             $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
             $donor->_extended = true;
@@ -457,7 +467,7 @@ class Compiler {
      * @throws ImproperUseException
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
-        $p = $scope->tpl->parseFirstArg($tokens, $name);
+        $p = $scope->tpl->parsePlainArg($tokens, $name);
         $scope["name"]  = $name;
         $scope["cname"] = $p;
     }
@@ -750,7 +760,7 @@ class Compiler {
             $tokens->next();
         }
 
-        $tpl->parseFirstArg($tokens, $name);
+        $tpl->parsePlainArg($tokens, $name);
         if(!$name) {
             throw new ImproperUseException("Invalid usage tag {import}");
         }

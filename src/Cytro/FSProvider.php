@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of Cytro.
+ *
+ * (c) 2013 Ivan Shalganov
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cytro;
 
 use Cytro\ProviderInterface;
@@ -46,6 +54,10 @@ class FSProvider implements ProviderInterface {
         }
     }
 
+    /**
+     * @param string $template_dir directory of templates
+     * @throws \LogicException if directory doesn't exists
+     */
     public function __construct($template_dir) {
         if($_dir = realpath($template_dir)) {
             $this->_path = $_dir;
@@ -107,9 +119,9 @@ class FSProvider implements ProviderInterface {
     }
 
     /**
-     * Verify templates by change time
+     * Verify templates (check change time)
      *
-     * @param array $templates [template_name => modified, ...] By conversation you may trust the template's name
+     * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
      * @return bool
      */
     public function verify(array $templates) {
