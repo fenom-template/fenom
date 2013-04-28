@@ -17,7 +17,7 @@ class ScopeTest extends TestCase {
     }
 
 	public function testBlock() {
-        /*$scope = new Scope($this->aspect, new Template($this->aspect), 1, array(
+        /*$scope = new Scope($this->cytro, new Template($this->cytro), 1, array(
             "open" => array($this, "openTag"),
             "close" => array($this, "closeTag")
         ), 0);

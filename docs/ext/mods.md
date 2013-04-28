@@ -3,7 +3,7 @@
 
 
 ```
-$aspect->addModifier(string $modifier, callable $callback);
+$cytro->addModifier(string $modifier, callable $callback);
 ```
 
 * `$modifier` - название модификатора, которое будет использоваться в шаблоне
@@ -16,7 +16,7 @@ For example:
 ```
 
 ```php
-$aspect->addModifier('my_modifier', function ($variable, $param1, $param2) {
+$cytro->addModifier('my_modifier', function ($variable, $param1, $param2) {
     // ...
 });
 ```

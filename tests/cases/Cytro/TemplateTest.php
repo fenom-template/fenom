@@ -16,7 +16,7 @@ class TemplateTest extends TestCase {
     }
 
     /*public function testSandbox() {
-        var_dump($this->aspect->compileCode('{"$s:{$b+1}f d {$d}"}')->_body);
+        var_dump($this->cytro->compileCode('{"$s:{$b+1}f d {$d}"}')->_body);
         exit;
     }*/
 

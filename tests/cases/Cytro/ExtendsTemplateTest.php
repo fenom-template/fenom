@@ -147,7 +147,7 @@ class ExtendsTemplateTest extends TestCase {
 //     * @group extends
 //     */
 //    public function _testParentLevel() {
-//	    //echo($this->aspect->getTemplate("parent.tpl")->_body); exit;
+//	    //echo($this->cytro->getTemplate("parent.tpl")->_body); exit;
 //	    $this->assertSame($this->cytro->fetch("parent.tpl", array("a" => "a char")), "Parent template\nBlock1: Block2: Block3: default");
 //    }
 //
@@ -155,7 +155,7 @@ class ExtendsTemplateTest extends TestCase {
 //	 * @group extends
 //	 */
 //	public function testChildLevel1() {
-//		//echo($this->aspect->fetch("child1.tpl", array("a" => "a char"))); exit;
+//		//echo($this->cytro->fetch("child1.tpl", array("a" => "a char"))); exit;
 //	}
 //
 //	/**

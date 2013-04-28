@@ -4,7 +4,7 @@
  *
  * (c) 2013 Ivan Shalganov
  *
- * For the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
 namespace Cytro;
@@ -67,17 +67,18 @@ class Template extends Render {
     /**
      * Just factory
      *
-     * @param \Cytro $aspect
+     * @param \Cytro $cytro
      * @param $options
      * @return Template
      */
-    public static function factory(Cytro $aspect, $options) {
-        return new static($aspect, $options);
+    public static function factory(Cytro $cytro, $options) {
+        return new static($cytro, $options);
     }
 
     /**
      * @param Cytro $cytro Template storage
-     * @param $options
+     * @param int $options
+     * @return \Cytro\Template
      */
     public function __construct(Cytro $cytro, $options) {
         $this->_cytro = $cytro;
@@ -88,7 +89,7 @@ class Template extends Render {
      * Load source from provider
      * @param string $name
      * @param bool $compile
-     * @return \Cytro\Template
+     * @return $this
      */
     public function load($name, $compile = true) {
         $this->_name = $name;
@@ -214,7 +215,17 @@ class Template extends Render {
      * @param string $text
      */
     private function _appendText($text) {
-        $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);
+        if($this->_filter) {
+            if(strpos($text, "<?") === false) {
+                foreach(explode("<?", $text) as $fragment) {
+
+                }
+            } else {
+                $this->_body .= $text;
+            }
+        } else {
+            $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);
+        }
     }
 
     /**
@@ -277,7 +288,7 @@ class Template extends Render {
     public function getTemplateCode() {
         return "<?php \n".
             "/** Cytro template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Cytro\\Render(\$aspect, ".$this->_getClosureSource().", ".var_export(array(
+            "return new Cytro\\Render(\$cytro, ".$this->_getClosureSource().", ".var_export(array(
             "options" => $this->_options,
             "provider" => $this->_scm,
             "name" => $this->_name,

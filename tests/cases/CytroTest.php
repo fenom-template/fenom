@@ -36,9 +36,9 @@ class CytroTest extends \Cytro\TestCase {
     public function testStorage() {
         $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
-        //$this->aspect->clearCompiledTemplate('custom.tpl', false);
+        //$this->cytro->clearCompiledTemplate('custom.tpl', false);
 
-        //$this->assertSame("Custom template", $this->aspect->fetch('custom.tpl', array()));
+        //$this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
 
         $this->tpl('custom.tpl', 'Custom template 2');
         $this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));

@@ -1,7 +1,7 @@
 Cytro - awesome template engine for PHP
 ==========================
 
-> Composer package: `{"bzick/cytro": "dev-master"}`. See on [Packagist.org](https://packagist.org/packages/bzick/aspect)
+> Composer package: `{"bzick/cytro": "dev-master"}`. See on [Packagist.org](https://packagist.org/packages/bzick/cytro)
 
 [![Build Status](https://travis-ci.org/bzick/aspect.png?branch=master)](https://travis-ci.org/bzick/cytro)
 ## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)

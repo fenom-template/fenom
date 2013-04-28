@@ -79,7 +79,7 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-В блоке `{foreachelse}...{/foreach}` использование `{break}`, `{continue}` выбросит исключение `Aspect\CompileException` при компиляции
+В блоке `{foreachelse}...{/foreach}` использование `{break}`, `{continue}` выбросит исключение `Cytro\CompileException` при компиляции
 
 ### Notice
 

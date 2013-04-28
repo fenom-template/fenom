@@ -13,9 +13,9 @@ Benchmark::run("twig", 'echo/twig.tpl', __DIR__.'/echo/data.json', false, '!comp
 Benchmark::run("twig", 'echo/twig.tpl', __DIR__.'/echo/data.json', false, 'compiled and !loaded');
 Benchmark::run("twig", 'echo/twig.tpl', __DIR__.'/echo/data.json', true, 'compiled and loaded');
 
-Benchmark::run("aspect", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, '!compiled and !loaded');
-Benchmark::run("aspect", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, 'compiled and !loaded');
-Benchmark::run("aspect", 'echo/smarty.tpl', __DIR__.'/echo/data.json', true, 'compiled and loaded');
+Benchmark::run("cytro", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, '!compiled and !loaded');
+Benchmark::run("cytro", 'echo/smarty.tpl', __DIR__.'/echo/data.json', false, 'compiled and !loaded');
+Benchmark::run("cytro", 'echo/smarty.tpl', __DIR__.'/echo/data.json', true, 'compiled and loaded');
 exit;
 
 require(__DIR__.'/../../vendor/autoload.php');

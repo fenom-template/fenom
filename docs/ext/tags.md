@@ -11,7 +11,7 @@ Tags [RU]
 Примитивное добавление функции можно осуществить следующим образом:
 
 ```php
-$aspect->addFunction(string $function_name, callable $callback[, callable $parser]);
+$cytro->addFunction(string $function_name, callable $callback[, callable $parser]);
 ```
 
 В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом.
@@ -19,7 +19,7 @@ $aspect->addFunction(string $function_name, callable $callback[, callable $parse
 Существует более совершенный способ добавления функции:
 
 ```php
-$aspect->addFunctionSmarty(string $function_name, callable $callback);
+$cytro->addFunctionSmarty(string $function_name, callable $callback);
 ```
 
 В данном случае парсер просканирует список аргументов коллбека и попробует сопоставить с аргументами из тега. Таким образом вы успешно можете добавлять Ваши штатные функции.
@@ -29,7 +29,7 @@ $aspect->addFunctionSmarty(string $function_name, callable $callback);
 Добавление блоковой функции аналогичен добавлению строковой за исключением того что есть возможность указать парсер для закрывающего тега.
 
 ```php
-$aspect->addBlockFunction(string $function_name, callable $callback[, callable $parser_open[, callable $parser_close]]);
+$cytro->addBlockFunction(string $function_name, callable $callback[, callable $parser_open[, callable $parser_close]]);
 ```
 
 Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега.
@@ -39,14 +39,14 @@ $aspect->addBlockFunction(string $function_name, callable $callback[, callable $
 Добавление строчного компилятора осуществляеться очень просто:
 
 ```php
-$aspect->addCompiler(string $compiler, callable $parser);
+$cytro->addCompiler(string $compiler, callable $parser);
 ```
 
 Парсер должен принимать `Aspect\Tokenizer $tokenizer`, `Aspect\Template $template` и возвращать PHP код.
 Компилятор так же можно импортировать из класса автоматически
 
 ```php
-$aspect->addCompilerSmart(string $compiler, $storage);
+$cytro->addCompilerSmart(string $compiler, $storage);
 ```
 
 `$storage` может быть как классом так и объектом. В данном случае шаблонизатор будет искать метод `tag{$compiler}`, который будет взят в качестве парсера тега.
@@ -56,13 +56,13 @@ $aspect->addCompilerSmart(string $compiler, $storage);
 Добавление блочного компилятора осуществяется двум способами. Первый
 
 ```php
-$aspect->addBlockCompiler(string $compiler, array $parsers, array $tags);
+$cytro->addBlockCompiler(string $compiler, array $parsers, array $tags);
 ```
 
 где `$parser` ассоциативный массив `["open" => parser, "close" => parser]`, сождержащий парсер на открывающий и на закрывающий тег, а `$tags` содержит список внутренних тегов в формате `["tag_name"] => parser`, которые могут быть использованы только с этим компилятором.
 Второй способ добавления парсера через импортирование из класса или объекта методов:
 
 ```php
-$aspect->addBlockCompilerSmart(string $compiler, $storage, array $tags, array $floats);
+$cytro->addBlockCompilerSmart(string $compiler, $storage, array $tags, array $floats);
 ```
 

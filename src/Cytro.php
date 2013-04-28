@@ -4,7 +4,7 @@
  *
  * (c) 2013 Ivan Shalganov
  *
- * For the full copyright and license information, please view the LICENSE
+ * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
 use Cytro\Template,
@@ -223,12 +223,12 @@ class Cytro {
         } else {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
-        $aspect = new static($provider);
-        $aspect->setCompileDir($compile_dir);
+        $cytro = new static($provider);
+        $cytro->setCompileDir($compile_dir);
         if($options) {
-            $aspect->setOptions($options);
+            $cytro->setOptions($options);
         }
-        return $aspect;
+        return $cytro;
     }
 
     /**
@@ -610,7 +610,7 @@ class Cytro {
         if(!is_file($this->_compile_dir."/".$file_name)) {
             return $this->compile($tpl);
         } else {
-            $aspect = $this;
+            $cytro = $this;
             return include($this->_compile_dir."/".$file_name);
         }
     }
