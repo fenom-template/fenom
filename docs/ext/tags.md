@@ -15,7 +15,7 @@ $cytro->addFunction(string $function_name, callable $callback[, callable $parser
 ```
 
 В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом.
-В данном случае вы можете переопределить парсер на произвольный в формате `function (Aspect\Tokenizer $tokenizer, Aspect\Template $template)`
+В данном случае вы можете переопределить парсер на произвольный в формате `function (Cytro\Tokenizer $tokenizer, Cytro\Template $template)`
 Существует более совершенный способ добавления функции:
 
 ```php
@@ -42,7 +42,7 @@ $cytro->addBlockFunction(string $function_name, callable $callback[, callable $p
 $cytro->addCompiler(string $compiler, callable $parser);
 ```
 
-Парсер должен принимать `Aspect\Tokenizer $tokenizer`, `Aspect\Template $template` и возвращать PHP код.
+Парсер должен принимать `Cytro\Tokenizer $tokenizer`, `Cytro\Template $template` и возвращать PHP код.
 Компилятор так же можно импортировать из класса автоматически
 
 ```php

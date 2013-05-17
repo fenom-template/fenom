@@ -45,13 +45,34 @@ class Benchmark {
 
     public static function cytro($tpl, $data, $double, $message) {
 
-        $cytro = Cytro::factory(__DIR__.'/../templates', __DIR__."/../compile/");
+        $cytro = Cytro::factory(__DIR__.'/../templates', __DIR__."/../compile");
 
         if($double) {
             $cytro->fetch($tpl, $data);
         }
         $_SERVER["t"] = $start = microtime(true);
         $cytro->fetch($tpl, $data);
+        printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
+    }
+
+    public static function volt($tpl, $data, $double, $message) {
+        $view = new \Phalcon\Mvc\View();
+        //$view->setViewsDir(__DIR__.'/../templates');
+        $volt = new \Phalcon\Mvc\View\Engine\Volt($view);
+
+
+        $volt->setOptions(array(
+            "compiledPath" => __DIR__.'/../compile',
+            "compiledExtension" =>  __DIR__."/../.compile"
+        ));
+
+        if($double) {
+            $volt->render($tpl, $data);
+        }
+
+        $start = microtime(true);
+        var_dump($tpl);
+        $volt->render(__DIR__.'/../templates/'.$tpl, $data);
         printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
     }
 

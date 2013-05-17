@@ -13,7 +13,7 @@ use Cytro;
 /**
  * Template compiler
  *
- * @package    aspect
+ * @package    Cytro
  * @author     Ivan Shalganov <owner@bzick.net>
  */
 class Template extends Render {
@@ -63,6 +63,8 @@ class Template extends Render {
      * @var bool
      */
     private $_ignore = false;
+
+    private $_filter = array();
 
     /**
      * Just factory
@@ -129,12 +131,12 @@ class Template extends Render {
      * @throws CompileException
      */
     public function compile() {
-        if(!isset($this->_src)) {
+        if(!isset($this->_src)) { // already compiled
             return;
         }
         $pos = 0;
         $frag = "";
-        while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-char of tags
+        while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch($this->_src[$start + 1]) { // check next char
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
                     $pos = $start + 1; // try find tags after the current char
@@ -174,7 +176,7 @@ class Template extends Render {
                 $this->_appendText($_frag);
                 $tokens = new Tokenizer($_tag);
                 $this->_appendCode($this->_tag($tokens), $tag);
-                if($tokens->key()) { // if tokenizer still have tokens
+                if($tokens->key()) { // if tokenizer have tokens - throws exceptions
                     throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
                 }
 
@@ -217,11 +219,17 @@ class Template extends Render {
     private function _appendText($text) {
         if($this->_filter) {
             if(strpos($text, "<?") === false) {
-                foreach(explode("<?", $text) as $fragment) {
-
-                }
-            } else {
                 $this->_body .= $text;
+            } else {
+                $fragments = explode("<?", $text);
+                foreach($fragments as &$fragment) {
+                    if($fragment) {
+                        foreach($this->_filter as $filter) {
+                            $fragment = call_user_func($filter, $fragment);
+                        }
+                    }
+                }
+                $this->_body .= implode('<?php echo "<?"; ?>', $fragments);
             }
         } else {
             $this->_body .= str_replace("<?", '<?php echo "<?"; ?>'.PHP_EOL, $text);

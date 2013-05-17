@@ -80,8 +80,8 @@ class Modifier {
     }
 
     /**
-     * Crop string by length
-     * UTF8 support
+     * Crop string by length (support unicode)
+     *
      * @param string $string text witch will be truncate
      * @param int $length maximum symbols of result string
      * @param string $etc place holder truncated symbols

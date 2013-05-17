@@ -391,7 +391,10 @@ class Compiler {
         }*/
         if($name) { // static extends
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
-            $tpl->_compatible = &$tpl->_extends->_compatible;
+//            $tpl->_compatible = &$tpl->_extends->_compatible;
+            if(!isset($tpl->_compatible)) {
+                $tpl->_compatible = &$tpl->_extends->_compatible;;
+            }
             $tpl->addDepend($tpl->_extends);
             return "";
         } else { // dynamic extends
@@ -411,6 +414,7 @@ class Compiler {
             $t = $t->_extends;
             if(is_object($t)) {
                 $t->_extended = true;
+                $tpl->addDepend($t);
                 $t->_compatible = &$tpl->_compatible;
                 $t->blocks = &$tpl->blocks;
                 $t->compile();
@@ -451,11 +455,6 @@ class Compiler {
             return '?>'.$donor->getBody().'<?php ';
         } else {
             throw new ImproperUseException('template name must be given explicitly');
-            //return '';
-            //return '$donor = $tpl->getStorage()->getTemplate('.$cname.'); ';
-
-            //$tpl->_compatible = true;
-            //$tpl->_ = false;
         }
     }
 
@@ -482,28 +481,26 @@ class Compiler {
         $tpl = $scope->tpl;
         if(isset($tpl->_extends)) { // is child
             if($scope["name"]) { // is scalar name
-                if(!isset($tpl->blocks[ $scope["name"] ])) { // is block still doesn't preset
-                    if($tpl->_compatible) { // is compatible mode
-                        $scope->replaceContent(
-                            '<?php if(empty($tpl->blocks['.$scope["cname"].'])) { '.
-                                '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
-                                    $scope->getContent().
-                                "<?php };".
-                            "} ?>".PHP_EOL
-                        );
-                    } else {
-                        $tpl->blocks[ $scope["name"] ] = $scope->getContent();
-                        $scope->replaceContent(
-                            '<?php $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
+                if($tpl->_compatible) { // is compatible mode
+                    $scope->replaceContent(
+                        '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
+                            '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                                 $scope->getContent().
-                            "<?php }; ?>".PHP_EOL
-                        );
-                    }
+                            "<?php };".
+                        "} ?>".PHP_EOL
+                    );
+                } elseif(!isset($tpl->blocks[ $scope["name"] ])) { // is block not registered
+                    $tpl->blocks[ $scope["name"] ] = $scope->getContent();
+                    $scope->replaceContent(
+                        '<?php /* Block '.$tpl.': '.$scope["cname"].' '.$tpl->_compatible.' */'.PHP_EOL.' $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
+                            $scope->getContent().
+                        "<?php }; ?>".PHP_EOL
+                    );
                 }
             } else { // dynamic name
                 $tpl->_compatible = true; // enable compatible mode
                 $scope->replaceContent(
-                    '<?php if(empty($tpl->b['.$scope["cname"].'])) { '.
+                    '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
                         '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                             $scope->getContent().
                         "<?php };".
@@ -514,7 +511,7 @@ class Compiler {
             if(isset($tpl->blocks[ $scope["name"] ])) { // has block
                 if($tpl->_compatible) { // compatible mode enabled
                     $scope->replaceContent(
-                        '<?php if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
+                        '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
                             $tpl->blocks[ $scope["name"] ].
                         '<?php } ?>'.PHP_EOL
                     );
@@ -524,7 +521,7 @@ class Compiler {
                 }
             } elseif(isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
                 $scope->replaceContent(
-                    '<?php if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
+                    '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
                         $scope->getContent().
                     '<?php } ?>'.PHP_EOL
                 );

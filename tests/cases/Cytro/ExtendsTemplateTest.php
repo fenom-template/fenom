@@ -90,79 +90,17 @@ class ExtendsTemplateTest extends TestCase {
         $tpls = self::generate('{block "%s"}%s{/block}', '{extends "level.%d.tpl"}');
         foreach($tpls as $name => $tpl) {
             $this->tpl($name, $tpl["src"]);
-            //var_dump($src, "----\n\n----", $dst);ob_flush();fgetc(STDIN);
+//            var_dump($src, "----\n\n----", $dst);ob_flush();fgetc(STDIN);
             $this->assertSame($this->cytro->fetch($name, $vars), $tpl["dst"]);
         }
         $tpls = self::generate('{block "{$%s}"}%s{/block}', '{extends "level.%d.tpl"}');
         arsort($tpls);
         foreach($tpls as $name => $tpl) {
             $this->tpl("d.".$name, $tpl["src"]);
-            //var_dump($src, "----\n\n----", $dst);ob_flush();fgetc(STDIN);
+//            var_dump($tpl["src"], "----\n\n----", $tpl["dst"]);ob_flush();fgetc(STDIN);
             $this->assertSame($this->cytro->fetch("d.".$name, $vars), $tpl["dst"]);
-            //var_dump($name);ob_flush();fgets(STDIN);
+//            var_dump($name);ob_flush();fgets(STDIN);
         }
     }
-
-//    public static function providerDynamicExtends() {
-//        $tpls = array();
-//        //foreach(self::templates() as $i => $tpl) {
-//        //    $tpls[] = array($tpl[0], );
-//        //}
-//        $data = self::providerExtends();
-//        $data[2][1] = str_replace('"b2"', '"b{$two}"', $data[2][1]);
-//        return $data;
-//    }
-
-//    public function setUp() {
-//        $this->cytro = Cytro::factory(CYTRO_RESOURCES.'/template', CYTRO_RESOURCES.'/compile');
-//    }
-//
-//    /**
-//     * @dataProvider providerExtends
-//     * @param $name
-//     * @param $code
-//     * @param $vars
-//     * @param $result
-//     */
-//    public function testStaticExtends($name, $code, $vars, $result) {
-//        static $i = 0;
-//        $vars["iteration"] = $i++;
-//        $this->execTpl($name, $code, $vars, $result);
-//    }
-//
-//    /**
-//     * @dataProvider providerDynamicExtends
-//     * @param $name
-//     * @param $code
-//     * @param $vars
-//     * @param $result
-//     */
-//    public function testDynamicExtends($name, $code, $vars, $result) {
-//        static $i = 0;
-//        $vars["iteration"] = $i++;
-//        $this->execTpl($name, $code, $vars, $result, 0);
-//    }
-//
-//    /**
-//     * @group extends
-//     */
-//    public function _testParentLevel() {
-//	    //echo($this->cytro->getTemplate("parent.tpl")->_body); exit;
-//	    $this->assertSame($this->cytro->fetch("parent.tpl", array("a" => "a char")), "Parent template\nBlock1: Block2: Block3: default");
-//    }
-//
-//	/**
-//	 * @group extends
-//	 */
-//	public function testChildLevel1() {
-//		//echo($this->cytro->fetch("child1.tpl", array("a" => "a char"))); exit;
-//	}
-//
-//	/**
-//	 * @group extends
-//	 */
-//	public function _testChildLevel3() {
-//        echo($this->cytro->getTemplate("child3.tpl")->getBody()); exit;
-//	}
 }
 
