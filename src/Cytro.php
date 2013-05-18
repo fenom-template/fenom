@@ -37,7 +37,7 @@ class Cytro {
     const SMART_FUNC_PARSER      = 'Cytro\Compiler::smartFuncParser';
 
     /**
-     * @var array of possible options, as associative array
+     * @var int[] of possible options, as associative array
      * @see setOptions, addOptions, delOptions
      */
     private static $_option_list = array(
@@ -50,7 +50,7 @@ class Cytro {
     );
 
     /**
-     * @var array Templates storage
+     * @var Cytro\Render[] Templates storage
      */
     protected $_storage = array();
     /**
@@ -72,12 +72,12 @@ class Cytro {
      */
     private $_provider;
     /**
-     * @var array of Cytro\ProviderInterface
+     * @var Cytro\ProviderInterface[]
      */
     protected $_providers = array();
 
     /**
-     * @var array of modifiers [modifier_name => callable]
+     * @var string[] list of modifiers [modifier_name => callable]
      */
     protected $_modifiers = array(
         "upper"       => 'strtoupper',
@@ -104,7 +104,7 @@ class Cytro {
     );
 
     /**
-     * @var array of compilers and functions
+     * @var array[] of compilers and functions
      */
     protected $_actions = array(
         'foreach' => array( // {foreach ...} {break} {continue} {foreachelse} {/foreach}
@@ -240,6 +240,7 @@ class Cytro {
 
     /**
      * Set compile directory
+     *
      * @param string $dir directory to store compiled templates in
      * @return Cytro
      */
@@ -274,8 +275,8 @@ class Cytro {
     /**
      * Add modifier
      *
-     * @param string $modifier
-     * @param string $callback
+     * @param string $modifier the modifier name
+     * @param string $callback the modifier callback
      * @return Cytro
      */
     public function addModifier($modifier, $callback) {
@@ -558,7 +559,6 @@ class Cytro {
      *
      * @param string $template name of template
      * @param array $vars array of data for template
-     * @internal param int $options
      * @return mixed
      */
     public function fetch($template, array $vars = array()) {
@@ -566,15 +566,14 @@ class Cytro {
     }
 
     /**
-     * Return template by name
+     * Get template by name
      *
-     * @param string $template
-     * @param int $options
+     * @param string $template template name with schema
+     * @param int $options additional options and flags
      * @return Cytro\Template
      */
     public function getTemplate($template, $options = 0) {
-        $options = $this->_options | $options;
-        $key = $template.".".dechex($options);
+        $key = dechex($this->_options | $options)."@".$template;
         if(isset($this->_storage[ $key ])) {
             /** @var Cytro\Template $tpl  */
             $tpl = $this->_storage[ $key ];
@@ -592,6 +591,7 @@ class Cytro {
 
     /**
      * Add custom template into storage
+     *
      * @param Cytro\Render $template
      */
     public function addTemplate(Cytro\Render $template) {
@@ -599,7 +599,7 @@ class Cytro {
     }
 
     /**
-     * Return template from storage or create if template doesn't exists.
+     * Load template from cache or create cache if it doesn't exists.
      *
      * @param string $tpl
      * @param int $opts
@@ -608,7 +608,7 @@ class Cytro {
     protected function _load($tpl, $opts) {
         $file_name = $this->_getCacheName($tpl, $opts);
         if(!is_file($this->_compile_dir."/".$file_name)) {
-            return $this->compile($tpl);
+            return $this->compile($tpl, true, $opts);
         } else {
             $cytro = $this;
             return include($this->_compile_dir."/".$file_name);
@@ -656,30 +656,15 @@ class Cytro {
         return $template;
     }
 
-
     /**
-     * @param string $tpl
-     * @param bool $cache
-     * @return bool
+     * Flush internal memory template cache
      */
-    /*public function clearCompiledTemplate($tpl, $cache = true) {
-        $file_name = $this->_compile_dir."/".$this->_getCacheName($tpl);
-        $it = new \GlobIterator($this->_compile_dir."/".str_replace(':', '_', basename($tpl)));
-        foreach() {
-
-        }
-        if(file_exists($file_name)) {
-            if($cache) {
-                unset($this->_storage[$tpl]);
-            }
-            return unlink($file_name);
-        } else {
-            return true;
-        }
-    }*/
+    public function flush() {
+       $this->_storage = array();
+    }
 
     /**
-     *
+     * Remove all compiled templates
      */
     public function clearAllCompiles() {
         \Cytro\FSProvider::clean($this->_compile_dir);

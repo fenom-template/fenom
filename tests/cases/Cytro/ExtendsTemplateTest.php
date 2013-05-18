@@ -5,17 +5,17 @@ use Symfony\Component\Process\Exception\LogicException;
 
 class ExtendsTemplateTest extends TestCase {
 
-    public static function templates() {
+    public static function templates(array $vars) {
         return array(
             array(
                 "name"  => "level.0.tpl",
                 "level" => 0,
                 "blocks" => array(
-                    "b1" => "default 5",
+                    "b1" => "default {\$default}",
                     "b2" => "empty 0"
                 ),
                 "result" => array(
-                    "b1" => "default 5",
+                    "b1" => "default ".$vars["default"],
                     "b2" => "empty 0"
                 ),
             ),
@@ -57,9 +57,9 @@ class ExtendsTemplateTest extends TestCase {
         );
     }
 
-    public static function generate($block_mask, $extend_mask) {
+    public static function generate($block_mask, $extend_mask, array $vars) {
         $t = array();
-        foreach(self::templates() as $level => $tpl) {
+        foreach(self::templates($vars) as $level => $tpl) {
             $src = 'level#'.$level.' ';
             foreach($tpl["blocks"] as $bname => &$bcode) {
                 $src .= sprintf($block_mask, $bname, $bname.': '.$bcode)." level#$level ";
@@ -87,19 +87,26 @@ class ExtendsTemplateTest extends TestCase {
             "level" => "level",
             "default" => 5
         );
-        $tpls = self::generate('{block "%s"}%s{/block}', '{extends "level.%d.tpl"}');
+        $tpls = self::generate('{block "%s"}%s{/block}', '{extends "level.%d.tpl"}', $vars);
         foreach($tpls as $name => $tpl) {
             $this->tpl($name, $tpl["src"]);
-//            var_dump($src, "----\n\n----", $dst);ob_flush();fgetc(STDIN);
             $this->assertSame($this->cytro->fetch($name, $vars), $tpl["dst"]);
         }
-        $tpls = self::generate('{block "{$%s}"}%s{/block}', '{extends "level.%d.tpl"}');
+        $vars["default"]++;
+        $this->cytro->flush();
+        $tpls = self::generate('{block "{$%s}"}%s{/block}', '{extends "level.%d.tpl"}', $vars);
         arsort($tpls);
         foreach($tpls as $name => $tpl) {
             $this->tpl("d.".$name, $tpl["src"]);
-//            var_dump($tpl["src"], "----\n\n----", $tpl["dst"]);ob_flush();fgetc(STDIN);
             $this->assertSame($this->cytro->fetch("d.".$name, $vars), $tpl["dst"]);
-//            var_dump($name);ob_flush();fgets(STDIN);
+        }
+        $vars["default"]++;
+        $this->cytro->flush();
+        $tpls = self::generate('{block "%s"}%s{/block}', '{extends "$level.%d.tpl"}', $vars);
+        arsort($tpls);
+        foreach($tpls as $name => $tpl) {
+            $this->tpl("x.".$name, $tpl["src"]);
+            $this->assertSame($this->cytro->fetch("x.".$name, $vars), $tpl["dst"]);
         }
     }
 }

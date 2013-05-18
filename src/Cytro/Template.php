@@ -84,7 +84,7 @@ class Template extends Render {
      */
     public function __construct(Cytro $cytro, $options) {
         $this->_cytro = $cytro;
-        $this->_options = $this->_cytro->getOptions();
+        $this->_options = $options;
     }
 
     /**

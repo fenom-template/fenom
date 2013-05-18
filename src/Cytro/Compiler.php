@@ -384,11 +384,9 @@ class Compiler {
         if(empty($tpl->_extended)) {
             $tpl->addPostCompile(__CLASS__."::extendBody");
         }
-        /*if($tpl->getOptions() & Template::EXTENDED) {
+        if($tpl->getOptions() & Template::EXTENDED) {
             $tpl->_compatible = true;
-        } else {
-            $tpl->_compatible = false;
-        }*/
+        }
         if($name) { // static extends
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
 //            $tpl->_compatible = &$tpl->_extends->_compatible;
@@ -398,6 +396,9 @@ class Compiler {
             $tpl->addDepend($tpl->_extends);
             return "";
         } else { // dynamic extends
+            if(!isset($tpl->_compatible)) {
+                $tpl->_compatible = false;
+            }
             $tpl->_extends = $tpl_name;
             return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Cytro\Template::EXTENDED);';
         }
