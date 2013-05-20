@@ -595,7 +595,7 @@ class Cytro {
      * @param Cytro\Render $template
      */
     public function addTemplate(Cytro\Render $template) {
-        $this->_storage[ $template->getName().".".dechex($template->getOptions()) ] = $template;
+        $this->_storage[dechex($template->getOptions()).'@'. $template->getName() ] = $template;
     }
 
     /**
