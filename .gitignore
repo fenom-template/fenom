@@ -1,5 +1,7 @@
 .idea
 vendor
+coverage
+build
 composer.lock
 composer.phar
 tests/resources/compile/*
