@@ -12,6 +12,8 @@ Documentation
 
 ### Modifiers
 
+[Usage](./syntax.md#modifiers)
+
 * [upper](./mods/upper.md) aka `up`
 * [lower](./mods/lower.md) aka `low`
 * [date_format](./mods/date_format.md)
@@ -20,14 +22,15 @@ Documentation
 * [escape](./mods/escape.md) aka `e`
 * [unescape](./mods/unescape.md)
 * [strip](./mods/strip.md)
-* [length](./mods/lenght.md)
+* [length](./mods/length.md)
 * [in](./mods/in.md)
 * allowed functions: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
-
-[Using](./syntax.md#modifiers) and [addition](./ext/mods.md) of modifiers.
+* or [add](./ext/mods.md) your own
 
 ### Tags
+
+[Usage](./syntax.md#tags)
 
 * [var](./tags/var.md)
 * [if](./tags/if.md), `elseif` and `else`
@@ -37,12 +40,11 @@ Documentation
 * [cycle](./tags/cycle.md)
 * [include](./tags/include.md)
 * [extends](./tags/extends.md), `use`, `block` and `parent`
-* [capture](./tags/capture.md)
 * [filter](./tags/filter.md)
 * [ignore](./tags/ignore.md)
 * [macro](./tags/macro.md) and `import`
-
-[Using](./syntax.md#tags) and [addition](./ext/tags.md) of tags.
+* [autotrim](./tags/autotrim.md)
+* or [add](./ext/tags.md) your own
 
 ### Extends
 

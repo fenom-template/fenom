@@ -5,8 +5,8 @@ namespace Cytro;
 class ModifiersTest extends TestCase {
 
     public static function providerTruncate() {
-        $lorem = 'Lorem ipsum dolor sit amet';
-        $uni   = 'Лорем ипсум долор сит амет';
+        $lorem = 'Lorem ipsum dolor sit amet'; // en
+        $uni   = 'Лорем ипсум долор сит амет'; // ru
         return array(
             // ascii chars
             array($lorem, 'Lorem ip...', 8),
@@ -23,13 +23,15 @@ class ModifiersTest extends TestCase {
         );
     }
 
+
     /**
      * @dataProvider providerTruncate
      * @param $in
      * @param $out
      * @param $count
      * @param string $delim
-     * @param bool $by_word
+     * @param bool $by_words
+     * @param bool $middle
      */
     public function testTruncate($in, $out, $count, $delim = '...', $by_words = false, $middle = false) {
         $tpl = $this->cytro->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
@@ -41,4 +43,58 @@ class ModifiersTest extends TestCase {
             "middle" => $middle
         )));
     }
+
+    public static function providerUpLow() {
+        return array(
+            array("up", "lorem", "LOREM"),
+            array("up", "Lorem", "LOREM"),
+            array("up", "loREM", "LOREM"),
+            array("up", "223a", "223A"),
+            array("low", "lorem", "lorem"),
+            array("low", "Lorem", "lorem"),
+            array("low", "loREM", "lorem"),
+            array("low", "223A", "223a"),
+        );
+    }
+
+
+    /**
+     * @dataProvider providerUpLow
+     * @param $modifier
+     * @param $in
+     * @param $out
+     */
+    public function testUpLow($modifier, $in, $out) {
+        $tpl = $this->cytro->compileCode('{$text|'.$modifier.'}');
+        $this->assertEquals($out, $tpl->fetch(array(
+            "text" => $in,
+        )));
+    }
+
+    public static function providerLength() {
+        return array(
+            array("length", 6),
+            array("длина", 5),
+            array("length - длина", 14),
+            array(array(1, 33, "c" => 4), 3),
+            array(new \ArrayIterator(array(1, "c" => 4)), 2),
+            array(true, 0),
+            array(new \stdClass(), 0),
+            array(5, 0)
+        );
+    }
+
+    /**
+     * @dataProvider providerLength
+     * @param $in
+     * @param $in
+     * @param $out
+     */
+    public function testLength($in, $out) {
+        $tpl = $this->cytro->compileCode('{$data|length}');
+        $this->assertEquals($out, $tpl->fetch(array(
+            "data" => $in,
+        )));
+    }
+
 }

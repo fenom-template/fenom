@@ -80,7 +80,7 @@ class Modifier {
     }
 
     /**
-     * Crop string by length (support unicode)
+     * Crop string to specific length (support unicode)
      *
      * @param string $string text witch will be truncate
      * @param int $length maximum symbols of result string
@@ -134,7 +134,7 @@ class Modifier {
      * @return int
      */
     public static function length($item) {
-        if(is_scalar($item)) {
+        if(is_string($item)) {
             return strlen(preg_replace('#[\x00-\x7F]|[\x80-\xDF][\x00-\xBF]|[\xE0-\xEF][\x00-\xBF]{2}#s', ' ', $item));
         } elseif (is_array($item)) {
             return count($item);

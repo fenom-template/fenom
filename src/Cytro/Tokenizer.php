@@ -79,6 +79,7 @@ class Tokenizer {
 
     public $tokens;
     public $p = 0;
+	public $quotes = 0;
     private $_max = 0;
     private $_last_no = 0;
 
@@ -100,7 +101,7 @@ class Tokenizer {
             \T_NEW => 1,         \T_PRINT => 1,       \T_PRIVATE => 1, \T_PUBLIC => 1,      \T_PROTECTED => 1,   \T_REQUIRE => 1,
             \T_REQUIRE_ONCE => 1,\T_RETURN => 1,      \T_RETURN => 1,  \T_STRING => 1,      \T_SWITCH => 1,      \T_THROW => 1,
             \T_TRAIT => 1,       \T_TRAIT_C => 1,     \T_TRY => 1,     \T_UNSET => 1,       \T_UNSET => 1,       \T_VAR => 1,
-            \T_WHILE => 1
+            \T_WHILE => 1,       \T_YIELD => 1
         ),
         self::MACRO_INCDEC => array(
             \T_INC => 1, \T_DEC => 1
@@ -142,51 +143,55 @@ class Tokenizer {
         'true' => 1, 'false' => 1, 'null' => 1, 'TRUE' => 1, 'FALSE' => 1, 'NULL' => 1
     );
 
-    /**
-     * Translate expression to tokens list.
-     *
-     * @static
-     * @param string $query
-     * @return array
-     */
-    public static function decode($query) {
-        $tokens = array(-1 => array(\T_WHITESPACE, '', '', 1));
-        $_tokens = token_get_all("<?php ".$query);
-        $line = 1;
-        array_shift($_tokens);
-        $i = 0;
-        foreach($_tokens as &$token) {
-            if(is_string($token)) {
-                $tokens[] = array(
-                    $token,
-                    $token,
-                    "",
-                    $line,
-                );
-                $i++;
-            } elseif ($token[0] === \T_WHITESPACE) {
-                $tokens[$i-1][2] = $token[1];
-            } else {
-                $tokens[] = array(
-                    $token[0],
-                    $token[1],
-                    "",
-                    $line =  $token[2],
-                );
-                $i++;
-            }
+	/**
+	 * @param $query
+	 */
+	public function __construct($query) {
+	    $tokens = array(-1 => array(\T_WHITESPACE, '', '', 1));
+	    $_tokens = token_get_all("<?php ".$query);
+	    $line = 1;
+	    array_shift($_tokens);
+	    $i = 0;
+	    foreach($_tokens as $token) {
+		    if(is_string($token)) {
+			    if($token === '"' || $token === "'" || $token === "`") {
+				    $this->quotes++;
+			    }
+			    $tokens[] = array(
+				    $token,
+				    $token,
+				    "",
+				    $line,
+			    );
+			    $i++;
+		    } elseif ($token[0] === \T_WHITESPACE) {
+			    $tokens[$i-1][2] = $token[1];
+		    } else {
+			    $tokens[] = array(
+				    $token[0],
+				    $token[1],
+				    "",
+				    $line =  $token[2],
+				    token_name($token[0]) // debug
+			    );
+			    $i++;
+		    }
 
-        }
-
-        return $tokens;
-    }
-
-    public function __construct($query, $decode = 0) {
-        $this->tokens = self::decode($query, $decode);
-        unset($this->tokens[-1]);
+	    }
+	    unset($tokens[-1]);
+	    $this->tokens = $tokens;
         $this->_max = count($this->tokens) - 1;
         $this->_last_no = $this->tokens[$this->_max][3];
     }
+
+	/**
+	 * Is incomplete mean some string not closed
+	 *
+	 * @return int
+	 */
+	public function isIncomplete() {
+		return ($this->quotes % 2) || ($this->tokens[$this->_max][0] === T_ENCAPSED_AND_WHITESPACE);
+	}
 
     /**
      * Return the current element
@@ -468,7 +473,7 @@ class Tokenizer {
     }
 
     /**
-     * Get tokens near current token
+     * Get tokens near current position
      * @param int $before count tokens before current token
      * @param int $after count tokens after current token
      * @return array
@@ -552,30 +557,6 @@ class Tokenizer {
      */
     public function getLine() {
         return $this->curr ? $this->curr[3] : $this->_last_no;
-    }
-
-    /**
-     * Parse code and append tokens. This method move pointer to offset.
-     *
-     * @param string $code
-     * @param int $offset if not -1 replace tokens from position $offset
-     * @return Tokenizer
-     */
-    public function append($code, $offset = -1) {
-        if($offset != -1) {
-            $code = $this->getSubstr($offset).$code;
-            if($this->p > $offset) {
-                $this->p = $offset;
-            }
-
-            $this->tokens = array_slice($this->tokens, 0, $offset);
-        }
-        $tokens = self::decode($code);
-        unset($tokens[-1], $this->prev, $this->curr, $this->next);
-        $this->tokens = array_merge($this->tokens, $tokens);
-        $this->_max = count($this->tokens) - 1;
-        $this->_last_no = $this->tokens[$this->_max][3];
-        return $this;
     }
 }
 

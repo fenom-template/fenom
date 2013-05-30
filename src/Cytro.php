@@ -91,6 +91,7 @@ class Cytro {
         "e"           => 'Cytro\Modifier::escape', // alias of escape
         "unescape"    => 'Cytro\Modifier::unescape',
         "strip"       => 'Cytro\Modifier::strip',
+        "length"      => 'Cytro\Modifier::length',
         "default"     => 'Cytro\Modifier::defaultValue'
     );
 
@@ -224,6 +225,7 @@ class Cytro {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
         $cytro = new static($provider);
+	    /* @var Cytro $cytro */
         $cytro->setCompileDir($compile_dir);
         if($options) {
             $cytro->setOptions($options);
@@ -525,8 +527,8 @@ class Cytro {
      */
     public function getProvider($scm = false) {
         if($scm) {
-            if(isset($this->_provider[$scm])) {
-                return $this->_provider[$scm];
+            if(isset($this->_providers[$scm])) {
+                return $this->_providers[$scm];
             } else {
                 throw new InvalidArgumentException("Provider for '$scm' not found");
             }
@@ -564,6 +566,23 @@ class Cytro {
     public function fetch($template, array $vars = array()) {
         return $this->getTemplate($template)->fetch($vars);
     }
+
+	/**
+	 *
+	 *
+	 * @param string $template name of template
+	 * @param array $vars
+	 * @param $callback
+	 * @param float $chunk
+	 * @return \Cytro\Render
+	 * @example $cytro->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
+	 */
+	public function pipe($template, array $vars, $callback, $chunk = 1e6) {
+		ob_start($callback, $chunk, true);
+		$this->getTemplate($template)->display($vars);
+		ob_end_flush();
+
+	}
 
     /**
      * Get template by name

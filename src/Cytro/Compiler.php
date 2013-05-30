@@ -411,6 +411,7 @@ class Compiler {
      */
     public static function extendBody(&$body, $tpl) {
         $t = $tpl;
+//	    var_dump("$tpl: ".$tpl->getBody());
         while(isset($t->_extends)) {
             $t = $t->_extends;
             if(is_object($t)) {
@@ -484,7 +485,7 @@ class Compiler {
             if($scope["name"]) { // is scalar name
                 if($tpl->_compatible) { // is compatible mode
                     $scope->replaceContent(
-                        '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
+                        '<?php /* 1) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
                             '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                                 $scope->getContent().
                             "<?php };".
@@ -493,7 +494,7 @@ class Compiler {
                 } elseif(!isset($tpl->blocks[ $scope["name"] ])) { // is block not registered
                     $tpl->blocks[ $scope["name"] ] = $scope->getContent();
                     $scope->replaceContent(
-                        '<?php /* Block '.$tpl.': '.$scope["cname"].' '.$tpl->_compatible.' */'.PHP_EOL.' $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
+                        '<?php /* 2) Block '.$tpl.': '.$scope["cname"].' '.$tpl->_compatible.' */'.PHP_EOL.' $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                             $scope->getContent().
                         "<?php }; ?>".PHP_EOL
                     );
@@ -501,7 +502,7 @@ class Compiler {
             } else { // dynamic name
                 $tpl->_compatible = true; // enable compatible mode
                 $scope->replaceContent(
-                    '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
+                    '<?php /* 3) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
                         '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
                             $scope->getContent().
                         "<?php };".
@@ -512,7 +513,7 @@ class Compiler {
             if(isset($tpl->blocks[ $scope["name"] ])) { // has block
                 if($tpl->_compatible) { // compatible mode enabled
                     $scope->replaceContent(
-                        '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
+                        '<?php /* 4) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
                             $tpl->blocks[ $scope["name"] ].
                         '<?php } ?>'.PHP_EOL
                     );
@@ -520,9 +521,11 @@ class Compiler {
                 } else {
                     $scope->replaceContent($tpl->blocks[ $scope["name"] ]);
                 }
+//            } elseif(isset($tpl->_extended) || !empty($tpl->_compatible)) {
             } elseif(isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
+//	            var_dump("$tpl: exxx");
                 $scope->replaceContent(
-                    '<?php /* Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
+                    '<?php /* 5) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
                         $scope->getContent().
                     '<?php } ?>'.PHP_EOL
                 );
@@ -629,74 +632,59 @@ class Compiler {
         return 'array('.implode(",", $_code).')';
     }
 
-    public static function varOpen(Tokenizer $tokens, Scope $scope) {
-        $scope->is_closed = true;
-        return self::setVar($tokens, $scope->tpl).';';
+	/**
+	 * @param Tokenizer $tokens
+	 * @param Scope $scope
+	 * @return string
+	 */
+	public static function varOpen(Tokenizer $tokens, Scope $scope) {
+	    $var = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
+	    if($tokens->is('=')) { // inline tag {var ...}
+		    $scope->is_closed = true;
+		    $tokens->next();
+		    if($tokens->is("[")) {
+			    return $var.'='.$scope->tpl->parseArray($tokens);
+		    } else {
+			    return $var.'='.$scope->tpl->parseExp($tokens, true);
+		    }
+	    } else {
+		    $scope["name"] = $var;
+		    if($tokens->is('|')) {
+		        $scope["value"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
+		    } else {
+			    $scope["value"] = "ob_get_clean()";
+		    }
+		    return 'ob_start();';
+	    }
     }
 
-    public static function varClose() {
-        return '';
+	/**
+	 * @param Tokenizer $tokens
+	 * @param Scope $scope
+	 * @return string
+	 */
+	public static function varClose(Tokenizer $tokens, Scope $scope) {
+        return $scope["name"].'='.$scope["value"].';';
     }
 
-    /**
-     * Tag {var ...}
-     *
-     * @static
-     * @param Tokenizer $tokens
-     * @param Template           $tpl
-     * @return string
-     */
-    //public static function assign(Tokenizer $tokens, Template $tpl) {
-      //  return self::setVar($tokens, $tpl).';';
-    //}
-
-    /**
-     * Set variable expression
-     * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @param bool $allow_array
-     * @return string
-     */
-    public static function setVar(Tokenizer $tokens, Template $tpl, $allow_array = true) {
-        $var = $tpl->parseVariable($tokens, $tpl::DENY_MODS);
-
-        $tokens->get('=');
-        $tokens->next();
-        if($tokens->is("[") && $allow_array) {
-            return $var.'='.$tpl->parseArray($tokens);
-        } else {
-            return $var.'='.$tpl->parseExp($tokens, true);
-        }
-    }
-
-    public static function filterOpen(Tokenizer $tokens, Scope $scope) {
-        $scope["filter"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
-        return "ob_start();";
-    }
-
-    public static function filterClose($tokens, Scope $scope) {
-        return "echo ".$scope["filter"].";";
-    }
 
     /**
      * @param Tokenizer $tokens
      * @param Scope $scope
      * @return string
      */
-    public static function captureOpen(Tokenizer $tokens, Scope $scope) {
-        if($tokens->is("|")) {
-            $scope["value"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
-        } else {
-            $scope["value"] = "ob_get_clean()";
-        }
-
-        $scope["var"] = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
-
+    public static function filterOpen(Tokenizer $tokens, Scope $scope) {
+        $scope["filter"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
         return "ob_start();";
     }
 
-    public static function captureClose($tokens, Scope $scope) {
-        return $scope["var"]." = ".$scope["value"].";";
+    /**
+     * @param $tokens
+     * @param Scope $scope
+     * @return string
+     */
+    public static function filterClose($tokens, Scope $scope) {
+        return "echo ".$scope["filter"].";";
     }
 
     /**

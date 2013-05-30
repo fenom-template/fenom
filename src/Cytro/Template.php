@@ -97,12 +97,12 @@ class Template extends Render {
         $this->_name = $name;
         if($provider = strstr($name, ":", true)) {
             $this->_scm = $provider;
-            $this->_base_name = substr($name, strlen($provider));
+            $this->_base_name = substr($name, strlen($provider) + 1);
         } else {
-            $this->_base_name = $name;
+	        $this->_base_name = $name;
         }
-        $this->_provider = $this->_cytro->getProvider($provider);
-        $this->_src = $this->_provider->getSource($name, $this->_time);
+	    $this->_provider = $this->_cytro->getProvider($provider);
+        $this->_src = $this->_provider->getSource($this->_base_name, $this->_time);
         if($compile) {
             $this->compile();
         }
@@ -134,56 +134,61 @@ class Template extends Render {
         if(!isset($this->_src)) { // already compiled
             return;
         }
-        $pos = 0;
-        $frag = "";
+	    $end = $pos = 0;
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
-            switch($this->_src[$start + 1]) { // check next char
+            switch($this->_src[$start + 1]) { // check next character
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
                     $pos = $start + 1; // try find tags after the current char
                     continue 2;
                 case "*": // if comment block
                     $end = strpos($this->_src, '*}', $start); // finding end of the comment block
+					if($end === false) {
+						throw new CompileException("Unclosed comment block in line {$this->_line}", 0, 1, $this->_name, $this->_line);
+					}
                     $_frag = substr($this->_src, $this->_pos, $start - $end); // read the comment block for precessing
-                    $this->_line += substr_count($_frag, "\n"); // count skipped lines
-                    $pos = $end + 1; // trying finding tags after the comment block
+                    $this->_line += substr_count($_frag, "\n"); // count skipped lines in comment block
+                    $pos = $end + 1; // seek pointer
                     continue 2;
             }
-            $end = strpos($this->_src, '}', $start); // search close-symbol of the tag
-            if(!$end) { // if unexpected end of template
-                throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
-            }
-            $frag .= substr($this->_src, $this->_pos, $start - $this->_pos);  // variable $frag contains chars after previous '}' and current '{'
-            $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains cytro tag '{...}'
-            $this->_line += substr_count($this->_src, "\n", $this->_pos, $end - $start + 1); // count lines in $frag and $tag (using original text $code)
-            $pos = $this->_pos = $end + 1; // move search-pointer to end of the tag
+	        $frag = substr($this->_src, $pos, $start - $pos);  // variable $frag contains chars after previous '}' and current '{'
+	        $this->_appendText($frag);
 
-            if($tag[strlen($tag) - 2] === "-") { // check right trim flag
-                $_tag = substr($tag, 1, -2);
-                $_frag = rtrim($frag);
-            } else {
-                $_tag = substr($tag, 1, -1);
-                $_frag = $frag;
-            }
-            if($this->_ignore) { // check ignore
-                if($_tag === '/ignore') {
-                    $this->_ignore = false;
-                    $this->_appendText($_frag);
-                } else { // still ignore
-                    $frag .= $tag;
-                    continue;
+	        $from = $start;
+	        reparse: { // yep, i use goto operator. For this algorithm it is good choice
+		        $end = strpos($this->_src, '}', $from); // search close-symbol of the tag
+		        if($end === false) { // if unexpected end of template
+	                throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
                 }
-            } else {
-                $this->_appendText($_frag);
-                $tokens = new Tokenizer($_tag);
-                $this->_appendCode($this->_tag($tokens), $tag);
-                if($tokens->key()) { // if tokenizer have tokens - throws exceptions
-                    throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
-                }
+                $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains cytro tag '{...}'
 
-            }
-            $frag = "";
+		        $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
+
+		        if($this->_ignore) { // check ignore
+			        if($_tag === '/ignore') { // turn off ignore
+				        $this->_ignore = false;
+			        } else { // still ignore
+				        $this->_appendText($tag);
+			        }
+			        $pos = $start + strlen($tag);
+			        continue;
+		        } else {
+			        $tokens = new Tokenizer($_tag); // tokenize the tag
+			        if($tokens->isIncomplete()) { // all strings finished?
+				        $from = $end + 1;
+				        goto reparse; // find another close-symbol
+			        }
+			        $this->_appendCode( $this->_tag($tokens) , $tag); // start the tag lexer
+			        $pos = $end + 1; // move search-pointer to end of the tag
+			        if($tokens->key()) { // if tokenizer have tokens - throws exceptions
+				        throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
+			        }
+
+			    }
+		    }
+            unset($frag);
         }
-        $this->_appendText(substr($this->_src, $this->_pos));
+        gc_collect_cycles();
+        $this->_appendText(substr($this->_src, $end ? $end + 1 : 0));
         if($this->_stack) {
             $_names = array();
             $_line = 0;
@@ -191,9 +196,9 @@ class Template extends Render {
                 if(!$_line) {
                     $_line = $scope->line;
                 }
-                $_names[] = '{'.$scope->name.'} defined on line '.$scope->line;
+                $_names[] = '{'.$scope->name.'} opened on line '.$scope->line;
             }
-            throw new CompileException("Unclosed tag(s): ".implode(", ", $_names), 0, 1, $this->_name, $_line);
+            throw new CompileException("Unclosed tag".(count($_names) == 1 ? "" : "s").": ".implode(", ", $_names), 0, 1, $this->_name, $_line);
         }
         unset($this->_src);
         if($this->_post) {
@@ -217,6 +222,7 @@ class Template extends Render {
      * @param string $text
      */
     private function _appendText($text) {
+	    $this->_line += substr_count($text, "\n");
         if($this->_filter) {
             if(strpos($text, "<?") === false) {
                 $this->_body .= $text;
@@ -262,9 +268,11 @@ class Template extends Render {
      * @param $source
      */
     private function _appendCode($code, $source) {
+
         if(!$code) {
             return;
         } else {
+	        $this->_line += substr_count($source, "\n");
             if(strpos($code, '?>') !== false) {
                 $code = $this->_escapeCode($code); // paste PHP_EOL
             }
@@ -357,14 +365,14 @@ class Template extends Render {
         return parent::fetch($values);
     }
 
-    /**
-     * Internal tags router
-     * @param Tokenizer $tokens
-     * @throws UnexpectedTokenException
-     * @throws CompileException
-     * @throws SecurityException
-     * @return string executable PHP code
-     */
+	/**
+	 * Internal tags router
+	 * @param Tokenizer $tokens
+	 *
+	 * @throws SecurityException
+	 * @throws CompileException
+	 * @return string executable PHP code
+	 */
     private function _tag(Tokenizer $tokens) {
         try {
             if($tokens->is(Tokenizer::MACRO_STRING)) {
@@ -742,104 +750,68 @@ class Template extends Render {
         return $_scalar;
     }
 
-    /**
-     * Parse string with or without variable
-     *
-     * @param Tokenizer $tokens
-     * @throws UnexpectedTokenException
-     * @return string
-     */
+	/**
+	 * Parse string with or without variable
+	 *
+	 * @param Tokenizer $tokens
+	 * @throws UnexpectedTokenException
+	 * @return string
+	 */
     public function parseSubstr(Tokenizer $tokens) {
-        ref: {
-            if($tokens->is('"',"`")) {
-                $p = $tokens->p;
-                $stop = $tokens->current();
-                $_str = '"';
-                $tokens->next();
-                while($t = $tokens->key()) {
-                    if($t === T_ENCAPSED_AND_WHITESPACE) {
-                        $_str .= $tokens->current();
-                        $tokens->next();
-                    } elseif($t === T_VARIABLE) {
-                        if(strlen($_str) > 1) {
-                            $_str .= '".';
-                        } else {
-                            $_str = "";
-                        }
-                        $_str .= '$tpl["'.substr($tokens->current(), 1).'"]';
-                        $tokens->next();
-                        if($tokens->is($stop)) {
-                            $tokens->skip();
-                            return $_str;
-                        } else {
-                            $_str .= '."';
-                        }
-                    } elseif($t === T_CURLY_OPEN) {
-                        if(strlen($_str) > 1) {
-                            $_str .= '".';
-                        } else {
-                            $_str = "";
-                        }
-                        $tokens->getNext(T_VARIABLE);
-                        $_str .= '('.$this->parseExp($tokens).')';
-                        /*if(!$tokens->valid()) {
-                            $more = $this->_getMoreSubstr($stop);
-                            //var_dump($more); exit;
-                            $tokens->append("}".$more, $p);
-                            var_dump("Curly", $more, $tokens->getSnippetAsString());
-                            exit;
-                        }*/
-
-                        //$tokens->skip('}');
-                        if($tokens->is($stop)) {
-                            $tokens->next();
-                            return $_str;
-                        } else {
-                            $_str .= '."';
-                        }
-                    } elseif($t === "}") {
-                        $tokens->next();
-                    } elseif($t === $stop) {
-                        $tokens->next();
-                        return $_str.'"';
+        if($tokens->is('"',"`")) {
+            $stop = $tokens->current();
+            $_str = '"';
+            $tokens->next();
+            while($t = $tokens->key()) {
+                if($t === T_ENCAPSED_AND_WHITESPACE) {
+                    $_str .= $tokens->current();
+                    $tokens->next();
+                } elseif($t === T_VARIABLE) {
+                    if(strlen($_str) > 1) {
+                        $_str .= '".';
                     } else {
-
-                        break;
+                        $_str = "";
                     }
-                }
-                if($more = $this->_getMoreSubstr($stop)) {
-                    $tokens->append("}".$more, $p);
-                    goto ref;
-                }
-                throw new UnexpectedTokenException($tokens);
-            } elseif($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
-                return $tokens->getAndNext();
-            } elseif($tokens->is(T_ENCAPSED_AND_WHITESPACE)) {
-                $p = $tokens->p;
-                if($more = $this->_getMoreSubstr($tokens->curr[1][0])) {
-                    $tokens->append("}".$more, $p);
-                    goto ref;
-                }
-                throw new UnexpectedTokenException($tokens);
-            } else {
-                return "";
-            }
-        }
-    }
+                    $_str .= '$tpl["'.substr($tokens->current(), 1).'"]';
+                    $tokens->next();
+                    if($tokens->is($stop)) {
+                        $tokens->skip();
+                        return $_str;
+                    } else {
+                        $_str .= '."';
+                    }
+                } elseif($t === T_CURLY_OPEN) {
+                    if(strlen($_str) > 1) {
+                        $_str .= '".';
+                    } else {
+                        $_str = "";
+                    }
+                    $tokens->getNext(T_VARIABLE);
+                    $_str .= '('.$this->parseExp($tokens).')';
+                    if($tokens->is($stop)) {
+                        $tokens->next();
+                        return $_str;
+                    } else {
+                        $_str .= '."';
+                    }
+                } elseif($t === "}") {
+                    $tokens->next();
+                } elseif($t === $stop) {
+                    $tokens->next();
+                    return $_str.'"';
+                } else {
 
-    /**
-     * @param string $after
-     * @return bool|string
-     */
-    private function _getMoreSubstr($after) {
-        $end = strpos($this->_src, $after, $this->_pos);
-        $end = strpos($this->_src, "}", $end);
-        if(!$end) {
-            return false;
+                    break;
+                }
+            }
+            throw new UnexpectedTokenException($tokens);
+        } elseif($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
+            return $tokens->getAndNext();
+        } elseif($tokens->is(T_ENCAPSED_AND_WHITESPACE)) {
+            throw new UnexpectedTokenException($tokens);
+        } else {
+            return "";
         }
-        $fragment = substr($this->_src, $this->_pos, $end - $this->_pos);
-        $this->_pos = $end + 1;
-        return $fragment;
     }
 
     /**
@@ -1092,3 +1064,4 @@ class Template extends Render {
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
 class ImproperUseException extends \LogicException {}
+class ReparseTagException extends \Exception {}

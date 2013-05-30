@@ -24,6 +24,11 @@ class TestCase extends \PHPUnit_Framework_TestCase {
             FS::clean(CYTRO_RESOURCES.'/compile/');
         }
         $this->cytro = Cytro::factory(CYTRO_RESOURCES.'/template', CYTRO_RESOURCES.'/compile');
+        $this->cytro->addModifier('dots', __CLASS__.'::dots');
+    }
+
+    public static function dots($value) {
+        return $value."...";
     }
 
     public static function setUpBeforeClass() {
@@ -85,10 +90,105 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         $this->fail("Code $code must be invalid");
     }
 
-    public function assertRender($tpl, $result) {
+    public function assertRender($tpl, $result, $debug = false) {
         $template = $this->cytro->compileCode($tpl);
+        if($debug) {
+            print_r("$tpl:\n".$template->getBody());
+        }
         $this->assertSame($result, $template->fetch($this->values));
     }
+
+
+	public static function providerNumbers() {
+		return array(
+			array('77', 77),
+			array('-33', -33),
+			array('0.2', 0.2),
+			array('-0.3', -0.3),
+			array('1e6', 1e6),
+			array('-2e6', -2e6),
+		);
+	}
+
+    public static function providerStrings() {
+        return array(
+            array('"str"', 'str'),
+            array('"str\nand\nmany\nlines"', "str\nand\nmany\nlines"),
+            array('"str and \'substr\'"', "str and 'substr'"),
+            array('"str and \"substr\""', 'str and "substr"'),
+            array("'str'", 'str'),
+            array("'str\\nin\\none\\nline'", 'str\nin\none\nline'),
+            array("'str and \"substr\"'", 'str and "substr"'),
+            array("'str and \'substr\''", "str and 'substr'"),
+            array('"$one"', '1'),
+            array('"$one $two"', '1 2'),
+            array('"$one and $two"', '1 and 2'),
+            array('"a $one and $two b"', 'a 1 and 2 b'),
+            array('"{$one}"', '1'),
+            array('"a {$one} b"', 'a 1 b'),
+            array('"{$one + 2}"', '3'),
+            array('"{$one * $two + 1}"', '3'),
+            array('"{$one} and {$two}"', '1 and 2'),
+            array('"$one and {$two}"', '1 and 2'),
+            array('"{$one} and $two"', '1 and 2'),
+            array('"a {$one} and {$two} b"', 'a 1 and 2 b'),
+            array('"{$one+1} and {$two-1}"', '2 and 1'),
+            array('"a {$one+1} and {$two-1} b"', 'a 2 and 1 b'),
+            array('"a {$one|dots} and {$two|dots} b"', 'a 1... and 2... b'),
+            array('"a {$one|dots} and $two b"', 'a 1... and 2 b'),
+            array('"a $one and {$two|dots} b"', 'a 1 and 2... b'),
+        );
+    }
+
+	public function providerVariables() {
+		return array();
+	}
+
+	public static function providerObjects() {
+		return array();
+	}
+
+	public static function providerArrays() {
+		$scalars = array();
+		$data = array(
+			array('[]', array()),
+			array('[[],[]]', array(array(), array())),
+		);
+		foreach(self::providerScalars() as $scalar) {
+			$scalars[0][] = $scalar[0];
+			$scalars[1][] = $scalar[1];
+
+			$data[] = array(
+				"[".$scalar[0]."]",
+				array($scalar[1])
+			);
+			$data[] = array(
+				"['some_key' =>".$scalar[0]."]",
+				array('some_key' => $scalar[1])
+			);
+		}
+		$data[] = array(
+			"[".implode(", ", $scalars[0])."]",
+			$scalars[1]
+		);
+		return $data;
+	}
+
+	public static function providerScalars() {
+		return array_merge(
+			self::providerNumbers(),
+			self::providerStrings()
+		);
+	}
+
+	public static function providerValues() {
+		return array_merge(
+			self::providerScalars(),
+			self::providerArrays(),
+			self::providerVariables(),
+			self::providerObjects()
+		);
+	}
 }
 
 class Fake implements \ArrayAccess {
@@ -113,4 +213,8 @@ class Fake implements \ArrayAccess {
     public function offsetUnset($offset) {
         unset($this->vars[$offset]);
     }
+
+	public function proxy() {
+		return implode(", ", func_get_args());
+	}
 }

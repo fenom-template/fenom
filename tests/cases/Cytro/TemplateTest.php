@@ -4,6 +4,11 @@ use Cytro\Template,
     Cytro,
     Cytro\Render;
 
+/**
+ * Test template parsing
+ *
+ * @package Cytro
+ */
 class TemplateTest extends TestCase {
 
     public function setUp() {
@@ -14,11 +19,6 @@ class TemplateTest extends TestCase {
             "name" => "welcome.tpl"
         )));
     }
-
-    /*public function testSandbox() {
-        var_dump($this->cytro->compileCode('{"$s:{$b+1}f d {$d}"}')->_body);
-        exit;
-    }*/
 
     public static function providerVars() {
         $a = array("a" => "World");
@@ -73,41 +73,6 @@ class TemplateTest extends TestCase {
         );
     }
 
-    public static function providerScalars() {
-        return array(
-            array('77', 77),
-            array('-33', -33),
-            array('0.2', 0.2),
-            array('-0.3', -0.3),
-            array('1e6', 1e6),
-            array('-2e6', -2e6),
-            array('"str"', 'str'),
-            array('"str\nand\nmany\nlines"', "str\nand\nmany\nlines"),
-            array('"str and \'substr\'"', "str and 'substr'"),
-            array('"str and \"substr\""', 'str and "substr"'),
-            array("'str'", 'str'),
-            array("'str\\nin\\none\\nline'", 'str\nin\none\nline'),
-            array("'str and \"substr\"'", 'str and "substr"'),
-            array("'str and \'substr\''", "str and 'substr'"),
-            array('"$one"', '1'),
-            array('"$one $two"', '1 2'),
-            array('"$one and $two"', '1 and 2'),
-            array('"a $one and $two b"', 'a 1 and 2 b'),
-            array('"{$one}"', '1'),
-            array('"a {$one} b"', 'a 1 b'),
-            array('"{$one + 2}"', '3'),
-            array('"{$one * $two + 1}"', '3'),
-            array('"{$one} and {$two}"', '1 and 2'),
-            array('"$one and {$two}"', '1 and 2'),
-            array('"{$one} and $two"', '1 and 2'),
-            array('"a {$one} and {$two} b"', 'a 1 and 2 b'),
-            array('"{$one+1} and {$two-1}"', '2 and 1'),
-            array('"a {$one+1} and {$two-1} b"', 'a 2 and 1 b'),
-            array('"a {$one|dots} and {$two|dots} b"', 'a 1... and 2... b'),
-            array('"a {$one|dots} and $two b"', 'a 1... and 2 b'),
-            array('"a $one and {$two|dots} b"', 'a 1 and 2... b'),
-        );
-    }
 
     public static function providerVarsInvalid() {
         return array(
@@ -347,7 +312,7 @@ class TemplateTest extends TestCase {
 
     public static function providerCreateVarInvalid() {
         return array(
-            array('Create: {var $v} Result: {$v} end',               'Cytro\CompileException', "Unexpected end of expression"),
+            array('Create: {var $v} Result: {$v} end',               'Cytro\CompileException', "Unclosed tag: {var} opened"),
             array('Create: {var $v = } Result: {$v} end',            'Cytro\CompileException', "Unexpected end of expression"),
             array('Create: {var $v = 1++} Result: {$v} end',         'Cytro\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = c} Result: {$v} end',           'Cytro\CompileException', "Unexpected token 'c'"),
@@ -586,7 +551,7 @@ class TemplateTest extends TestCase {
             array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end',                        'Cytro\CompileException', "Unexpected closing of the tag 'for'"),
             array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end',                         'Cytro\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
             array('Layers: {/switch} end',                                                          'Cytro\CompileException', "Unexpected closing of the tag 'switch'"),
-            array('Layers: {if 1} end',                                                             'Cytro\CompileException', "Unclosed tag(s): {if}"),
+            array('Layers: {if 1} end',                                                             'Cytro\CompileException', "Unclosed tag: {if}"),
         );
     }
 
