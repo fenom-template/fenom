@@ -141,12 +141,14 @@ class Template extends Render {
                     $pos = $start + 1; // try find tags after the current char
                     continue 2;
                 case "*": // if comment block
-                    $end = strpos($this->_src, '*}', $start); // finding end of the comment block
+                    $end = strpos($this->_src, '*}', $start) + 1; // finding end of the comment block
 					if($end === false) {
 						throw new CompileException("Unclosed comment block in line {$this->_line}", 0, 1, $this->_name, $this->_line);
 					}
-                    $_frag = substr($this->_src, $this->_pos, $start - $end); // read the comment block for precessing
-                    $this->_line += substr_count($_frag, "\n"); // count skipped lines in comment block
+					$this->_appendText(substr($this->_src, $pos, $start - $pos));
+                    $comment = substr($this->_src, $start, $end - $start); // read the comment block for processing
+                    $this->_line += substr_count($comment, "\n"); // count skipped lines in comment block
+					unset($comment);
                     $pos = $end + 1; // seek pointer
                     continue 2;
             }

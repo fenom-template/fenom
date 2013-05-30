@@ -25,7 +25,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         }
         $this->cytro = Cytro::factory(CYTRO_RESOURCES.'/template', CYTRO_RESOURCES.'/compile');
         $this->cytro->addModifier('dots', __CLASS__.'::dots');
-        $this->cytro->addModifier('dots', __CLASS__.'::concat');
+        $this->cytro->addModifier('concat', __CLASS__.'::concat');
     }
 
     public static function dots($value) {
