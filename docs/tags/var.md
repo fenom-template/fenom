@@ -7,9 +7,14 @@ Tag {var} [RU]
 {var $var=EXPR}
 ```
 
-
 ```smarty
 {var $var}
+  ... any content ...
+{/var}
+```
+
+```smarty
+{var $var|modifiers}
   ... any content ...
 {/var}
 ```

@@ -25,11 +25,16 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         }
         $this->cytro = Cytro::factory(CYTRO_RESOURCES.'/template', CYTRO_RESOURCES.'/compile');
         $this->cytro->addModifier('dots', __CLASS__.'::dots');
+        $this->cytro->addModifier('dots', __CLASS__.'::concat');
     }
 
     public static function dots($value) {
         return $value."...";
     }
+
+	public static function concat() {
+		return call_user_func_array('var_export', func_get_args());
+	}
 
     public static function setUpBeforeClass() {
         if(!file_exists(CYTRO_RESOURCES.'/template')) {
@@ -101,6 +106,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 
 	public static function providerNumbers() {
 		return array(
+			array('0', 0),
 			array('77', 77),
 			array('-33', -33),
 			array('0.2', 0.2),
