@@ -696,21 +696,31 @@ class Compiler {
      * @throws ImproperUseException
      */
     public static function tagCycle(Tokenizer $tokens, Template $tpl) {
-        $exp = $tpl->parseExp($tokens, true);
+	    if($tokens->is("[")) {
+		    $exp = $tpl->parseArray($tokens);
+	    } else {
+		    $exp = $tpl->parseExp($tokens, true);
+	    }
         if($tokens->valid()) {
             $p = $tpl->parseParams($tokens);
             if(empty($p["index"])) {
                 throw new ImproperUseException("Cycle may contain only index attribute");
             } else {
-                return __CLASS__.'::cycle((array)'.$exp.', '.$p["index"].');';
+                return 'echo '.__CLASS__.'::cycle('.$exp.', '.$p["index"].')';
             }
         } else {
             $var = $tpl->tmpVar();
-            return "is_array($exp) ? ".__CLASS__.'::cycle('.$exp.", isset($var) ? $var++ : ($var = 0) ) : $exp";
+            return 'echo '.__CLASS__.'::cycle('.$exp.", isset($var) ? ++$var : ($var = 0) )";
         }
     }
 
-    public static function cycle($vals, $index) {
+	/**
+	 * Runtime cycle callback
+	 * @param mixed $vals
+	 * @param $index
+	 * @return mixed
+	 */
+	public static function cycle($vals, $index) {
         return $vals[$index % count($vals)];
     }
 

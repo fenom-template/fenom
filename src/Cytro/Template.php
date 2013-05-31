@@ -18,10 +18,19 @@ use Cytro;
  */
 class Template extends Render {
 
-    const DENY_ARRAY = 1;
-    const DENY_MODS = 2;
+	/**
+	 * Disable array parser.
+	 */
+	const DENY_ARRAY = 1;
+	/**
+	 * Disable modifier parser.
+	 */
+	const DENY_MODS = 2;
 
-    const EXTENDED = 0x1000;
+	/**
+	 * Template was extended
+	 */
+	const EXTENDED = 0x1000;
 
     /**
      * @var int shared counter
@@ -56,7 +65,6 @@ class Template extends Render {
     /**
      * @var int
      */
-    private $_pos = 0;
     private $_line = 1;
     private $_post = array();
     /**
@@ -131,25 +139,22 @@ class Template extends Render {
      * @throws CompileException
      */
     public function compile() {
-        if(!isset($this->_src)) { // already compiled
-            return;
-        }
 	    $end = $pos = 0;
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch($this->_src[$start + 1]) { // check next character
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
-                    $pos = $start + 1; // try find tags after the current char
+                    $pos = $start + 1;
                     continue 2;
-                case "*": // if comment block
-                    $end = strpos($this->_src, '*}', $start) + 1; // finding end of the comment block
+                case "*": // if comments
+                    $end = strpos($this->_src, '*}', $start) + 1; // find end of the comment block
 					if($end === false) {
 						throw new CompileException("Unclosed comment block in line {$this->_line}", 0, 1, $this->_name, $this->_line);
 					}
 					$this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $comment = substr($this->_src, $start, $end - $start); // read the comment block for processing
-                    $this->_line += substr_count($comment, "\n"); // count skipped lines in comment block
-					unset($comment);
-                    $pos = $end + 1; // seek pointer
+                    $this->_line += substr_count($comment, "\n"); // count lines in comments
+					unset($comment); // cleanup
+                    $pos = $end + 1;
                     continue 2;
             }
 	        $frag = substr($this->_src, $pos, $start - $pos);  // variable $frag contains chars after previous '}' and current '{'
@@ -177,7 +182,7 @@ class Template extends Render {
 			        $tokens = new Tokenizer($_tag); // tokenize the tag
 			        if($tokens->isIncomplete()) { // all strings finished?
 				        $from = $end + 1;
-				        goto reparse; // find another close-symbol
+				        goto reparse; // need next close-symbol
 			        }
 			        $this->_appendCode( $this->_tag($tokens) , $tag); // start the tag lexer
 			        $pos = $end + 1; // move search-pointer to end of the tag
@@ -187,7 +192,7 @@ class Template extends Render {
 
 			    }
 		    }
-            unset($frag);
+            unset($frag, $_tag, $tag); // cleanup
         }
         gc_collect_cycles();
         $this->_appendText(substr($this->_src, $end ? $end + 1 : 0));
@@ -202,7 +207,7 @@ class Template extends Render {
             }
             throw new CompileException("Unclosed tag".(count($_names) == 1 ? "" : "s").": ".implode(", ", $_names), 0, 1, $this->_name, $_line);
         }
-        unset($this->_src);
+        $this->_src = ""; // cleanup
         if($this->_post) {
             foreach($this->_post as $cb) {
                 call_user_func_array($cb, array(&$this->_body, $this));
@@ -1066,4 +1071,3 @@ class Template extends Render {
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
 class ImproperUseException extends \LogicException {}
-class ReparseTagException extends \Exception {}

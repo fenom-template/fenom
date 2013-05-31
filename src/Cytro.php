@@ -14,22 +14,24 @@ use Cytro\Template,
  * Cytro Template Engine
  */
 class Cytro {
-    const VERSION = '1.0.1';
+    const VERSION = '1.0';
 
+	/* Compiler types */
     const INLINE_COMPILER   = 1;
     const BLOCK_COMPILER    = 2;
     const INLINE_FUNCTION   = 3;
     const BLOCK_FUNCTION    = 4;
     const MODIFIER          = 5;
 
+	/* Options */
     const DENY_METHODS      = 0x10;
     const DENY_INLINE_FUNCS = 0x20;
     const FORCE_INCLUDE     = 0x40;
-
     const AUTO_RELOAD       = 0x80;
     const FORCE_COMPILE     = 0xF0;
     const DISABLE_CACHE     = 0x1F0;
 
+	/* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Cytro\Compiler::stdClose';
     const DEFAULT_FUNC_PARSER    = 'Cytro\Compiler::stdFuncParser';
     const DEFAULT_FUNC_OPEN      = 'Cytro\Compiler::stdFuncOpen';
@@ -204,7 +206,11 @@ class Cytro {
         'import' => array(
             'type' => self::INLINE_COMPILER,
             'parser' => 'Cytro\Compiler::tagImport'
-        )
+        ),
+	    'cycle' => array(
+		    'type' => self::INLINE_COMPILER,
+		    'parser' => 'Cytro\Compiler::tagCycle'
+	    )
     );
 
     /**
