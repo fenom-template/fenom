@@ -11,7 +11,7 @@ Cytro - awesome template engine for PHP
 * [Secure](./docs/settings.md)
 * [Simple](./ideology.md)
 * [Flexible](./docs/main.md#extends)
-* [Lightweight](./docs/benchmark.md#satistic)
+* [Lightweight](./docs/benchmark.md#stats)
 * [Powerful](./docs/main.md)
 * Easy to use:
 

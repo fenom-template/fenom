@@ -101,7 +101,7 @@ class Tokenizer {
             \T_NEW => 1,         \T_PRINT => 1,       \T_PRIVATE => 1, \T_PUBLIC => 1,      \T_PROTECTED => 1,   \T_REQUIRE => 1,
             \T_REQUIRE_ONCE => 1,\T_RETURN => 1,      \T_RETURN => 1,  \T_STRING => 1,      \T_SWITCH => 1,      \T_THROW => 1,
             \T_TRAIT => 1,       \T_TRAIT_C => 1,     \T_TRY => 1,     \T_UNSET => 1,       \T_UNSET => 1,       \T_VAR => 1,
-            \T_WHILE => 1,       \T_YIELD => 1
+            \T_WHILE => 1,       \T_YIELD => 1,       \T_USE => 1
         ),
         self::MACRO_INCDEC => array(
             \T_INC => 1, \T_DEC => 1

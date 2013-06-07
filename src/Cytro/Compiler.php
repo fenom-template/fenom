@@ -388,53 +388,66 @@ class Compiler {
             $tpl->_compatible = true;
         }
         if($name) { // static extends
+	        dump("$tpl: static extend $name");
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
 //            $tpl->_compatible = &$tpl->_extends->_compatible;
             if(!isset($tpl->_compatible)) {
-                $tpl->_compatible = &$tpl->_extends->_compatible;;
+                $tpl->_compatible = &$tpl->_extends->_compatible;
             }
             $tpl->addDepend($tpl->_extends);
             return "";
         } else { // dynamic extends
-            if(!isset($tpl->_compatible)) {
-                $tpl->_compatible = false;
+	        if(!isset($tpl->_compatible)) {
+	            $tpl->_compatible = true;
             }
-            $tpl->_extends = $tpl_name;
+	        dump("$tpl: dynamic extend $tpl_name");
+	        $tpl->_extends = $tpl_name;
             return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Cytro\Template::EXTENDED);';
         }
     }
 
     /**
      * Post compile action for {extends ...} tag
-     * @param $body
+     * @param string $body
      * @param Template $tpl
      */
     public static function extendBody(&$body, $tpl) {
-        $t = $tpl;
+	    $t = $tpl;
 //	    var_dump("$tpl: ".$tpl->getBody());
-        while(isset($t->_extends)) {
-            $t = $t->_extends;
-            if(is_object($t)) {
-                $t->_extended = true;
-                $tpl->addDepend($t);
-                $t->_compatible = &$tpl->_compatible;
-                $t->blocks = &$tpl->blocks;
-                $t->compile();
-                if(!isset($t->_extends)) { // last item => parent
-                    if(empty($tpl->_compatible)) {
-                        $body = $t->getBody();
-                    } else {
-                        $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->getBody();
-                    }
-                    return;
-                } else {
-                    $body .= $t->getBody();
-                }
-            } else {
-                $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
-                return;
-            }
-        }
+	    if($tpl->uses) {
+		    dump("$tpl: append use blocks: ".var_export($tpl->uses, 1));
+		    $tpl->blocks += $tpl->uses;
+	    }
+	    while(isset($t->_extends)) {
+		    $t = $t->_extends;
+		    if(is_object($t)) {
+			    /* @var \Cytro\Template $t */
+			    $t->_extended = true;
+			    $tpl->addDepend($t);
+			    $t->_compatible = &$tpl->_compatible;
+			    $t->blocks = &$tpl->blocks;
+			    dump("$tpl: before compile $t have blocks: ".var_export($tpl->blocks, 1));
+			    $t->compile();
+			    if($t->uses) {
+				    dump("$tpl: after compile $t have use blocks: ".var_export($tpl->uses, 1));
+				    $tpl->blocks += $t->uses;
+			    }
+			    dump("$tpl: after compile $t have blocks: ".var_export($tpl->blocks, 1));
+			    if(!isset($t->_extends)) { // last item => parent
+				    if(empty($tpl->_compatible)) {
+					    $body = $t->getBody();
+				    } else {
+					    $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); ?>'.$t->getBody();
+				    }
+				    return;
+			    } else {
+				    $body .= $t->getBody();
+			    }
+		    } else {
+			    $body = '<?php ob_start(); ?>'.$body.'<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
+			    return;
+		    }
+	    }
     }
 
     /**
@@ -445,18 +458,35 @@ class Compiler {
      * @return string
      */
     public static function tagUse(Tokenizer $tokens, Template $tpl) {
-        $tpl->parsePlainArg($tokens, $name);
+        $cname = $tpl->parsePlainArg($tokens, $name);
         if($name) {
+	        dump("$tpl: static use $name");
             $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
             $donor->_extended = true;
-            $tpl->_compatible = &$donor->_compatible;
-            $donor->compile();
-            if(empty($tpl->_compatible)) {
-                $tpl->blocks += $donor->blocks;
-            }
-            return '?>'.$donor->getBody().'<?php ';
+	        $donor->_extends = $tpl;
+	        $donor->_compatible = &$tpl->_compatible;
+	        //$donor->blocks = &$tpl->blocks;
+	        dump("$tpl: before compile donor $donor have blocks: ".var_export($tpl->blocks, 1));
+	        $donor->compile();
+	        dump("$tpl: before use block from $donor: ".var_export($donor->blocks, 1));
+	        $blocks = $donor->blocks;
+	        foreach($blocks as $name => $code) {
+		        if(isset($tpl->blocks[$name])) {
+			        $tpl->blocks[$name] = $code;
+			        unset($blocks[$name]);
+		        }
+	        }
+	        dump("$tpl: after use block from $donor: ".var_export($tpl->blocks, 1));
+	        dump("$tpl: save tail from $donor: ".var_export($blocks, 1));
+	        $tpl->uses = $blocks + $tpl->uses;
+	        $tpl->addDepend($donor);
+	        return '?>'.$donor->getBody().'<?php ';
         } else {
-            throw new ImproperUseException('template name must be given explicitly');
+	        $tpl->_compatible = true;
+	        return '$donor = $tpl->getStorage()->getTemplate('.$cname.', \Cytro\Template::EXTENDED);'.PHP_EOL.
+		        '$donor->fetch((array)$tpl);'.PHP_EOL.
+		        '$tpl->b += (array)$donor->b';
+//            throw new ImproperUseException('template name must be given explicitly');
         }
     }
 
@@ -468,9 +498,9 @@ class Compiler {
      * @throws ImproperUseException
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
-        $p = $scope->tpl->parsePlainArg($tokens, $name);
-        $scope["name"]  = $name;
-        $scope["cname"] = $p;
+	    $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
+	    $scope["name"]  = $name;
+	    dump("{$scope->tpl}: open block ".$scope["name"]);
     }
 
     /**
@@ -480,58 +510,60 @@ class Compiler {
      * @return string
      */
     public static function tagBlockClose($tokens, Scope $scope) {
-        $tpl = $scope->tpl;
-        if(isset($tpl->_extends)) { // is child
-            if($scope["name"]) { // is scalar name
-                if($tpl->_compatible) { // is compatible mode
-                    $scope->replaceContent(
-                        '<?php /* 1) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
-                            '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
-                                $scope->getContent().
-                            "<?php };".
-                        "} ?>".PHP_EOL
-                    );
-                } elseif(!isset($tpl->blocks[ $scope["name"] ])) { // is block not registered
-                    $tpl->blocks[ $scope["name"] ] = $scope->getContent();
-                    $scope->replaceContent(
-                        '<?php /* 2) Block '.$tpl.': '.$scope["cname"].' '.$tpl->_compatible.' */'.PHP_EOL.' $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
-                            $scope->getContent().
-                        "<?php }; ?>".PHP_EOL
-                    );
-                }
-            } else { // dynamic name
-                $tpl->_compatible = true; // enable compatible mode
-                $scope->replaceContent(
-                    '<?php /* 3) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
-                        '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
-                            $scope->getContent().
-                        "<?php };".
-                    "} ?>".PHP_EOL
-                );
-            }
-        } else {     // is parent
-            if(isset($tpl->blocks[ $scope["name"] ])) { // has block
-                if($tpl->_compatible) { // compatible mode enabled
-                    $scope->replaceContent(
-                        '<?php /* 4) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
-                            $tpl->blocks[ $scope["name"] ].
-                        '<?php } ?>'.PHP_EOL
-                    );
 
-                } else {
-                    $scope->replaceContent($tpl->blocks[ $scope["name"] ]);
-                }
+	    $tpl = $scope->tpl;
+	    if(isset($tpl->_extends)) { // is child
+		    if($scope["name"]) { // is scalar name
+			    if($tpl->_compatible) { // is compatible mode
+				    $scope->replaceContent(
+					    '<?php /* 1) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
+					    '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
+					    $scope->getContent().
+					    "<?php };".
+					    "} ?>".PHP_EOL
+				    );
+			    } elseif(!isset($tpl->blocks[ $scope["name"] ])) { // is block not registered
+				    $tpl->blocks[ $scope["name"] ] = $scope->getContent();
+				    $scope->replaceContent(
+					    '<?php /* 2) Block '.$tpl.': '.$scope["cname"].' '.$tpl->_compatible.' */'.PHP_EOL.' $tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
+					    $scope->getContent().
+					    "<?php }; ?>".PHP_EOL
+				    );
+			    }
+		    } else { // dynamic name
+			    $tpl->_compatible = true; // enable compatible mode
+			    $scope->replaceContent(
+				    '<?php /* 3) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(empty($tpl->b['.$scope["cname"].'])) { '.
+				    '$tpl->b['.$scope["cname"].'] = function($tpl) { ?>'.PHP_EOL.
+				    $scope->getContent().
+				    "<?php };".
+				    "} ?>".PHP_EOL
+			    );
+		    }
+	    } else {     // is parent
+		    if(isset($tpl->blocks[ $scope["name"] ])) { // has block
+			    if($tpl->_compatible) { // compatible mode enabled
+				    $scope->replaceContent(
+					    '<?php /* 4) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
+					    $tpl->blocks[ $scope["name"] ].
+					    '<?php } ?>'.PHP_EOL
+				    );
+
+			    } else {
+				    $scope->replaceContent($tpl->blocks[ $scope["name"] ]);
+			    }
 //            } elseif(isset($tpl->_extended) || !empty($tpl->_compatible)) {
-            } elseif(isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
+		    } elseif(isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
 //	            var_dump("$tpl: exxx");
-                $scope->replaceContent(
-                    '<?php /* 5) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
-                        $scope->getContent().
-                    '<?php } ?>'.PHP_EOL
-                );
-            }
-        }
-        return '';
+			    $scope->replaceContent(
+				    '<?php /* 5) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
+				    $scope->getContent().
+				    '<?php } ?>'.PHP_EOL
+			    );
+		    }
+	    }
+	    return '';
+
     }
 
     public static function tagParent($tokens, Scope $scope) {

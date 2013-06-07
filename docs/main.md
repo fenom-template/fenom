@@ -10,6 +10,8 @@ Documentation
 * [Callbacks and filters](./callbacks.md)
 * [Operators](./operators.md)
 
+***
+
 ### Modifiers
 
 [Usage](./syntax.md#modifiers)
@@ -28,6 +30,8 @@ Documentation
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
 * or [add](./ext/mods.md) your own
 
+***
+
 ### Tags
 
 [Usage](./syntax.md#tags)
@@ -45,6 +49,8 @@ Documentation
 * [macro](./tags/macro.md) and `import`
 * [autotrim](./tags/autotrim.md)
 * or [add](./ext/tags.md) your own
+
+***
 
 ### Extends
 

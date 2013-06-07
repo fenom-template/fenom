@@ -15,3 +15,10 @@ function drop() {
     echo "-------\nDump trace: \n".$e->getTraceAsString()."\n";
     exit();
 }
+
+function dump() {
+	foreach(func_get_args() as $arg) {
+		fwrite(STDERR, "DUMP: ".call_user_func("print_r", $arg, true)."\n");
+
+	}
+}

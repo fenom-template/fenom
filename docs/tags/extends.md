@@ -54,6 +54,8 @@ Tag {extends} [RU]
 
 ### {parent}
 
+Planned. Not supported yet.
+
 ```smarty
 {block 'block1'}
   content ...

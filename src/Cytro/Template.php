@@ -51,6 +51,15 @@ class Template extends Render {
      * @var array of blocks
      */
     public $blocks = array();
+
+	public $uses = array();
+
+	public $parents = array();
+
+	public $_extends;
+	public $_extended = false;
+	public $_compatible;
+
     /**
      * Call stack
      * @var Scope[]
@@ -1071,3 +1080,4 @@ class Template extends Render {
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
 class ImproperUseException extends \LogicException {}
+class ReparseTagException extends \Exception {}
