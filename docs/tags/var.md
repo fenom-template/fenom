@@ -49,4 +49,8 @@ Tag {var} [RU]
 {var $v}
     Some long {$text|trim}
 {/var}
+
+{var $v|escape} {* apply modifier to variable*}
+    Some long {$text|trim}
+{/var}
 ```
