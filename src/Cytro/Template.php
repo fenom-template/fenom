@@ -30,7 +30,9 @@ class Template extends Render {
 	/**
 	 * Template was extended
 	 */
-	const EXTENDED = 0x1000;
+	const DYNAMIC_EXTEND = 0x1000;
+	const EXTENDED = 0x2000;
+	const DYNAMIC_BLOCK = 0x4000;
 
     /**
      * @var int shared counter

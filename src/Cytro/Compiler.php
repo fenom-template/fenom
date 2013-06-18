@@ -384,13 +384,11 @@ class Compiler {
         if(empty($tpl->_extended)) {
             $tpl->addPostCompile(__CLASS__."::extendBody");
         }
-        if($tpl->getOptions() & Template::EXTENDED) {
+        if($tpl->getOptions() & Template::DYNAMIC_EXTEND) {
             $tpl->_compatible = true;
         }
         if($name) { // static extends
-	        dump("$tpl: static extend $name");
             $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
-//            $tpl->_compatible = &$tpl->_extends->_compatible;
             if(!isset($tpl->_compatible)) {
                 $tpl->_compatible = &$tpl->_extends->_compatible;
             }
@@ -400,7 +398,6 @@ class Compiler {
 	        if(!isset($tpl->_compatible)) {
 	            $tpl->_compatible = true;
             }
-	        dump("$tpl: dynamic extend $tpl_name");
 	        $tpl->_extends = $tpl_name;
             return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Cytro\Template::EXTENDED);';
         }
@@ -413,9 +410,7 @@ class Compiler {
      */
     public static function extendBody(&$body, $tpl) {
 	    $t = $tpl;
-//	    var_dump("$tpl: ".$tpl->getBody());
 	    if($tpl->uses) {
-		    dump("$tpl: append use blocks: ".var_export($tpl->uses, 1));
 		    $tpl->blocks += $tpl->uses;
 	    }
 	    while(isset($t->_extends)) {
@@ -426,13 +421,10 @@ class Compiler {
 			    $tpl->addDepend($t);
 			    $t->_compatible = &$tpl->_compatible;
 			    $t->blocks = &$tpl->blocks;
-			    dump("$tpl: before compile $t have blocks: ".var_export($tpl->blocks, 1));
 			    $t->compile();
 			    if($t->uses) {
-				    dump("$tpl: after compile $t have use blocks: ".var_export($tpl->uses, 1));
 				    $tpl->blocks += $t->uses;
 			    }
-			    dump("$tpl: after compile $t have blocks: ".var_export($tpl->blocks, 1));
 			    if(!isset($t->_extends)) { // last item => parent
 				    if(empty($tpl->_compatible)) {
 					    $body = $t->getBody();
@@ -460,15 +452,12 @@ class Compiler {
     public static function tagUse(Tokenizer $tokens, Template $tpl) {
         $cname = $tpl->parsePlainArg($tokens, $name);
         if($name) {
-	        dump("$tpl: static use $name");
             $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
             $donor->_extended = true;
 	        $donor->_extends = $tpl;
 	        $donor->_compatible = &$tpl->_compatible;
 	        //$donor->blocks = &$tpl->blocks;
-	        dump("$tpl: before compile donor $donor have blocks: ".var_export($tpl->blocks, 1));
 	        $donor->compile();
-	        dump("$tpl: before use block from $donor: ".var_export($donor->blocks, 1));
 	        $blocks = $donor->blocks;
 	        foreach($blocks as $name => $code) {
 		        if(isset($tpl->blocks[$name])) {
@@ -476,8 +465,6 @@ class Compiler {
 			        unset($blocks[$name]);
 		        }
 	        }
-	        dump("$tpl: after use block from $donor: ".var_export($tpl->blocks, 1));
-	        dump("$tpl: save tail from $donor: ".var_export($blocks, 1));
 	        $tpl->uses = $blocks + $tpl->uses;
 	        $tpl->addDepend($donor);
 	        return '?>'.$donor->getBody().'<?php ';
@@ -500,7 +487,6 @@ class Compiler {
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
 	    $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
 	    $scope["name"]  = $name;
-	    dump("{$scope->tpl}: open block ".$scope["name"]);
     }
 
     /**
@@ -554,7 +540,6 @@ class Compiler {
 			    }
 //            } elseif(isset($tpl->_extended) || !empty($tpl->_compatible)) {
 		    } elseif(isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
-//	            var_dump("$tpl: exxx");
 			    $scope->replaceContent(
 				    '<?php /* 5) Block '.$tpl.': '.$scope["cname"].' */'.PHP_EOL.' if(isset($tpl->b['.$scope["cname"].'])) { echo $tpl->b['.$scope["cname"].']->__invoke($tpl); } else {?>'.PHP_EOL.
 				    $scope->getContent().
