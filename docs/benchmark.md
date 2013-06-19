@@ -7,7 +7,7 @@ To start benchmark run script `benchmark/run.php`.
 
 PHP 5.4.11
 
-    Print varaibles
+    Printing of varaibles
 
      smarty3: !compiled and !loaded      8.7919 sec,       21.1 MiB
      smarty3:  compiled and !loaded      0.0341 sec,       16.4 MiB
@@ -21,7 +21,7 @@ PHP 5.4.11
        cytro:  compiled and !loaded      0.0167 sec,        6.1 MiB
        cytro:  compiled and  loaded      0.0024 sec,        6.1 MiB
 
-    Iterates array
+    Iterating of array ({foreach})
 
      smarty3: !compiled and !loaded      0.0369 sec,        5.7 MiB
      smarty3:  compiled and !loaded      0.0048 sec,        3.1 MiB
@@ -35,7 +35,7 @@ PHP 5.4.11
        cytro:  compiled and !loaded      0.0033 sec,        2.4 MiB
        cytro:  compiled and  loaded      0.0027 sec,        2.4 MiB
 
-    templates inheritance
+    Inheriting of templates ({extends})
 
      smarty3: !compiled and !loaded      0.6374 sec,        9.8 MiB
      smarty3:  compiled and !loaded      0.0009 sec,        3.0 MiB
