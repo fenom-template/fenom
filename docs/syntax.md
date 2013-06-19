@@ -1,18 +1,20 @@
 Syntax [RU]
 ===========
 
-[Smarty](http://www.smarty.net/) like syntax
+Cytro have [Smarty](http://www.smarty.net/) like syntax.
 
-### Output variables
+## Variable
+
+### Get/print value
 
 ```smarty
 {$foo}
+{$bar}
 {$foo[4]}
 {$foo.4}
 {$foo.bar}
 {$foo.'bar'}
 {$foo."bar"}
-{$foo[bar]}
 {$foo['bar']}
 {$foo["bar"]}
 {$foo.$bar}
@@ -21,7 +23,7 @@ Syntax [RU]
 {$foo->bar()}
 ```
 
-complex variables
+### Multidimensional value support
 
 ```smarty
 {$foo.bar.baz}
@@ -32,7 +34,7 @@ complex variables
 {$foo[ $bar.baz ]}
 ```
 
-Operations
+### Math operations
 
 ```smarty
 {$x+$y}
@@ -40,85 +42,97 @@ Operations
 {$foo[$x+3]*$x+3*$y % 3}
 ```
 
-[Список всех операторов](./operators.md)
+See all [operators](./operators.md)
 
-Define variable
+### Object support
+
+```smarty
+{$object->item}
+{$object->item|upper} {* apply modifier *}
+{$object->item->method($y, 'named')}
+{$object->item->method($y->name, 'named')|upper} {* apply modifier to method result*}
+```
+
+You may disable call methods in template, see [security options](./settings.md)
+
+
+### Set variable
 
 ```smarty
 {var $foo = "bar"}
+{var $foo = "bar"|upper} {* apply modifier *}
 {var $foo = 5}
-```
-
-```smarty
 {var $foo = $x + $y}
 {var $foo = $x.y[z] + $y}
-{var $foo = strlen($a)}
+{var $foo = strlen($a)} {* work with functions *}
 {var $foo = myfunct( ($x+$y)*3 )}
-{var $foo.bar.baz = 1}
+{var $foo.bar.baz = 1} {* multidimensional value support *}
+{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
+```
+
+Using block tag
+
+```smarty
+{var $foo}
+    content {$text|truncate:30}
+{/var}
+{var $foo|truncate:50} {* apply modifier to content *}
+    content {$text}
+{/var}
+```
+
+Set array
+
+```smarty
+{var $foo = [1, 2, 3]} numeric array
+{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
+{var $foo = [1, [9, 8], 3]} can be nested
+{var $foo = [1, $two, $three * 3 + 9]}
+{var $foo = [$a, $d.c, $a + $f]}
+{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
+{var $foo = [1, [$parent, $a->method()], 3]}
 ```
 
 See also [{var}](./tags/var.md) documentation.
 
-Define arrays
 
-```smarty
-{var $foo = [1,2,3]}
-{var $foo = ['y'=>'yellow','b'=>'blue']}  can be associative
-{var $foo = [1,[9,8],3]}   can be nested
-```
+## Scalar values
 
-more complex example
+### Strings
 
-```smarty
-{var $foo = [$a, $d.c, $a + $f]}
-{var $foo = ['y'=>'yellow', $color=>$colors[ $color ]}
-{var $foo = [1,[$parent ,$a + $e],3]}
-```
-
-### Objects
-
-```smarty
-{$object->method1($x)->method2($y)}
-{var $foo=$object->item->method($y, 'named')}
-```
-
-See also [security options](./settings.md)
-
-### Scalar values
-
-Строки в Cytro обрабатываются идентично правилам подстановки переменных в строки в PHP, т.е. в двойных кавычках переменная заменяется на её значение, в одинарных замены не происходит.
+When the string in double quotation marks, all the expressions in the string will be run.
+The result of the expression will be inserted into the string instead it.
 
 ```smarty
 {var $foo="Username"}
 {var $user.name="Username"}
-{"Hi, $foo"}          выведет "Hi, Username"
-{"Hi, {$foo}"}        выведет "Hi, Username"
-{"Hi, {$user.name}"}  выведет "Hi, Username"
-{var $message = "Hi, {$user.name}"}
-{'Hi, $foo'}          выведет 'Hi, $foo'
-{'Hi, {$foo}'}        выведет 'Hi, {$foo}'
-```
-
-Переменные в строках так же поддерживают [модификаторы](#modifiers)
-
-```smarty
-{"Hi, {$user.name|up}"} outputs Hi, USERNAME
-```
-
-Поддерживается вызов методов
-
-```smarty
+{"Hi, $foo"}          outputs "Hi, Username"
+{"Hi, {$foo}"}        outputs "Hi, Username"
+{"Hi, {$user.name}"}  outputs "Hi, Username"
+{"Hi, {$user.name|up}"} outputs "Hi, USERNAME"
 {"Hi, {$user->getName(true)}"} outputs Hi, Username
+{var $message = "Hi, {$user.name}"}
 ```
 
-Числовые значение обрабатывается как есть
+but if use single quote any template expressions will be on display as it is
+
+```smarty
+{'Hi, $foo'}            outputs 'Hi, $foo'
+{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
+{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
+{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
+```
+
+## Numbers
 
 ```smarty
 {2|pow:10}
 {var $magick = 5381|calc}
+{0.2|round}
+{1e-6|round}
 ```
 
-### Modificatiors
+### Modifiers
 
 * Модификаторы позволяют изменить значение переменной перед выводом или использованием в выражении
 * Модификаторы записываются после переменной через символ вертикальной черты "|"
@@ -138,7 +152,7 @@ See also [security options](./settings.md)
 {var $foo="Ivan"|upper}    переменная $foo будет содержать "USER"
 ```
 
-[Список модификаторов](./main.md#modifiers)
+[List of modifiers](./main.md#modifiers)
 
 ### Tags
 
