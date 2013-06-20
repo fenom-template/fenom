@@ -844,7 +844,8 @@ class Template extends Render {
      */
     public function parseModifier(Tokenizer $tokens, $value) {
         while($tokens->is("|")) {
-            $mods = $this->_cytro->getModifier( $tokens->getNext(Tokenizer::MACRO_STRING) );
+            $mods = $this->_cytro->getModifier( $modifier_name = $tokens->getNext(Tokenizer::MACRO_STRING) );
+
             $tokens->next();
             $args = array();
 
@@ -870,12 +871,18 @@ class Template extends Render {
             }
 
 
-            if($args) {
-                $value = $mods.'('.$value.', '.implode(", ", $args).')';
+            if(is_string($mods)) { // dynamic modifier
+                $mods = 'call_user_func($tpl->getStorage()->getModifier("'.$modifier_name.'"), ';
             } else {
-                $value = $mods.'('.$value.')';
+                $mods .= "(";
+            }
+            if($args) {
+                $value = $mods.$value.', '.implode(", ", $args).')';
+            } else {
+                $value = $mods.$value.')';
             }
         }
+//        var_dump($value); exit;
         return $value;
     }
 

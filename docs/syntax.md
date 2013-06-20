@@ -135,21 +135,18 @@ but if use single quote any template expressions will be on display as it is
 ### Modifiers
 
 * Модификаторы позволяют изменить значение переменной перед выводом или использованием в выражении
-* Модификаторы записываются после переменной через символ вертикальной черты "|"
-* Модификаторы могут иметь параметры, которые записываются через символ двоеточие ":" после имени модификатора
-* Параметры модификаторов друг от друга также разделяются символом двоеточие ":"
-* В качестве параметров могут использоваться переменные.
-* Модификаторы могут составлять цепочки. В этом случае они применяются к переменной последовательно слева направо
+* To apply a modifier, specify the value followed by a | (pipe) and the modifier name.
+* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a : (colon).
 
 ```smarty
 {var $foo="User"}
-{$foo|upper}     выведет "USER"
-{$foo|lower}     выведет "user"
-{"{$foo|lower}"}     выведет "user"
-{"User"|lower}}     выведет "user"
-{$looong_text|truncate:80:"..."}  обрежет текст до 80 символов и добавит "..." в конец текста
+{$foo|upper}            outputs "USER"
+{$foo|lower}            outputs "user"
+{"{$foo|lower}"}        outputs "user"
+{"User"|lower}}         outputs "user"
+{$looong_text|truncate:80:"..."}  truncate the text to 80 symbols and append <continue> symbols, like "..."
 {$looong_text|lower|truncate:$settings.count:$settings.etc}
-{var $foo="Ivan"|upper}    переменная $foo будет содержать "USER"
+{var $foo="Ivan"|upper}    sets $foo value "USER"
 ```
 
 [List of modifiers](./main.md#modifiers)

@@ -571,7 +571,7 @@ class Compiler {
      * Standard function parser
      *
      * @static
-     * @param                    $function
+     * @param mixed              $function
      * @param Tokenizer $tokens
      * @param Template           $tpl
      * @return string
