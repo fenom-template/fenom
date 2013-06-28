@@ -1,13 +1,13 @@
 <?php
 
-namespace Cytro;
+namespace Fenom;
 
 
 class CustomProviderTest extends TestCase {
 
     public function setUp() {
         parent::setUp();
-        $this->cytro->addProvider("my", new FSProvider(CYTRO_RESOURCES.'/provider'));
+        $this->fenom->addProvider("my", new Provider(FENOM_RESOURCES.'/provider'));
     }
 
     public function testCustom() {

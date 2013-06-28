@@ -1,13 +1,13 @@
 <?php
 
-namespace Cytro;
+namespace Fenom;
 
 
 class TagsTest extends TestCase {
 
 	public function _testSandbox() {
 		try {
-			var_dump($this->cytro->compileCode('{for $i=0 to=5}{cycle ["one", "two"]}, {/for}')->getBody());
+			var_dump($this->fenom->compileCode('{for $i=0 to=5}{cycle ["one", "two"]}, {/for}')->getBody());
 		} catch(\Exception $e) {
 			echo "$e";
 		}

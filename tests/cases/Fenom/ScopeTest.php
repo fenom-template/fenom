@@ -1,23 +1,23 @@
 <?php
-namespace Cytro;
+namespace Fenom;
 
 class ScopeTest extends TestCase {
     public function openTag($tokenizer, $scope) {
-        $this->assertInstanceOf('Cytro\Tokenizer', $tokenizer);
-        $this->assertInstanceOf('Cytro\Scope', $scope);
+        $this->assertInstanceOf('Fenom\Tokenizer', $tokenizer);
+        $this->assertInstanceOf('Fenom\Scope', $scope);
         $scope["value"] = true;
         return "open-tag";
     }
 
     public function closeTag($tokenizer, $scope) {
-        $this->assertInstanceOf('Cytro\Tokenizer', $tokenizer);
-        $this->assertInstanceOf('Cytro\Scope', $scope);
+        $this->assertInstanceOf('Fenom\Tokenizer', $tokenizer);
+        $this->assertInstanceOf('Fenom\Scope', $scope);
         $this->assertTrue($scope["value"]);
         return "close-tag";
     }
 
 	public function testBlock() {
-        /*$scope = new Scope($this->cytro, new Template($this->cytro), 1, array(
+        /*$scope = new Scope($this->fenom, new Template($this->fenom), 1, array(
             "open" => array($this, "openTag"),
             "close" => array($this, "closeTag")
         ), 0);

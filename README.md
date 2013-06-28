@@ -1,9 +1,9 @@
-Cytro - awesome template engine for PHP
+Fenom - awesome template engine for PHP
 ==========================
 
-> Composer package: `{"bzick/cytro": "dev-master"}`. See on [Packagist.org](https://packagist.org/packages/bzick/cytro)
+> Composer package: `{"bzick/fenom": "dev-master"}`. See on [Packagist.org](https://packagist.org/packages/bzick/fenom)
 
-[![Build Status](https://travis-ci.org/bzick/cytro.png?branch=master)](https://travis-ci.org/bzick/cytro)
+[![Build Status](https://travis-ci.org/bzick/fenom.png?branch=master)](https://travis-ci.org/bzick/fenom)
 ## [About](./docs/about.md) :: [Documentation](./docs/main.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)
 
 * Simplest known [syntax](./docs/syntax.md)
@@ -20,11 +20,11 @@ Simple template
 ```smarty
 <html>
     <head>
-        <title>Cytro</title>
+        <title>Fenom</title>
     </head>
     <body>
-    {if $templaters.cytro?}
-        {var $tpl = $templaters.cytro}
+    {if $templaters.fenom?}
+        {var $tpl = $templaters.fenom}
         <div>Name: {$tpl.name}</div>
         <div>Description: {$tpl.name|truncate:80}</div>
         <ul>
@@ -41,25 +41,25 @@ Display template
 
 ```php
 <?php
-$cytro = Cytro::factory('./templates', './compiled', Cytro::CHECK_MTIME);
-$cytro->display("pages/about.tpl", $data);
+$fenom = Fenom::factory('./templates', './compiled', Fenom::AUTO_RELOAD);
+$fenom->display("pages/about.tpl", $data);
 ```
 
 Get content
 
 ```php
 <?php
-$cytro = Cytro::factory('./templates', './compiled', Cytro::CHECK_MTIME);
-$content = $cytro->fetch("pages/about.tpl", $data);
+$fenom = Fenom::factory('./templates', './compiled', Fenom::AUTO_RELOAD);
+$content = $fenom->fetch("pages/about.tpl", $data);
 ```
 
 Runtime compilation
 
 ```php
 <?php
-$cytro = new Cytro();
-$tempate = $cytro->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
-$tempate->display($data);
+$fenom = new Fenom();
+$template = $fenom->compileCode('Hello {$user.name}! {if $user.email?} Your email: {$user.email} {/if}');
+$template->display($data);
 // or
-$content = $tempate->fetch($data);
+$content = $template->fetch($data);
 ```

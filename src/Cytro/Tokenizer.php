@@ -1,13 +1,13 @@
 <?php
 /*
- * This file is part of Cytro.
+ * This file is part of Fenom.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-namespace Cytro;
+namespace Fenom;
 
 /**
  * for <PHP 5.4 compatible
@@ -32,7 +32,7 @@ defined('T_YIELD')      || define('T_YIELD', 370);
  * @property array $curr the current token
  * @property array $next the next token
  *
- * @package    Cytro
+ * @package    Fenom
  */
 class Tokenizer {
     const TOKEN = 0;

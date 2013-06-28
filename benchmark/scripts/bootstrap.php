@@ -43,15 +43,15 @@ class Benchmark {
         printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
     }
 
-    public static function cytro($tpl, $data, $double, $message) {
+    public static function fenom($tpl, $data, $double, $message) {
 
-        $cytro = Cytro::factory(__DIR__.'/../templates', __DIR__."/../compile");
+        $fenom = Fenom::factory(__DIR__.'/../templates', __DIR__."/../compile");
 
         if($double) {
-            $cytro->fetch($tpl, $data);
+            $fenom->fetch($tpl, $data);
         }
         $_SERVER["t"] = $start = microtime(true);
-        $cytro->fetch($tpl, $data);
+        $fenom->fetch($tpl, $data);
         printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
     }
 

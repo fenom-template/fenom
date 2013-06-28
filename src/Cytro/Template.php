@@ -1,19 +1,19 @@
 <?php
 /*
- * This file is part of Cytro.
+ * This file is part of Fenom.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-namespace Cytro;
-use Cytro;
+namespace Fenom;
+use Fenom;
 
 /**
  * Template compiler
  *
- * @package    Cytro
+ * @package    Fenom
  * @author     Ivan Shalganov <owner@bzick.net>
  */
 class Template extends Render {
@@ -88,21 +88,21 @@ class Template extends Render {
     /**
      * Just factory
      *
-     * @param \Cytro $cytro
+     * @param \Fenom $fenom
      * @param $options
      * @return Template
      */
-    public static function factory(Cytro $cytro, $options) {
-        return new static($cytro, $options);
+    public static function factory(Fenom $fenom, $options) {
+        return new static($fenom, $options);
     }
 
     /**
-     * @param Cytro $cytro Template storage
+     * @param Fenom $fenom Template storage
      * @param int $options
-     * @return \Cytro\Template
+     * @return \Fenom\Template
      */
-    public function __construct(Cytro $cytro, $options) {
-        $this->_cytro = $cytro;
+    public function __construct(Fenom $fenom, $options) {
+        $this->_fenom = $fenom;
         $this->_options = $options;
     }
 
@@ -120,7 +120,7 @@ class Template extends Render {
         } else {
 	        $this->_base_name = $name;
         }
-	    $this->_provider = $this->_cytro->getProvider($provider);
+	    $this->_provider = $this->_fenom->getProvider($provider);
         $this->_src = $this->_provider->getSource($this->_base_name, $this->_time);
         if($compile) {
             $this->compile();
@@ -133,7 +133,7 @@ class Template extends Render {
      * @param string $name template name
      * @param string $src template source
      * @param bool $compile
-     * @return \Cytro\Template
+     * @return \Fenom\Template
      */
     public function source($name, $src, $compile = true) {
         $this->_name = $name;
@@ -177,7 +177,7 @@ class Template extends Render {
 		        if($end === false) { // if unexpected end of template
 	                throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
                 }
-                $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains cytro tag '{...}'
+                $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains fenom tag '{...}'
 
 		        $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
 
@@ -321,8 +321,8 @@ class Template extends Render {
      */
     public function getTemplateCode() {
         return "<?php \n".
-            "/** Cytro template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Cytro\\Render(\$cytro, ".$this->_getClosureSource().", ".var_export(array(
+            "/** Fenom template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
+            "return new Fenom\\Render(\$fenom, ".$this->_getClosureSource().", ".var_export(array(
             "options" => $this->_options,
             "provider" => $this->_scm,
             "name" => $this->_name,
@@ -466,20 +466,20 @@ class Template extends Render {
             return $this->parseMacro($tokens, $name);
         }
 
-        if($act = $this->_cytro->getFunction($action)) { // call some function
+        if($act = $this->_fenom->getFunction($action)) { // call some function
             switch($act["type"]) {
-                case Cytro::BLOCK_COMPILER:
+                case Fenom::BLOCK_COMPILER:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     $code = $scope->open($tokens);
                     if(!$scope->is_closed) {
                         array_push($this->_stack, $scope);
                     }
                     return $code;
-                case Cytro::INLINE_COMPILER:
+                case Fenom::INLINE_COMPILER:
                     return call_user_func($act["parser"], $tokens, $this);
-                case Cytro::INLINE_FUNCTION:
+                case Fenom::INLINE_FUNCTION:
                     return call_user_func($act["parser"], $act["function"], $tokens, $this);
-                case Cytro::BLOCK_FUNCTION:
+                case Fenom::BLOCK_FUNCTION:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     $scope->setFuncName($act["function"]);
                     array_push($this->_stack, $scope);
@@ -494,7 +494,7 @@ class Template extends Render {
                 return $this->_stack[$i]->tag($action, $tokens);
             }
         }
-        if($tags = $this->_cytro->getTagOwners($action)) { // unknown template tag
+        if($tags = $this->_fenom->getTagOwners($action)) { // unknown template tag
             throw new TokenizeException("Unexpected tag '$action' (this tag can be used with '".implode("', '", $tags)."')");
         } else {
             throw new TokenizeException("Unexpected tag $action");
@@ -548,7 +548,7 @@ class Template extends Render {
                 if($tokens->isSpecialVal()) {
                     $_exp .= $tokens->getAndNext();
                 } elseif($tokens->isNext("(")) {
-                    $func = $this->_cytro->getModifier($tokens->current());
+                    $func = $this->_fenom->getModifier($tokens->current());
                     $tokens->next();
                     $_exp .= $func.$this->parseArgs($tokens);
                 } else {
@@ -687,7 +687,7 @@ class Template extends Render {
             } elseif($t === T_OBJECT_OPERATOR) {
                 $prop = $tokens->getNext(T_STRING);
                 if($tokens->isNext("(")) {
-                    if($this->_options & Cytro::DENY_METHODS) {
+                    if($this->_options & Fenom::DENY_METHODS) {
                         throw new \LogicException("Forbidden to call methods");
                     }
                     $pure_var = false;
@@ -844,7 +844,7 @@ class Template extends Render {
      */
     public function parseModifier(Tokenizer $tokens, $value) {
         while($tokens->is("|")) {
-            $mods = $this->_cytro->getModifier( $modifier_name = $tokens->getNext(Tokenizer::MACRO_STRING) );
+            $mods = $this->_fenom->getModifier( $modifier_name = $tokens->getNext(Tokenizer::MACRO_STRING) );
 
             $tokens->next();
             $args = array();

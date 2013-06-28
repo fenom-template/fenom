@@ -3,7 +3,7 @@ Benchmark
 
 To start benchmark run script `benchmark/run.php`.
 
-### Smarty3 vs Twig vs Cytro
+### Smarty3 vs Twig vs Fenom
 
 PHP 5.4.11
 
@@ -17,9 +17,9 @@ PHP 5.4.11
         twig:  compiled and !loaded      0.0337 sec,       16.1 MiB
         twig:  compiled and  loaded      0.0027 sec,       16.1 MiB
 
-       cytro: !compiled and !loaded      1.0142 sec,        8.8 MiB
-       cytro:  compiled and !loaded      0.0167 sec,        6.1 MiB
-       cytro:  compiled and  loaded      0.0024 sec,        6.1 MiB
+       fenom: !compiled and !loaded      1.0142 sec,        8.8 MiB
+       fenom:  compiled and !loaded      0.0167 sec,        6.1 MiB
+       fenom:  compiled and  loaded      0.0024 sec,        6.1 MiB
 
     Iterating of array ({foreach})
 
@@ -31,9 +31,9 @@ PHP 5.4.11
         twig:  compiled and !loaded      0.0605 sec,        2.9 MiB
         twig:  compiled and  loaded      0.0550 sec,        2.9 MiB
 
-       cytro: !compiled and !loaded      0.0093 sec,        3.0 MiB
-       cytro:  compiled and !loaded      0.0033 sec,        2.4 MiB
-       cytro:  compiled and  loaded      0.0027 sec,        2.4 MiB
+       fenom: !compiled and !loaded      0.0093 sec,        3.0 MiB
+       fenom:  compiled and !loaded      0.0033 sec,        2.4 MiB
+       fenom:  compiled and  loaded      0.0027 sec,        2.4 MiB
 
     Inheriting of templates ({extends})
 
@@ -45,9 +45,9 @@ PHP 5.4.11
         twig:  compiled and !loaded      0.0255 sec,        6.3 MiB
         twig:  compiled and  loaded      0.0038 sec,        6.3 MiB
 
-       cytro: !compiled and !loaded      0.1222 sec,        3.9 MiB
-       cytro:  compiled and !loaded      0.0004 sec,        2.4 MiB
-       cytro:  compiled and  loaded      0.0000 sec,        2.4 MiB
+       fenom: !compiled and !loaded      0.1222 sec,        3.9 MiB
+       fenom:  compiled and !loaded      0.0004 sec,        2.4 MiB
+       fenom:  compiled and  loaded      0.0000 sec,        2.4 MiB
 
 * **!compiled and !loaded** - template engine object created but parsers not initialized and templates not compiled
 * **compiled and !loaded** - template engine object created, template compiled but not loaded
@@ -59,4 +59,4 @@ PHP 5.4.11
 | --------------- | ------:| --------:| ------:|
 | Smarty3 (3.1.13)|    320 |      190 |  55095 |
 | Twig (1.13.0)   |    162 |      131 |  13908 |
-| Cytro (1.0.1)   |      9 |       16 |   3899 |
+| Fenom (1.0.1)   |      9 |       16 |   3899 |

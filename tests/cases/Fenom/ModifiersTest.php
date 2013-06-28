@@ -1,5 +1,5 @@
 <?php
-namespace Cytro;
+namespace Fenom;
 
 
 class ModifiersTest extends TestCase {
@@ -34,7 +34,7 @@ class ModifiersTest extends TestCase {
      * @param bool $middle
      */
     public function testTruncate($in, $out, $count, $delim = '...', $by_words = false, $middle = false) {
-        $tpl = $this->cytro->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
+        $tpl = $this->fenom->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
         $this->assertEquals($out, $tpl->fetch(array(
             "text" => $in,
             "count" => $count,
@@ -65,7 +65,7 @@ class ModifiersTest extends TestCase {
      * @param $out
      */
     public function testUpLow($modifier, $in, $out) {
-        $tpl = $this->cytro->compileCode('{$text|'.$modifier.'}');
+        $tpl = $this->fenom->compileCode('{$text|'.$modifier.'}');
         $this->assertEquals($out, $tpl->fetch(array(
             "text" => $in,
         )));
@@ -91,7 +91,7 @@ class ModifiersTest extends TestCase {
      * @param $out
      */
     public function testLength($in, $out) {
-        $tpl = $this->cytro->compileCode('{$data|length}');
+        $tpl = $this->fenom->compileCode('{$data|length}');
         $this->assertEquals($out, $tpl->fetch(array(
             "data" => $in,
         )));

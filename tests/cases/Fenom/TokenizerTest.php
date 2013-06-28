@@ -1,6 +1,6 @@
 <?php
-namespace Cytro;
-use Cytro\Tokenizer;
+namespace Fenom;
+use Fenom\Tokenizer;
 
 class TokenizerTest extends \PHPUnit_Framework_TestCase {
 
@@ -54,7 +54,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase {
         try {
             $tokens->skip(T_STRING)->skip('(')->skip(':');
         } catch(\Exception $e) {
-            $this->assertInstanceOf('Cytro\UnexpectedTokenException', $e);
+            $this->assertInstanceOf('Fenom\UnexpectedTokenException', $e);
             $this->assertStringStartsWith("Unexpected token '3' in expression, expect ':'", $e->getMessage());
         }
         $this->assertTrue($tokens->valid());

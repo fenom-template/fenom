@@ -1,14 +1,14 @@
 <?php
 /*
- * This file is part of Cytro.
+ * This file is part of Fenom.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-namespace Cytro;
-use Cytro;
+namespace Fenom;
+use Fenom;
 
 /**
  * Primitive template
@@ -41,9 +41,9 @@ class Render extends \ArrayObject {
      */
     protected $_base_name = 'runtime';
     /**
-     * @var Cytro
+     * @var Fenom
      */
-    protected $_cytro;
+    protected $_fenom;
     /**
      * Timestamp of compilation
      * @var float
@@ -56,7 +56,7 @@ class Render extends \ArrayObject {
     protected $_depends = array();
 
     /**
-     * @var int tempalte options (see Cytro options)
+     * @var int tempalte options (see Fenom options)
      */
     protected $_options = 0;
 
@@ -67,15 +67,15 @@ class Render extends \ArrayObject {
     protected $_provider;
 
     /**
-     * @param Cytro $cytro
+     * @param Fenom $fenom
      * @param callable $code template body
      * @param array $props
      */
-    public function __construct(Cytro $cytro, \Closure $code, $props = array()) {
-        $this->_cytro = $cytro;
+    public function __construct(Fenom $fenom, \Closure $code, $props = array()) {
+        $this->_fenom = $fenom;
         $props += self::$_props;
         $this->_name = $props["name"];
-        $this->_provider = $this->_cytro->getProvider($props["scm"]);
+        $this->_provider = $this->_fenom->getProvider($props["scm"]);
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
@@ -84,10 +84,10 @@ class Render extends \ArrayObject {
 
     /**
      * Get template storage
-     * @return Cytro
+     * @return Fenom
      */
     public function getStorage() {
-        return $this->_cytro;
+        return $this->_fenom;
     }
 
     public function getDepends() {
@@ -135,12 +135,12 @@ class Render extends \ArrayObject {
      * @return bool
      */
     public function isValid() {
-        $provider = $this->_cytro->getProvider(strstr($this->_name, ":"), true);
+        $provider = $this->_fenom->getProvider(strstr($this->_name, ":"), true);
         if($provider->getLastModified($this->_name) >= $this->_time) {
             return false;
         }
         foreach($this->_depends as $tpl => $time) {
-            if($this->_cytro->getTemplate($tpl)->getTime() !== $time) {
+            if($this->_fenom->getTemplate($tpl)->getTime() !== $time) {
                 return false;
             }
         }

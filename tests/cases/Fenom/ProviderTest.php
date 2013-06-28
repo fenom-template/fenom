@@ -1,10 +1,10 @@
 <?php
-namespace Cytro;
-use Cytro;
+namespace Fenom;
+use Fenom;
 
-class FSProviderTest extends \Cytro\TestCase {
+class FSProviderTest extends \Fenom\TestCase {
     /**
-     * @var FSProvider
+     * @var Provider
      */
     public $provider;
 
@@ -12,7 +12,7 @@ class FSProviderTest extends \Cytro\TestCase {
         parent::setUp();
         $this->tpl("template1.tpl", 'Template 1 {$a}');
         $this->tpl("template2.tpl", 'Template 2 {$a}');
-        $this->provider = new FSProvider(CYTRO_RESOURCES.'/template');
+        $this->provider = new Provider(FENOM_RESOURCES.'/template');
     }
 
     public function testIsTemplateExists() {
@@ -23,8 +23,8 @@ class FSProviderTest extends \Cytro\TestCase {
     public function testGetSource() {
         $src = $this->provider->getSource("template1.tpl", $time);
         clearstatcache();
-        $this->assertEquals(file_get_contents(CYTRO_RESOURCES.'/template/template1.tpl'), $src);
-        $this->assertEquals(filemtime(CYTRO_RESOURCES.'/template/template1.tpl'), $time);
+        $this->assertEquals(file_get_contents(FENOM_RESOURCES.'/template/template1.tpl'), $src);
+        $this->assertEquals(filemtime(FENOM_RESOURCES.'/template/template1.tpl'), $time);
     }
 
     /**
@@ -37,7 +37,7 @@ class FSProviderTest extends \Cytro\TestCase {
     public function testGetLastModified() {
         $time = $this->provider->getLastModified("template1.tpl");
         clearstatcache();
-        $this->assertEquals(filemtime(CYTRO_RESOURCES.'/template/template1.tpl'), $time);
+        $this->assertEquals(filemtime(FENOM_RESOURCES.'/template/template1.tpl'), $time);
     }
 
     /**
@@ -52,7 +52,7 @@ class FSProviderTest extends \Cytro\TestCase {
         $this->assertSame($tpls, array_keys($times));
         clearstatcache();
         foreach($times as $template => $time) {
-            $this->assertEquals(filemtime(CYTRO_RESOURCES."/template/$template"), $time);
+            $this->assertEquals(filemtime(FENOM_RESOURCES."/template/$template"), $time);
         }
     }
 

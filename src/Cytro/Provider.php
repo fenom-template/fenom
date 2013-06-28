@@ -1,20 +1,20 @@
 <?php
 /*
- * This file is part of Cytro.
+ * This file is part of Fenom.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-namespace Cytro;
+namespace Fenom;
 
-use Cytro\ProviderInterface;
+use Fenom\ProviderInterface;
 /**
  * Templates provider
  * @author Ivan Shalganov
  */
-class FSProvider implements ProviderInterface {
+class Provider implements ProviderInterface {
     private $_path;
 
     /**

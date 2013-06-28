@@ -1,6 +1,6 @@
 <?php
 
-namespace Cytro;
+namespace Fenom;
 
 
 class CommentTest extends TestCase {

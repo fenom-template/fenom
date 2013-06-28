@@ -1,20 +1,20 @@
 <?php
 /*
- * This file is part of Cytro.
+ * This file is part of Fenom.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-namespace Cytro;
-use Cytro\Tokenizer;
-use Cytro\Template;
-use Cytro\Scope;
+namespace Fenom;
+use Fenom\Tokenizer;
+use Fenom\Template;
+use Fenom\Scope;
 
 /**
  * Compilers collection
- * @package Cytro
+ * @package Fenom
  */
 class Compiler {
     /**
@@ -30,7 +30,7 @@ class Compiler {
         $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
         if($p) { // if we have additionally variables
-            if($name && ($tpl->getStorage()->getOptions() & \Cytro::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
+            if($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 return '$_tpl = (array)$tpl; $tpl->exchangeArray('.self::toArray($p).'+$_tpl); ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
@@ -38,7 +38,7 @@ class Compiler {
                 return '$tpl->getStorage()->getTemplate('.$cname.')->display('.self::toArray($p).'+(array)$tpl);';
             }
         } else {
-            if($name && ($tpl->getStorage()->getOptions() & \Cytro::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
+            if($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 return '$_tpl = (array)$tpl; ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
@@ -399,7 +399,7 @@ class Compiler {
 	            $tpl->_compatible = true;
             }
 	        $tpl->_extends = $tpl_name;
-            return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Cytro\Template::EXTENDED);';
+            return '$parent = $tpl->getStorage()->getTemplate('.$tpl_name.', \Fenom\Template::EXTENDED);';
         }
     }
 
@@ -416,7 +416,7 @@ class Compiler {
 	    while(isset($t->_extends)) {
 		    $t = $t->_extends;
 		    if(is_object($t)) {
-			    /* @var \Cytro\Template $t */
+			    /* @var \Fenom\Template $t */
 			    $t->_extended = true;
 			    $tpl->addDepend($t);
 			    $t->_compatible = &$tpl->_compatible;
@@ -470,7 +470,7 @@ class Compiler {
 	        return '?>'.$donor->getBody().'<?php ';
         } else {
 	        $tpl->_compatible = true;
-	        return '$donor = $tpl->getStorage()->getTemplate('.$cname.', \Cytro\Template::EXTENDED);'.PHP_EOL.
+	        return '$donor = $tpl->getStorage()->getTemplate('.$cname.', \Fenom\Template::EXTENDED);'.PHP_EOL.
 		        '$donor->fetch((array)$tpl);'.PHP_EOL.
 		        '$tpl->b += (array)$donor->b';
 //            throw new ImproperUseException('template name must be given explicitly');

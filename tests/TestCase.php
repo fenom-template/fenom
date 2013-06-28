@@ -1,12 +1,12 @@
 <?php
-namespace Cytro;
-use Cytro, Cytro\FSProvider as FS;
+namespace Fenom;
+use Fenom, Fenom\Provider as FS;
 
 class TestCase extends \PHPUnit_Framework_TestCase {
     /**
-     * @var Cytro
+     * @var Fenom
      */
-    public $cytro;
+    public $fenom;
 
     public $values = array(
         "one" => 1,
@@ -18,14 +18,14 @@ class TestCase extends \PHPUnit_Framework_TestCase {
     );
 
     public function setUp() {
-        if(!file_exists(CYTRO_RESOURCES.'/compile')) {
-            mkdir(CYTRO_RESOURCES.'/compile', 0777, true);
+        if(!file_exists(FENOM_RESOURCES.'/compile')) {
+            mkdir(FENOM_RESOURCES.'/compile', 0777, true);
         } else {
-            FS::clean(CYTRO_RESOURCES.'/compile/');
+            FS::clean(FENOM_RESOURCES.'/compile/');
         }
-        $this->cytro = Cytro::factory(CYTRO_RESOURCES.'/template', CYTRO_RESOURCES.'/compile');
-        $this->cytro->addModifier('dots', __CLASS__.'::dots');
-        $this->cytro->addModifier('concat', __CLASS__.'::concat');
+        $this->fenom = Fenom::factory(FENOM_RESOURCES.'/template', FENOM_RESOURCES.'/compile');
+        $this->fenom->addModifier('dots', __CLASS__.'::dots');
+        $this->fenom->addModifier('concat', __CLASS__.'::concat');
     }
 
     public static function dots($value) {
@@ -37,15 +37,15 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 	}
 
     public static function setUpBeforeClass() {
-        if(!file_exists(CYTRO_RESOURCES.'/template')) {
-            mkdir(CYTRO_RESOURCES.'/template', 0777, true);
+        if(!file_exists(FENOM_RESOURCES.'/template')) {
+            mkdir(FENOM_RESOURCES.'/template', 0777, true);
         } else {
-            FS::clean(CYTRO_RESOURCES.'/template/');
+            FS::clean(FENOM_RESOURCES.'/template/');
         }
     }
 
     public function tpl($name, $code) {
-        file_put_contents(CYTRO_RESOURCES.'/template/'.$name, $code);
+        file_put_contents(FENOM_RESOURCES.'/template/'.$name, $code);
     }
 
     /**
@@ -57,7 +57,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param bool $dump dump source and result code (for debug)
      */
     public function exec($code, $vars, $result, $dump = false) {
-        $tpl = $this->cytro->compileCode($code, "runtime.tpl");
+        $tpl = $this->fenom->compileCode($code, "runtime.tpl");
         if($dump) {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
         }
@@ -66,7 +66,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 
     public function execTpl($name, $code, $vars, $result, $dump = false) {
         $this->tpl($name, $code);
-        $tpl = $this->cytro->getTemplate($name);
+        $tpl = $this->fenom->getTemplate($name);
         if($dump) {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
         }
@@ -78,25 +78,25 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param string $code source of the template
      * @param string $exception exception class
      * @param string $message exception message
-     * @param int $options Cytro's options
+     * @param int $options Fenom's options
      */
     public function execError($code, $exception, $message, $options = 0) {
-        $opt = $this->cytro->getOptions();
-        $this->cytro->setOptions($options);
+        $opt = $this->fenom->getOptions();
+        $this->fenom->setOptions($options);
         try {
-            $this->cytro->compileCode($code, "inline.tpl");
+            $this->fenom->compileCode($code, "inline.tpl");
         } catch(\Exception $e) {
             $this->assertSame($exception, get_class($e), "Exception $code");
             $this->assertStringStartsWith($message, $e->getMessage());
-            $this->cytro->setOptions($opt);
+            $this->fenom->setOptions($opt);
             return;
         }
-        $this->cytro->setOptions($opt);
+        $this->fenom->setOptions($opt);
         $this->fail("Code $code must be invalid");
     }
 
     public function assertRender($tpl, $result, $debug = false) {
-        $template = $this->cytro->compileCode($tpl);
+        $template = $this->fenom->compileCode($tpl);
         if($debug) {
             print_r("$tpl:\n".$template->getBody());
         }

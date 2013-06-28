@@ -1,19 +1,19 @@
 <?php
 /*
- * This file is part of Cytro.
+ * This file is part of Fenom.
  *
  * (c) 2013 Ivan Shalganov
  *
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-use Cytro\Template,
-    Cytro\ProviderInterface;
+use Fenom\Template,
+    Fenom\ProviderInterface;
 
 /**
- * Cytro Template Engine
+ * Fenom Template Engine
  */
-class Cytro {
+class Fenom {
     const VERSION = '1.0';
 
 	/* Compiler types */
@@ -32,11 +32,11 @@ class Cytro {
     const DISABLE_CACHE     = 0x1F0;
 
 	/* Default parsers */
-    const DEFAULT_CLOSE_COMPILER = 'Cytro\Compiler::stdClose';
-    const DEFAULT_FUNC_PARSER    = 'Cytro\Compiler::stdFuncParser';
-    const DEFAULT_FUNC_OPEN      = 'Cytro\Compiler::stdFuncOpen';
-    const DEFAULT_FUNC_CLOSE     = 'Cytro\Compiler::stdFuncClose';
-    const SMART_FUNC_PARSER      = 'Cytro\Compiler::smartFuncParser';
+    const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
+    const DEFAULT_FUNC_PARSER    = 'Fenom\Compiler::stdFuncParser';
+    const DEFAULT_FUNC_OPEN      = 'Fenom\Compiler::stdFuncOpen';
+    const DEFAULT_FUNC_CLOSE     = 'Fenom\Compiler::stdFuncClose';
+    const SMART_FUNC_PARSER      = 'Fenom\Compiler::smartFuncParser';
 
     /**
      * @var int[] of possible options, as associative array
@@ -52,7 +52,7 @@ class Cytro {
     );
 
     /**
-     * @var Cytro\Render[] Templates storage
+     * @var Fenom\Render[] Templates storage
      */
     protected $_storage = array();
     /**
@@ -74,7 +74,7 @@ class Cytro {
      */
     private $_provider;
     /**
-     * @var Cytro\ProviderInterface[]
+     * @var Fenom\ProviderInterface[]
      */
     protected $_providers = array();
 
@@ -86,15 +86,15 @@ class Cytro {
         "up"          => 'strtoupper',
         "lower"       => 'strtolower',
         "low"         => 'strtolower',
-        "date_format" => 'Cytro\Modifier::dateFormat',
-        "date"        => 'Cytro\Modifier::date',
-        "truncate"    => 'Cytro\Modifier::truncate',
-        "escape"      => 'Cytro\Modifier::escape',
-        "e"           => 'Cytro\Modifier::escape', // alias of escape
-        "unescape"    => 'Cytro\Modifier::unescape',
-        "strip"       => 'Cytro\Modifier::strip',
-        "length"      => 'Cytro\Modifier::length',
-        "default"     => 'Cytro\Modifier::defaultValue'
+        "date_format" => 'Fenom\Modifier::dateFormat',
+        "date"        => 'Fenom\Modifier::date',
+        "truncate"    => 'Fenom\Modifier::truncate',
+        "escape"      => 'Fenom\Modifier::escape',
+        "e"           => 'Fenom\Modifier::escape', // alias of escape
+        "unescape"    => 'Fenom\Modifier::unescape',
+        "strip"       => 'Fenom\Modifier::strip',
+        "length"      => 'Fenom\Modifier::length',
+        "default"     => 'Fenom\Modifier::defaultValue'
     );
 
     /**
@@ -112,137 +112,137 @@ class Cytro {
     protected $_actions = array(
         'foreach' => array( // {foreach ...} {break} {continue} {foreachelse} {/foreach}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::foreachOpen',
-            'close' => 'Cytro\Compiler::foreachClose',
+            'open' => 'Fenom\Compiler::foreachOpen',
+            'close' => 'Fenom\Compiler::foreachClose',
             'tags' => array(
-                'foreachelse' => 'Cytro\Compiler::foreachElse',
-                'break' => 'Cytro\Compiler::tagBreak',
-                'continue' => 'Cytro\Compiler::tagContinue',
+                'foreachelse' => 'Fenom\Compiler::foreachElse',
+                'break' => 'Fenom\Compiler::tagBreak',
+                'continue' => 'Fenom\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
         'if' => array(      // {if ...} {elseif ...} {else} {/if}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::ifOpen',
-            'close' => 'Cytro\Compiler::stdClose',
+            'open' => 'Fenom\Compiler::ifOpen',
+            'close' => 'Fenom\Compiler::stdClose',
             'tags' => array(
-                'elseif' => 'Cytro\Compiler::tagElseIf',
-                'else' => 'Cytro\Compiler::tagElse',
+                'elseif' => 'Fenom\Compiler::tagElseIf',
+                'else' => 'Fenom\Compiler::tagElse',
             )
         ),
         'switch' => array(  // {switch ...} {case ...} {break} {default} {/switch}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::switchOpen',
-            'close' => 'Cytro\Compiler::stdClose',
+            'open' => 'Fenom\Compiler::switchOpen',
+            'close' => 'Fenom\Compiler::stdClose',
             'tags' => array(
-                'case' => 'Cytro\Compiler::tagCase',
-                'default' => 'Cytro\Compiler::tagDefault',
-                'break' => 'Cytro\Compiler::tagBreak',
+                'case' => 'Fenom\Compiler::tagCase',
+                'default' => 'Fenom\Compiler::tagDefault',
+                'break' => 'Fenom\Compiler::tagBreak',
             ),
             'float_tags' => array('break' => 1)
         ),
         'for' => array(     // {for ...} {break} {continue} {/for}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::forOpen',
-            'close' => 'Cytro\Compiler::forClose',
+            'open' => 'Fenom\Compiler::forOpen',
+            'close' => 'Fenom\Compiler::forClose',
             'tags' => array(
-                'forelse' => 'Cytro\Compiler::forElse',
-                'break' => 'Cytro\Compiler::tagBreak',
-                'continue' => 'Cytro\Compiler::tagContinue',
+                'forelse' => 'Fenom\Compiler::forElse',
+                'break' => 'Fenom\Compiler::tagBreak',
+                'continue' => 'Fenom\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
         'while' => array(   // {while ...} {break} {continue} {/while}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::whileOpen',
-            'close' => 'Cytro\Compiler::stdClose',
+            'open' => 'Fenom\Compiler::whileOpen',
+            'close' => 'Fenom\Compiler::stdClose',
             'tags' => array(
-                'break' => 'Cytro\Compiler::tagBreak',
-                'continue' => 'Cytro\Compiler::tagContinue',
+                'break' => 'Fenom\Compiler::tagBreak',
+                'continue' => 'Fenom\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
         'include' => array( // {include ...}
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Cytro\Compiler::tagInclude'
+            'parser' => 'Fenom\Compiler::tagInclude'
         ),
         'var' => array(     // {var ...}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::varOpen',
-            'close' => 'Cytro\Compiler::varClose'
+            'open' => 'Fenom\Compiler::varOpen',
+            'close' => 'Fenom\Compiler::varClose'
         ),
         'block' => array(   // {block ...} {parent} {/block}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::tagBlockOpen',
-            'close' => 'Cytro\Compiler::tagBlockClose',
+            'open' => 'Fenom\Compiler::tagBlockOpen',
+            'close' => 'Fenom\Compiler::tagBlockClose',
             'tags' => array(
-                'parent' => 'Cytro\Compiler::tagParent'
+                'parent' => 'Fenom\Compiler::tagParent'
             ),
             'float_tags' => array('parent' => 1)
         ),
         'extends' => array( // {extends ...}
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Cytro\Compiler::tagExtends'
+            'parser' => 'Fenom\Compiler::tagExtends'
         ),
         'use' => array( // {use}
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Cytro\Compiler::tagUse'
+            'parser' => 'Fenom\Compiler::tagUse'
         ),
         'capture' => array( // {capture ...} {/capture}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::captureOpen',
-            'close' => 'Cytro\Compiler::captureClose'
+            'open' => 'Fenom\Compiler::captureOpen',
+            'close' => 'Fenom\Compiler::captureClose'
         ),
         'filter' => array( // {filter} ... {/filter}
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::filterOpen',
-            'close' => 'Cytro\Compiler::filterClose'
+            'open' => 'Fenom\Compiler::filterOpen',
+            'close' => 'Fenom\Compiler::filterClose'
         ),
         'macro' => array(
             'type' => self::BLOCK_COMPILER,
-            'open' => 'Cytro\Compiler::macroOpen',
-            'close' => 'Cytro\Compiler::macroClose'
+            'open' => 'Fenom\Compiler::macroOpen',
+            'close' => 'Fenom\Compiler::macroClose'
         ),
         'import' => array(
             'type' => self::INLINE_COMPILER,
-            'parser' => 'Cytro\Compiler::tagImport'
+            'parser' => 'Fenom\Compiler::tagImport'
         ),
 	    'cycle' => array(
 		    'type' => self::INLINE_COMPILER,
-		    'parser' => 'Cytro\Compiler::tagCycle'
+		    'parser' => 'Fenom\Compiler::tagCycle'
 	    )
     );
 
     /**
      * Just factory
      *
-     * @param string|Cytro\ProviderInterface $source path to templates or custom provider
+     * @param string|Fenom\ProviderInterface $source path to templates or custom provider
      * @param string $compile_dir path to compiled files
      * @param int $options
      * @throws InvalidArgumentException
-     * @return Cytro
+     * @return Fenom
      */
     public static function factory($source, $compile_dir = '/tmp', $options = 0) {
         if(is_string($source)) {
-            $provider = new Cytro\FSProvider($source);
+            $provider = new Fenom\Provider($source);
         } elseif($source instanceof ProviderInterface) {
             $provider = $source;
         } else {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
-        $cytro = new static($provider);
-	    /* @var Cytro $cytro */
-        $cytro->setCompileDir($compile_dir);
+        $fenom = new static($provider);
+	    /* @var Fenom $fytro */
+        $fenom->setCompileDir($compile_dir);
         if($options) {
-            $cytro->setOptions($options);
+            $fenom->setOptions($options);
         }
-        return $cytro;
+        return $fenom;
     }
 
     /**
-     * @param Cytro\ProviderInterface $provider
+     * @param Fenom\ProviderInterface $provider
      */
-    public function __construct(Cytro\ProviderInterface $provider) {
+    public function __construct(Fenom\ProviderInterface $provider) {
         $this->_provider = $provider;
     }
 
@@ -250,7 +250,7 @@ class Cytro {
      * Set compile directory
      *
      * @param string $dir directory to store compiled templates in
-     * @return Cytro
+     * @return Fenom
      */
     public function setCompileDir($dir) {
         $this->_compile_dir = $dir;
@@ -285,7 +285,7 @@ class Cytro {
      *
      * @param string $modifier the modifier name
      * @param string $callback the modifier callback
-     * @return Cytro
+     * @return Fenom
      */
     public function addModifier($modifier, $callback) {
         $this->_modifiers[$modifier] = $callback;
@@ -297,7 +297,7 @@ class Cytro {
      *
      * @param string $compiler
      * @param callable $parser
-     * @return Cytro
+     * @return Fenom
      */
     public function addCompiler($compiler, $parser) {
         $this->_actions[$compiler] = array(
@@ -329,7 +329,7 @@ class Cytro {
      * @param callable $open_parser
      * @param callable|string $close_parser
      * @param array $tags
-     * @return Cytro
+     * @return Fenom
      */
     public function addBlockCompiler($compiler, $open_parser, $close_parser = self::DEFAULT_CLOSE_COMPILER, array $tags = array()) {
         $this->_actions[$compiler] = array(
@@ -347,7 +347,7 @@ class Cytro {
      * @param array $tags
      * @param array $floats
      * @throws LogicException
-     * @return Cytro
+     * @return Fenom
      */
     public function addBlockCompilerSmart($compiler, $storage, array $tags, array $floats = array()) {
         $c = array(
@@ -383,7 +383,7 @@ class Cytro {
      * @param string $function
      * @param callable $callback
      * @param callable|string $parser
-     * @return Cytro
+     * @return Fenom
      */
     public function addFunction($function, $callback, $parser = self::DEFAULT_FUNC_PARSER) {
         $this->_actions[$function] = array(
@@ -397,7 +397,7 @@ class Cytro {
     /**
      * @param string $function
      * @param callable $callback
-     * @return Cytro
+     * @return Fenom
      */
     public function addFunctionSmart($function, $callback) {
         $this->_actions[$function] = array(
@@ -413,7 +413,7 @@ class Cytro {
      * @param callable $callback
      * @param callable|string $parser_open
      * @param callable|string $parser_close
-     * @return Cytro
+     * @return Fenom
      */
     public function addBlockFunction($function, $callback, $parser_open = self::DEFAULT_FUNC_OPEN, $parser_close = self::DEFAULT_FUNC_CLOSE) {
         $this->_actions[$function] = array(
@@ -427,7 +427,7 @@ class Cytro {
 
     /**
      * @param array $funcs
-     * @return Cytro
+     * @return Fenom
      */
     public function addAllowedFunctions(array $funcs) {
         $this->_allowed_funcs = $this->_allowed_funcs + array_flip($funcs);
@@ -495,9 +495,9 @@ class Cytro {
      * Add source template provider by scheme
      *
      * @param string $scm scheme name
-     * @param Cytro\ProviderInterface $provider provider object
+     * @param Fenom\ProviderInterface $provider provider object
      */
-    public function addProvider($scm, \Cytro\ProviderInterface $provider) {
+    public function addProvider($scm, \Fenom\ProviderInterface $provider) {
         $this->_providers[$scm] = $provider;
     }
 
@@ -528,7 +528,7 @@ class Cytro {
 
     /**
      * @param bool|string $scm
-     * @return Cytro\ProviderInterface
+     * @return Fenom\ProviderInterface
      * @throws InvalidArgumentException
      */
     public function getProvider($scm = false) {
@@ -546,10 +546,10 @@ class Cytro {
     /**
      * Return empty template
      *
-     * @return Cytro\Template
+     * @return Fenom\Template
      */
     public function getRawTemplate() {
-        return new \Cytro\Template($this, $this->_options);
+        return new \Fenom\Template($this, $this->_options);
     }
 
     /**
@@ -557,7 +557,7 @@ class Cytro {
      *
      * @param string $template name of template
      * @param array $vars array of data for template
-     * @return Cytro\Render
+     * @return Fenom\Render
      */
     public function display($template, array $vars = array()) {
         return $this->getTemplate($template)->display($vars);
@@ -580,8 +580,8 @@ class Cytro {
 	 * @param array $vars
 	 * @param $callback
 	 * @param float $chunk
-	 * @return \Cytro\Render
-	 * @example $cytro->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
+	 * @return \Fenom\Render
+	 * @example $fenom->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
 	 */
 	public function pipe($template, array $vars, $callback, $chunk = 1e6) {
 		ob_start($callback, $chunk, true);
@@ -595,12 +595,12 @@ class Cytro {
      *
      * @param string $template template name with schema
      * @param int $options additional options and flags
-     * @return Cytro\Template
+     * @return Fenom\Template
      */
     public function getTemplate($template, $options = 0) {
         $key = dechex($this->_options | $options)."@".$template;
         if(isset($this->_storage[ $key ])) {
-            /** @var Cytro\Template $tpl  */
+            /** @var Fenom\Template $tpl  */
             $tpl = $this->_storage[ $key ];
             if(($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
                 return $this->_storage[ $key ] = $this->compile($template, true, $options);
@@ -617,9 +617,9 @@ class Cytro {
     /**
      * Add custom template into storage
      *
-     * @param Cytro\Render $template
+     * @param Fenom\Render $template
      */
-    public function addTemplate(Cytro\Render $template) {
+    public function addTemplate(Fenom\Render $template) {
         $this->_storage[dechex($template->getOptions()).'@'. $template->getName() ] = $template;
     }
 
@@ -628,14 +628,14 @@ class Cytro {
      *
      * @param string $tpl
      * @param int $opts
-     * @return Cytro\Render
+     * @return Fenom\Render
      */
     protected function _load($tpl, $opts) {
         $file_name = $this->_getCacheName($tpl, $opts);
         if(!is_file($this->_compile_dir."/".$file_name)) {
             return $this->compile($tpl, true, $opts);
         } else {
-            $cytro = $this;
+            $fenom = $this;
             return include($this->_compile_dir."/".$file_name);
         }
     }
@@ -659,7 +659,7 @@ class Cytro {
      * @param bool $store store template on disk
      * @param int $options
      * @throws RuntimeException
-     * @return \Cytro\Template
+     * @return \Fenom\Template
      */
     public function compile($tpl, $store = true, $options = 0) {
         $options = $this->_options | $options;
@@ -692,7 +692,7 @@ class Cytro {
      * Remove all compiled templates
      */
     public function clearAllCompiles() {
-        \Cytro\FSProvider::clean($this->_compile_dir);
+        \Fenom\Provider::clean($this->_compile_dir);
     }
 
     /**
@@ -700,7 +700,7 @@ class Cytro {
      *
      * @param string $code
      * @param string $name
-     * @return Cytro\Template
+     * @return Fenom\Template
      */
     public function compileCode($code, $name = 'Runtime compile') {
         return Template::factory($this, $this->_options)->source($name, $code);

@@ -1,10 +1,10 @@
 Documentation
 =============
 
-### Cytro
+### Fenom
 
-* [About](./about.md)
 * [Install](./install.md)
+* [Usage](./usage.md)
 * [Syntax](./syntax.md)
 * [Settings](./settings.md)
 * [Callbacks and filters](./callbacks.md)
@@ -47,7 +47,6 @@ Documentation
 * [filter](./tags/filter.md)
 * [ignore](./tags/ignore.md)
 * [macro](./tags/macro.md) and `import`
-* [autotrim](./tags/autotrim.md)
 * or [add](./ext/tags.md) your own
 
 ***

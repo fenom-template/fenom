@@ -1,13 +1,13 @@
 <?php
-namespace Cytro;
-use Cytro, Cytro\TestCase;
+namespace Fenom;
+use Fenom, Fenom\TestCase;
 
 class ExtendsTemplateTest extends TestCase {
 
 	public function _testSandbox() {
-		$this->cytro = Cytro::factory(CYTRO_RESOURCES.'/provider', CYTRO_RESOURCES.'/compile');
+		$this->fenom = Fenom::factory(FENOM_RESOURCES.'/provider', FENOM_RESOURCES.'/compile');
 		try {
-			print_r($this->cytro->getTemplate('use/child.tpl')->getBody());
+			print_r($this->fenom->getTemplate('use/child.tpl')->getBody());
 		} catch (\Exception $e) {
 			echo "$e";
 		}
@@ -114,24 +114,24 @@ class ExtendsTemplateTest extends TestCase {
         $tpls = self::generate('{block "%s"}%s{/block}', '{extends "level.%d.tpl"}', self::templates($vars));
         foreach($tpls as $name => $tpl) {
             $this->tpl($name, $tpl["src"]);
-            $this->assertSame($this->cytro->fetch($name, $vars), $tpl["dst"]);
+            $this->assertSame($this->fenom->fetch($name, $vars), $tpl["dst"]);
         }
 		return;
         $vars["default"]++;
-        $this->cytro->flush();
+        $this->fenom->flush();
         $tpls = self::generate('{block "{$%s}"}%s{/block}', '{extends "level.%d.tpl"}', self::templates($vars));
         arsort($tpls);
         foreach($tpls as $name => $tpl) {
             $this->tpl("d.".$name, $tpl["src"]);
-            $this->assertSame($this->cytro->fetch("d.".$name, $vars), $tpl["dst"]);
+            $this->assertSame($this->fenom->fetch("d.".$name, $vars), $tpl["dst"]);
         }
         $vars["default"]++;
-        $this->cytro->flush();
+        $this->fenom->flush();
         $tpls = self::generate('{block "%s"}%s{/block}', '{extends "$level.%d.tpl"}', self::templates($vars));
         arsort($tpls);
         foreach($tpls as $name => $tpl) {
             $this->tpl("x.".$name, $tpl["src"]);
-            $this->assertSame($this->cytro->fetch("x.".$name, $vars), $tpl["dst"]);
+            $this->assertSame($this->fenom->fetch("x.".$name, $vars), $tpl["dst"]);
         }
     }
 
@@ -139,8 +139,8 @@ class ExtendsTemplateTest extends TestCase {
 	 * @group use
 	 */
 	public function testUse() {
-		$this->cytro = Cytro::factory(CYTRO_RESOURCES.'/provider', CYTRO_RESOURCES.'/compile');
-		$this->assertSame("<html>\n block 1 blocks \n block 2 child \n</html>", $this->cytro->fetch('use/child.tpl'));
+		$this->fenom = Fenom::factory(FENOM_RESOURCES.'/provider', FENOM_RESOURCES.'/compile');
+		$this->assertSame("<html>\n block 1 blocks \n block 2 child \n</html>", $this->fenom->fetch('use/child.tpl'));
 	}
 
 	public function _testParent() {

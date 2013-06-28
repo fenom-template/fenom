@@ -3,7 +3,7 @@
 
 
 ```
-$cytro->addModifier(string $modifier, callable $callback);
+$fenom->addModifier(string $modifier, callable $callback);
 ```
 
 * `$modifier` - название модификатора, которое будет использоваться в шаблоне
@@ -16,7 +16,7 @@ For example:
 ```
 
 ```php
-$cytro->addModifier('my_modifier', function ($variable, $param1, $param2) {
+$fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
     // ...
 });
 ```

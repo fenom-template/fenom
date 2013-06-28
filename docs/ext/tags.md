@@ -11,15 +11,15 @@ Tags [RU]
 Примитивное добавление функции можно осуществить следующим образом:
 
 ```php
-$cytro->addFunction(string $function_name, callable $callback[, callable $parser]);
+$fenom->addFunction(string $function_name, callable $callback[, callable $parser]);
 ```
 
 В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом.
-В данном случае вы можете переопределить парсер на произвольный в формате `function (Cytro\Tokenizer $tokenizer, Cytro\Template $template)`
+В данном случае вы можете переопределить парсер на произвольный в формате `function (Fenom\Tokenizer $tokenizer, Fenom\Template $template)`
 Существует более совершенный способ добавления функции:
 
 ```php
-$cytro->addFunctionSmarty(string $function_name, callable $callback);
+$fenom->addFunctionSmarty(string $function_name, callable $callback);
 ```
 
 В данном случае парсер просканирует список аргументов коллбека и попробует сопоставить с аргументами из тега. Таким образом вы успешно можете добавлять Ваши штатные функции.
@@ -29,7 +29,7 @@ $cytro->addFunctionSmarty(string $function_name, callable $callback);
 Добавление блоковой функции аналогичен добавлению строковой за исключением того что есть возможность указать парсер для закрывающего тега.
 
 ```php
-$cytro->addBlockFunction(string $function_name, callable $callback[, callable $parser_open[, callable $parser_close]]);
+$fenom->addBlockFunction(string $function_name, callable $callback[, callable $parser_open[, callable $parser_close]]);
 ```
 
 Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега.
@@ -39,14 +39,14 @@ $cytro->addBlockFunction(string $function_name, callable $callback[, callable $p
 Добавление строчного компилятора осуществляеться очень просто:
 
 ```php
-$cytro->addCompiler(string $compiler, callable $parser);
+$fenom->addCompiler(string $compiler, callable $parser);
 ```
 
-Парсер должен принимать `Cytro\Tokenizer $tokenizer`, `Cytro\Template $template` и возвращать PHP код.
+Парсер должен принимать `Fenom\Tokenizer $tokenizer`, `Fenom\Template $template` и возвращать PHP код.
 Компилятор так же можно импортировать из класса автоматически
 
 ```php
-$cytro->addCompilerSmart(string $compiler, $storage);
+$fenom->addCompilerSmart(string $compiler, $storage);
 ```
 
 `$storage` может быть как классом так и объектом. В данном случае шаблонизатор будет искать метод `tag{$compiler}`, который будет взят в качестве парсера тега.
@@ -56,13 +56,13 @@ $cytro->addCompilerSmart(string $compiler, $storage);
 Добавление блочного компилятора осуществяется двум способами. Первый
 
 ```php
-$cytro->addBlockCompiler(string $compiler, array $parsers, array $tags);
+$fenom->addBlockCompiler(string $compiler, array $parsers, array $tags);
 ```
 
 где `$parser` ассоциативный массив `["open" => parser, "close" => parser]`, сождержащий парсер на открывающий и на закрывающий тег, а `$tags` содержит список внутренних тегов в формате `["tag_name"] => parser`, которые могут быть использованы только с этим компилятором.
 Второй способ добавления парсера через импортирование из класса или объекта методов:
 
 ```php
-$cytro->addBlockCompilerSmart(string $compiler, $storage, array $tags, array $floats);
+$fenom->addBlockCompilerSmart(string $compiler, $storage, array $tags, array $floats);
 ```
 

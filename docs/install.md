@@ -5,11 +5,11 @@ For installation use [composer](http://getcompoer.org). Add in your `composer.js
 ```json
 {
     "require": {
-        "bzick/cytro": "dev-master"
+        "bzick/fenom": "dev-master"
     }
 }
 ```
 or use shell
-`composer require bzick/cytro`
+`composer require bzick/fenom`
 
-If you do not use composer - use `psr-0` format for loading Cytro's classes.
+If you do not use composer - use `psr-0` format for loading Fenom's classes.

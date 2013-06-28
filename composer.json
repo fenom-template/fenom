@@ -1,9 +1,9 @@
 {
-    "name": "bzick/cytro",
+    "name": "bzick/fenom",
     "type": "library",
-    "description": "Cytro - fast template engine for PHP",
-    "homepage": "http://bzick.github.io/cytro/",
-    "keywords": ["cytro", "template", "templating"],
+    "description": "Fenom - fast template engine for PHP",
+    "homepage": "http://bzick.github.io/fenom/",
+    "keywords": ["fenom", "template", "templating"],
     "license": "BSD-3",
     "authors": [
         {
@@ -22,7 +22,7 @@
         "twig/twig": "1.*"
     },
     "autoload": {
-        "psr-0": { "Cytro\\": "src/" },
-        "classmap": [ "src/Cytro.php" ]
+        "psr-0": { "Fenom\\": "src/" },
+        "classmap": [ "src/Fenom.php" ]
     }
 }

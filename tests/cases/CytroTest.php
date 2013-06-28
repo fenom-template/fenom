@@ -1,22 +1,22 @@
 <?php
 
-use Cytro\Render,
-    Cytro\FSProvider as FS;
+use Fenom\Render,
+    Fenom\Provider as FS;
 
-class CytroTest extends \Cytro\TestCase {
+class FenomTest extends \Fenom\TestCase {
 
     public function testAddRender() {
         $test = $this;
-        $this->cytro->addTemplate(new Render($this->cytro, function($tpl) use ($test) {
+        $this->fenom->addTemplate(new Render($this->fenom, function($tpl) use ($test) {
             /** @var \PHPUnit_Framework_TestCase $test  */
-            $test->assertInstanceOf('Cytro\Render', $tpl);
+            $test->assertInstanceOf('Fenom\Render', $tpl);
             echo "Inline render";
         }, array(
             "name" => 'render.tpl',
             "scm" => false
         )));
 
-        $this->assertSame("Inline render", $this->cytro->fetch('render.tpl', array()));
+        $this->assertSame("Inline render", $this->fenom->fetch('render.tpl', array()));
     }
 
     public function testCompileFile() {
@@ -26,71 +26,71 @@ class CytroTest extends \Cytro\TestCase {
         );
         $this->tpl('template1.tpl', 'Template 1 a');
         $this->tpl('template2.tpl', 'Template 2 b');
-        $this->assertSame("Template 1 a", $this->cytro->fetch('template1.tpl', $a));
-        $this->assertSame("Template 2 b", $this->cytro->fetch('template2.tpl', $a));
-        $this->assertInstanceOf('Cytro\Render', $this->cytro->getTemplate('template1.tpl'));
-        $this->assertInstanceOf('Cytro\Render', $this->cytro->getTemplate('template2.tpl'));
-        $this->assertSame(3, iterator_count(new FilesystemIterator(CYTRO_RESOURCES.'/compile')));
+        $this->assertSame("Template 1 a", $this->fenom->fetch('template1.tpl', $a));
+        $this->assertSame("Template 2 b", $this->fenom->fetch('template2.tpl', $a));
+        $this->assertInstanceOf('Fenom\Render', $this->fenom->getTemplate('template1.tpl'));
+        $this->assertInstanceOf('Fenom\Render', $this->fenom->getTemplate('template2.tpl'));
+        $this->assertSame(3, iterator_count(new FilesystemIterator(FENOM_RESOURCES.'/compile')));
     }
 
     public function testStorage() {
         $this->tpl('custom.tpl', 'Custom template');
-        $this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
-        //$this->cytro->clearCompiledTemplate('custom.tpl', false);
+        $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
+        //$this->fenom->clearCompiledTemplate('custom.tpl', false);
 
-        //$this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
+        //$this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
 
         $this->tpl('custom.tpl', 'Custom template 2');
-        $this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
     }
 
     public function testCheckMTime() {
-        $this->cytro->setOptions(Cytro::FORCE_COMPILE);
+        $this->fenom->setOptions(Fenom::FORCE_COMPILE);
         $this->tpl('custom.tpl', 'Custom template');
-        $this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
 
         sleep(1);
         $this->tpl('custom.tpl', 'Custom template (new)');
-        $this->assertSame("Custom template (new)", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom template (new)", $this->fenom->fetch('custom.tpl', array()));
     }
 
     public function testForceCompile() {
-        $this->cytro->setOptions(Cytro::FORCE_COMPILE);
+        $this->fenom->setOptions(Fenom::FORCE_COMPILE);
         $this->tpl('custom.tpl', 'Custom template');
-        $this->assertSame("Custom template", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
         $this->tpl('custom.tpl', 'Custom template (new)');
-        $this->assertSame("Custom template (new)", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom template (new)", $this->fenom->fetch('custom.tpl', array()));
     }
 
     public function testSetModifier() {
-        $this->cytro->addModifier("mymod", "myMod");
+        $this->fenom->addModifier("mymod", "myMod");
         $this->tpl('custom.tpl', 'Custom modifier {$a|mymod}');
-        $this->assertSame("Custom modifier (myMod)Custom(/myMod)", $this->cytro->fetch('custom.tpl', array("a" => "Custom")));
+        $this->assertSame("Custom modifier (myMod)Custom(/myMod)", $this->fenom->fetch('custom.tpl', array("a" => "Custom")));
     }
 
     /**
      * @group add_functions
      */
     public function testSetFunctions() {
-        $this->cytro->setOptions(Cytro::FORCE_COMPILE);
-        $this->cytro->addFunction("myfunc", "myFunc");
-        $this->cytro->addBlockFunction("myblockfunc", "myBlockFunc");
+        $this->fenom->setOptions(Fenom::FORCE_COMPILE);
+        $this->fenom->addFunction("myfunc", "myFunc");
+        $this->fenom->addBlockFunction("myblockfunc", "myBlockFunc");
         $this->tpl('custom.tpl', 'Custom function {myfunc name="foo"}');
-        $this->assertSame("Custom function MyFunc:foo", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom function MyFunc:foo", $this->fenom->fetch('custom.tpl', array()));
         $this->tpl('custom.tpl', 'Custom function {myblockfunc name="foo"} this block1 {/myblockfunc}');
-        $this->assertSame("Custom function Block:foo:this block1:Block", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom function Block:foo:this block1:Block", $this->fenom->fetch('custom.tpl', array()));
     }
 
     public function testSetCompilers() {
-        $this->cytro->setOptions(Cytro::FORCE_COMPILE);
-        $this->cytro->addCompiler("mycompiler", 'myCompiler');
-        $this->cytro->addBlockCompiler("myblockcompiler", 'myBlockCompilerOpen', 'myBlockCompilerClose', array(
+        $this->fenom->setOptions(Fenom::FORCE_COMPILE);
+        $this->fenom->addCompiler("mycompiler", 'myCompiler');
+        $this->fenom->addBlockCompiler("myblockcompiler", 'myBlockCompilerOpen', 'myBlockCompilerClose', array(
             'tag' => 'myBlockCompilerTag'
         ));
         $this->tpl('custom.tpl', 'Custom compiler {mycompiler name="bar"}');
-        $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar)", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar)", $this->fenom->fetch('custom.tpl', array()));
         $this->tpl('custom.tpl', 'Custom compiler {myblockcompiler name="bar"} block1 {tag name="baz"} block2 {/myblockcompiler}');
-        $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar) block1 Tag baz of compiler block2 End of compiler", $this->cytro->fetch('custom.tpl', array()));
+        $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar) block1 Tag baz of compiler block2 End of compiler", $this->fenom->fetch('custom.tpl', array()));
     }
 }
 

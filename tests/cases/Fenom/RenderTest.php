@@ -1,7 +1,7 @@
 <?php
-namespace Cytro;
-use Cytro,
-    Cytro\Render;
+namespace Fenom;
+use Fenom,
+    Fenom\Render;
 
 class RenderTest extends \PHPUnit_Framework_TestCase {
 
@@ -11,7 +11,7 @@ class RenderTest extends \PHPUnit_Framework_TestCase {
     public static $render;
 
     public static function setUpBeforeClass() {
-        self::$render = new Render(Cytro::factory("."), function ($tpl) {
+        self::$render = new Render(Fenom::factory("."), function ($tpl) {
             echo "It is render's function ".$tpl["render"];
         }, array(
             "name" => "render.tpl"
@@ -19,7 +19,7 @@ class RenderTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testCreate() {
-        $r = new Render(Cytro::factory("."), function () {
+        $r = new Render(Fenom::factory("."), function () {
             echo "Test render";
         }, array(
             "name" => "test.render.tpl"
@@ -43,7 +43,7 @@ class RenderTest extends \PHPUnit_Framework_TestCase {
      * @expectedExceptionMessage template error
      */
     public function testFetchException() {
-        $render = new Render(Cytro::factory("."), function () {
+        $render = new Render(Fenom::factory("."), function () {
             echo "error";
             throw new \RuntimeException("template error");
         }, array(
