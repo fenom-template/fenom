@@ -1,5 +1,5 @@
 {
-    "name": "bzick/fenom",
+    "name": "fenom/fenom",
     "type": "library",
     "description": "Fenom - fast template engine for PHP",
     "homepage": "http://bzick.github.io/fenom/",

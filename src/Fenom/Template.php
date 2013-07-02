@@ -107,6 +107,14 @@ class Template extends Render {
     }
 
     /**
+     * Get tag stack size
+     * @return int
+     */
+    public function getStackSize() {
+        return count($this->_stack);
+    }
+
+    /**
      * Load source from provider
      * @param string $name
      * @param bool $compile
@@ -408,7 +416,7 @@ class Template extends Render {
             } else {
                 return $code = "echo ".$this->parseExp($tokens).";";
             }
-        } catch (ImproperUseException $e) {
+        } catch (InvalidUsageException $e) {
             throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
             throw new SecurityException($e->getMessage()." in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
@@ -937,7 +945,7 @@ class Template extends Render {
      *
      * @param Tokenizer $tokens
      * @return string
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      */
     public function parseConst(Tokenizer $tokens) {
         $tokens->get('#');
@@ -956,7 +964,7 @@ class Template extends Render {
         if(defined($name)) {
             return $name;
         } else {
-            throw new ImproperUseException("Use undefined constant $name");
+            throw new InvalidUsageException("Use undefined constant $name");
         }
     }
 
@@ -964,7 +972,7 @@ class Template extends Render {
      * @param Tokenizer $tokens
      * @param $name
      * @return string
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      */
     public function parseMacro(Tokenizer $tokens, $name) {
         if(isset($this->macros[ $name ])) {
@@ -977,13 +985,13 @@ class Template extends Render {
                 } elseif(isset($macro["defaults"][ $arg ])) {
                     $args[ $arg ] = $macro["defaults"][ $arg ];
                 } else {
-                    throw new ImproperUseException("Macro '$name' require '$arg' argument");
+                    throw new InvalidUsageException("Macro '$name' require '$arg' argument");
                 }
             }
             $args = $args ? '$tpl = '.Compiler::toArray($args).';' : '';
             return '$_tpl = $tpl; '.$args.' ?>'.$macro["body"].'<?php $tpl = $_tpl; unset($_tpl);';
         } else {
-            throw new ImproperUseException("Undefined macro '$name'");
+            throw new InvalidUsageException("Undefined macro '$name'");
         }
     }
 
@@ -1088,5 +1096,5 @@ class Template extends Render {
 
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
-class ImproperUseException extends \LogicException {}
+class InvalidUsageException extends \LogicException {}
 class ReparseTagException extends \Exception {}

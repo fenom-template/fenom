@@ -14,27 +14,27 @@ echo "Testing a lot output...\n";
 Benchmark::runs("smarty3", 'echo/smarty.tpl',   __DIR__.'/templates/echo/data.json');
 Benchmark::runs("twig",    'echo/twig.tpl',     __DIR__.'/templates/echo/data.json');
 Benchmark::runs("fenom",   'echo/smarty.tpl',   __DIR__.'/templates/echo/data.json');
-if(extension_loaded("phalcon")) {
-    Benchmark::runs("volt",   'echo/twig.tpl',  __DIR__.'/templates/echo/data.json');
-}
+//if(extension_loaded("phalcon")) {
+//    Benchmark::runs("volt",   'echo/twig.tpl',  __DIR__.'/templates/echo/data.json');
+//}
 
 echo "\nTesting 'foreach' of big array...\n";
 
 Benchmark::runs("smarty3", 'foreach/smarty.tpl', __DIR__.'/templates/foreach/data.json');
 Benchmark::runs("twig",    'foreach/twig.tpl',   __DIR__.'/templates/foreach/data.json');
 Benchmark::runs("fenom",   'foreach/smarty.tpl', __DIR__.'/templates/foreach/data.json');
-if(extension_loaded("phalcon")) {
-    Benchmark::runs("volt",   'foreach/twig.tpl', __DIR__.'/templates/foreach/data.json');
-}
+//if(extension_loaded("phalcon")) {
+//    Benchmark::runs("volt",   'foreach/twig.tpl', __DIR__.'/templates/foreach/data.json');
+//}
 
 echo "\nTesting deep 'inheritance'...\n";
 
 Benchmark::runs("smarty3", 'inheritance/smarty/b100.tpl', __DIR__.'/templates/foreach/data.json');
 Benchmark::runs("twig",    'inheritance/twig/b100.tpl', __DIR__.'/templates/foreach/data.json');
 Benchmark::runs("fenom",  'inheritance/smarty/b100.tpl', __DIR__.'/templates/foreach/data.json');
-if(extension_loaded("phalcon")) {
-    Benchmark::runs("volt",  'inheritance/twig/b100.tpl', __DIR__.'/templates/foreach/data.json');
-}
+//if(extension_loaded("phalcon")) {
+//    Benchmark::runs("volt",  'inheritance/twig/b100.tpl', __DIR__.'/templates/foreach/data.json');
+//}
 
 echo "\nDone. Cleanup.\n";
 //passthru("rm -rf ".__DIR__."/compile/*");

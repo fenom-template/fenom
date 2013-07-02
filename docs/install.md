@@ -5,11 +5,11 @@ For installation use [composer](http://getcompoer.org). Add in your `composer.js
 ```json
 {
     "require": {
-        "bzick/fenom": "dev-master"
+        "fenom/fenom": "dev-master"
     }
 }
 ```
 or use shell
-`composer require bzick/fenom`
+`composer require fenom/fenom`
 
 If you do not use composer - use `psr-0` format for loading Fenom's classes.

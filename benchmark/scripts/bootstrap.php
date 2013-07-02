@@ -77,7 +77,7 @@ class Benchmark {
     }
 
     public static function run($engine, $template, $data, $double, $message) {
-        passthru(sprintf("php -dmemory_limit=512M -dxdebug.max_nesting_level=1024 %s/run.php --engine '%s' --template '%s' --data '%s' --message '%s' %s", __DIR__, $engine, $template, $data, $message, $double ? '--double' : ''));
+        passthru(sprintf(PHP_BINARY." -dmemory_limit=512M -dxdebug.max_nesting_level=1024 %s/run.php --engine '%s' --template '%s' --data '%s' --message '%s' %s", __DIR__, $engine, $template, $data, $message, $double ? '--double' : ''));
     }
 
     /**

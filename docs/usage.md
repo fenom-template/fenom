@@ -1,20 +1,38 @@
 Basic usage
 ===========
 
-### Creating template engine
+### Initialize Fenom
 
+Use factory method
 ```php
-$fenom = Fenom::factory('/path/to/templates', '/path/to/template/cache', $options);
+$fenom = Fenom::factory('/path/to/templates', '/path/to/compiled/template', $options);
+```
 
-//or
-
-$fenom = new Fenom(new FSProvider('/path/to/templates'));
+Use `new` operator
+```php
+$fenom = new Fenom(new Provider('/path/to/templates'));
 $fenom->setCompileDir('/path/to/template/cache');
 $fenom->setOptions($options);
 ```
 
-### Output template result
+### Render template
 
+Output template
 ```php
 $fenom->display("template/name.tpl", $vars);
+```
+
+Get template into the variable
+```php
+$result = $fenom->fetch("template/name.tpl", $vars);
+```
+
+Create pipe-line into callback
+```php
+$fenom->export(
+    "template/sitemap.tpl",
+    $vars,
+    $callback = [new SplFileObject("/tmp/sitemap.xml", "w"), "fwrite"], // pipe to file /tmp/sitemap.xml
+    $chunk_size = 1e6 // chunk size for callback
+);
 ```

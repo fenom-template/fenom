@@ -23,7 +23,7 @@ class Compiler {
      * @static
      * @param Tokenizer $tokens
      * @param Template           $tpl
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagInclude(Tokenizer $tokens, Template $tpl) {
@@ -68,12 +68,12 @@ class Compiler {
      * @static
      * @param Tokenizer $tokens
      * @param Scope              $scope
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagElseIf(Tokenizer $tokens, Scope $scope) {
         if($scope["else"]) {
-            throw new ImproperUseException('Incorrect use of the tag {elseif}');
+            throw new InvalidUsageException('Incorrect use of the tag {elseif}');
         }
         return '} elseif('.$scope->tpl->parseExp($tokens, true).') {';
     }
@@ -99,7 +99,7 @@ class Compiler {
      * @param Tokenizer $tokens
      * @param Scope     $scope
      * @throws UnexpectedTokenException
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function foreachOpen(Tokenizer $tokens, Scope $scope) {
@@ -132,7 +132,7 @@ class Compiler {
         while($token = $tokens->key()) {
             $param = $tokens->get(T_STRING);
             if(!isset($p[ $param ])) {
-                throw new ImproperUseException("Unknown parameter '$param' in {foreach}");
+                throw new InvalidUsageException("Unknown parameter '$param' in {foreach}");
             }
             $tokens->getNext("=");
             $tokens->next();
@@ -197,7 +197,7 @@ class Compiler {
      * @param Tokenizer $tokens
      * @param Scope              $scope
      * @return string
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      */
     public static function forOpen(Tokenizer $tokens, Scope $scope) {
         $p = array("index" => false, "first" => false, "last" => false, "step" => 1, "to" => false, "max" => false, "min" => false);
@@ -218,7 +218,7 @@ class Compiler {
                 $condition = "$var >= {$p['to']}";
                 if($p["last"]) $c = "($var + {$p['step']}) < {$p['to']}";
             } else {
-                throw new ImproperUseException("Invalid step value if {for}");
+                throw new InvalidUsageException("Invalid step value if {for}");
             }
         } else {
             $condition = "({$p['step']} > 0 && $var <= {$p['to']} || {$p['step']} < 0 && $var >= {$p['to']})";
@@ -323,14 +323,14 @@ class Compiler {
      * @static
      * @param Tokenizer $tokens
      * @param Scope              $scope
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagContinue($tokens, Scope $scope) {
         if(empty($scope["no-continue"])) {
             return 'continue;';
         } else {
-            throw new ImproperUseException("Improper usage of the tag {continue}");
+            throw new InvalidUsageException("Improper usage of the tag {continue}");
         }
     }
 
@@ -358,14 +358,14 @@ class Compiler {
      * @static
      * @param Tokenizer $tokens
      * @param Scope     $scope
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagBreak($tokens, Scope $scope) {
         if(empty($scope["no-break"])) {
             return 'break;';
         } else {
-            throw new ImproperUseException("Improper usage of the tag {break}");
+            throw new InvalidUsageException("Improper usage of the tag {break}");
         }
     }
 
@@ -373,12 +373,14 @@ class Compiler {
      * Dispatch {extends} tag
      * @param Tokenizer $tokens
      * @param Template $tpl
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagExtends(Tokenizer $tokens, Template $tpl) {
         if(!empty($tpl->_extends)) {
-            throw new ImproperUseException("Only one {extends} allowed");
+            throw new InvalidUsageException("Only one {extends} allowed");
+        } elseif($tpl->getStackSize()) {
+            throw new InvalidUsageException("Tags {extends} can not be nested");
         }
         $tpl_name = $tpl->parsePlainArg($tokens, $name);
         if(empty($tpl->_extended)) {
@@ -446,10 +448,13 @@ class Compiler {
      * Tag {use ...}
      * @param Tokenizer $tokens
      * @param Template $tpl
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagUse(Tokenizer $tokens, Template $tpl) {
+        if($tpl->getStackSize()) {
+            throw new InvalidUsageException("Tags {use} can not be nested");
+        }
         $cname = $tpl->parsePlainArg($tokens, $name);
         if($name) {
             $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
@@ -469,11 +474,12 @@ class Compiler {
 	        $tpl->addDepend($donor);
 	        return '?>'.$donor->getBody().'<?php ';
         } else {
-	        $tpl->_compatible = true;
-	        return '$donor = $tpl->getStorage()->getTemplate('.$cname.', \Fenom\Template::EXTENDED);'.PHP_EOL.
+//            throw new InvalidUsageException('template name must be given explicitly yet');
+            // under construction
+            $tpl->_compatible = true;
+            return '$donor = $tpl->getStorage()->getTemplate('.$cname.', \Fenom\Template::EXTENDED);'.PHP_EOL.
 		        '$donor->fetch((array)$tpl);'.PHP_EOL.
 		        '$tpl->b += (array)$donor->b';
-//            throw new ImproperUseException('template name must be given explicitly');
         }
     }
 
@@ -482,9 +488,13 @@ class Compiler {
      * @param Tokenizer $tokens
      * @param Scope $scope
      * @return string
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
+        if($scope->level > 0) {
+            var_dump("".$scope->tpl);
+            $scope->tpl->_compatible = true;
+        }
 	    $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
 	    $scope["name"]  = $name;
     }
@@ -553,7 +563,7 @@ class Compiler {
 
     public static function tagParent($tokens, Scope $scope) {
         if(empty($scope->tpl->_extends)) {
-            throw new ImproperUseException("Tag {parent} may be declared in childs");
+            throw new InvalidUsageException("Tag {parent} may be declared in childs");
         }
     }
 
@@ -710,7 +720,7 @@ class Compiler {
      * @param Tokenizer $tokens
      * @param Template $tpl
      * @return string
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      */
     public static function tagCycle(Tokenizer $tokens, Template $tpl) {
 	    if($tokens->is("[")) {
@@ -721,7 +731,7 @@ class Compiler {
         if($tokens->valid()) {
             $p = $tpl->parseParams($tokens);
             if(empty($p["index"])) {
-                throw new ImproperUseException("Cycle may contain only index attribute");
+                throw new InvalidUsageException("Cycle may contain only index attribute");
             } else {
                 return 'echo '.__CLASS__.'::cycle('.$exp.', '.$p["index"].')';
             }
@@ -747,7 +757,7 @@ class Compiler {
      * @param Tokenizer $tokens
      * @param Template $tpl
      * @throws UnexpectedTokenException
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      * @return string
      */
     public static function tagImport(Tokenizer $tokens, Template $tpl) {
@@ -775,7 +785,7 @@ class Compiler {
 
         $tpl->parsePlainArg($tokens, $name);
         if(!$name) {
-            throw new ImproperUseException("Invalid usage tag {import}");
+            throw new InvalidUsageException("Invalid usage tag {import}");
         }
         if($tokens->is(T_AS)) {
             $alias = $tokens->next()->get(Tokenizer::MACRO_STRING);
@@ -812,7 +822,7 @@ class Compiler {
      *
      * @param Tokenizer $tokens
      * @param Scope $scope
-     * @throws ImproperUseException
+     * @throws InvalidUsageException
      */
     public static function macroOpen(Tokenizer $tokens, Scope $scope) {
         $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
@@ -832,7 +842,7 @@ class Compiler {
                 if($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
                     $scope["defaults"][ $param ] = $tokens->getAndNext();
                 } else {
-                    throw new ImproperUseException("Macro parameters may have only scalar defaults");
+                    throw new InvalidUsageException("Macro parameters may have only scalar defaults");
                 }
             }
             $tokens->skipIf(',');
