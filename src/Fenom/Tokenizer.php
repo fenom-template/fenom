@@ -79,7 +79,7 @@ class Tokenizer {
 
     public $tokens;
     public $p = 0;
-	public $quotes = 0;
+    public $quotes = 0;
     private $_max = 0;
     private $_last_no = 0;
 
@@ -143,55 +143,55 @@ class Tokenizer {
         'true' => 1, 'false' => 1, 'null' => 1, 'TRUE' => 1, 'FALSE' => 1, 'NULL' => 1
     );
 
-	/**
-	 * @param $query
-	 */
-	public function __construct($query) {
-	    $tokens = array(-1 => array(\T_WHITESPACE, '', '', 1));
-	    $_tokens = token_get_all("<?php ".$query);
-	    $line = 1;
-	    array_shift($_tokens);
-	    $i = 0;
-	    foreach($_tokens as $token) {
-		    if(is_string($token)) {
-			    if($token === '"' || $token === "'" || $token === "`") {
-				    $this->quotes++;
-			    }
-			    $tokens[] = array(
-				    $token,
-				    $token,
-				    "",
-				    $line,
-			    );
-			    $i++;
-		    } elseif ($token[0] === \T_WHITESPACE) {
-			    $tokens[$i-1][2] = $token[1];
-		    } else {
-			    $tokens[] = array(
-				    $token[0],
-				    $token[1],
-				    "",
-				    $line =  $token[2],
-				    token_name($token[0]) // debug
-			    );
-			    $i++;
-		    }
+    /**
+     * @param $query
+     */
+    public function __construct($query) {
+        $tokens = array(-1 => array(\T_WHITESPACE, '', '', 1));
+        $_tokens = token_get_all("<?php ".$query);
+        $line = 1;
+        array_shift($_tokens);
+        $i = 0;
+        foreach($_tokens as $token) {
+            if(is_string($token)) {
+                if($token === '"' || $token === "'" || $token === "`") {
+                    $this->quotes++;
+                }
+                $tokens[] = array(
+                    $token,
+                    $token,
+                    "",
+                    $line,
+                );
+                $i++;
+            } elseif ($token[0] === \T_WHITESPACE) {
+                $tokens[$i-1][2] = $token[1];
+            } else {
+                $tokens[] = array(
+                    $token[0],
+                    $token[1],
+                    "",
+                    $line =  $token[2],
+                    token_name($token[0]) // debug
+                );
+                $i++;
+            }
 
-	    }
-	    unset($tokens[-1]);
-	    $this->tokens = $tokens;
+        }
+        unset($tokens[-1]);
+        $this->tokens = $tokens;
         $this->_max = count($this->tokens) - 1;
         $this->_last_no = $this->tokens[$this->_max][3];
     }
 
-	/**
-	 * Is incomplete mean some string not closed
-	 *
-	 * @return int
-	 */
-	public function isIncomplete() {
-		return ($this->quotes % 2) || ($this->tokens[$this->_max][0] === T_ENCAPSED_AND_WHITESPACE);
-	}
+    /**
+     * Is incomplete mean some string not closed
+     *
+     * @return int
+     */
+    public function isIncomplete() {
+        return ($this->quotes % 2) || ($this->tokens[$this->_max][0] === T_ENCAPSED_AND_WHITESPACE);
+    }
 
     /**
      * Return the current element

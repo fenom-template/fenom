@@ -18,21 +18,21 @@ use Fenom;
  */
 class Template extends Render {
 
-	/**
-	 * Disable array parser.
-	 */
-	const DENY_ARRAY = 1;
-	/**
-	 * Disable modifier parser.
-	 */
-	const DENY_MODS = 2;
+    /**
+     * Disable array parser.
+     */
+    const DENY_ARRAY = 1;
+    /**
+     * Disable modifier parser.
+     */
+    const DENY_MODS = 2;
 
-	/**
-	 * Template was extended
-	 */
-	const DYNAMIC_EXTEND = 0x1000;
-	const EXTENDED = 0x2000;
-	const DYNAMIC_BLOCK = 0x4000;
+    /**
+     * Template was extended
+     */
+    const DYNAMIC_EXTEND = 0x1000;
+    const EXTENDED = 0x2000;
+    const DYNAMIC_BLOCK = 0x4000;
 
     /**
      * @var int shared counter
@@ -54,13 +54,13 @@ class Template extends Render {
      */
     public $blocks = array();
 
-	public $uses = array();
+    public $uses = array();
 
-	public $parents = array();
+    public $parents = array();
 
-	public $_extends;
-	public $_extended = false;
-	public $_compatible;
+    public $_extends;
+    public $_extended = false;
+    public $_compatible;
 
     /**
      * Call stack
@@ -126,9 +126,9 @@ class Template extends Render {
             $this->_scm = $provider;
             $this->_base_name = substr($name, strlen($provider) + 1);
         } else {
-	        $this->_base_name = $name;
+            $this->_base_name = $name;
         }
-	    $this->_provider = $this->_fenom->getProvider($provider);
+        $this->_provider = $this->_fenom->getProvider($provider);
         $this->_src = $this->_provider->getSource($this->_base_name, $this->_time);
         if($compile) {
             $this->compile();
@@ -158,59 +158,59 @@ class Template extends Render {
      * @throws CompileException
      */
     public function compile() {
-	    $end = $pos = 0;
+        $end = $pos = 0;
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch($this->_src[$start + 1]) { // check next character
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
-                    $pos = $start + 1;
-                    continue 2;
+                $pos = $start + 1;
+                continue 2;
                 case "*": // if comments
                     $end = strpos($this->_src, '*}', $start) + 1; // find end of the comment block
-					if($end === false) {
-						throw new CompileException("Unclosed comment block in line {$this->_line}", 0, 1, $this->_name, $this->_line);
-					}
-					$this->_appendText(substr($this->_src, $pos, $start - $pos));
+                    if($end === false) {
+                        throw new CompileException("Unclosed comment block in line {$this->_line}", 0, 1, $this->_name, $this->_line);
+                    }
+                    $this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $comment = substr($this->_src, $start, $end - $start); // read the comment block for processing
                     $this->_line += substr_count($comment, "\n"); // count lines in comments
-					unset($comment); // cleanup
+                    unset($comment); // cleanup
                     $pos = $end + 1;
                     continue 2;
             }
-	        $frag = substr($this->_src, $pos, $start - $pos);  // variable $frag contains chars after previous '}' and current '{'
-	        $this->_appendText($frag);
+            $frag = substr($this->_src, $pos, $start - $pos);  // variable $frag contains chars after previous '}' and current '{'
+            $this->_appendText($frag);
 
-	        $from = $start;
-	        reparse: { // yep, i use goto operator. For this algorithm it is good choice
-		        $end = strpos($this->_src, '}', $from); // search close-symbol of the tag
-		        if($end === false) { // if unexpected end of template
-	                throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
+            $from = $start;
+            reparse: { // yep, i use goto operator. For this algorithm it is good choice
+                $end = strpos($this->_src, '}', $from); // search close-symbol of the tag
+                if($end === false) { // if unexpected end of template
+                    throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
                 }
                 $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains fenom tag '{...}'
 
-		        $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
+                $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
 
-		        if($this->_ignore) { // check ignore
-			        if($_tag === '/ignore') { // turn off ignore
-				        $this->_ignore = false;
-			        } else { // still ignore
-				        $this->_appendText($tag);
-			        }
-			        $pos = $start + strlen($tag);
-			        continue;
-		        } else {
-			        $tokens = new Tokenizer($_tag); // tokenize the tag
-			        if($tokens->isIncomplete()) { // all strings finished?
-				        $from = $end + 1;
-				        goto reparse; // need next close-symbol
-			        }
-			        $this->_appendCode( $this->_tag($tokens) , $tag); // start the tag lexer
-			        $pos = $end + 1; // move search-pointer to end of the tag
-			        if($tokens->key()) { // if tokenizer have tokens - throws exceptions
-				        throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
-			        }
+                if($this->_ignore) { // check ignore
+                    if($_tag === '/ignore') { // turn off ignore
+                        $this->_ignore = false;
+                    } else { // still ignore
+                        $this->_appendText($tag);
+                    }
+                    $pos = $start + strlen($tag);
+                    continue;
+                } else {
+                    $tokens = new Tokenizer($_tag); // tokenize the tag
+                    if($tokens->isIncomplete()) { // all strings finished?
+                        $from = $end + 1;
+                        goto reparse; // need next close-symbol
+                    }
+                    $this->_appendCode( $this->_tag($tokens) , $tag); // start the tag lexer
+                    $pos = $end + 1; // move search-pointer to end of the tag
+                    if($tokens->key()) { // if tokenizer have tokens - throws exceptions
+                        throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
+                    }
 
-			    }
-		    }
+                }
+            }
             unset($frag, $_tag, $tag); // cleanup
         }
         gc_collect_cycles();
@@ -248,7 +248,7 @@ class Template extends Render {
      * @param string $text
      */
     private function _appendText($text) {
-	    $this->_line += substr_count($text, "\n");
+        $this->_line += substr_count($text, "\n");
         if($this->_filter) {
             if(strpos($text, "<?") === false) {
                 $this->_body .= $text;
@@ -298,7 +298,7 @@ class Template extends Render {
         if(!$code) {
             return;
         } else {
-	        $this->_line += substr_count($source, "\n");
+            $this->_line += substr_count($source, "\n");
             if(strpos($code, '?>') !== false) {
                 $code = $this->_escapeCode($code); // paste PHP_EOL
             }
@@ -329,15 +329,15 @@ class Template extends Render {
      */
     public function getTemplateCode() {
         return "<?php \n".
-            "/** Fenom template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-            "return new Fenom\\Render(\$fenom, ".$this->_getClosureSource().", ".var_export(array(
-            "options" => $this->_options,
-            "provider" => $this->_scm,
-            "name" => $this->_name,
-            "base_name" => $this->_base_name,
-            "time" => $this->_time,
-            "depends" => $this->_depends
-        ), true).");\n";
+        "/** Fenom template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
+        "return new Fenom\\Render(\$fenom, ".$this->_getClosureSource().", ".var_export(array(
+                "options" => $this->_options,
+                "provider" => $this->_scm,
+                "name" => $this->_name,
+                "base_name" => $this->_base_name,
+                "time" => $this->_time,
+                "depends" => $this->_depends
+            ), true).");\n";
     }
 
     /**
@@ -391,14 +391,14 @@ class Template extends Render {
         return parent::fetch($values);
     }
 
-	/**
-	 * Internal tags router
-	 * @param Tokenizer $tokens
-	 *
-	 * @throws SecurityException
-	 * @throws CompileException
-	 * @return string executable PHP code
-	 */
+    /**
+     * Internal tags router
+     * @param Tokenizer $tokens
+     *
+     * @throws SecurityException
+     * @throws CompileException
+     * @return string executable PHP code
+     */
     private function _tag(Tokenizer $tokens) {
         try {
             if($tokens->is(Tokenizer::MACRO_STRING)) {
@@ -776,13 +776,13 @@ class Template extends Render {
         return $_scalar;
     }
 
-	/**
-	 * Parse string with or without variable
-	 *
-	 * @param Tokenizer $tokens
-	 * @throws UnexpectedTokenException
-	 * @return string
-	 */
+    /**
+     * Parse string with or without variable
+     *
+     * @param Tokenizer $tokens
+     * @throws UnexpectedTokenException
+     * @return string
+     */
     public function parseSubstr(Tokenizer $tokens) {
         if($tokens->is('"',"`")) {
             $stop = $tokens->current();

@@ -16,14 +16,14 @@ use Fenom\Template,
 class Fenom {
     const VERSION = '1.0';
 
-	/* Compiler types */
+    /* Compiler types */
     const INLINE_COMPILER   = 1;
     const BLOCK_COMPILER    = 2;
     const INLINE_FUNCTION   = 3;
     const BLOCK_FUNCTION    = 4;
     const MODIFIER          = 5;
 
-	/* Options */
+    /* Options */
     const DENY_METHODS      = 0x10;
     const DENY_INLINE_FUNCS = 0x20;
     const FORCE_INCLUDE     = 0x40;
@@ -31,7 +31,7 @@ class Fenom {
     const FORCE_COMPILE     = 0xF0;
     const DISABLE_CACHE     = 0x1F0;
 
-	/* Default parsers */
+    /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
     const DEFAULT_FUNC_PARSER    = 'Fenom\Compiler::stdFuncParser';
     const DEFAULT_FUNC_OPEN      = 'Fenom\Compiler::stdFuncOpen';
@@ -207,10 +207,10 @@ class Fenom {
             'type' => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagImport'
         ),
-	    'cycle' => array(
-		    'type' => self::INLINE_COMPILER,
-		    'parser' => 'Fenom\Compiler::tagCycle'
-	    )
+        'cycle' => array(
+            'type' => self::INLINE_COMPILER,
+            'parser' => 'Fenom\Compiler::tagCycle'
+        )
     );
 
     /**
@@ -231,7 +231,7 @@ class Fenom {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
         $fenom = new static($provider);
-	    /* @var Fenom $fytro */
+        /* @var Fenom $fytro */
         $fenom->setCompileDir($compile_dir);
         if($options) {
             $fenom->setOptions($options);
@@ -573,22 +573,22 @@ class Fenom {
         return $this->getTemplate($template)->fetch($vars);
     }
 
-	/**
-	 *
-	 *
-	 * @param string $template name of template
-	 * @param array $vars
-	 * @param $callback
-	 * @param float $chunk
-	 * @return \Fenom\Render
-	 * @example $fenom->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
-	 */
-	public function pipe($template, array $vars, $callback, $chunk = 1e6) {
-		ob_start($callback, $chunk, true);
-		$this->getTemplate($template)->display($vars);
-		ob_end_flush();
+    /**
+     *
+     *
+     * @param string $template name of template
+     * @param array $vars
+     * @param $callback
+     * @param float $chunk
+     * @return \Fenom\Render
+     * @example $fenom->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
+     */
+    public function pipe($template, array $vars, $callback, $chunk = 1e6) {
+        ob_start($callback, $chunk, true);
+        $this->getTemplate($template)->display($vars);
+        ob_end_flush();
 
-	}
+    }
 
     /**
      * Get template by name
@@ -685,7 +685,7 @@ class Fenom {
      * Flush internal memory template cache
      */
     public function flush() {
-       $this->_storage = array();
+        $this->_storage = array();
     }
 
     /**

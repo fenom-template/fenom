@@ -26,9 +26,13 @@ class Provider implements ProviderInterface {
         if(is_file($path)) {
             unlink($path);
         } elseif(is_dir($path)) {
-            $iterator = iterator_to_array(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($path,
-                    \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS),
-                \RecursiveIteratorIterator::CHILD_FIRST));
+            $iterator = iterator_to_array(
+                new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($path,
+                        \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::CHILD_FIRST
+                )
+            );
             foreach($iterator as $file) {
                 /* @var \splFileInfo $file*/
                 if($file->isFile()) {
