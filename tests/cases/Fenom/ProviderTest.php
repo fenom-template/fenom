@@ -16,8 +16,8 @@ class FSProviderTest extends \Fenom\TestCase {
     }
 
     public function testIsTemplateExists() {
-        $this->assertTrue($this->provider->isTemplateExists("template1.tpl"));
-        $this->assertFalse($this->provider->isTemplateExists("unexists.tpl"));
+        $this->assertTrue($this->provider->templateExists("template1.tpl"));
+        $this->assertFalse($this->provider->templateExists("unexists.tpl"));
     }
 
     public function testGetSource() {

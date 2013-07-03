@@ -33,6 +33,7 @@ defined('T_YIELD')      || define('T_YIELD', 370);
  * @property array $next the next token
  *
  * @package    Fenom
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Tokenizer {
     const TOKEN = 0;
@@ -244,13 +245,13 @@ class Tokenizer {
     /**
      * If the next token is a valid one, move the position of cursor one step forward. Otherwise throws an exception.
      * @param array $tokens
-     * @throws TokenizeException
+     * @throws UnexpectedTokenException
      * @return mixed
      */
     public function _next($tokens) {
         $this->next();
         if(!$this->curr) {
-            throw new TokenizeException("Unexpected end of expression");
+            throw new UnexpectedTokenException($this, $tokens);
         }
         if($tokens) {
             if($this->_valid($tokens, $this->key())) {
@@ -259,12 +260,7 @@ class Tokenizer {
         } else {
             return;
         }
-        if(count($tokens) == 1 && is_string($tokens[0])) {
-            $expect = ", expect '".$tokens[0]."'";
-        } else {
-            $expect = "";
-        }
-        throw new TokenizeException("Unexpected token '".$this->current()."'$expect");
+        throw new UnexpectedTokenException($this, $tokens);
     }
 
     /**
@@ -561,14 +557,9 @@ class Tokenizer {
 }
 
 /**
- * Tokenize error
- */
-class TokenizeException extends \RuntimeException {}
-
-/**
  * Unexpected token
  */
-class UnexpectedTokenException extends TokenizeException {
+class UnexpectedTokenException extends \RuntimeException {
     public function __construct(Tokenizer $tokens, $expect = null, $where = null) {
         if($expect && count($expect) == 1 && is_string($expect[0])) {
             $expect = ", expect '".$expect[0]."'";

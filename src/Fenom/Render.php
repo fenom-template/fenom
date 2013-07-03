@@ -12,6 +12,7 @@ use Fenom;
 
 /**
  * Primitive template
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Render extends \ArrayObject {
     private static $_props = array(

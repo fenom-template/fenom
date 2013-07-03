@@ -15,6 +15,7 @@ use Fenom\Scope;
 /**
  * Compilers collection
  * @package Fenom
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Compiler {
     /**

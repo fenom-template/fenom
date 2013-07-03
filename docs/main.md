@@ -5,6 +5,7 @@ Documentation
 
 * [Install](./install.md)
 * [Usage](./usage.md)
+* [Develop](./develop.md)
 * [Syntax](./syntax.md)
 * [Settings](./settings.md)
 * [Callbacks and filters](./callbacks.md)

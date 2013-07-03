@@ -12,6 +12,8 @@ use Fenom\Template,
 
 /**
  * Fenom Template Engine
+ *
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Fenom {
     const VERSION = '1.0';
@@ -24,12 +26,13 @@ class Fenom {
     const MODIFIER          = 5;
 
     /* Options */
-    const DENY_METHODS      = 0x10;
-    const DENY_INLINE_FUNCS = 0x20;
-    const FORCE_INCLUDE     = 0x40;
-    const AUTO_RELOAD       = 0x80;
-    const FORCE_COMPILE     = 0xF0;
+    const DENY_METHODS      =  0x10;
+    const DENY_INLINE_FUNCS =  0x20;
+    const FORCE_INCLUDE     =  0x40;
+    const AUTO_RELOAD       =  0x80;
+    const FORCE_COMPILE     =  0xF0;
     const DISABLE_CACHE     = 0x1F0;
+    const AUTO_ESCAPE       = 0x200;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';

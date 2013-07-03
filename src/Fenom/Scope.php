@@ -11,6 +11,8 @@ namespace Fenom;
 
 /**
  * Scope for blocks tags
+ *
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Scope extends \ArrayObject {
 

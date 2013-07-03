@@ -11,7 +11,7 @@ namespace Fenom;
 
 /**
  * Collection of modifiers
- *
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Modifier {
 

@@ -11,7 +11,7 @@ namespace Fenom;
 
 use Fenom\ProviderInterface;
 /**
- * Templates provider
+ * Base template provider
  * @author Ivan Shalganov
  */
 class Provider implements ProviderInterface {
@@ -110,10 +110,14 @@ class Provider implements ProviderInterface {
      * @param string $tpl
      * @return bool
      */
-    public function isTemplateExists($tpl) {
+    public function templateExists($tpl) {
         return file_exists($this->_path."/".$tpl);
     }
 
+    /**
+     * @param array $tpls
+     * @return array
+     */
     public function getLastModifiedBatch($tpls) {
         $tpls = array_flip($tpls);
         foreach($tpls as $tpl => &$time) {

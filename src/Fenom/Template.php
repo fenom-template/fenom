@@ -14,7 +14,7 @@ use Fenom;
  * Template compiler
  *
  * @package    Fenom
- * @author     Ivan Shalganov <owner@bzick.net>
+ * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Template extends Render {
 
@@ -391,6 +391,13 @@ class Template extends Render {
         return parent::fetch($values);
     }
 
+    private function _print($data) {
+        if($this->_options & Fenom::AUTO_ESCAPE) {
+            return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8')";
+        } else {
+            return "echo $data";
+        }
+    }
     /**
      * Internal tags router
      * @param Tokenizer $tokens
@@ -412,9 +419,9 @@ class Template extends Render {
             } elseif ($tokens->is('/')) {
                 return $this->_end($tokens);
             } elseif ($tokens->is('#')) {
-                return "echo ".$this->parseConst($tokens).';';
+                return $this->_print($this->parseConst($tokens)).';';
             } else {
-                return $code = "echo ".$this->parseExp($tokens).";";
+                return $code = $this->_print($this->parseExp($tokens)).";";
             }
         } catch (InvalidUsageException $e) {
             throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
@@ -460,12 +467,12 @@ class Template extends Render {
         if($tokens->is(Tokenizer::MACRO_STRING)) {
             $action = $tokens->getAndNext();
         } else {
-            return 'echo '.$this->parseExp($tokens).';'; // may be math and/or boolean expression
+            return $this->_print($this->parseExp($tokens)).';'; // may be math and/or boolean expression
         }
 
         if($tokens->is("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method
             $tokens->back();
-            return "echo ".$this->parseExp($tokens).";";
+            return $this->_print($this->parseExp($tokens)).";";
         } elseif($tokens->is('.')) {
             $name = $tokens->skip()->get(Tokenizer::MACRO_STRING);
             if($action !== "macro") {
@@ -1111,3 +1118,4 @@ class Template extends Render {
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
 class InvalidUsageException extends \LogicException {}
+class TokenizeException extends \RuntimeException {}
