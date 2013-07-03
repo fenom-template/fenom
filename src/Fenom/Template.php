@@ -625,7 +625,13 @@ class Template extends Render {
         return $_exp;
     }
 
-
+    /**
+     * Parse simple variable (without modifier etc)
+     *
+     * @param Tokenizer $tokens
+     * @param int $options
+     * @return string
+     */
     public function parseVar(Tokenizer $tokens, $options = 0) {
         $var = $tokens->get(T_VARIABLE);
         $_var = '$tpl["'.substr($var, 1).'"]';
@@ -715,6 +721,15 @@ class Template extends Render {
         return $_var;
     }
 
+    /**
+     * Parse ternary operator
+     *
+     * @param Tokenizer $tokens
+     * @param $var
+     * @param $type
+     * @return string
+     * @throws UnexpectedTokenException
+     */
     public function parseTernary(Tokenizer $tokens, $var, $type) {
         $empty = ($type === "?");
         $tokens->next();
@@ -890,7 +905,6 @@ class Template extends Render {
                 $value = $mods.$value.')';
             }
         }
-//        var_dump($value); exit;
         return $value;
     }
 
@@ -1097,4 +1111,3 @@ class Template extends Render {
 class CompileException extends \ErrorException {}
 class SecurityException extends CompileException {}
 class InvalidUsageException extends \LogicException {}
-class ReparseTagException extends \Exception {}
