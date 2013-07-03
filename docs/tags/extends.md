@@ -45,16 +45,12 @@ Tag {extends} [RU]
 
 ```smarty
 {use 'blocks.tpl'}
-...
-{if $theme.extended?}
-    {use $theme.extended}
-{/if}
 ```
 
 
 ### {parent}
 
-Planned. Not supported yet.
+Planned. Not supported yet. Feature #5.
 
 ```smarty
 {block 'block1'}
