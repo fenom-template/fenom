@@ -29,7 +29,7 @@ $result = $fenom->fetch("template/name.tpl", $vars);
 
 Create pipe-line into callback
 ```php
-$fenom->export(
+$fenom->pipe(
     "template/sitemap.tpl",
     $vars,
     $callback = [new SplFileObject("/tmp/sitemap.xml", "w"), "fwrite"], // pipe to file /tmp/sitemap.xml
