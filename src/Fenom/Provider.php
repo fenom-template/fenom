@@ -10,22 +10,38 @@
 namespace Fenom;
 
 use Fenom\ProviderInterface;
+
 /**
  * Base template provider
  * @author Ivan Shalganov
  */
-class Provider implements ProviderInterface {
+class Provider implements ProviderInterface
+{
     private $_path;
+
+    /**
+     * @param string $template_dir directory of templates
+     * @throws \LogicException if directory doesn't exists
+     */
+    public function __construct($template_dir)
+    {
+        if ($_dir = realpath($template_dir)) {
+            $this->_path = $_dir;
+        } else {
+            throw new \LogicException("Template directory {$template_dir} doesn't exists");
+        }
+    }
 
     /**
      * Clean directory from files
      *
      * @param string $path
      */
-    public static function clean($path) {
-        if(is_file($path)) {
+    public static function clean($path)
+    {
+        if (is_file($path)) {
             unlink($path);
-        } elseif(is_dir($path)) {
+        } elseif (is_dir($path)) {
             $iterator = iterator_to_array(
                 new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($path,
@@ -33,13 +49,13 @@ class Provider implements ProviderInterface {
                     \RecursiveIteratorIterator::CHILD_FIRST
                 )
             );
-            foreach($iterator as $file) {
-                /* @var \splFileInfo $file*/
-                if($file->isFile()) {
-                    if(strpos($file->getBasename(), ".") !== 0) {
+            foreach ($iterator as $file) {
+                /* @var \splFileInfo $file */
+                if ($file->isFile()) {
+                    if (strpos($file->getBasename(), ".") !== 0) {
                         unlink($file->getRealPath());
                     }
-                } elseif($file->isDir()) {
+                } elseif ($file->isDir()) {
                     rmdir($file->getRealPath());
                 }
             }
@@ -51,78 +67,61 @@ class Provider implements ProviderInterface {
      *
      * @param string $path
      */
-    public static function rm($path) {
+    public static function rm($path)
+    {
         self::clean($path);
-        if(is_dir($path)) {
+        if (is_dir($path)) {
             rmdir($path);
-        }
-    }
-
-    /**
-     * @param string $template_dir directory of templates
-     * @throws \LogicException if directory doesn't exists
-     */
-    public function __construct($template_dir) {
-        if($_dir = realpath($template_dir)) {
-            $this->_path = $_dir;
-        } else {
-            throw new \LogicException("Template directory {$template_dir} doesn't exists");
         }
     }
 
     /**
      *
      * @param string $tpl
-     * @param int $time
+     * @param int    $time
      * @return string
      */
-    public function getSource($tpl, &$time) {
+    public function getSource($tpl, &$time)
+    {
         $tpl = $this->_getTemplatePath($tpl);
         clearstatcache(null, $tpl);
         $time = filemtime($tpl);
+
         return file_get_contents($tpl);
     }
 
-    public function getLastModified($tpl) {
+    public function getLastModified($tpl)
+    {
         clearstatcache(null, $tpl = $this->_getTemplatePath($tpl));
+
         return filemtime($tpl);
     }
 
-    public function getList() {
+    public function getList()
+    {
 
-    }
-
-    /**
-     * Get template path
-     * @param $tpl
-     * @return string
-     * @throws \RuntimeException
-     */
-    protected function _getTemplatePath($tpl) {
-        if(($path = realpath($this->_path."/".$tpl)) && strpos($path, $this->_path) === 0) {
-            return $path;
-        } else {
-            throw new \RuntimeException("Template $tpl not found");
-        }
     }
 
     /**
      * @param string $tpl
      * @return bool
      */
-    public function templateExists($tpl) {
-        return file_exists($this->_path."/".$tpl);
+    public function templateExists($tpl)
+    {
+        return file_exists($this->_path . "/" . $tpl);
     }
 
     /**
      * @param array $tpls
      * @return array
      */
-    public function getLastModifiedBatch($tpls) {
+    public function getLastModifiedBatch($tpls)
+    {
         $tpls = array_flip($tpls);
-        foreach($tpls as $tpl => &$time) {
+        foreach ($tpls as $tpl => &$time) {
             $time = $this->getLastModified($tpl);
         }
+
         return $tpls;
     }
 
@@ -132,14 +131,31 @@ class Provider implements ProviderInterface {
      * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
      * @return bool
      */
-    public function verify(array $templates) {
-        foreach($templates as $template => $mtime) {
-            clearstatcache(null, $template = $this->_path.'/'.$template);
-            if(@filemtime($template) !== $mtime) {
+    public function verify(array $templates)
+    {
+        foreach ($templates as $template => $mtime) {
+            clearstatcache(null, $template = $this->_path . '/' . $template);
+            if (@filemtime($template) !== $mtime) {
                 return false;
             }
 
         }
+
         return true;
+    }
+
+    /**
+     * Get template path
+     * @param $tpl
+     * @return string
+     * @throws \RuntimeException
+     */
+    protected function _getTemplatePath($tpl)
+    {
+        if (($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0) {
+            return $path;
+        } else {
+            throw new \RuntimeException("Template $tpl not found");
+        }
     }
 }

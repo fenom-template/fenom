@@ -11,18 +11,20 @@ namespace Fenom;
 
 /**
  * Template provider interface
- * @package Fenom
+ * @package    Fenom
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
-interface ProviderInterface {
+interface ProviderInterface
+{
     /**
      * @param string $tpl
      * @return bool
      */
     public function templateExists($tpl);
+
     /**
      * @param string $tpl
-     * @param int $time
+     * @param int    $time
      * @return string
      */
     public function getSource($tpl, &$time);
