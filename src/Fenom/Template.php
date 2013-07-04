@@ -901,7 +901,7 @@ class Template extends Render {
             }
 
 
-            if(is_string($mods)) { // dynamic modifier
+            if(!is_string($mods)) { // dynamic modifier
                 $mods = 'call_user_func($tpl->getStorage()->getModifier("'.$modifier_name.'"), ';
             } else {
                 $mods .= "(";
