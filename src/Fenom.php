@@ -104,9 +104,9 @@ class Fenom {
      * @var array of allowed PHP functions
      */
     protected $_allowed_funcs = array(
-        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
-        "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
-        "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
+        'count', 'is_string', 'is_array', 'is_numeric', 'is_int',
+        'is_object', 'strtotime', 'gettype', 'is_double', 'json_encode', 'json_decode',
+        'ip2long', 'long2ip', 'strip_tags', 'nl2br', 'explode', 'implode'
     );
 
     /**
@@ -433,7 +433,7 @@ class Fenom {
      * @return Fenom
      */
     public function addAllowedFunctions(array $funcs) {
-        $this->_allowed_funcs = $this->_allowed_funcs + array_flip($funcs);
+        $this->_allowed_funcs = $this->_allowed_funcs + array_values($funcs);
         return $this;
     }
 
@@ -474,7 +474,7 @@ class Fenom {
      */
     public function isAllowedFunction($function) {
         if($this->_options & self::DENY_INLINE_FUNCS) {
-            return isset($this->_allowed_funcs[$function]);
+            return in_array($function, $this->_allowed_funcs);
         } else {
             return is_callable($function);
         }
