@@ -234,7 +234,7 @@ class Fenom {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
         $fenom = new static($provider);
-        /* @var Fenom $fytro */
+        /* @var Fenom $fenom */
         $fenom->setCompileDir($compile_dir);
         if($options) {
             $fenom->setOptions($options);

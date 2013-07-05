@@ -1,7 +1,7 @@
 Installation
 ============
 
-For installation use [composer](http://getcompoer.org). Add in your `composer.json` requirements:
+For installation use [composer](http://getcomposer.org). Add in your `composer.json` requirements:
 ```json
 {
     "require": {

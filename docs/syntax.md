@@ -196,7 +196,7 @@ but if use single quote any template expressions will be on display as it is
 {funct arg=($a.d.c|count+4)/3}
 ```
 
-### Ignoring temaplate code
+### Ignoring template code
 
 В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
 Если требуется вывести текст, содержащий фигурные скобки, помните о следующих возможностях:

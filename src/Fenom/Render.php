@@ -57,7 +57,7 @@ class Render extends \ArrayObject {
     protected $_depends = array();
 
     /**
-     * @var int tempalte options (see Fenom options)
+     * @var int template options (see Fenom options)
      */
     protected $_options = 0;
 

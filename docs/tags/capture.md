@@ -11,7 +11,7 @@ This content will be captured into variable $var
 
 
 ```smarty
-{capture|stip_tags $var}
+{capture|strip_tags $var}
 This content will be captured into variable $var and all tags will be stripped
 {/capture}
 ```
