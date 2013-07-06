@@ -391,8 +391,15 @@ class Template extends Render {
         return parent::fetch($values);
     }
 
-    private function _print($data) {
-        if($this->_options & Fenom::AUTO_ESCAPE) {
+    /**
+     * Output the value
+     *
+     * @param $data
+     * @param $tag
+     * @return string
+     */
+    private function _print($data, $tag) {
+        if($this->_options & Fenom::AUTO_ESCAPE && !$tag->raw) {
             return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8')";
         } else {
             return "echo $data";
@@ -419,9 +426,9 @@ class Template extends Render {
             } elseif ($tokens->is('/')) {
                 return $this->_end($tokens);
             } elseif ($tokens->is('#')) {
-                return $this->_print($this->parseConst($tokens)).';';
+                return $this->_print($this->parseConst($tokens), $tokens).';';
             } else {
-                return $code = $this->_print($this->parseExp($tokens)).";";
+                return $code = $this->_print($this->parseExp($tokens), $tokens).";";
             }
         } catch (InvalidUsageException $e) {
             throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
@@ -467,12 +474,12 @@ class Template extends Render {
         if($tokens->is(Tokenizer::MACRO_STRING)) {
             $action = $tokens->getAndNext();
         } else {
-            return $this->_print($this->parseExp($tokens)).';'; // may be math and/or boolean expression
+            return $this->_print($this->parseExp($tokens), $tokens).';'; // may be math and/or boolean expression
         }
 
         if($tokens->is("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method
             $tokens->back();
-            return $this->_print($this->parseExp($tokens)).";";
+            return $this->_print($this->parseExp($tokens), $tokens).";";
         } elseif($tokens->is('.')) {
             $name = $tokens->skip()->get(Tokenizer::MACRO_STRING);
             if($action !== "macro") {
@@ -876,6 +883,11 @@ class Template extends Render {
         while($tokens->is("|")) {
             $mods = $this->_fenom->getModifier( $modifier_name = $tokens->getNext(Tokenizer::MACRO_STRING) );
 
+            if($modifier_name == "raw") {
+                $tokens->raw = false;
+                $tokens->next();
+                continue;
+            }
             $tokens->next();
             $args = array();
 
