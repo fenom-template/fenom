@@ -395,11 +395,10 @@ class Template extends Render {
      * Output the value
      *
      * @param $data
-     * @param $tag
      * @return string
      */
-    private function _print($data, $tag) {
-        if($this->_options & Fenom::AUTO_ESCAPE && !$tag->raw) {
+    private function _print($data) {
+        if($this->_options & Fenom::AUTO_ESCAPE) {
             return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8')";
         } else {
             return "echo $data";
@@ -883,11 +882,6 @@ class Template extends Render {
         while($tokens->is("|")) {
             $mods = $this->_fenom->getModifier( $modifier_name = $tokens->getNext(Tokenizer::MACRO_STRING) );
 
-            if($modifier_name == "raw") {
-                $tokens->raw = false;
-                $tokens->next();
-                continue;
-            }
             $tokens->next();
             $args = array();
 
