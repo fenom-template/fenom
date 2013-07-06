@@ -36,3 +36,5 @@ $fenom->setOptions(array(
 // same
 $fenom->setOptions(Fenom::AUTO_RELOAD | Fenom::FORCE_INCLUDE);
 ```
+
+По умолчанию, все опции отключены.
