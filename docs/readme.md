@@ -29,7 +29,7 @@ Documentation
 * [in](./mods/in.md)
 * allowed functions: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
-* or [add](./ext/mods.md) your own
+* or [add](./ext/mods.md) yours
 
 ***
 
@@ -48,7 +48,9 @@ Documentation
 * [filter](./tags/filter.md)
 * [ignore](./tags/ignore.md)
 * [macro](./tags/macro.md) and `import`
-* or [add](./ext/tags.md) your own
+* [autoescape](./tags/autoescape.md)
+* [raw](./tags/raw.md)
+* or [add](./ext/tags.md) yours
 
 ***
 
