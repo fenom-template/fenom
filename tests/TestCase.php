@@ -26,6 +26,8 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         $this->fenom = Fenom::factory(FENOM_RESOURCES.'/template', FENOM_RESOURCES.'/compile');
         $this->fenom->addModifier('dots', __CLASS__.'::dots');
         $this->fenom->addModifier('concat', __CLASS__.'::concat');
+        $this->fenom->addFunction('test_function', __CLASS__.'::inlineFunction');
+        $this->fenom->addBlockFunction('test_block_function', __CLASS__.'::blockFunction');
     }
 
     public static function dots($value) {
@@ -35,6 +37,14 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 	public static function concat() {
 		return call_user_func_array('var_export', func_get_args());
 	}
+
+    public static function inlineFunction($params) {
+        return isset($params["text"]) ? $params["text"] : "";
+    }
+
+    public static function blockFunction($params, $text) {
+        return $text;
+    }
 
     public static function setUpBeforeClass() {
         if(!file_exists(FENOM_RESOURCES.'/template')) {
