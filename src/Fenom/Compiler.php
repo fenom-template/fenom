@@ -588,7 +588,7 @@ class Compiler {
      * @return string
      */
     public static function stdFuncParser($function, Tokenizer $tokens, Template $tpl) {
-        return "echo $function(".self::toArray($tpl->parseParams($tokens)).', $tpl);';
+        return "$function(".self::toArray($tpl->parseParams($tokens)).', $tpl)';
     }
 
     /**
@@ -618,7 +618,7 @@ class Compiler {
                 $args[] = $param->getDefaultValue();
             }
         }
-        return "echo $function(".implode(", ", $args).');';
+        return "$function(".implode(", ", $args).')';
     }
 
     /**
@@ -643,7 +643,7 @@ class Compiler {
      * @return string
      */
     public static function stdFuncClose($tokens, Scope $scope) {
-        return "echo ".$scope["function"].'('.$scope["params"].', ob_get_clean(), $tpl);';
+        return $scope["function"].'('.$scope["params"].', ob_get_clean(), $tpl)';
     }
 
     /**
@@ -866,4 +866,48 @@ class Compiler {
         $scope->tpl->_body = substr($scope->tpl->_body, 0, strlen($scope->tpl->_body) - strlen($content));
     }
 
+    /**
+     * Output value as is, without escaping
+     *
+     * @param Tokenizer $tokens
+     * @param Template $tpl
+     * @throws InvalidUsageException
+     * @return string
+     */
+    public static function tagRaw(Tokenizer $tokens, Template $tpl) {
+        $tpl->escape = false;
+        if($tokens->is(':')) {
+            $func = $tokens->getNext(Tokenizer::MACRO_STRING);
+            $tag = $tpl->getStorage()->getFunction($func);
+            if($tag["type"] == \Fenom::INLINE_FUNCTION) {
+                return $tpl->parseAct($tokens);
+            } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
+                $code = $tpl->parseAct($tokens);
+                $tpl->getLastScope()->escape = false;
+                return $code;
+            }
+            throw new InvalidUsageException("Raw mode allow for expressions or functions");
+        } else {
+            return $tpl->out($tpl->parseExp($tokens, true));
+        }
+    }
+
+    /**
+     * @param Tokenizer $tokens
+     * @param Scope $scope
+     */
+    public static function autoescapeOpen(Tokenizer $tokens, Scope $scope) {
+        $boolean = ($tokens->get(T_STRING) == "true" ? true : false);
+        $scope["escape"] = $scope->tpl->escape;
+        $scope->tpl->escape = $boolean;
+        $tokens->next();
+    }
+
+    /**
+     * @param Tokenizer $tokens
+     * @param Scope $scope
+     */
+    public static function autoescapeClose(Tokenizer $tokens, Scope $scope) {
+        $scope->tpl->escape = $scope["escape"];
+    }
 }

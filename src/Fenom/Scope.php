@@ -25,9 +25,11 @@ class Scope extends \ArrayObject {
     public $tpl;
     public $is_compiler = true;
     public $is_closed = false;
+    public $escape = false;
     private $_action;
     private $_body;
     private $_offset;
+    private $_global_escape = false;
 
     /**
      * Creating cope
@@ -56,6 +58,8 @@ class Scope extends \ArrayObject {
     public function setFuncName($function) {
         $this["function"] = $function;
         $this->is_compiler = false;
+        $this->_global_escape = $this->tpl->escape;
+        $this->tpl->escape = false;
     }
 
     /**
@@ -104,6 +108,9 @@ class Scope extends \ArrayObject {
      * @return string
      */
     public function close($tokenizer) {
+        if(!$this->is_compiler) {
+            $this->tpl->escape = $this->_global_escape;
+        }
         return call_user_func($this->_action["close"], $tokenizer, $this);
     }
 

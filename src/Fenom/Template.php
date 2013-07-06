@@ -58,6 +58,11 @@ class Template extends Render {
 
     public $parents = array();
 
+    /**
+     * Escape output value
+     * @var bool
+     */
+    public $escape = false;
     public $_extends;
     public $_extended = false;
     public $_compatible;
@@ -159,6 +164,7 @@ class Template extends Render {
      */
     public function compile() {
         $end = $pos = 0;
+        $this->escape = $this->_options & Fenom::AUTO_ESCAPE;
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch($this->_src[$start + 1]) { // check next character
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
@@ -397,11 +403,11 @@ class Template extends Render {
      * @param $data
      * @return string
      */
-    private function _print($data) {
-        if($this->_options & Fenom::AUTO_ESCAPE) {
-            return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8')";
+    public function out($data) {
+        if($this->escape) {
+            return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8');";
         } else {
-            return "echo $data";
+            return "echo $data;";
         }
     }
     /**
@@ -420,14 +426,14 @@ class Template extends Render {
                     $tokens->next();
                     return '';
                 } else {
-                    return $this->_parseAct($tokens);
+                    return $this->parseAct($tokens);
                 }
             } elseif ($tokens->is('/')) {
                 return $this->_end($tokens);
             } elseif ($tokens->is('#')) {
-                return $this->_print($this->parseConst($tokens), $tokens).';';
+                return $this->out($this->parseConst($tokens), $tokens).';';
             } else {
-                return $code = $this->_print($this->parseExp($tokens), $tokens).";";
+                return $code = $this->out($this->parseExp($tokens), $tokens).";";
             }
         } catch (InvalidUsageException $e) {
             throw new CompileException($e->getMessage()." in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
@@ -442,7 +448,7 @@ class Template extends Render {
      * Close tag handler
      *
      * @param Tokenizer $tokens
-     * @return mixed
+     * @return string
      * @throws TokenizeException
      */
     private function _end(Tokenizer $tokens) {
@@ -457,7 +463,20 @@ class Template extends Render {
         if($scope->name !== $name) {
             throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$scope->name}, opened on line {$scope->line})");
         }
-        return $scope->close($tokens);
+        if($scope->is_compiler) {
+            return $scope->close($tokens);
+        } else {
+            $scope->tpl->escape = $scope->escape;
+            return $this->out($scope->close($tokens));
+        }
+    }
+
+    /**
+     * Get current scope
+     * @return Scope
+     */
+    public function getLastScope() {
+        return end($this->_stack);
     }
 
     /**
@@ -469,16 +488,16 @@ class Template extends Render {
      * @throws TokenizeException
      * @return string
      */
-    private function _parseAct(Tokenizer $tokens) {
+    public function parseAct(Tokenizer $tokens) {
         if($tokens->is(Tokenizer::MACRO_STRING)) {
             $action = $tokens->getAndNext();
         } else {
-            return $this->_print($this->parseExp($tokens), $tokens).';'; // may be math and/or boolean expression
+            return $this->out($this->parseExp($tokens), $tokens).';'; // may be math and/or boolean expression
         }
 
         if($tokens->is("(", T_NAMESPACE, T_DOUBLE_COLON)) { // just invoke function or static method
             $tokens->back();
-            return $this->_print($this->parseExp($tokens), $tokens).";";
+            return $this->out($this->parseExp($tokens), $tokens).";";
         } elseif($tokens->is('.')) {
             $name = $tokens->skip()->get(Tokenizer::MACRO_STRING);
             if($action !== "macro") {
@@ -499,11 +518,12 @@ class Template extends Render {
                 case Fenom::INLINE_COMPILER:
                     return call_user_func($act["parser"], $tokens, $this);
                 case Fenom::INLINE_FUNCTION:
-                    return call_user_func($act["parser"], $act["function"], $tokens, $this);
+                    return $this->out(call_user_func($act["parser"], $act["function"], $tokens, $this));
                 case Fenom::BLOCK_FUNCTION:
                     $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
                     $scope->setFuncName($act["function"]);
                     array_push($this->_stack, $scope);
+                    $scope->escape = $this->_options & Fenom::AUTO_ESCAPE;
                     return $scope->open($tokens);
                 default:
                     throw new \LogicException("Unknown function type");

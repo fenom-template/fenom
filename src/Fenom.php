@@ -33,6 +33,7 @@ class Fenom {
     const FORCE_COMPILE     =  0xF0;
     const DISABLE_CACHE     = 0x1F0;
     const AUTO_ESCAPE       = 0x200;
+    const FORCE_VALIDATE    = 0x400;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -43,7 +44,7 @@ class Fenom {
 
     /**
      * @var int[] of possible options, as associative array
-     * @see setOptions, addOptions, delOptions
+     * @see setOptions
      */
     private static $_option_list = array(
         "disable_methods" => self::DENY_METHODS,
@@ -52,6 +53,8 @@ class Fenom {
         "force_compile" => self::FORCE_COMPILE,
         "auto_reload" => self::AUTO_RELOAD,
         "force_include" => self::FORCE_INCLUDE,
+        "auto_escape" => self::AUTO_ESCAPE,
+        "force_validate" => self::FORCE_VALIDATE
     );
 
     /**
@@ -213,6 +216,15 @@ class Fenom {
         'cycle' => array(
             'type' => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagCycle'
+        ),
+        'raw'   => array(
+            'type' => self::INLINE_COMPILER,
+            'parser' => 'Fenom\Compiler::tagRaw'
+        ),
+        'autoescape' => array(
+            'type' => self::BLOCK_COMPILER,
+            'open' => 'Fenom\Compiler::autoescapeOpen',
+            'close' => 'Fenom\Compiler::autoescapeClose'
         )
     );
 
@@ -234,7 +246,6 @@ class Fenom {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
         $fenom = new static($provider);
-        /* @var Fenom $fytro */
         $fenom->setCompileDir($compile_dir);
         if($options) {
             $fenom->setOptions($options);
