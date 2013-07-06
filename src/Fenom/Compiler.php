@@ -564,7 +564,7 @@ class Compiler {
 
     public static function tagParent($tokens, Scope $scope) {
         if(empty($scope->tpl->_extends)) {
-            throw new InvalidUsageException("Tag {parent} may be declared in childs");
+            throw new InvalidUsageException("Tag {parent} may be declared in children");
         }
     }
 

@@ -6,7 +6,7 @@ Tag {if} [RU]
 ```smarty
 {if <expression>}
    {* ...code... *}
-{elseif <expresion>}
+{elseif <expression>}
    {* ...code... *}
 {else}
    {* ...code... *}
@@ -16,7 +16,7 @@ Tag {if} [RU]
 ### {if}
 
 ```smarty
-{if <expresion>}
+{if <expression>}
     {*...some code...*}
 {/if}
 ```
@@ -26,9 +26,9 @@ Tag {if} [RU]
 ### {elseif}
 
 ```smarty
-{if <expresion1>}
+{if <expression1>}
     {*...some code...*}
-{elseif <expresion2>}
+{elseif <expression2>}
     {*...some code...*}
 {/if}
 ```
@@ -38,7 +38,7 @@ Tag {if} [RU]
 ### {else}
 
 ```smarty
-{if <expresion>}
+{if <expression>}
     {*...some code...*}
 {else}
     {*...some code...*}
