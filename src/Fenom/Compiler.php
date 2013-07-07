@@ -875,21 +875,24 @@ class Compiler {
      * @return string
      */
     public static function tagRaw(Tokenizer $tokens, Template $tpl) {
+        $escape = $tpl->escape;
         $tpl->escape = false;
         if($tokens->is(':')) {
             $func = $tokens->getNext(Tokenizer::MACRO_STRING);
             $tag = $tpl->getStorage()->getFunction($func);
             if($tag["type"] == \Fenom::INLINE_FUNCTION) {
-                return $tpl->parseAct($tokens);
+                $code = $tpl->parseAct($tokens);
             } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
                 $code = $tpl->parseAct($tokens);
                 $tpl->getLastScope()->escape = false;
-                return $code;
+            } else {
+                throw new InvalidUsageException("Raw mode allow for expressions or functions");
             }
-            throw new InvalidUsageException("Raw mode allow for expressions or functions");
         } else {
-            return $tpl->out($tpl->parseExp($tokens, true));
+            $code = $tpl->out($tpl->parseExp($tokens, true), false);
         }
+        $tpl->escape = $escape;
+        return $code;
     }
 
     /**

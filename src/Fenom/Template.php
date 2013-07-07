@@ -452,7 +452,6 @@ class Template extends Render {
      * @throws TokenizeException
      */
     private function _end(Tokenizer $tokens) {
-        //return "end";
         $name = $tokens->getNext(Tokenizer::MACRO_STRING);
         $tokens->next();
         if(!$this->_stack) {
@@ -466,8 +465,9 @@ class Template extends Render {
         if($scope->is_compiler) {
             return $scope->close($tokens);
         } else {
+            $code = $this->out($scope->close($tokens));
             $scope->tpl->escape = $scope->escape;
-            return $this->out($scope->close($tokens));
+            return $code;
         }
     }
 

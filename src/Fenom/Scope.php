@@ -29,7 +29,7 @@ class Scope extends \ArrayObject {
     private $_action;
     private $_body;
     private $_offset;
-    private $_global_escape = false;
+    public $_global_escape = false;
 
     /**
      * Creating cope

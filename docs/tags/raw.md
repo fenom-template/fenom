@@ -23,13 +23,6 @@ Tag {raw} [RU]
     {my_func page=5} {* escape *}
     {raw:my_func page=5} {* unescape *}
     ...
-    {my_block_func page=5}
-        ...
-    {/my_block_func} {* escape *}
-    {raw:my_block_func page=5}
-        ...
-    {/my_block_func} {* unescape *}
-    ...
 {/autoescate}
 ```
 
