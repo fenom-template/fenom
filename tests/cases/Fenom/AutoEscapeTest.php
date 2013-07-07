@@ -16,6 +16,7 @@ class AutoEscapeTest extends TestCase {
             array('{$html}', $html, $vars, 0),
             array('{$html}', $escaped, $vars, \Fenom::AUTO_ESCAPE),
             array('{raw $html}', $html, $vars, \Fenom::AUTO_ESCAPE),
+            array('{raw $html} {$html}', "$html $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{raw "{$html|up}"}', strtoupper($html), $vars, \Fenom::AUTO_ESCAPE),
             array('{autoescape true}{$html}{/autoescape}, {$html}', "$escaped, $html", $vars, 0),
             array('{autoescape false}{$html}{/autoescape}, {$html}', "$html, $escaped", $vars, \Fenom::AUTO_ESCAPE),
