@@ -448,6 +448,7 @@ class TemplateTest extends TestCase {
             array('{if 0}none{/if} literal: {$a} end',                      $a, 'literal: lit. A end'),
             array('{if 0}none{/if} literal:{ignore} {$a} {/ignore} end',  $a, 'literal: {$a} end'),
             array('{if 0}none{/if} literal: { $a} end',                     $a, 'literal: { $a} end'),
+            array('{if 0}none{/if} literal: {  $a}{$a}{  $a} end',                     $a, 'literal: {  $a}lit. A{  $a} end'),
             array('{if 0}none{/if} literal: {
             $a} end',                                       $a, 'literal: { $a} end'),
             array('{if 0}none{/if}literal: function () { return 1; } end', $a, 'literal: function () { return 1; } end')
