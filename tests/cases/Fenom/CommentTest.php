@@ -14,6 +14,10 @@ class CommentTest extends TestCase {
         $this->assertRender("before {*{{$tpl_val}}*} after", "before  after");
     }
 
+    public function testError() {
+        $this->execError('{* ', 'Fenom\CompileException', "Unclosed comment block in line");
+    }
+
 	/**
 	 * @dataProvider providerScalars
 	 */

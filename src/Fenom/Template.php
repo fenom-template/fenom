@@ -165,60 +165,63 @@ class Template extends Render {
     public function compile() {
         $end = $pos = 0;
         $this->escape = $this->_options & Fenom::AUTO_ESCAPE;
+
         while(($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch($this->_src[$start + 1]) { // check next character
                 case "\n": case "\r": case "\t": case " ": case "}": // ignore the tag
-                $pos = $start + 1;
-                continue 2;
+                    $this->_appendText(substr($this->_src, $pos, $start - $pos + 2));
+                    $end = $start + 1;
+                    break;
                 case "*": // if comments
-                    $end = strpos($this->_src, '*}', $start) + 1; // find end of the comment block
+                    $end = strpos($this->_src, '*}', $start); // find end of the comment block
                     if($end === false) {
                         throw new CompileException("Unclosed comment block in line {$this->_line}", 0, 1, $this->_name, $this->_line);
                     }
+                    $end++;
                     $this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $comment = substr($this->_src, $start, $end - $start); // read the comment block for processing
                     $this->_line += substr_count($comment, "\n"); // count lines in comments
                     unset($comment); // cleanup
-                    $pos = $end + 1;
-                    continue 2;
+//                    $pos = $end + 1;
+                    break;
+                default:
+                    $this->_appendText(substr($this->_src, $pos, $start - $pos));
+                    $end = $start + 1;
+                    do {
+                        $need_next_close_symbol = false;
+                        $end = strpos($this->_src, '}', $end + 1); // search close-symbol of the tag
+                        if($end === false) { // if unexpected end of template
+                            throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
+                        }
+                        $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains fenom tag '{...}'
+
+                        $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
+
+                        if($this->_ignore) { // check ignore
+                            if($_tag === '/ignore') { // turn off ignore
+                                $this->_ignore = false;
+                            } else { // still ignore
+                                $this->_appendText($tag);
+                            }
+                        } else {
+                            $tokens = new Tokenizer($_tag); // tokenize the tag
+                            if($tokens->isIncomplete()) { // all strings finished?
+                                $need_next_close_symbol = true;
+                            } else {
+                                $this->_appendCode( $this->_tag($tokens) , $tag); // start the tag lexer
+                                if($tokens->key()) { // if tokenizer have tokens - throws exceptions
+                                    throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
+                                }
+                            }
+                        }
+                    } while ($need_next_close_symbol);
+//                    $pos = $end + 1; // move search-pointer to end of the tag
+                    unset($_tag, $tag); // cleanup
+                    break;
             }
-            $frag = substr($this->_src, $pos, $start - $pos);  // variable $frag contains chars after previous '}' and current '{'
-            $this->_appendText($frag);
-
-            $from = $start;
-            reparse: { // yep, i use goto operator. For this algorithm it is good choice
-                $end = strpos($this->_src, '}', $from); // search close-symbol of the tag
-                if($end === false) { // if unexpected end of template
-                    throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
-                }
-                $tag = substr($this->_src, $start, $end - $start + 1); // variable $tag contains fenom tag '{...}'
-
-                $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
-
-                if($this->_ignore) { // check ignore
-                    if($_tag === '/ignore') { // turn off ignore
-                        $this->_ignore = false;
-                    } else { // still ignore
-                        $this->_appendText($tag);
-                    }
-                    $pos = $start + strlen($tag);
-                    continue;
-                } else {
-                    $tokens = new Tokenizer($_tag); // tokenize the tag
-                    if($tokens->isIncomplete()) { // all strings finished?
-                        $from = $end + 1;
-                        goto reparse; // need next close-symbol
-                    }
-                    $this->_appendCode( $this->_tag($tokens) , $tag); // start the tag lexer
-                    $pos = $end + 1; // move search-pointer to end of the tag
-                    if($tokens->key()) { // if tokenizer have tokens - throws exceptions
-                        throw new CompileException("Unexpected token '".$tokens->current()."' in {$this} line {$this->_line}, near '{".$tokens->getSnippetAsString(0,0)."' <- there", 0, E_ERROR, $this->_name, $this->_line);
-                    }
-
-                }
-            }
-            unset($frag, $_tag, $tag); // cleanup
+        $pos = $end + 1; // move search-pointer to end of the tag
         }
+
         gc_collect_cycles();
         $this->_appendText(substr($this->_src, $end ? $end + 1 : 0));
         if($this->_stack) {
