@@ -621,10 +621,10 @@ class Fenom {
             } else {
                 return $tpl;
             }
-        } elseif($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
+        } elseif($this->_options & self::FORCE_COMPILE === self::FORCE_COMPILE) {
+            return $this->compile($template, $this->_options & self::DISABLE_CACHE === self::DISABLE_CACHE, $options);
         } else {
-            return $this->_storage[ $key ] = $this->_load($template, $options);
+			return $this->_storage[ $key ] = $this->_load($template, $options);
         }
     }
 
