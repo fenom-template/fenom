@@ -3,9 +3,18 @@
 require(__DIR__.'/../../vendor/autoload.php');
 
 class Benchmark {
-    public static $t = "%8s: %-22s %10.4f sec, %10.1f MiB\n";
+	const OUTPUT = "%8s: %-22s %10.4f sec, %10.1f MiB\n";
 
-    public static function smarty3($tpl, $data, $double, $message) {
+	const STRESS_REQUEST_COUNT = 1000;
+	const STRESS_FENOM_REINIT = true;
+	const STRESS_TWIG_REINIT  = true;
+
+	/** @var Fenom */
+	protected static $_fenom;
+	/** @var Twig_Environment */
+	protected static $_twig;
+
+    public static function smarty3($tpl, $data, $double) {
         $smarty = new Smarty();
         $smarty->compile_check = false;
 
@@ -21,18 +30,21 @@ class Benchmark {
         $smarty->assign($data);
         $smarty->fetch($tpl);
 
-        printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
+        return microtime(true)-$start;
     }
 
-    public static function twig($tpl, $data, $double, $message) {
+    public static function twig($tpl, $data, $double) {
+		if (self::STRESS_TWIG_REINIT || !self::$_twig) {
+			Twig_Autoloader::register();
+			$loader = new Twig_Loader_Filesystem(__DIR__.'/../templates');
+			self::$_twig = new Twig_Environment($loader, array(
+				'cache' => __DIR__."/../compile/",
+				'autoescape' => false,
+				'auto_reload' => false,
+			));
+		}
 
-        Twig_Autoloader::register();
-        $loader = new Twig_Loader_Filesystem(__DIR__.'/../templates');
-        $twig = new Twig_Environment($loader, array(
-            'cache' => __DIR__."/../compile/",
-            'autoescape' => false,
-            'auto_reload' => false,
-        ));
+		$twig = self::$_twig;
 
         if($double) {
             $twig->loadTemplate($tpl)->render($data);
@@ -40,22 +52,25 @@ class Benchmark {
 
         $start = microtime(true);
         $twig->loadTemplate($tpl)->render($data);
-        printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
+		return microtime(true)-$start;
     }
 
-    public static function fenom($tpl, $data, $double, $message) {
-
-        $fenom = Fenom::factory(__DIR__.'/../templates', __DIR__."/../compile");
-
+	public static function fenom($tpl, $data, $double) {
+		if (self::STRESS_FENOM_REINIT || !self::$_fenom) {
+			self::$_fenom = Fenom::factory(__DIR__.'/../templates', __DIR__."/../compile");
+		}
+		$fenom = self::$_fenom;
+		$fenom->setOptions(Fenom::AUTO_RELOAD);
         if($double) {
             $fenom->fetch($tpl, $data);
         }
-        $_SERVER["t"] = $start = microtime(true);
+        $start = microtime(true);
         $fenom->fetch($tpl, $data);
-        printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
+
+		return microtime(true)-$start;
     }
 
-    public static function volt($tpl, $data, $double, $message) {
+    public static function volt($tpl, $data, $double) {
         $view = new \Phalcon\Mvc\View();
         //$view->setViewsDir(__DIR__.'/../templates');
         $volt = new \Phalcon\Mvc\View\Engine\Volt($view);
@@ -71,9 +86,8 @@ class Benchmark {
         }
 
         $start = microtime(true);
-        var_dump($tpl);
         $volt->render(__DIR__.'/../templates/'.$tpl, $data);
-        printf(self::$t, __FUNCTION__, $message, round(microtime(true)-$start, 4), round(memory_get_peak_usage()/1024/1024, 2));
+		return microtime(true)-$start;
     }
 
     public static function run($engine, $template, $data, $double, $message) {
@@ -91,8 +105,13 @@ class Benchmark {
         self::run($engine, $template, $data, true,  ' compiled and  loaded');
         echo "\n";
     }
-}
 
-function t() {
-    if(isset($_SERVER["t"])) var_dump(round(microtime(1) - $_SERVER["t"], 4));
+	public static function stress($engine, $template, $data) {
+		passthru(
+			sprintf(
+				PHP_BINARY." -dmemory_limit=2048M -dxdebug.max_nesting_level=1024 %s/run.php --engine '%s' --template '%s' --data '%s' --stress",
+				__DIR__, $engine, $template, $data
+			)
+		);
+	}
 }

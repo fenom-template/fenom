@@ -36,6 +36,12 @@ Benchmark::runs("fenom",  'inheritance/smarty/b100.tpl', __DIR__.'/templates/for
 //    Benchmark::runs("volt",  'inheritance/twig/b100.tpl', __DIR__.'/templates/foreach/data.json');
 //}
 
+echo "\nTesting " . Benchmark::STRESS_REQUEST_COUNT ." separate renderings...\n";
+Benchmark::stress("smarty3", 'foreach/smarty.tpl', __DIR__.'/templates/foreach/data.json', Benchmark::STRESS_REQUEST_COUNT);
+// twig takes minutes, so not comparable
+//Benchmark::stress("twig",    'foreach/twig.tpl',   __DIR__.'/templates/foreach/data.json', Benchmark::STRESS_REQUEST_COUNT);
+Benchmark::stress("fenom",   'foreach/smarty.tpl', __DIR__.'/templates/foreach/data.json', Benchmark::STRESS_REQUEST_COUNT);
+
 echo "\nDone. Cleanup.\n";
 //passthru("rm -rf ".__DIR__."/compile/*");
 passthru("rm -f ".__DIR__."/templates/inheritance/smarty/*");
