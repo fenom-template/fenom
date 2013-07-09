@@ -612,17 +612,18 @@ class Fenom {
      * @return Fenom\Template
      */
     public function getTemplate($template, $options = 0) {
-        $key = dechex($this->_options | $options)."@".$template;
+		$options |= $this->_options;
+        $key = dechex($options)."@".$template;
         if(isset($this->_storage[ $key ])) {
             /** @var Fenom\Template $tpl  */
             $tpl = $this->_storage[ $key ];
-            if(($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
+            if(($options & self::AUTO_RELOAD) && !$tpl->isValid()) {
                 return $this->_storage[ $key ] = $this->compile($template, true, $options);
             } else {
                 return $tpl;
             }
-        } elseif($this->_options & self::FORCE_COMPILE === self::FORCE_COMPILE) {
-            return $this->compile($template, $this->_options & self::DISABLE_CACHE === self::DISABLE_CACHE, $options);
+        } elseif($options & self::FORCE_COMPILE === self::FORCE_COMPILE) {
+            return $this->compile($template, $options & self::DISABLE_CACHE === self::DISABLE_CACHE, $options);
         } else {
 			return $this->_storage[ $key ] = $this->_load($template, $options);
         }
