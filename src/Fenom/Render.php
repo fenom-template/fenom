@@ -141,10 +141,18 @@ class Render extends \ArrayObject {
             return false;
         }
         foreach($this->_depends as $tpl => $time) {
-            if($this->_fenom->getTemplate($tpl)->getTime() !== $time) {
-                return false;
+			// if cached, check time of cache
+			$cache = $this->_fenom->getCachedTemplate($tpl);
+			if ($cache instanceof Render) {
+				if ($cache->getTime() !== $time) {
+					return false;
+				}
+			}
+			// if not cached, check source's filemtime
+            if ($provider->getLastModified($tpl) !== $time) {
+				return false;
             }
-        }
+		}
         return true;
     }
 

@@ -641,6 +641,23 @@ class Fenom {
         $this->_storage[dechex($template->getOptions()).'@'. $template->getName() ] = $template;
     }
 
+	/**
+	 * @param $tpl
+	 * @param $options
+	 * @return Fenom\Render|null
+	 */
+	public function getCachedTemplate($tpl, $options = 0) {
+		$options |= $this->_options;
+		$cachePath = $this->_compile_dir . DIRECTORY_SEPARATOR . $this->_getCacheName($tpl, $options);
+		if (is_file($cachePath)) {
+			$fenom = $this;
+			/** @noinspection PhpIncludeInspection */
+			return include($cachePath);
+		} else {
+			return null;
+		}
+	}
+
     /**
      * Load template from cache or create cache if it doesn't exists.
      *
@@ -649,19 +666,12 @@ class Fenom {
      * @return Fenom\Render
      */
 	protected function _load($tpl, $opts) {
-		$cachePath = $this->_compile_dir . DIRECTORY_SEPARATOR . $this->_getCacheName($tpl, $opts);
-		$useCache = false;
-		$cached = null;
-		if (is_file($cachePath)) {
-			$fenom = $this;
-			/** @var Fenom\Render $cached */
-			$cached = include($cachePath);
-			if (($opts & self::AUTO_RELOAD) !== self::AUTO_RELOAD || $cached->isValid()) {
-				$useCache = true;
-			}
+		$cached = $this->getCachedTemplate($tpl, $opts);
+		if ($cached && ( !($opts & self::AUTO_RELOAD) || $cached->isValid() )) {
+			return $cached;
 		}
 
-		return $useCache ? $cached : $this->compile($tpl, true, $opts);
+		return $this->compile($tpl, true, $opts);
 	}
 
     /**
