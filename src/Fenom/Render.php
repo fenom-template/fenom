@@ -137,7 +137,7 @@ class Render extends \ArrayObject {
      */
     public function isValid() {
         $provider = $this->_fenom->getProvider(strstr($this->_name, ":"), true);
-        if($provider->getLastModified($this->_name) >= $this->_time) {
+        if($provider->getLastModified($this->_name) !== $this->_time) {
             return false;
         }
         foreach($this->_depends as $tpl => $time) {
