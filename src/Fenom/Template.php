@@ -381,7 +381,11 @@ class Template extends Render {
      * @param Render $tpl
      */
     public function addDepend(Render $tpl) {
-        $this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
+		$name = $tpl->getName();
+		if ($tpl->getScm()) {
+			$name = $tpl->getScm() . ':' . $name;
+		}
+		$this->_depends[$name] = $tpl->getTime();
     }
 
     /**
