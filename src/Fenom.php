@@ -613,8 +613,13 @@ class Fenom {
      */
     public function getTemplate($template, $options = 0) {
 		$options |= $this->_options;
-        $key = dechex($options)."@".$template;
-        if(isset($this->_storage[ $key ])) {
+
+		if (($options & self::FORCE_COMPILE) === self::FORCE_COMPILE) {
+			return $this->compile($template, ($options & self::DISABLE_CACHE) === self::DISABLE_CACHE, $options);
+		}
+
+		$key = dechex($options)."@".$template;
+		if(isset($this->_storage[ $key ])) {
             /** @var Fenom\Template $tpl  */
             $tpl = $this->_storage[ $key ];
             if(($options & self::AUTO_RELOAD) && !$tpl->isValid()) {
@@ -622,8 +627,6 @@ class Fenom {
             } else {
                 return $tpl;
             }
-        } elseif($options & self::FORCE_COMPILE === self::FORCE_COMPILE) {
-            return $this->compile($template, $options & self::DISABLE_CACHE === self::DISABLE_CACHE, $options);
         } else {
 			return $this->_storage[ $key ] = $this->_load($template, $options);
         }
@@ -653,7 +656,7 @@ class Fenom {
 			$fenom = $this;
 			/** @var Fenom\Render $cached */
 			$cached = include($cachePath);
-			if (($opts & self::AUTO_RELOAD !== self::AUTO_RELOAD) || $cached->isValid()) {
+			if (($opts & self::AUTO_RELOAD) !== self::AUTO_RELOAD || $cached->isValid()) {
 				$useCache = true;
 			}
 		}
