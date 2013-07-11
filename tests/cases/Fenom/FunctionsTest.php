@@ -29,7 +29,8 @@ class FunctionsTest extends TestCase {
         $this->tpl('function_default_param_empty_array.tpl', 	'{sum}');
         $this->tpl('function_default_param_const.tpl', 			'{inc a=1}');
         $this->tpl('function_array_param.tpl',					'{sum of=[1, 2, 3, 4, 5]}');
-    }
+        $this->tpl('function_array_param_pos.tpl',				'{sum [1, 2, 3, 4, 5]}');
+	}
 
     public function testFunctionWithParams() {
         $output = $this->fenom->fetch('function_params_scalar.tpl');
@@ -56,8 +57,13 @@ class FunctionsTest extends TestCase {
 		$this->assertEquals('2', $output);
 	}
 
-	public function testFunctionWithArrayParam() {
+	public function testFunctionWithArrayNamedParam() {
 		$output = $this->fenom->fetch('function_array_param.tpl');
+		$this->assertEquals('15', $output);
+	}
+
+	public function testFunctionWithArrayPositionalParam() {
+		$output = $this->fenom->fetch('function_array_param_pos.tpl');
 		$this->assertEquals('15', $output);
 	}
 
