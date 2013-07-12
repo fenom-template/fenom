@@ -166,8 +166,9 @@ class TemplateTest extends TestCase {
             array('Exp: {$y-$x} result',                        $b, 'Exp: 18 result'),
             array('Exp: {$y*$x} result',                        $b, 'Exp: 243 result'),
             array('Exp: {$y^$x} result',                        $b, 'Exp: 18 result'),
-            array('Exp: {-$x} result',                          $b, 'Exp: -9 result'),
+            array('Exp: {-($x)} result',                        $b, 'Exp: -9 result'),
             array('Exp: {!$x} result',                          $b, 'Exp: result'),
+            array('Exp: {!($x)} result',                        $b, 'Exp: result'),
             array('Exp: {!5} result',                           $b, 'Exp: result'),
             array('Exp: {-1} result',                           $b, 'Exp: -1 result'),
             array('Exp: {$z = 5} {$z} result',                  $b, 'Exp: 5 5 result'),
@@ -266,6 +267,8 @@ class TemplateTest extends TestCase {
             array('if: {if true} block1 {else} block2 {/if} end',             $a, 'if: block1 end'),
             array('if: {if false} block1 {else} block2 {/if} end',            $a, 'if: block2 end'),
             array('if: {if null} block1 {else} block2 {/if} end',             $a, 'if: block2 end'),
+            array('if: {if !($val0 || $val1)} block1 {else} block2 {/if} end',
+																			  $a, 'if: block2 end'),
         );
     }
 
