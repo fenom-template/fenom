@@ -608,7 +608,7 @@ class Template extends Render {
                 }
                 $term = 1;
             } elseif(!$term && $tokens->is(Tokenizer::MACRO_UNARY)) {
-                if(!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY)) {
+                if(!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY, '(')) {
                     break;
                 }
                 $_exp .= $tokens->getAndNext();
