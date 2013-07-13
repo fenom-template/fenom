@@ -71,9 +71,9 @@ class Provider implements ProviderInterface {
     }
 
     /**
-     *
+     * Get source and mtime of template by name
      * @param string $tpl
-     * @param int $time
+     * @param int $time load last modified time
      * @return string
      */
     public function getSource($tpl, &$time) {
@@ -83,13 +83,37 @@ class Provider implements ProviderInterface {
         return file_get_contents($tpl);
     }
 
+    /**
+     * Get last modified of template by name
+     * @param string $tpl
+     * @return int
+     */
     public function getLastModified($tpl) {
         clearstatcache(null, $tpl = $this->_getTemplatePath($tpl));
         return filemtime($tpl);
     }
 
-    public function getList() {
-
+    /**
+     * Get all names of templates from provider.
+     *
+     * @param string $extension all templates must have this extension, default .tpl
+     * @return array|\Iterator
+     */
+    public function getList($extension = "tpl") {
+        $list = array();
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($this->_path,
+                \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS),
+            \RecursiveIteratorIterator::CHILD_FIRST
+        );
+        $path_len = strlen($this->_path);
+        foreach($iterator as $file) {
+            /* @var \SplFileInfo $file */
+            if($file->isFile() && $file->getExtension() == $extension) {
+                $list[] = substr($file->getPathname(), $path_len + 1);
+            }
+        }
+        return $list;
     }
 
     /**
@@ -112,18 +136,6 @@ class Provider implements ProviderInterface {
      */
     public function templateExists($tpl) {
         return file_exists($this->_path."/".$tpl);
-    }
-
-    /**
-     * @param array $tpls
-     * @return array
-     */
-    public function getLastModifiedBatch($tpls) {
-        $tpls = array_flip($tpls);
-        foreach($tpls as $tpl => &$time) {
-            $time = $this->getLastModified($tpl);
-        }
-        return $tpls;
     }
 
     /**

@@ -55,6 +55,10 @@ class TestCase extends \PHPUnit_Framework_TestCase {
     }
 
     public function tpl($name, $code) {
+        $dir = dirname($name);
+        if($dir != "." && !is_dir(FENOM_RESOURCES.'/template/'.$dir)) {
+            mkdir(FENOM_RESOURCES.'/template/'.$dir, 0777, true);
+        }
         file_put_contents(FENOM_RESOURCES.'/template/'.$name, $code);
     }
 

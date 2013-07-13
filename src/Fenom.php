@@ -246,6 +246,7 @@ class Fenom {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
         $fenom = new static($provider);
+        /* @var Fenom $fenom */
         $fenom->setCompileDir($compile_dir);
         if($options) {
             $fenom->setOptions($options);
@@ -595,7 +596,6 @@ class Fenom {
      * @param $callback
      * @param float $chunk
      * @return \Fenom\Render
-     * @example $fenom->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
      */
     public function pipe($template, array $vars, $callback, $chunk = 1e6) {
         ob_start($callback, $chunk, true);

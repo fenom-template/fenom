@@ -10,7 +10,7 @@
 namespace Fenom;
 
 /**
- * Template provider interface
+ * Interface of templates provider
  * @package Fenom
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
@@ -20,6 +20,7 @@ interface ProviderInterface {
      * @return bool
      */
     public function templateExists($tpl);
+
     /**
      * @param string $tpl
      * @param int $time
@@ -34,15 +35,16 @@ interface ProviderInterface {
     public function getLastModified($tpl);
 
     /**
-     * Verify templates by change time
+     * Verify templates (check mtime)
      *
-     * @param array $templates [template_name => modified, ...] By conversation you may trust the template's name
-     * @return bool
+     * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
+     * @return bool if true - all templates are valid else some templates are invalid
      */
     public function verify(array $templates);
 
     /**
-     * @return array
+     * Get all names of template from provider
+     * @return array|\Iterator
      */
     public function getList();
 }
