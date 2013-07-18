@@ -644,7 +644,11 @@ class Template extends Render {
                 } else {
                     break;
                 }
-            } else {
+
+			} elseif($tokens->is('[')) {
+				$_exp .= $this->parseArray($tokens);
+
+			} else {
                 break;
             }
         }
@@ -1126,7 +1130,7 @@ class Template extends Render {
                 }
                 if($tokens->is("=")) {
                     $tokens->next();
-                    $params[ $key ] = $this->parseExp($tokens);
+					$params[ $key ] = $this->parseExp($tokens);
                 } else {
                     $params[ $key ] = 'true';
                 }

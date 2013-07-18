@@ -615,7 +615,7 @@ class Compiler {
             } elseif(isset($params[ $param->getPosition() ])) {
                 $args[] = $params[ $param->getPosition() ];
             } elseif($param->isOptional()) {
-                $args[] = $param->getDefaultValue();
+                $args[] = var_export($param->getDefaultValue(), true);
             }
         }
         return "$function(".implode(", ", $args).')';
