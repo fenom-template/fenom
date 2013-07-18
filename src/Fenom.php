@@ -731,12 +731,12 @@ class Fenom {
      * @throws \RuntimeException if key from custom assoc doesn't exists into possible values
      */
     private static function _makeMask(array $values, array $options, $mask = 0) {
-        foreach($values as $value) {
-            if(isset($options[$value])) {
-                if($options[$value]) {
-                    $mask |= $options[$value];
+        foreach ($values as $key=>$value) {
+            if (isset($options[$key])) {
+                if ($options[$key]) {
+                    $mask |= $options[$key];
                 } else {
-                    $mask &= ~$options[$value];
+                    $mask &= ~$options[$key];
                 }
             } else {
                 throw new \RuntimeException("Undefined parameter $value");
