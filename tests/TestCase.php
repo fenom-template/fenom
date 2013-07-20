@@ -68,9 +68,11 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param string $code source of template
      * @param array $vars variables of template
      * @param string $result expected result.
+     * @param int $options
      * @param bool $dump dump source and result code (for debug)
      */
-    public function exec($code, $vars, $result, $dump = false) {
+    public function exec($code, $vars, $result, $options = 0, $dump = false) {
+        $this->fenom->setOptions($options);
         $tpl = $this->fenom->compileCode($code, "runtime.tpl");
         if($dump) {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
