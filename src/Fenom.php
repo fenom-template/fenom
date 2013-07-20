@@ -460,7 +460,12 @@ class Fenom {
             return $this->_modifiers[$modifier];
         } elseif($this->isAllowedFunction($modifier)) {
             return $modifier;
-        } else {
+		}
+		$path = __DIR__ . DIRECTORY_SEPARATOR . 'plugins'. DIRECTORY_SEPARATOR . 'modifier_'. $modifier . '.php';
+		if (is_file($path) && is_readable($path)) {
+			require_once $path;
+			return 'modifier_'. $modifier;
+		} else {
             throw new \Exception("Modifier $modifier not found");
         }
     }
