@@ -11,15 +11,6 @@ use Fenom\Template,
  */
 class TemplateTest extends TestCase {
 
-    public function setUp() {
-        parent::setUp();
-        $this->fenom->addTemplate(new Render($this->fenom, function ($tpl) {
-            echo "<b>Welcome, ".$tpl["username"]." (".$tpl["email"].")</b>";
-        }, array(
-            "name" => "welcome.tpl"
-        )));
-    }
-
     public static function providerVars() {
         $a = array("a" => "World");
         $obj = new \stdClass;
@@ -126,19 +117,20 @@ class TemplateTest extends TestCase {
 	        array('Mod: {$rescue_html|unescape}!',          $b, 'Mod: Chip & Dale!'),
 	        array('Mod: {$rescue_html|unescape:"html"}!',   $b, 'Mod: Chip & Dale!'),
 	        array('Mod: {$rescue_url|unescape:"url"}!',     $b, 'Mod: Chip & Dale!'),
-            array('Mod: {$rescue|unescape:"unknown"}!',       $b, 'Mod: Chip & Dale!'),
+            array('Mod: {$rescue|unescape:"unknown"}!',     $b, 'Mod: Chip & Dale!'),
 	        array('Mod: {$time|date_format:"%Y %m %d"}!',   $b, 'Mod: 2012 07 26!'),
 	        array('Mod: {$date|date_format:"%Y %m %d"}!',   $b, 'Mod: 2012 07 26!'),
 	        array('Mod: {$time|date:"Y m d"}!',             $b, 'Mod: 2012 07 26!'),
 	        array('Mod: {$date|date:"Y m d"}!',             $b, 'Mod: 2012 07 26!'),
 	        array('Mod: {$tags|strip_tags}!',               $b, 'Mod: my name is Legion!'),
 	        array('Mod: {$b.c|json_encode}!',               $b, 'Mod: "Username"!'),
+	        array('Mod: {time()|date:"Y m d"}!',            $b, 'Mod: '.date("Y m d").'!'),
         );
     }
 
     public static function providerModifiersInvalid() {
         return array(
-            array('Mod: {$lorem|}!',                     'Fenom\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|}!',                    'Fenom\CompileException', "Unexpected end of expression"),
             array('Mod: {$lorem|str_rot13}!',           'Fenom\CompileException', "Modifier str_rot13 not found", Fenom::DENY_INLINE_FUNCS),
             array('Mod: {$lorem|my_encode}!',           'Fenom\CompileException', "Modifier my_encode not found"),
             array('Mod: {$lorem|truncate:}!',           'Fenom\CompileException', "Unexpected end of expression"),
@@ -188,12 +180,16 @@ class TemplateTest extends TestCase {
             array('If: {-"hi"} end',         'Fenom\CompileException', "Unexpected token '-'"),
             array('If: {($a++)++} end',      'Fenom\CompileException', "Unexpected token '++'"),
             array('If: {$a + * $c} end',     'Fenom\CompileException', "Unexpected token '*'"),
+            array('If: {$a + } end',     'Fenom\CompileException', "Unexpected token '+'"),
+            array('If: {$a + =} end',     'Fenom\CompileException', "Unexpected token '='"),
+            array('If: {$a + 1 =} end',     'Fenom\CompileException', "Unexpected token '='"),
+            array('If: {$a + 1 = 6} end',     'Fenom\CompileException', "Unexpected token '='"),
             array('If: {/$a} end',           'Fenom\CompileException', "Unexpected token '\$a'"),
             array('If: {$a == 5 > 4} end',   'Fenom\CompileException', "Unexpected token '>'"),
             array('If: {$a != 5 <= 4} end',  'Fenom\CompileException', "Unexpected token '<='"),
             array('If: {$a != 5 => 4} end',  'Fenom\CompileException', "Unexpected token '=>'"),
             array('If: {$a + (*6)} end',     'Fenom\CompileException', "Unexpected token '*'"),
-            array('If: {$a + ( 6} end',      'Fenom\CompileException', "Brackets don't match"),
+            array('If: {$a + ( 6} end',      'Fenom\CompileException', "Unexpected end of expression, expect ')'"),
         );
     }
 
@@ -266,6 +262,9 @@ class TemplateTest extends TestCase {
             array('if: {if true} block1 {else} block2 {/if} end',             $a, 'if: block1 end'),
             array('if: {if false} block1 {else} block2 {/if} end',            $a, 'if: block2 end'),
             array('if: {if null} block1 {else} block2 {/if} end',             $a, 'if: block2 end'),
+            array('if: {if ($val1 || $val0) && $x} block1 {else} block2 {/if} end',
+                                                                              $a, 'if: block1 end'),
+            array('if: {if $unexist} block1 {else} block2 {/if} end',         $a, 'if: block2 end', Fenom::FORCE_VERIFY),
         );
     }
 
@@ -317,7 +316,7 @@ class TemplateTest extends TestCase {
             array('Create: {var $v = 1++} Result: {$v} end',         'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = c} Result: {$v} end',           'Fenom\CompileException', "Unexpected token 'c'"),
             array('Create: {var $v = ($a)++} Result: {$v} end',      'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = --$a++} Result: {$v} end',      'Fenom\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = --$a++} Result: {$v} end',      'Fenom\CompileException', "Can not use two increments and decrements for one variable"),
             array('Create: {var $v = $a|upper++} Result: {$v} end',  'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)} Result: {$v} end',   'Fenom\CompileException', "Modifier max not found", Fenom::DENY_INLINE_FUNCS),
@@ -388,6 +387,8 @@ class TemplateTest extends TestCase {
             array('{if $nonempty.string!} right {/if}',             $a),
             array('{if $nonempty.double!} right {/if}',             $a),
             array('{if $nonempty.bool!} right {/if}',               $a),
+            // ! ... : ...
+            // !: ...
         );
     }
 
@@ -614,7 +615,7 @@ class TemplateTest extends TestCase {
      * @group include
      * @dataProvider providerInclude
      */
-    public function testInclude($code, $vars, $result) {
+    public function _testInclude($code, $vars, $result) { // fixme, addTemplate removed
         $this->exec($code, $vars, $result);
     }
 
@@ -627,9 +628,10 @@ class TemplateTest extends TestCase {
 
     /**
      * @dataProvider providerIf
+     * @group test-if
      */
-    public function testIf($code, $vars, $result) {
-        $this->exec($code, $vars, $result);
+    public function testIf($code, $vars, $result, $options = 0) {
+        $this->exec($code, $vars, $result, $options);
     }
 
     /**

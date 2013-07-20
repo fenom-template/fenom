@@ -18,7 +18,7 @@ use Fenom\Template,
 class Fenom {
     const VERSION = '1.0';
 
-    /* Compiler types */
+    /* Actions */
     const INLINE_COMPILER   = 1;
     const BLOCK_COMPILER    = 2;
     const INLINE_FUNCTION   = 3;
@@ -26,14 +26,16 @@ class Fenom {
     const MODIFIER          = 5;
 
     /* Options */
-    const DENY_METHODS      =  0x10;
-    const DENY_INLINE_FUNCS =  0x20;
-    const FORCE_INCLUDE     =  0x40;
-    const AUTO_RELOAD       =  0x80;
-    const FORCE_COMPILE     =  0xF0;
-    const DISABLE_CACHE     = 0x1F0;
-    const AUTO_ESCAPE       = 0x200;
-    const FORCE_VALIDATE    = 0x400;
+    const DENY_METHODS        =  0x10;
+    const DENY_INLINE_FUNCS   =  0x20;
+    const FORCE_INCLUDE       =  0x40;
+    const AUTO_RELOAD         =  0x80;
+    const FORCE_COMPILE       =  0xF0;
+    const DISABLE_CACHE       = 0x1F0;
+    const AUTO_ESCAPE         = 0x200;
+    const FORCE_VERIFY        = 0x400;
+    const AUTO_TRIM           = 0x800;
+    const DENY_STATIC_METHODS = 0xF00;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -54,7 +56,7 @@ class Fenom {
         "auto_reload" => self::AUTO_RELOAD,
         "force_include" => self::FORCE_INCLUDE,
         "auto_escape" => self::AUTO_ESCAPE,
-        "force_validate" => self::FORCE_VALIDATE
+        "force_verify" => self::FORCE_VERIFY
     );
 
     /**
@@ -100,7 +102,8 @@ class Fenom {
         "unescape"    => 'Fenom\Modifier::unescape',
         "strip"       => 'Fenom\Modifier::strip',
         "length"      => 'Fenom\Modifier::length',
-        "default"     => 'Fenom\Modifier::defaultValue'
+        "default"     => 'Fenom\Modifier::defaultValue',
+        "iterable"    => 'Fenom\Modifier::isIterable'
     );
 
     /**
@@ -593,15 +596,15 @@ class Fenom {
      *
      * @param string $template name of template
      * @param array $vars
-     * @param $callback
+     * @param callable $callback
      * @param float $chunk
-     * @return \Fenom\Render
+     * @return array
      */
     public function pipe($template, array $vars, $callback, $chunk = 1e6) {
         ob_start($callback, $chunk, true);
-        $this->getTemplate($template)->display($vars);
+        $data = $this->getTemplate($template)->display($vars);
         ob_end_flush();
-
+        return $data;
     }
 
     /**
@@ -629,12 +632,19 @@ class Fenom {
     }
 
     /**
-     * Add custom template into storage
-     *
-     * @param Fenom\Render $template
+     * Check if template exists
+     * @param string $template
+     * @return bool
      */
-    public function addTemplate(Fenom\Render $template) {
-        $this->_storage[dechex($template->getOptions()).'@'. $template->getName() ] = $template;
+    public function templateExists($template) {
+        if($provider = strstr($template, ":", true)) {
+            if(isset($this->_providers[$provider])) {
+                return $this->_providers[$provider]->templateExists(substr($template, strlen($provider) + 1));
+            }
+        } else {
+            return $this->_provider->templateExists($template);
+        }
+        return false;
     }
 
     /**
