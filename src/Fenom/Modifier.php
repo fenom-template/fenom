@@ -157,4 +157,12 @@ class Modifier {
         }
         return false;
     }
+
+    /**
+     * @param $value
+     * @return bool
+     */
+    public static function isIterable($value) {
+        return is_array($value) || ($value instanceof \Iterator);
+    }
 }
