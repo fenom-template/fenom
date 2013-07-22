@@ -29,7 +29,6 @@ class Scope extends \ArrayObject {
     private $_action;
     private $_body;
     private $_offset;
-    public $_global_escape = false;
 
     /**
      * Creating cope
@@ -58,8 +57,7 @@ class Scope extends \ArrayObject {
     public function setFuncName($function) {
         $this["function"] = $function;
         $this->is_compiler = false;
-        $this->_global_escape = $this->tpl->escape;
-        $this->tpl->escape = false;
+        $this->escape = $this->tpl->escape;
     }
 
     /**
@@ -108,9 +106,6 @@ class Scope extends \ArrayObject {
      * @return string
      */
     public function close($tokenizer) {
-        if(!$this->is_compiler) {
-            $this->tpl->escape = $this->_global_escape;
-        }
         return call_user_func($this->_action["close"], $tokenizer, $this);
     }
 
@@ -144,5 +139,9 @@ class Scope extends \ArrayObject {
     public function replaceContent($new_content) {
         $this->cutContent();
         $this->_body .= $new_content;
+    }
+
+    public function unEscapeContent() {
+
     }
 }

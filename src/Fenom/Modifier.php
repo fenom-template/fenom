@@ -147,13 +147,15 @@ class Modifier {
 
     /**
      *
-     * @param $value
-     * @param $list
+     * @param mixed $value
+     * @param mixed $haystack
      * @return bool
      */
-    public static function in($value, $list) {
-        if(is_array($list)) {
-            return in_array($value, $list);
+    public static function in($value, $haystack) {
+        if(is_array($haystack)) {
+            return in_array($value, $haystack) || array_key_exists($value, $haystack);
+        } elseif(is_string($haystack)) {
+            return strpos($haystack, $value) !== false;
         }
         return false;
     }

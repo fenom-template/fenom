@@ -9,13 +9,37 @@ class TestCase extends \PHPUnit_Framework_TestCase {
     public $fenom;
 
     public $values = array(
-        "one" => 1,
+        "zero" => 0,
+        "one"   => 1,
         "two" => 2,
         "three" => 3,
+        "float" => 4.5,
+        "bool"  => true,
+        0 => "empty value",
         1 => "one value",
         2 => "two value",
         3 => "three value",
     );
+
+    public static function getVars() {
+        return array(
+            "zero" => 0,
+            "one"   => 1,
+            "two" => 2,
+            "three" => 3,
+            "float" => 4.5,
+            "bool"  => true,
+            "obj"  => new \StdClass,
+            "list" => array(
+                "a" => 1,
+                "b" => 2
+            ),
+            0 => "empty value",
+            1 => "one value",
+            2 => "two value",
+            3 => "three value",
+        );
+    }
 
     public function setUp() {
         if(!file_exists(FENOM_RESOURCES.'/compile')) {
@@ -23,6 +47,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         } else {
             FS::clean(FENOM_RESOURCES.'/compile/');
         }
+
         $this->fenom = Fenom::factory(FENOM_RESOURCES.'/template', FENOM_RESOURCES.'/compile');
         $this->fenom->addModifier('dots', __CLASS__.'::dots');
         $this->fenom->addModifier('concat', __CLASS__.'::concat');

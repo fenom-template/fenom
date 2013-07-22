@@ -284,6 +284,13 @@ class Tokenizer {
         return $this->current();
     }
 
+    /**
+     * @param $token
+     * @return bool
+     */
+    public function isNextToken($token) {
+        return $this->next ? $this->next[1] == $token : false;
+    }
 
     /**
      * Return substring. This method doesn't move pointer.
@@ -372,6 +379,22 @@ class Tokenizer {
         $this->p--;
         unset($this->prev, $this->curr, $this->next);
         return $this;
+    }
+
+    /**
+     * @param $token1
+     * @return bool
+     */
+    public function hasBackList($token1 /*, $token2 ...*/) {
+        $tokens = func_get_args();
+        $c = $this->p;
+        foreach($tokens as $token) {
+            $c--;
+            if($c < 0 || $this->tokens[$c][0] !== $token) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

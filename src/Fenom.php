@@ -16,7 +16,7 @@ use Fenom\Template,
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Fenom {
-    const VERSION = '1.0';
+    const VERSION = '1.1';
 
     /* Actions */
     const INLINE_COMPILER   = 1;
@@ -26,16 +26,16 @@ class Fenom {
     const MODIFIER          = 5;
 
     /* Options */
-    const DENY_METHODS        =  0x10;
-    const DENY_INLINE_FUNCS   =  0x20;
-    const FORCE_INCLUDE       =  0x40;
-    const AUTO_RELOAD         =  0x80;
-    const FORCE_COMPILE       =  0xF0;
-    const DISABLE_CACHE       = 0x1F0;
-    const AUTO_ESCAPE         = 0x200;
-    const FORCE_VERIFY        = 0x400;
-    const AUTO_TRIM           = 0x800;
-    const DENY_STATIC_METHODS = 0xF00;
+    const DENY_METHODS        =   0x10;
+    const DENY_INLINE_FUNCS   =   0x20;
+    const FORCE_INCLUDE       =   0x40;
+    const AUTO_RELOAD         =   0x80;
+    const FORCE_COMPILE       =  0x100;
+    const AUTO_ESCAPE         =  0x200;
+    const DISABLE_CACHE       =  0x400;
+    const FORCE_VERIFY        =  0x800; // reserved
+    const AUTO_TRIM           = 0x1000; // reserved
+    const DENY_STATIC_METHODS = 0x2000; // reserved
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -49,14 +49,14 @@ class Fenom {
      * @see setOptions
      */
     private static $_option_list = array(
-        "disable_methods" => self::DENY_METHODS,
+        "disable_methods"      => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_INLINE_FUNCS,
-        "disable_cache" => self::DISABLE_CACHE,
-        "force_compile" => self::FORCE_COMPILE,
-        "auto_reload" => self::AUTO_RELOAD,
-        "force_include" => self::FORCE_INCLUDE,
-        "auto_escape" => self::AUTO_ESCAPE,
-        "force_verify" => self::FORCE_VERIFY
+        "disable_cache"        => self::DISABLE_CACHE,
+        "force_compile"        => self::FORCE_COMPILE,
+        "auto_reload"          => self::AUTO_RELOAD,
+        "force_include"        => self::FORCE_INCLUDE,
+        "auto_escape"          => self::AUTO_ESCAPE,
+        "force_verify"         => self::FORCE_VERIFY
     );
 
     /**
@@ -615,7 +615,8 @@ class Fenom {
      * @return Fenom\Template
      */
     public function getTemplate($template, $options = 0) {
-        $key = dechex($this->_options | $options)."@".$template;
+        $options |= $this->_options;
+        $key = dechex($options)."@".$template;
         if(isset($this->_storage[ $key ])) {
             /** @var Fenom\Template $tpl  */
             $tpl = $this->_storage[ $key ];

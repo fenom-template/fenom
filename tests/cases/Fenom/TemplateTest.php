@@ -11,10 +11,16 @@ use Fenom\Template,
  */
 class TemplateTest extends TestCase {
 
+    public function setUp() {
+        parent::setUp();
+        $this->tpl('welcome.tpl', '<b>Welcome, {$username} ({$email})</b>');
+    }
+
     public static function providerVars() {
         $a = array("a" => "World");
         $obj = new \stdClass;
         $obj->name = "Object";
+        $obj->list = $a;
         $obj->c = "c";
         $b = array("b" => array("c" => "Username", "c_char" => "c", "mcp" => "Master", 'm{$c}p' => "Unknown", 'obj' => $obj), "c" => "c");
         $c = array_replace_recursive($b, array("b" => array(3 => $b["b"], 4 => "Mister")));
@@ -51,16 +57,20 @@ class TemplateTest extends TestCase {
             array('hello, {$b[ "m{$b.c_char}p" ]} and {$b.3[$b.c_char]}!',
                                                 $c, 'hello, Master and Username!'),
             array('hello, {$b.obj->name}!',     $c, 'hello, Object!'),
+            array('hello, {$b.obj->list.a}!',   $c, 'hello, World!'),
             array('hello, {$b[obj]->name}!',    $c, 'hello, Object!'),
             array('hello, {$b["obj"]->name}!',  $c, 'hello, Object!'),
+
             array('hello, {$b."obj"->name}!',   $c, 'hello, Object!'),
             array('hello, {$b.obj->name|upper}!',
                                                 $c, 'hello, OBJECT!'),
+            array('hello, {$b.obj->list.a|upper}!',
+                                                $c, 'hello, WORLD!'),
             array('hello, {$b[ $b.obj->c ]}!',  $b, 'hello, Username!'),
             array('hello, {$b[ "{$b.obj->c}" ]}!',
                                                 $b, 'hello, Username!'),
             array('hello, {"World"}!',          $a, 'hello, World!'),
-            //array('hello, {"W{$a}d"}!',          $a, 'hello, WWorldd!'),
+            array('hello, {"W{$a}d"}!',          $a, 'hello, WWorldd!'),
         );
     }
 
@@ -99,17 +109,6 @@ class TemplateTest extends TestCase {
             array('hello, {$b.c|upper}!',                   $b, 'hello, USERNAME!'),
             array('hello, {$b."c"|upper}!',                 $b, 'hello, USERNAME!'),
             array('hello, {$b["C"|lower]|upper}!',          $b, 'hello, USERNAME!'),
-//            array('Mod: {$lorem|truncate:16}!',             $b, 'Mod: Lorem ipsum...!'),
-//            array('Mod: {$lorem|truncate:max(4,16)}!',             $b, 'Mod: Lorem ipsum...!'),
-//            array('Mod: {$lorem|truncate:16|upper}!',       $b, 'Mod: LOREM IPSUM...!'),
-//            array('Mod: {$lorem|truncate:16:"->"}!',        $b, 'Mod: Lorem ipsum->!'),
-//            array('Mod: {$lorem|truncate:20:$next}!',       $b, 'Mod: Lorem ipsum next -->!'),
-//            array('Mod: {$lorem|truncate:20:$next|upper}!', $b, 'Mod: LOREM IPSUM NEXT -->!'),
-//            array('Mod: {$lorem|truncate:(20-5):$next}!',   $b, 'Mod: Lorem next -->!'),
-//            array('Mod: {$lorem|truncate:20:($next|upper)}!',
-//                                                            $b, 'Mod: Lorem ipsum NEXT -->!'),
-//            array('Mod: {$lorem|truncate:max(4,20):($next|upper)}!',
-//                                                            $b, 'Mod: Lorem ipsum NEXT -->!'),
 	        array('Mod: {$rescue|escape}!',                 $b, 'Mod: Chip &amp; Dale!'),
 	        array('Mod: {$rescue|escape:"html"}!',          $b, 'Mod: Chip &amp; Dale!'),
 	        array('Mod: {$rescue|escape:"url"}!',           $b, 'Mod: Chip+%26+Dale!'),
@@ -316,7 +315,7 @@ class TemplateTest extends TestCase {
             array('Create: {var $v = 1++} Result: {$v} end',         'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = c} Result: {$v} end',           'Fenom\CompileException', "Unexpected token 'c'"),
             array('Create: {var $v = ($a)++} Result: {$v} end',      'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = --$a++} Result: {$v} end',      'Fenom\CompileException', "Can not use two increments and decrements for one variable"),
+            array('Create: {var $v = --$a++} Result: {$v} end',      'Fenom\CompileException', "Can not use two increments and/or decrements for one variable"),
             array('Create: {var $v = $a|upper++} Result: {$v} end',  'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)} Result: {$v} end',   'Fenom\CompileException', "Modifier max not found", Fenom::DENY_INLINE_FUNCS),
@@ -568,6 +567,88 @@ class TemplateTest extends TestCase {
         );
     }
 
+    public static function providerIsOperator() {
+        return array(
+            // is {$type}
+            array('{if $one is int} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one && $one is int} block1 {else} block2 {/if}', 'block1'),
+            array('{if $zero && $one is int} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one is 1} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one is 2} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one is not int} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one is not 1} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one is not 2} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one is $one} block1 {else} block2 {/if}', 'block1'),
+            array('{if $float is float} block1 {else} block2 {/if}', 'block1'),
+            array('{if $float is not float} block1 {else} block2 {/if}', 'block2'),
+            array('{if $obj is object} block1 {else} block2 {/if}', 'block1'),
+            array('{if $obj is $obj} block1 {else} block2 {/if}', 'block1'),
+            array('{if $list is array} block1 {else} block2 {/if}', 'block1'),
+            array('{if $list is iterable} block1 {else} block2 {/if}', 'block1'),
+            array('{if $list is not scalar} block1 {else} block2 {/if}', 'block1'),
+            array('{if $list is $list} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one is scalar} block1 {else} block2 {/if}', 'block1'),
+            // is set
+            array('{if $one is set} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one is not set} block1 {else} block2 {/if}', 'block2'),
+            array('{if $unexists is set} block1 {else} block2 {/if}', 'block2'),
+            array('{if $unexists is not set} block1 {else} block2 {/if}', 'block1'),
+            array('{if 5 is set} block1 {else} block2 {/if}', 'block1'),
+            array('{if time() is set} block1 {else} block2 {/if}', 'block1'),
+            array('{if null is set} block1 {else} block2 {/if}', 'block2'),
+            array('{if 0 is empty} block1 {else} block2 {/if}', 'block1'),
+            array('{if "" is empty} block1 {else} block2 {/if}', 'block1'),
+            array('{if "data" is empty} block1 {else} block2 {/if}', 'block2'),
+            array('{if time() is not empty} block1 {else} block2 {/if}', 'block1'),
+            // is empty
+            array('{if $one is empty} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one is not empty} block1 {else} block2 {/if}', 'block1'),
+            array('{if $unexists is empty} block1 {else} block2 {/if}', 'block1'),
+            array('{if $unexists is not empty} block1 {else} block2 {/if}', 'block2'),
+            array('{if $zero is empty} block1 {else} block2 {/if}', 'block1'),
+            array('{if $zero is not empty} block1 {else} block2 {/if}', 'block2'),
+            // instaceof
+            array('{if $obj is StdClass} block1 {else} block2 {/if}', 'block1'),
+            array('{if $obj is \StdClass} block1 {else} block2 {/if}', 'block1'),
+            array('{if $obj is not \My\StdClass} block1 {else} block2 {/if}', 'block1'),
+            // event, odd
+            array('{if $one is odd} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one is even} block1 {else} block2 {/if}', 'block2'),
+            array('{if $two is even} block1 {else} block2 {/if}', 'block1'),
+            array('{if $two is odd} block1 {else} block2 {/if}', 'block2'),
+            // template
+            array('{if "welcome.tpl" is template} block1 {else} block2 {/if}', 'block1'),
+            array('{if "welcome2.tpl" is template} block1 {else} block2 {/if}', 'block2'),
+
+        );
+    }
+
+    public static function providerInOperator() {
+        return array(
+            array('{if $one in "qwertyuiop 1"} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one in string "qwertyuiop 1"} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one in "qwertyuiop"} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one not in "qwertyuiop 1"} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one not in "qwertyuiop"} block1 {else}v block2 {/if}', 'block1'),
+
+            array('{if $one in [1, 2, 3]} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one in list [1, 2, 3]} block1 {else} block2 {/if}', 'block1'),
+            array('{if $one in ["one", "two", "three"]} block1 {else} block2 {/if}', 'block2'),
+            array('{if $one in keys [1 => "one", 2 => "two", 3 => "three"]} block1 {else} block2 {/if}', 'block1'),
+
+            array('{if $one in $two} block1 {else} block2 {/if}', 'block2'),
+        );
+    }
+
+    public function _testSandbox() {
+        try {
+            var_dump($this->fenom->compileCode('{$one.two->three[e]()}')->getBody());
+        } catch(\Exception $e) {
+            print_r($e->getMessage()."\n".$e->getTraceAsString());
+        }
+        exit;
+    }
+
     /**
      * @dataProvider providerVars
      */
@@ -615,7 +696,7 @@ class TemplateTest extends TestCase {
      * @group include
      * @dataProvider providerInclude
      */
-    public function _testInclude($code, $vars, $result) { // fixme, addTemplate removed
+    public function testInclude($code, $vars, $result) {
         $this->exec($code, $vars, $result);
     }
 
@@ -731,6 +812,22 @@ class TemplateTest extends TestCase {
      */
     public function testLayersInvalid($code, $exception, $message, $options = 0) {
         $this->execError($code, $exception, $message, $options);
+    }
+
+    /**
+     * @group is_operator
+     * @dataProvider providerIsOperator
+     */
+    public function testIsOperator($code, $result) {
+        $this->exec($code, self::getVars(), $result);
+    }
+
+    /**
+     * @group in_operator
+     * @dataProvider providerInOperator
+     */
+    public function testInOperator($code, $result) {
+        $this->exec($code, self::getVars(), $result);
     }
 }
 
