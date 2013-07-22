@@ -1,7 +1,7 @@
 Tags [RU]
 =========
 
-В шаблонизаторе принято различать два типа тегов: компиляторы и функции.
+В шаблонизаторе принято различать два типа тегов: _компиляторы_ и _функции_.
 Компиляторы вызываются во время преобразования кода шаблона в PHP код и возвращяю PHP код который будет вставлен вместо тега.
 А функции вызываются непременно в момент выполнения шаблона и возвращают непосредственно данные которые будут отображены.
 Среди тегов как и в HTML есть строчные и блоковые теги.
@@ -14,15 +14,34 @@ Tags [RU]
 $fenom->addFunction(string $function_name, callable $callback[, callable $parser]);
 ```
 
-В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом.
-В данном случае вы можете переопределить парсер на произвольный в формате `function (Fenom\Tokenizer $tokenizer, Fenom\Template $template)`
-Существует более совершенный способ добавления функции:
+В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом:
+```php
+$fenom->addFunction("some_function", function (array $params) { /* ... */ });
+```
+При необходимости можно переопределить парсер на произвольный:
+```php
+$fenom->addFunction("some_function", $some_function, function (Fenom\Tokenizer $tokenizer, Fenom\Template $template) { /* parse tag */});
+```
+Существует более простой способ добавления произвольной функции:
 
 ```php
 $fenom->addFunctionSmarty(string $function_name, callable $callback);
 ```
 
-В данном случае парсер просканирует список аргументов коллбека и попробует сопоставить с аргументами из тега. Таким образом вы успешно можете добавлять Ваши штатные функции.
+В данном случае парсер сканирует список аргументов коллбека и попробует сопоставить с аргументами тега.
+
+```php
+// ... class XYCalcs ..
+public static function calc($x, $y = 5) { /* ... */}
+// ...
+$fenom->addFunctionSmart('calc', 'XYCalcs::calc');
+```
+then
+```smarty
+{calc x=$top y=50} or {calc y=50 x=$top} is XYCalcs::calc($top, 50)
+{calc x=$top} or {calc $top} is XYCalcs::calc($top)
+```
+Таким образом вы успешно можете добавлять Ваши функции или методы.
 
 ## Block function
 
@@ -32,7 +51,10 @@ $fenom->addFunctionSmarty(string $function_name, callable $callback);
 $fenom->addBlockFunction(string $function_name, callable $callback[, callable $parser_open[, callable $parser_close]]);
 ```
 
-Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега.
+Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега:
+```php
+$fenom->addBlockFunction('some_block_function', function ($content, array $params) { /* ... */});
+```
 
 ## Inline compiler
 
@@ -53,7 +75,7 @@ $fenom->addCompilerSmart(string $compiler, $storage);
 
 ## Block compiler
 
-Добавление блочного компилятора осуществяется двум способами. Первый
+Добавление блочного компилятора осуществяется двумя способами. Первый
 
 ```php
 $fenom->addBlockCompiler(string $compiler, array $parsers, array $tags);

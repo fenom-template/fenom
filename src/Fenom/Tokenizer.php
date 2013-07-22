@@ -136,6 +136,18 @@ class Tokenizer {
         )
     );
 
+    public static $description = array(
+        self::MACRO_STRING  => 'string',
+        self::MACRO_INCDEC  => 'increment/decrement operator',
+        self::MACRO_UNARY   => 'unary operator',
+        self::MACRO_BINARY  => 'binary operator',
+        self::MACRO_BOOLEAN => 'boolean operator',
+        self::MACRO_MATH    => 'math operator',
+        self::MACRO_COND    => 'conditional operator',
+        self::MACRO_EQUALS  => 'equal operator',
+        self::MACRO_SCALAR  => 'scalar value'
+    );
+
     /**
      * Special tokens
      * @var array
@@ -272,6 +284,13 @@ class Tokenizer {
         return $this->current();
     }
 
+    /**
+     * @param $token
+     * @return bool
+     */
+    public function isNextToken($token) {
+        return $this->next ? $this->next[1] == $token : false;
+    }
 
     /**
      * Return substring. This method doesn't move pointer.
@@ -360,6 +379,22 @@ class Tokenizer {
         $this->p--;
         unset($this->prev, $this->curr, $this->next);
         return $this;
+    }
+
+    /**
+     * @param $token1
+     * @return bool
+     */
+    public function hasBackList($token1 /*, $token2 ...*/) {
+        $tokens = func_get_args();
+        $c = $this->p;
+        foreach($tokens as $token) {
+            $c--;
+            if($c < 0 || $this->tokens[$c][0] !== $token) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**
@@ -554,6 +589,18 @@ class Tokenizer {
     public function getLine() {
         return $this->curr ? $this->curr[3] : $this->_last_no;
     }
+
+    /**
+     * Is current token whitespaced, means previous token has whitespace characters
+     * @return bool
+     */
+    public function isWhiteSpaced() {
+        return $this->prev ? (bool)$this->prev[2] : false;
+    }
+
+    public function getWhitespace() {
+        return $this->curr ? $this->curr[2] : false;
+    }
 }
 
 /**
@@ -570,6 +617,8 @@ class UnexpectedTokenException extends \RuntimeException {
             $this->message = "Unexpected end of ".($where?:"expression")."$expect";
         } elseif($tokens->curr[0] === T_WHITESPACE) {
             $this->message = "Unexpected whitespace$expect";
+        } elseif($tokens->curr[0] === T_BAD_CHARACTER) {
+            $this->message = "Unexpected bad characters (below ASCII 32 except \\t, \\n and \\r) in ".($where?:"expression")."$expect";
         } else {
             $this->message = "Unexpected token '".$tokens->current()."' in ".($where?:"expression")."$expect";
         }

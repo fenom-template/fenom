@@ -5,20 +5,6 @@ use Fenom\Render,
 
 class FenomTest extends \Fenom\TestCase {
 
-    public function testAddRender() {
-        $test = $this;
-        $this->fenom->addTemplate(new Render($this->fenom, function($tpl) use ($test) {
-            /** @var \PHPUnit_Framework_TestCase $test  */
-            $test->assertInstanceOf('Fenom\Render', $tpl);
-            echo "Inline render";
-        }, array(
-            "name" => 'render.tpl',
-            "scm" => false
-        )));
-
-        $this->assertSame("Inline render", $this->fenom->fetch('render.tpl', array()));
-    }
-
     public function testCompileFile() {
         $a = array(
             "a" => "a",
