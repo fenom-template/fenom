@@ -62,7 +62,6 @@ class Template extends Render {
      * Escape outputs value
      * @var bool
      */
-//    public $escape = false;
     public $escape = false;
     public $_extends;
     public $_extended = false;
@@ -648,12 +647,12 @@ class Template extends Render {
                     throw new TokenizeException("Unexpected token ".$tokens->getNext().", isset() and empty() accept only variables");
                 }
                 $term = true;
-            } elseif(!$term && $tokens->is(Tokenizer::MACRO_UNARY)) { // like unary operator, see Tokenizer::MACRO_UNARY
-                if(!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY)) {
+            } elseif(!$term && $tokens->is(Tokenizer::MACRO_UNARY)) {
+                if(!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY, '(')) {
                     break;
                 }
                 $_exp[] = $tokens->getAndNext();
-                $term = false;
+                $term = 0;
             } elseif($tokens->is(Tokenizer::MACRO_BINARY)) { // like binary operator, see Tokenizer::MACRO_BINARY
                 if(!$term) {
                     throw new UnexpectedTokenException($tokens);
@@ -671,6 +670,8 @@ class Template extends Render {
                 }
                 $_exp[] = " ".$tokens->getAndNext()." ";
                 $term = 0;
+            } elseif($tokens->is('[')) {
+				$_exp[] = $this->parseArray($tokens);
             } else {
                 break;
             }
@@ -1284,7 +1285,7 @@ class Template extends Render {
                 }
                 if($tokens->is("=")) {
                     $tokens->next();
-                    $params[ $key ] = $this->parseExp($tokens);
+					$params[ $key ] = $this->parseExp($tokens);
                 } else {
                     $params[ $key ] = 'true';
                 }
