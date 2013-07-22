@@ -108,7 +108,7 @@ class Template extends Render {
         'array'    => 'is_array(%s)',
         'iterable' => '\Fenom\Modifier::isIterable(%s)',
         'const'    => 'defined(%s)',
-        'template' => '$this->getStorage()->templateExists(%s)',
+        'template' => '$tpl->getStorage()->templateExists(%s)',
         'empty'    => 'empty(%s)',
         'set'      => 'isset(%s)',
         '_empty'   => '!%s', // for none variable
