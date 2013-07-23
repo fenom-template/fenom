@@ -602,7 +602,7 @@ class Fenom {
      * @param float $chunk
      * @return array
      */
-    public function pipe($template, array $vars, $callback, $chunk = 1e6) {
+    public function pipe($template, $callback, array $vars = array(), $chunk = 1e6) {
         ob_start($callback, $chunk, true);
         $data = $this->getTemplate($template)->display($vars);
         ob_end_flush();
