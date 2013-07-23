@@ -18,6 +18,7 @@ CHANGELOG
 - Internal optimization
 - Add options for benchmark
 - Add stress test (thanks to @klkvsk)
+- Bugs--
 - Comments++
 - Docs++
 - Test++

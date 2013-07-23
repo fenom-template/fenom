@@ -56,6 +56,7 @@ Documentation
 
 ### Extends
 
+* [Extensions](./ext/extensions.md)
 * [Add tags](./ext/tags.md)
 * [Add modificators](./ext/mods.md)
 * [Add template provider](./ext/provider.md)
