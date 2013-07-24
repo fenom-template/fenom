@@ -376,11 +376,33 @@ class Template extends Render {
     }
 
     /**
+     * Return PHP code for saving plugins include to file
+     *
+     * @return string
+     */
+    public function getPluginsCode() {
+       
+	   	$plugins_code = "<?php "."\n"; 	
+		
+		foreach ($this->_fenom->getPlugins() as $name=>$path){
+			$plugins_code .= "if (!is_callable('".$name."')) {include_once '".$path."';}"."\n"; 
+		}
+		
+		$plugins_code .= " ?>"."\n";
+			
+        return $plugins_code;
+    }	
+
+
+    /**
      * Return closure code
      * @return string
      */
     private function _getClosureSource() {
-        return "function (\$tpl) {\n?>{$this->_body}<?php\n}";
+        
+		$plugins_code = $this->getPluginsCode();
+			
+        return "function (\$tpl) {\n?>{$plugins_code}\n{$this->_body}<?php\n}";
     }
 
     /**
