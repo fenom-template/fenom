@@ -108,6 +108,8 @@ class Fenom {
         "iterable"    => 'Fenom\Modifier::isIterable'
     );
 
+	protected $_plugins = array();
+
     /**
      * @var array of allowed PHP functions
      */
@@ -466,7 +468,14 @@ class Fenom {
             return $this->_modifiers[$modifier];
         } elseif($this->isAllowedFunction($modifier)) {
             return $modifier;
-        } else {
+		}
+		
+		$path = __DIR__ . DIRECTORY_SEPARATOR . 'plugins'. DIRECTORY_SEPARATOR . 'modifier.'. $modifier . '.php';
+    	if (is_file($path) && is_readable($path)) {
+  			$this->_plugins['fenom_modifier_'.$modifier] = $path;
+      		require_once $path;
+	  		return 'fenom_modifier_'. $modifier;
+    	} else {         
             throw new \Exception("Modifier $modifier not found");
         }
     }
@@ -545,6 +554,11 @@ class Fenom {
     public function getOptions() {
         return $this->_options;
     }
+
+	public function getPlugins() {
+		return $this->_plugins;
+	}
+
 
     /**
      * @param bool|string $scm
