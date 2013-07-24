@@ -1,7 +1,7 @@
 Benchmark
 =========
 
-To start benchmark run script `benchmark/run.php`.
+To start benchmark use script `benchmark/run.php -h`.
 
 ### Smarty3 vs Twig vs Fenom
 

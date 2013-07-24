@@ -35,7 +35,7 @@ class Fenom {
     const DISABLE_CACHE       =  0x400;
     const FORCE_VERIFY        =  0x800; // reserved
     const AUTO_TRIM           = 0x1000; // reserved
-    const DENY_STATIC_METHODS = 0x2000; // reserved
+    const DENY_STATICS        = 0x2000; // reserved
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -48,7 +48,7 @@ class Fenom {
      * @var int[] of possible options, as associative array
      * @see setOptions
      */
-    private static $_option_list = array(
+    private static $_options_list = array(
         "disable_methods"      => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_INLINE_FUNCS,
         "disable_cache"        => self::DISABLE_CACHE,
@@ -56,7 +56,9 @@ class Fenom {
         "auto_reload"          => self::AUTO_RELOAD,
         "force_include"        => self::FORCE_INCLUDE,
         "auto_escape"          => self::AUTO_ESCAPE,
-        "force_verify"         => self::FORCE_VERIFY
+        "force_verify"         => self::FORCE_VERIFY,
+        "auto_trim"            => self::AUTO_TRIM,
+        "disable_statics"      => self::DENY_STATICS,
     );
 
     /**
@@ -534,7 +536,7 @@ class Fenom {
      */
     public function setOptions($options) {
         if(is_array($options)) {
-            $options = self::_makeMask($options, self::$_option_list);
+            $options = self::_makeMask($options, self::$_options_list, $this->_options);
         }
         $this->_storage = array();
         $this->_options = $options;
@@ -604,7 +606,7 @@ class Fenom {
      * @param float $chunk
      * @return array
      */
-    public function pipe($template, array $vars, $callback, $chunk = 1e6) {
+    public function pipe($template, $callback, array $vars = array(), $chunk = 1e6) {
         ob_start($callback, $chunk, true);
         $data = $this->getTemplate($template)->display($vars);
         ob_end_flush();
@@ -746,7 +748,7 @@ class Fenom {
      * @throws \RuntimeException if key from custom assoc doesn't exists into possible values
      */
     private static function _makeMask(array $values, array $options, $mask = 0) {
-        foreach ($values as $key=>$value) {
+        foreach ($values as $key => $value) {
             if (isset($options[$key])) {
                 if ($options[$key]) {
                     $mask |= $options[$key];
