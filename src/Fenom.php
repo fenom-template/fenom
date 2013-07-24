@@ -16,7 +16,7 @@ use Fenom\Template,
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Fenom {
-    const VERSION = '1.1';
+    const VERSION = '1.2';
 
     /* Actions */
     const INLINE_COMPILER   = 1;
@@ -27,7 +27,7 @@ class Fenom {
 
     /* Options */
     const DENY_METHODS        =   0x10;
-    const DENY_INLINE_FUNCS   =   0x20;
+    const DENY_NATIVE_FUNCS   =   0x20;
     const FORCE_INCLUDE       =   0x40;
     const AUTO_RELOAD         =   0x80;
     const FORCE_COMPILE       =  0x100;
@@ -36,6 +36,9 @@ class Fenom {
     const FORCE_VERIFY        =  0x800; // reserved
     const AUTO_TRIM           = 0x1000; // reserved
     const DENY_STATICS        = 0x2000; // reserved
+
+    /* @deprecated */
+    const DENY_INLINE_FUNCS   =   0x20;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -50,7 +53,7 @@ class Fenom {
      */
     private static $_options_list = array(
         "disable_methods"      => self::DENY_METHODS,
-        "disable_native_funcs" => self::DENY_INLINE_FUNCS,
+        "disable_native_funcs" => self::DENY_NATIVE_FUNCS,
         "disable_cache"        => self::DISABLE_CACHE,
         "force_compile"        => self::FORCE_COMPILE,
         "auto_reload"          => self::AUTO_RELOAD,
@@ -461,32 +464,61 @@ class Fenom {
     /**
      * Return modifier function
      *
-     * @param $modifier
+     * @param string $modifier
+     * @param Fenom\Template $template
      * @return mixed
-     * @throws \Exception
      */
-    public function getModifier($modifier) {
+    public function getModifier($modifier, Template $template = null) {
         if(isset($this->_modifiers[$modifier])) {
             return $this->_modifiers[$modifier];
         } elseif($this->isAllowedFunction($modifier)) {
             return $modifier;
         } else {
-            throw new \Exception("Modifier $modifier not found");
+            return $this->_loadModifier($modifier, $template);
         }
     }
 
     /**
-     * Return function
-     *
+     * @param string $modifier
+     * @param Fenom\Template $template
+     * @return bool
+     */
+    protected function _loadModifier($modifier, $template) {
+        return false;
+    }
+
+    /**
      * @param string $function
+     * @param Fenom\Template $template
+     * @return bool|string
+     * @deprecated
+     */
+    public function getFunction($function, Template $template = null) {
+        return $this->getTag($function, $template);
+    }
+
+    /**
+     * Returns tag info
+     *
+     * @param string $tag
+     * @param Fenom\Template $template
      * @return string|bool
      */
-    public function getFunction($function) {
-        if(isset($this->_actions[$function])) {
-            return $this->_actions[$function];
+    public function getTag($tag, Template $template = null) {
+        if(isset($this->_actions[$tag])) {
+            return $this->_actions[$tag];
         } else {
-            return false;
+            return $this->_loadTag($tag, $template);
         }
+    }
+
+    /**
+     * @param $tag
+     * @param Fenom\Template $template
+     * @return bool
+     */
+    protected function _loadTag($tag, Template $template) {
+        return false;
     }
 
     /**
@@ -494,7 +526,7 @@ class Fenom {
      * @return bool
      */
     public function isAllowedFunction($function) {
-        if($this->_options & self::DENY_INLINE_FUNCS) {
+        if($this->_options & self::DENY_NATIVE_FUNCS) {
             return isset($this->_allowed_funcs[$function]);
         } else {
             return is_callable($function);

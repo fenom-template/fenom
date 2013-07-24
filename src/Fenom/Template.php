@@ -520,22 +520,22 @@ class Template extends Render {
             return $this->parseMacro($tokens, $name);
         }
 
-        if($act = $this->_fenom->getFunction($action)) { // call some function
-            switch($act["type"]) {
+        if($tag = $this->_fenom->getTag($action, $this)) { // call some function
+            switch($tag["type"]) {
                 case Fenom::BLOCK_COMPILER:
-                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
+                    $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
                     $code = $scope->open($tokens);
                     if(!$scope->is_closed) {
                         array_push($this->_stack, $scope);
                     }
                     return $code;
                 case Fenom::INLINE_COMPILER:
-                    return call_user_func($act["parser"], $tokens, $this);
+                    return call_user_func($tag["parser"], $tokens, $this);
                 case Fenom::INLINE_FUNCTION:
-                    return $this->out(call_user_func($act["parser"], $act["function"], $tokens, $this));
+                    return $this->out(call_user_func($tag["parser"], $tag["function"], $tokens, $this));
                 case Fenom::BLOCK_FUNCTION:
-                    $scope = new Scope($action, $this, $this->_line, $act, count($this->_stack), $this->_body);
-                    $scope->setFuncName($act["function"]);
+                    $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
+                    $scope->setFuncName($tag["function"]);
                     array_push($this->_stack, $scope);
                     $scope->escape = $this->escape;
                     $this->escape = false;
@@ -562,10 +562,10 @@ class Template extends Render {
      *
      * @static
      * @param Tokenizer $tokens
-     * @param bool               $required
-     * @throws \LogicException
-     * @throws UnexpectedTokenException
+     * @param bool $required
      * @throws TokenizeException
+     * @throws UnexpectedTokenException
+     * @throws \Exception
      * @return string
      */
     public function parseExp(Tokenizer $tokens, $required = false) {
@@ -625,6 +625,9 @@ class Template extends Render {
                         $_exp[] = $tokens->getAndNext();
                     } elseif($tokens->isNext("(") && !$tokens->getWhitespace()) {
                         $func = $this->_fenom->getModifier($tokens->current());
+                        if(!$func) {
+                            throw new \Exception("Function ".$tokens->getAndNext()." not found");
+                        }
                         $tokens->next();
                         $func = $func.$this->parseArgs($tokens);
                         if($tokens->is('|')) {
@@ -1063,8 +1066,10 @@ class Template extends Render {
      */
     public function parseModifier(Tokenizer $tokens, $value) {
         while($tokens->is("|")) {
-            $mods = $this->_fenom->getModifier( $modifier_name = $tokens->getNext(Tokenizer::MACRO_STRING) );
-
+            $mods = $this->_fenom->getModifier($tokens->getNext(Tokenizer::MACRO_STRING) );
+            if(!$mods) {
+                throw new \Exception("Modifier ".$tokens->current()." not found");
+            }
             $tokens->next();
             $args = array();
 

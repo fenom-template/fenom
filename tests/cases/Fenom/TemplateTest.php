@@ -319,7 +319,7 @@ class TemplateTest extends TestCase {
             array('Create: {var $v = --$a++} Result: {$v} end',      'Fenom\CompileException', "Can not use two increments and/or decrements for one variable"),
             array('Create: {var $v = $a|upper++} Result: {$v} end',  'Fenom\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = max($a,2)} Result: {$v} end',   'Fenom\CompileException', "Modifier max not found", Fenom::DENY_INLINE_FUNCS),
+            array('Create: {var $v = max($a,2)} Result: {$v} end',   'Fenom\CompileException', "Function max not found", Fenom::DENY_NATIVE_FUNCS),
             array('Create: {var $v = 4*} Result: {$v} end',          'Fenom\CompileException', "Unexpected token '*'"),
             array('Create: {var $v = ""$a} Result: {$v} end',        'Fenom\CompileException', "Unexpected token '\$a'"),
             array('Create: {var $v = [1,2} Result: {$v} end',        'Fenom\CompileException', "Unexpected end of expression"),

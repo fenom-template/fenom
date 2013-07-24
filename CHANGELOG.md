@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+## 1.2.0
+
+- Feature #29: add {unset} tag
+- Add hook for loading modifiers and tags
+
 ## 1.1.0
 
 - Bug #19: Bug with "if" expressions starting with "("

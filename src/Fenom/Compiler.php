@@ -879,7 +879,7 @@ class Compiler {
         $tpl->escape = false;
         if($tokens->is(':')) {
             $func = $tokens->getNext(Tokenizer::MACRO_STRING);
-            $tag = $tpl->getStorage()->getFunction($func);
+            $tag = $tpl->getStorage()->getTag($func, $tpl);
             if($tag["type"] == \Fenom::INLINE_FUNCTION) {
                 $code = $tpl->parseAct($tokens);
             } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
