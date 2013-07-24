@@ -107,7 +107,6 @@ class Fenom {
         "unescape"    => 'Fenom\Modifier::unescape',
         "strip"       => 'Fenom\Modifier::strip',
         "length"      => 'Fenom\Modifier::length',
-        "default"     => 'Fenom\Modifier::defaultValue',
         "iterable"    => 'Fenom\Modifier::isIterable'
     );
 
@@ -558,12 +557,7 @@ class Fenom {
     }
 
     /**
-     * Set options. May be bitwise mask of constants DENY_METHODS, DENY_INLINE_FUNCS, DENY_SET_VARS, INCLUDE_SOURCES,
-     * FORCE_COMPILE, CHECK_MTIME, or associative array with boolean values:
-     * disable_methods - disable all calls method in template
-     * disable_native_funcs - disable all native PHP functions in template
-     * force_compile - recompile template every time (very slow!)
-     * compile_check - check template modifications (slow!)
+     * Set options
      * @param int|array $options
      */
     public function setOptions($options) {
@@ -605,7 +599,7 @@ class Fenom {
      * @return Fenom\Template
      */
     public function getRawTemplate() {
-        return new \Fenom\Template($this, $this->_options);
+        return new Template($this, $this->_options);
     }
 
     /**
@@ -726,7 +720,7 @@ class Fenom {
      */
     public function compile($tpl, $store = true, $options = 0) {
         $options = $this->_options | $options;
-        $template = Template::factory($this, $options)->load($tpl);
+        $template = $this->getRawTemplate()->load($tpl);
         if($store) {
             $cache = $this->_getCacheName($tpl, $options);
             $tpl_tmp = tempnam($this->_compile_dir, $cache);
@@ -766,7 +760,7 @@ class Fenom {
      * @return Fenom\Template
      */
     public function compileCode($code, $name = 'Runtime compile') {
-        return Template::factory($this, $this->_options)->source($name, $code);
+        return $this->getRawTemplate()->source($name, $code);
     }
 
 

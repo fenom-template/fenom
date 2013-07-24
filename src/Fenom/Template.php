@@ -119,17 +119,6 @@ class Template extends Render {
     );
 
     /**
-     * Just factory
-     *
-     * @param \Fenom $fenom
-     * @param $options
-     * @return Template
-     */
-    public static function factory(Fenom $fenom, $options) {
-        return new static($fenom, $options);
-    }
-
-    /**
      * @param Fenom $fenom Template storage
      * @param int $options
      * @return \Fenom\Template
@@ -215,7 +204,7 @@ class Template extends Render {
                     $this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $end = $start + 1;
                     do {
-                        $need_next_close_symbol = false;
+                        $need_more = false;
                         $end = strpos($this->_src, '}', $end + 1); // search close-symbol of the tag
                         if($end === false) { // if unexpected end of template
                             throw new CompileException("Unclosed tag in line {$this->_line}", 0, 1, $this->_name, $this->_line);
@@ -233,7 +222,7 @@ class Template extends Render {
                         } else {
                             $tokens = new Tokenizer($_tag); // tokenize the tag
                             if($tokens->isIncomplete()) { // all strings finished?
-                                $need_next_close_symbol = true;
+                                $need_more = true;
                             } else {
                                 $this->_appendCode( $this->parseTag($tokens) , $tag); // start the tag lexer
                                 if($tokens->key()) { // if tokenizer have tokens - throws exceptions
@@ -241,7 +230,7 @@ class Template extends Render {
                                 }
                             }
                         }
-                    } while ($need_next_close_symbol);
+                    } while ($need_more);
                     unset($_tag, $tag); // cleanup
                     break;
             }
