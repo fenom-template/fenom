@@ -16,3 +16,4 @@
 		}
 		return $size;
 	}
+?>

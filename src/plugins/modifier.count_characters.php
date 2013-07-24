@@ -36,5 +36,4 @@
 		return preg_match_all('~\S~', $string, $match);
 	}
 
-
 ?>

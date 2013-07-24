@@ -66,3 +66,6 @@
 			return implode($tag, $ret);
 		}
 	}
+
+	
+?>

@@ -5,3 +5,4 @@
 		return sizeof(preg_split('~[\r\n]+~', $string));
 	}
 
+?>

@@ -4,4 +4,4 @@
 		return preg_match_all('~\S\.(?!\w)~', $string, $match);
 	}
 
-
+?>

@@ -34,3 +34,4 @@
 		}
 		return $query;
 	}
+?>

@@ -8,3 +8,4 @@
 			return strip_tags($string);
 		}
 	}
+?>

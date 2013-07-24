@@ -4,3 +4,4 @@
 		return sprintf($format, $string);
 	}
 
+?>

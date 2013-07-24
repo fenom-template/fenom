@@ -4,3 +4,4 @@
 		return preg_replace('~\s+~', $replace, $text);
 	}
 
+?>

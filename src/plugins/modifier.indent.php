@@ -5,3 +5,4 @@
 		return preg_replace('~^~m', str_repeat($char, $chars), $string);
 	}
 
+?>
