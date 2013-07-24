@@ -624,7 +624,7 @@ class Template extends Render {
                     if($tokens->isSpecialVal()) {
                         $_exp[] = $tokens->getAndNext();
                     } elseif($tokens->isNext("(") && !$tokens->getWhitespace()) {
-                        $func = $this->_fenom->getModifier($tokens->current());
+                        $func = $this->_fenom->getModifier($tokens->current(), $this);
                         if(!$func) {
                             throw new \Exception("Function ".$tokens->getAndNext()." not found");
                         }
@@ -1066,7 +1066,7 @@ class Template extends Render {
      */
     public function parseModifier(Tokenizer $tokens, $value) {
         while($tokens->is("|")) {
-            $mods = $this->_fenom->getModifier($tokens->getNext(Tokenizer::MACRO_STRING) );
+            $mods = $this->_fenom->getModifier($tokens->getNext(Tokenizer::MACRO_STRING), $this);
             if(!$mods) {
                 throw new \Exception("Modifier ".$tokens->current()." not found");
             }
