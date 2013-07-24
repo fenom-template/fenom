@@ -517,7 +517,7 @@ class Fenom {
      * @param Fenom\Template $template
      * @return bool
      */
-    protected function _loadTag($tag, Template $template) {
+    protected function _loadTag($tag, $template) {
         return false;
     }
 
