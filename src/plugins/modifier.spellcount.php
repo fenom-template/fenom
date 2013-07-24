@@ -1,6 +1,6 @@
 <?php
 
-    function smarty_modifier_spellcount($num, $one, $two, $many)
+    function fenom_modifier_spellcount($num, $one, $two, $many)
     {
         if ($num % 10 == 1 && $num % 100 != 11) {
             echo $num . ' ' . $one;
