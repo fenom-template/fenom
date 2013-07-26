@@ -88,6 +88,8 @@ class Template extends Render {
      */
     private $_ignore = false;
 
+    private $_before;
+
     private $_filter = array();
 
     private static $_checkers = array(
@@ -260,6 +262,14 @@ class Template extends Render {
     }
 
     /**
+     * Execute some code in loading cache
+     * @param $code
+     */
+    public function before($code) {
+        $this->_before .= $code;
+    }
+
+    /**
      * Generate temporary internal template variable
      * @return string
      */
@@ -354,6 +364,7 @@ class Template extends Render {
     public function getTemplateCode() {
         return "<?php \n".
         "/** Fenom template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
+        ($this->_before ? $this->_before."\n" : "").
         "return new Fenom\\Render(\$fenom, ".$this->_getClosureSource().", ".var_export(array(
                 "options" => $this->_options,
                 "provider" => $this->_scm,
