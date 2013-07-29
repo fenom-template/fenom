@@ -9,13 +9,37 @@ class TestCase extends \PHPUnit_Framework_TestCase {
     public $fenom;
 
     public $values = array(
-        "one" => 1,
+        "zero" => 0,
+        "one"   => 1,
         "two" => 2,
         "three" => 3,
+        "float" => 4.5,
+        "bool"  => true,
+        0 => "empty value",
         1 => "one value",
         2 => "two value",
         3 => "three value",
     );
+
+    public static function getVars() {
+        return array(
+            "zero" => 0,
+            "one"   => 1,
+            "two" => 2,
+            "three" => 3,
+            "float" => 4.5,
+            "bool"  => true,
+            "obj"  => new \StdClass,
+            "list" => array(
+                "a" => 1,
+                "b" => 2
+            ),
+            0 => "empty value",
+            1 => "one value",
+            2 => "two value",
+            3 => "three value",
+        );
+    }
 
     public function setUp() {
         if(!file_exists(FENOM_RESOURCES.'/compile')) {
@@ -23,6 +47,7 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         } else {
             FS::clean(FENOM_RESOURCES.'/compile/');
         }
+
         $this->fenom = Fenom::factory(FENOM_RESOURCES.'/template', FENOM_RESOURCES.'/compile');
         $this->fenom->addModifier('dots', __CLASS__.'::dots');
         $this->fenom->addModifier('concat', __CLASS__.'::concat');
@@ -55,6 +80,10 @@ class TestCase extends \PHPUnit_Framework_TestCase {
     }
 
     public function tpl($name, $code) {
+        $dir = dirname($name);
+        if($dir != "." && !is_dir(FENOM_RESOURCES.'/template/'.$dir)) {
+            mkdir(FENOM_RESOURCES.'/template/'.$dir, 0777, true);
+        }
         file_put_contents(FENOM_RESOURCES.'/template/'.$name, $code);
     }
 
@@ -64,9 +93,11 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param string $code source of template
      * @param array $vars variables of template
      * @param string $result expected result.
+     * @param int $options
      * @param bool $dump dump source and result code (for debug)
      */
-    public function exec($code, $vars, $result, $dump = false) {
+    public function exec($code, $vars, $result, $options = 0, $dump = false) {
+        $this->fenom->setOptions($options);
         $tpl = $this->fenom->compileCode($code, "runtime.tpl");
         if($dump) {
             echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";

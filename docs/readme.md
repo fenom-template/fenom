@@ -5,10 +5,11 @@ Documentation
 
 * [Install](./install.md)
 * [Usage](./usage.md)
+* [Fenom adapters](./adapters.md)
 * [Develop](./develop.md)
-* [Syntax](./syntax.md)
 * [Settings](./settings.md)
 * [Callbacks and filters](./callbacks.md)
+* [Syntax](./syntax.md)
 * [Operators](./operators.md)
 
 ***
@@ -56,6 +57,7 @@ Documentation
 
 ### Extends
 
+* [Extensions](./ext/extensions.md)
 * [Add tags](./ext/tags.md)
 * [Add modificators](./ext/mods.md)
 * [Add template provider](./ext/provider.md)

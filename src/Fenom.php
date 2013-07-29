@@ -16,9 +16,9 @@ use Fenom\Template,
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Fenom {
-    const VERSION = '1.0';
+    const VERSION = '1.1';
 
-    /* Compiler types */
+    /* Actions */
     const INLINE_COMPILER   = 1;
     const BLOCK_COMPILER    = 2;
     const INLINE_FUNCTION   = 3;
@@ -26,14 +26,16 @@ class Fenom {
     const MODIFIER          = 5;
 
     /* Options */
-    const DENY_METHODS      =  0x10;
-    const DENY_INLINE_FUNCS =  0x20;
-    const FORCE_INCLUDE     =  0x40;
-    const AUTO_RELOAD       =  0x80;
-    const FORCE_COMPILE     =  0xF0;
-    const DISABLE_CACHE     = 0x1F0;
-    const AUTO_ESCAPE       = 0x200;
-    const FORCE_VALIDATE    = 0x400;
+    const DENY_METHODS        =   0x10;
+    const DENY_INLINE_FUNCS   =   0x20;
+    const FORCE_INCLUDE       =   0x40;
+    const AUTO_RELOAD         =   0x80;
+    const FORCE_COMPILE       =  0x100;
+    const AUTO_ESCAPE         =  0x200;
+    const DISABLE_CACHE       =  0x400;
+    const FORCE_VERIFY        =  0x800; // reserved
+    const AUTO_TRIM           = 0x1000; // reserved
+    const DENY_STATICS        = 0x2000; // reserved
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -46,15 +48,17 @@ class Fenom {
      * @var int[] of possible options, as associative array
      * @see setOptions
      */
-    private static $_option_list = array(
-        "disable_methods" => self::DENY_METHODS,
+    private static $_options_list = array(
+        "disable_methods"      => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_INLINE_FUNCS,
-        "disable_cache" => self::DISABLE_CACHE,
-        "force_compile" => self::FORCE_COMPILE,
-        "auto_reload" => self::AUTO_RELOAD,
-        "force_include" => self::FORCE_INCLUDE,
-        "auto_escape" => self::AUTO_ESCAPE,
-        "force_validate" => self::FORCE_VALIDATE
+        "disable_cache"        => self::DISABLE_CACHE,
+        "force_compile"        => self::FORCE_COMPILE,
+        "auto_reload"          => self::AUTO_RELOAD,
+        "force_include"        => self::FORCE_INCLUDE,
+        "auto_escape"          => self::AUTO_ESCAPE,
+        "force_verify"         => self::FORCE_VERIFY,
+        "auto_trim"            => self::AUTO_TRIM,
+        "disable_statics"      => self::DENY_STATICS,
     );
 
     /**
@@ -100,7 +104,8 @@ class Fenom {
         "unescape"    => 'Fenom\Modifier::unescape',
         "strip"       => 'Fenom\Modifier::strip',
         "length"      => 'Fenom\Modifier::length',
-        "default"     => 'Fenom\Modifier::defaultValue'
+        "default"     => 'Fenom\Modifier::defaultValue',
+        "iterable"    => 'Fenom\Modifier::isIterable'
     );
 
     /**
@@ -246,6 +251,7 @@ class Fenom {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
         $fenom = new static($provider);
+        /* @var Fenom $fenom */
         $fenom->setCompileDir($compile_dir);
         if($options) {
             $fenom->setOptions($options);
@@ -526,7 +532,7 @@ class Fenom {
      */
     public function setOptions($options) {
         if(is_array($options)) {
-            $options = self::_makeMask($options, self::$_option_list);
+            $options = self::_makeMask($options, self::$_options_list, $this->_options);
         }
         $this->_storage = array();
         $this->_options = $options;
@@ -592,16 +598,15 @@ class Fenom {
      *
      * @param string $template name of template
      * @param array $vars
-     * @param $callback
+     * @param callable $callback
      * @param float $chunk
-     * @return \Fenom\Render
-     * @example $fenom->pipe("products.yml.tpl", $iterators, [new SplFileObject("/tmp/products.yml"), "fwrite"], 512*1024)
+     * @return array
      */
-    public function pipe($template, array $vars, $callback, $chunk = 1e6) {
+    public function pipe($template, $callback, array $vars = array(), $chunk = 1e6) {
         ob_start($callback, $chunk, true);
-        $this->getTemplate($template)->display($vars);
+        $data = $this->getTemplate($template)->display($vars);
         ob_end_flush();
-
+        return $data;
     }
 
     /**
@@ -633,12 +638,19 @@ class Fenom {
     }
 
     /**
-     * Add custom template into storage
-     *
-     * @param Fenom\Render $template
+     * Check if template exists
+     * @param string $template
+     * @return bool
      */
-    public function addTemplate(Fenom\Render $template) {
-        $this->_storage[dechex($template->getOptions()).'@'. $template->getName() ] = $template;
+    public function templateExists($template) {
+        if($provider = strstr($template, ":", true)) {
+            if(isset($this->_providers[$provider])) {
+                return $this->_providers[$provider]->templateExists(substr($template, strlen($provider) + 1));
+            }
+        } else {
+            return $this->_provider->templateExists($template);
+        }
+        return false;
     }
 
 	/**
@@ -751,12 +763,12 @@ class Fenom {
      * @throws \RuntimeException if key from custom assoc doesn't exists into possible values
      */
     private static function _makeMask(array $values, array $options, $mask = 0) {
-        foreach($values as $value) {
-            if(isset($options[$value])) {
-                if($options[$value]) {
-                    $mask |= $options[$value];
+        foreach ($values as $key => $value) {
+            if (isset($options[$key])) {
+                if ($options[$key]) {
+                    $mask |= $options[$key];
                 } else {
-                    $mask &= ~$options[$value];
+                    $mask &= ~$options[$key];
                 }
             } else {
                 throw new \RuntimeException("Undefined parameter $value");

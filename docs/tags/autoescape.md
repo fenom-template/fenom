@@ -1,4 +1,4 @@
-Tag {autoescape} [RU]
+Tag {autoescape}
 =====================
 
 Force enable or disable `auto_escape` option for block area:
@@ -11,4 +11,4 @@ Force enable or disable `auto_escape` option for block area:
 {/autoescape}
 ```
 
-Also see {raw} tag for
+Also see {raw} tag and :raw tag option

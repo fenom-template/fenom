@@ -76,7 +76,7 @@ class Render extends \ArrayObject {
         $this->_fenom = $fenom;
         $props += self::$_props;
         $this->_name = $props["name"];
-        $this->_provider = $this->_fenom->getProvider($props["scm"]);
+//        $this->_provider = $this->_fenom->getProvider($props["scm"]);
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
@@ -100,7 +100,7 @@ class Render extends \ArrayObject {
     }
 
     public function getProvider() {
-        return $this->_provider;
+        return $this->_fenom->getProvider($this->_scm);
     }
 
     public function getBaseName() {
@@ -136,23 +136,19 @@ class Render extends \ArrayObject {
      * @return bool
      */
     public function isValid() {
-        $provider = $this->_fenom->getProvider(strstr($this->_name, ":"), true);
-        if($provider->getLastModified($this->_name) !== $this->_time) {
-            return false;
-        }
-        foreach($this->_depends as $tpl => $time) {
-			// if cached, check time of cache
-			$cache = $this->_fenom->getCachedTemplate($tpl);
-			if ($cache instanceof Render) {
-				if ($cache->getTime() !== $time) {
-					return false;
-				}
-			}
-			// if not cached, check source's filemtime
-            if ($provider->getLastModified($tpl) !== $time) {
-				return false;
+        if(count($this->_depends) === 1) { // if no external dependencies, only self
+            $provider = $this->_fenom->getProvider($this->_scm);
+            if($provider->getLastModified($this->_name) !== $this->_time) {
+                return false;
             }
-		}
+        } else {
+            foreach($this->_depends as $scm => $templates) {
+                $provider = $this->_fenom->getProvider($scm);
+                if(!$provider->verify($templates)) {
+                    return false;
+                }
+            }
+        }
         return true;
     }
 
@@ -164,7 +160,7 @@ class Render extends \ArrayObject {
     public function display(array $values) {
         $this->exchangeArray($values);
         $this->_code->__invoke($this);
-        return $this;
+        return $this->exchangeArray(array());
     }
 
     /**

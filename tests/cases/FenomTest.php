@@ -5,18 +5,17 @@ use Fenom\Render,
 
 class FenomTest extends \Fenom\TestCase {
 
-    public function testAddRender() {
-        $test = $this;
-        $this->fenom->addTemplate(new Render($this->fenom, function($tpl) use ($test) {
-            /** @var \PHPUnit_Framework_TestCase $test  */
-            $test->assertInstanceOf('Fenom\Render', $tpl);
-            echo "Inline render";
-        }, array(
-            "name" => 'render.tpl',
-            "scm" => false
-        )));
-
-        $this->assertSame("Inline render", $this->fenom->fetch('render.tpl', array()));
+    public static function providerOptions() {
+        return array(
+            array("disable_methods",        Fenom::DENY_METHODS),
+            array("disable_native_funcs",   Fenom::DENY_INLINE_FUNCS),
+            array("disable_cache",          Fenom::DISABLE_CACHE),
+            array("force_compile",          Fenom::FORCE_COMPILE),
+            array("auto_reload",            Fenom::AUTO_RELOAD),
+            array("force_include",          Fenom::FORCE_INCLUDE),
+            array("auto_escape",            Fenom::AUTO_ESCAPE),
+            array("force_verify",           Fenom::FORCE_VERIFY)
+        );
     }
 
     public function testCompileFile() {
@@ -36,10 +35,6 @@ class FenomTest extends \Fenom\TestCase {
     public function testStorage() {
         $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
-        //$this->fenom->clearCompiledTemplate('custom.tpl', false);
-
-        //$this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
-
         $this->tpl('custom.tpl', 'Custom template 2');
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
     }
@@ -92,6 +87,21 @@ class FenomTest extends \Fenom\TestCase {
         $this->tpl('custom.tpl', 'Custom compiler {myblockcompiler name="bar"} block1 {tag name="baz"} block2 {/myblockcompiler}');
         $this->assertSame("Custom compiler PHP_VERSION: ".PHP_VERSION." (for bar) block1 Tag baz of compiler block2 End of compiler", $this->fenom->fetch('custom.tpl', array()));
     }
-}
 
-?>
+    /**
+     * @dataProvider providerOptions
+     */
+    public function testOptions($code, $option) {
+        static $options = array();
+        static $flags = 0;
+        $options[$code] = true;
+        $flags |= $option;
+
+        $this->fenom->setOptions($options);
+        $this->assertSame($this->fenom->getOptions(), $flags);
+//        printf("from %010b, flags %010b\n", $this->fenom->getOptions(), $flags);
+//        $this->fenom->setOptions(array($code => false));
+//        printf("remove %010b from option %010b, flags %010b\n", $option, $this->fenom->getOptions(), $flags & ~$option);
+//        $this->assertSame($this->fenom->getOptions(), $flags & ~$option);
+    }
+}

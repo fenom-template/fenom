@@ -1,41 +1,92 @@
 Operators
 =========
 
-### Math
+### Arithmetic operators
 
-Operators: `+ - / *`
+* `$a + $b` - addition
+* `$a - $b` - subtraction
+* `$a * $b` - multiplication
+* `$a / $b` - division
+* `$a % $b` - modulus
 
 ```smarty
 {$a + $b * $c/$d - $e*5 + 1e3}
 ```
 
-### Boolean
+### Logical operators
 
-Operators:  `|| && and or < > <= >= == === !== !=`
-
-```smarty
-{if $a && $b >= 5 && $c != 3} {/if}
-```
-
-### Bitwize
-
-Operators: `| & << >> |= &= <<= >>=`
+* `$a || $b` - or
+* `$a && $b` - and
+* `!$a` - not, unary operator
+* `$a and $b` - and
+* `$a or $b` - or
+* `$a xor $b` - xor
 
 ```smarty
-{if $a & 1} {var $b |= $flags} {/if}
+{if $b && $c} ... {/if}
 ```
 
-### Unary
+### Comparison operators
 
-Operators:  `^ ~ - !`
+* `$a < $b` - less than
+* `$a > $b` - greater than
+* `$a <= $b` - less than or equal to
+* `$a >= $b` - greater than or equal to
+* `$a == $b` - equal
+* `$a === $b` - identical
+* `$a !== $b` - not identical
+* `$a != $b` - not equal
+* `$a <> $b` - not equal
 
 ```smarty
-{var $b |= $flags & ^$c}
+{if $b >= 5} ... {/if}
 ```
 
-### Ternar
+### Bitwise operators
 
-Operators: `? :`
+* `$a | $b` - or
+* `$a & $b` - and
+* `$a ^ $b` - xor
+* `~$a` - not, unary operator
+* `$a << $b` - shift left
+* `$a >> $b` - shift right
+
+```smarty
+{if $a & 1} {var $b = 4 | $flags} {/if}
+```
+
+### Assignment Operators
+
+* `$a = $b` - assignment
+* `$a += $b` - assignment with addition
+* `$a -= $b` - assignment with subtraction
+* `$a *= $b` - assignment with multiplication
+* `$a /= $b` - assignment with division
+* `$a %= $b` - assignment with modulus
+* `$a &= $b` - assignment with bitwise And
+* `$a |= $b` - assignment with bitwise or
+* `$a ^= $b` - assignment with bitwise xor
+* `$a <<= $b` - assignment with left shift
+* `$a >>= $b` - assignment with right shift
+
+
+```smarty
+{var $b |= $flags}
+```
+
+### Incrementing/Decrementing operators
+
+* `++$a` - increment the variable and use it
+* `$a++` - use the variable and increment it
+* `--$a` - decrement the variable and use it
+* `$a--` - use the variable and decrement it
+
+### Ternary operator
+
+* `$a ? $b : $c` - returns `$b` if `$a` is not empty, and `$c` otherwise
+* `$a ! $b : $c` - returns `$b` if `$a` is set, and `$c` otherwise
+* `$a ?: $c` - returns `$a` if `$a` is not empty, and `$c` otherwise
+* `$a !: $c` - returns `$a` if `$a` is set, and `$c` otherwise
 
 ```smarty
 {var $a = true}
@@ -44,24 +95,43 @@ Operators: `? :`
 {$a ? 5 : 10} {* outputs 10 *}
 ```
 
-### Variable operator
+### Check operator
 
-Checking variable value
+* `$a?` - returns `TRUE` if `$a` is not empty
+* `$a!` - returns `TRUE` if `$a` is set
+
 ```smarty
 {if $a?} {* instead of {if !empty($a)} *}
-```
-
-Checking variable existence
-```smarty
 {if $a!} {* instead of {if isset($a)} *}
-```
-
-Get default if variable is empty
-```smarty
 {$a?:"some text"} {* instead of {if empty($a) ? "some text" : $a} *}
+{$a!:"some text"} {* instead of {if isset($a) ? $a : "some text"} *}
 ```
 
-Get default if variable doesn't exist
+### Test operator
+
+Tests can be negated by using the `is not` operator.
+
+* `$a is $b` - $a identical $b
+* `$a is integer` - test variable type. Type may be int/integer, bool/boolean, float/double/decimal, array, object, scalar, string, callback/callable, number/numeric.
+* `$a is iterable` - test variable for iteration.
+* `$a is template` - variable `$a` contain existing template name.
+* `$a is empty` - checks if a variable is empty.
+* `$a is set` - checks if a variable is set.
+* `$a is even` - variable `$a` is even.
+* `$a is odd` - variable `$a` is odd.
+* `$a is MyClass` or `$a is \MyClass` - variable `$a` instance of `MyClass` class
+
+### Containment operator
+
+Tests can be negated by using the `not in` operator.
+
+* `$a in $b` - variable `$a` contains in `$b`, $b may be string, plain or assoc array.
+* `$a in list $b` - variable `$a` contains in array `$b` as value
+* `$a in keys $b` - variable `$a` contains in array `$b` as key
+* `$a in string $b` - variable `$a` contains in string `$b` as substring
+
 ```smarty
-{$a!:"some text"} {* instead of {if isset($a) ? $a : "some text"} *}
+{'df' in 'abcdefg'}
+{5 in [1, 5, 25, 125]}
+{2 in keys [1, 5, 25, 125]}
 ```

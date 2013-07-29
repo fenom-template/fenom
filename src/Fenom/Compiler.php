@@ -615,7 +615,7 @@ class Compiler {
             } elseif(isset($params[ $param->getPosition() ])) {
                 $args[] = $params[ $param->getPosition() ];
             } elseif($param->isOptional()) {
-                $args[] = $param->getDefaultValue();
+                $args[] = var_export($param->getDefaultValue(), true);
             }
         }
         return "$function(".implode(", ", $args).')';
@@ -875,7 +875,7 @@ class Compiler {
      * @return string
      */
     public static function tagRaw(Tokenizer $tokens, Template $tpl) {
-        $escape = $tpl->escape;
+        $escape = (bool)$tpl->escape;
         $tpl->escape = false;
         if($tokens->is(':')) {
             $func = $tokens->getNext(Tokenizer::MACRO_STRING);
@@ -885,11 +885,12 @@ class Compiler {
             } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
                 $code = $tpl->parseAct($tokens);
                 $tpl->getLastScope()->escape = false;
+                return $code;
             } else {
                 throw new InvalidUsageException("Raw mode allow for expressions or functions");
             }
         } else {
-            $code = $tpl->out($tpl->parseExp($tokens, true), false);
+            $code = $tpl->out($tpl->parseExp($tokens, true));
         }
         $tpl->escape = $escape;
         return $code;
