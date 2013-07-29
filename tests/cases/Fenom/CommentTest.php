@@ -18,7 +18,7 @@ class CommentTest extends TestCase
 
     public function testError()
     {
-        $this->execError('{* ', 'Fenom\CompileException', "Unclosed comment block in line");
+        $this->execError('{* ', 'Fenom\Error\CompileException', "Unclosed comment block in line");
     }
 
     /**

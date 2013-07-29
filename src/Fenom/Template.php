@@ -8,7 +8,12 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
-use Fenom;
+use Fenom,
+    Fenom\Error\UnexpectedTokenException;
+use Fenom\Error\CompileException;
+use Fenom\Error\InvalidUsageException;
+use Fenom\Error\SecurityException;
+use Fenom\Error\TokenizeException;
 
 /**
  * Template compiler
@@ -146,7 +151,7 @@ class Template extends Render
      * Load source from provider
      * @param string $name
      * @param bool $compile
-     * @return $this
+     * @return self
      */
     public function load($name, $compile = true)
     {
@@ -1370,20 +1375,4 @@ class Template extends Render
 
         return $params;
     }
-}
-
-class CompileException extends \ErrorException
-{
-}
-
-class SecurityException extends CompileException
-{
-}
-
-class InvalidUsageException extends \LogicException
-{
-}
-
-class TokenizeException extends \RuntimeException
-{
 }

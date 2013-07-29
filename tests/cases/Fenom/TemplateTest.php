@@ -81,14 +81,14 @@ class TemplateTest extends TestCase
     public static function providerVarsInvalid()
     {
         return array(
-            array('hello, {$a.}!', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('hello, {$b[c}!', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('hello, {$b.c]}!', 'Fenom\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[ ]}!', 'Fenom\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[9/].c}!', 'Fenom\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[3]$c}!', 'Fenom\CompileException', "Unexpected token '\$c'"),
-            array('hello, {$b[3]c}!', 'Fenom\CompileException', "Unexpected token 'c'"),
-            array('hello, {$b.obj->valid()}!', 'Fenom\SecurityException', "Forbidden to call methods", Fenom::DENY_METHODS),
+            array('hello, {$a.}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('hello, {$b[c}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('hello, {$b.c]}!', 'Fenom\Error\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[ ]}!', 'Fenom\Error\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[9/].c}!', 'Fenom\Error\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[3]$c}!', 'Fenom\Error\CompileException', "Unexpected token '\$c'"),
+            array('hello, {$b[3]c}!', 'Fenom\Error\CompileException', "Unexpected token 'c'"),
+            array('hello, {$b.obj->valid()}!', 'Fenom\Error\SecurityException', "Forbidden to call methods", Fenom::DENY_METHODS),
         );
     }
 
@@ -135,12 +135,12 @@ class TemplateTest extends TestCase
     public static function providerModifiersInvalid()
     {
         return array(
-            array('Mod: {$lorem|}!', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Mod: {$lorem|str_rot13}!', 'Fenom\CompileException', "Modifier str_rot13 not found", Fenom::DENY_INLINE_FUNCS),
-            array('Mod: {$lorem|my_encode}!', 'Fenom\CompileException', "Modifier my_encode not found"),
-            array('Mod: {$lorem|truncate:}!', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Mod: {$lorem|truncate:abs}!', 'Fenom\CompileException', "Unexpected token 'abs'"),
-            array('Mod: {$lorem|truncate:80|}!', 'Fenom\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|str_rot13}!', 'Fenom\Error\CompileException', "Modifier str_rot13 not found", Fenom::DENY_INLINE_FUNCS),
+            array('Mod: {$lorem|my_encode}!', 'Fenom\Error\CompileException', "Modifier my_encode not found"),
+            array('Mod: {$lorem|truncate:}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Mod: {$lorem|truncate:abs}!', 'Fenom\Error\CompileException', "Unexpected token 'abs'"),
+            array('Mod: {$lorem|truncate:80|}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
         );
     }
 
@@ -185,19 +185,19 @@ class TemplateTest extends TestCase
     public static function providerExpressionsInvalid()
     {
         return array(
-            array('If: {-"hi"} end', 'Fenom\CompileException', "Unexpected token '-'"),
-            array('If: {($a++)++} end', 'Fenom\CompileException', "Unexpected token '++'"),
-            array('If: {$a + * $c} end', 'Fenom\CompileException', "Unexpected token '*'"),
-            array('If: {$a + } end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('If: {$a + =} end', 'Fenom\CompileException', "Unexpected token '='"),
-            array('If: {$a + 1 =} end', 'Fenom\CompileException', "Unexpected token '='"),
-            array('If: {$a + 1 = 6} end', 'Fenom\CompileException', "Unexpected token '='"),
-            array('If: {/$a} end', 'Fenom\CompileException', "Unexpected token '\$a'"),
-            array('If: {$a == 5 > 4} end', 'Fenom\CompileException', "Unexpected token '>'"),
-            array('If: {$a != 5 <= 4} end', 'Fenom\CompileException', "Unexpected token '<='"),
-            array('If: {$a != 5 => 4} end', 'Fenom\CompileException', "Unexpected token '=>'"),
-            array('If: {$a + (*6)} end', 'Fenom\CompileException', "Unexpected token '*'"),
-            array('If: {$a + ( 6} end', 'Fenom\CompileException', "Unexpected end of expression, expect ')'"),
+            array('If: {-"hi"} end', 'Fenom\Error\CompileException', "Unexpected token '-'"),
+            array('If: {($a++)++} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
+            array('If: {$a + * $c} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
+            array('If: {$a + } end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('If: {$a + =} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
+            array('If: {$a + 1 =} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
+            array('If: {$a + 1 = 6} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
+            array('If: {/$a} end', 'Fenom\Error\CompileException', "Unexpected token '\$a'"),
+            array('If: {$a == 5 > 4} end', 'Fenom\Error\CompileException', "Unexpected token '>'"),
+            array('If: {$a != 5 <= 4} end', 'Fenom\Error\CompileException', "Unexpected token '<='"),
+            array('If: {$a != 5 => 4} end', 'Fenom\Error\CompileException', "Unexpected token '=>'"),
+            array('If: {$a + (*6)} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
+            array('If: {$a + ( 6} end', 'Fenom\Error\CompileException', "Unexpected end of expression, expect ')'"),
         );
     }
 
@@ -236,8 +236,8 @@ class TemplateTest extends TestCase
     public static function providerIncludeInvalid()
     {
         return array(
-            array('Include {include} template', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Include {include another="welcome.tpl"} template', 'Fenom\CompileException', "Unexpected token '='"),
+            array('Include {include} template', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Include {include another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Unexpected token '='"),
         );
     }
 
@@ -282,10 +282,10 @@ class TemplateTest extends TestCase
     public static function providerIfInvalid()
     {
         return array(
-            array('If: {if} block1 {/if} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('If: {if 1} block1 {elseif} block2 {/if} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('If: {if 1} block1 {else} block2 {elseif 0} block3 {/if} end', 'Fenom\CompileException', "Incorrect use of the tag {elseif}"),
-            array('If: {if 1} block1 {else} block2 {/if} block3 {elseif 0} end', 'Fenom\CompileException', "Unexpected tag 'elseif' (this tag can be used with 'if')"),
+            array('If: {if} block1 {/if} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('If: {if 1} block1 {elseif} block2 {/if} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('If: {if 1} block1 {else} block2 {elseif 0} block3 {/if} end', 'Fenom\Error\CompileException', "Incorrect use of the tag {elseif}"),
+            array('If: {if 1} block1 {else} block2 {/if} block3 {elseif 0} end', 'Fenom\Error\CompileException', "Unexpected tag 'elseif' (this tag can be used with 'if')"),
         );
     }
 
@@ -325,20 +325,20 @@ class TemplateTest extends TestCase
     public static function providerCreateVarInvalid()
     {
         return array(
-            array('Create: {var $v} Result: {$v} end', 'Fenom\CompileException', "Unclosed tag: {var} opened"),
-            array('Create: {var $v = } Result: {$v} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Create: {var $v = 1++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = c} Result: {$v} end', 'Fenom\CompileException', "Unexpected token 'c'"),
-            array('Create: {var $v = ($a)++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = --$a++} Result: {$v} end', 'Fenom\CompileException', "Can not use two increments and/or decrements for one variable"),
-            array('Create: {var $v = $a|upper++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = max($a,2)} Result: {$v} end', 'Fenom\CompileException', "Function max not found", Fenom::DENY_NATIVE_FUNCS),
-            array('Create: {var $v = 4*} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '*'"),
-            array('Create: {var $v = ""$a} Result: {$v} end', 'Fenom\CompileException', "Unexpected token '\$a'"),
-            array('Create: {var $v = [1,2} Result: {$v} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Create: {var $v = empty(2)} Result: {$v} end', 'Fenom\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
-            array('Create: {var $v = isset(2)} Result: {$v} end', 'Fenom\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
+            array('Create: {var $v} Result: {$v} end', 'Fenom\Error\CompileException', "Unclosed tag: {var} opened"),
+            array('Create: {var $v = } Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Create: {var $v = 1++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = c} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 'c'"),
+            array('Create: {var $v = ($a)++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = --$a++} Result: {$v} end', 'Fenom\Error\CompileException', "Can not use two increments and/or decrements for one variable"),
+            array('Create: {var $v = $a|upper++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
+            array('Create: {var $v = max($a,2)} Result: {$v} end', 'Fenom\Error\CompileException', "Function max not found", Fenom::DENY_NATIVE_FUNCS),
+            array('Create: {var $v = 4*} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
+            array('Create: {var $v = ""$a} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '\$a'"),
+            array('Create: {var $v = [1,2} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Create: {var $v = empty(2)} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
+            array('Create: {var $v = isset(2)} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
 
         );
     }
@@ -436,27 +436,27 @@ class TemplateTest extends TestCase
     public static function providerForeachInvalid()
     {
         return array(
-            array('Foreach: {foreach} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected end of tag {foreach}"),
-            array('Foreach: {foreach $list} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach array_random() as $e} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'array_random'"),
-            array('Foreach: {foreach $list as $e+1} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as $k+1 => $e} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as max($i,1) => $e} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as max($e,1)} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list => $e} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '=>'"),
-            array('Foreach: {foreach $list $k => $e} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '\$k'"),
-            array('Foreach: {foreach $list as $k =>} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'last' in tag {foreach}"),
-            array('Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end', 'Fenom\CompileException', "Unknown parameter 'unknown'"),
-            array('Foreach: {foreach $list as $e index=$i+1} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as $e first=$f+1} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as $e last=$l+1} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('Foreach: {foreach $list as $e index=max($i,1)} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as $e first=max($i,1)} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as $e last=max($i,1)} {$e}, {/foreach} end', 'Fenom\CompileException', "Unexpected token 'max'"),
-            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {break} {/foreach} end', 'Fenom\CompileException', "Improper usage of the tag {break}"),
-            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {continue} {/foreach} end', 'Fenom\CompileException', "Improper usage of the tag {continue}"),
+            array('Foreach: {foreach} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected end of tag {foreach}"),
+            array('Foreach: {foreach $list} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach array_random() as $e} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'array_random'"),
+            array('Foreach: {foreach $list as $e+1} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as $k+1 => $e} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as max($i,1) => $e} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list as max($e,1)} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list => $e} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '=>'"),
+            array('Foreach: {foreach $list $k => $e} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '\$k'"),
+            array('Foreach: {foreach $list as $k =>} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'last' in tag {foreach}"),
+            array('Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unknown parameter 'unknown'"),
+            array('Foreach: {foreach $list as $e index=$i+1} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as $e first=$f+1} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as $e last=$l+1} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('Foreach: {foreach $list as $e index=max($i,1)} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list as $e first=max($i,1)} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list as $e last=max($i,1)} {$e}, {/foreach} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {break} {/foreach} end', 'Fenom\Error\CompileException', "Improper usage of the tag {break}"),
+            array('Foreach: {foreach $list as $e} {$e}, {foreachelse} {continue} {/foreach} end', 'Fenom\Error\CompileException', "Improper usage of the tag {continue}"),
         );
     }
 
@@ -505,9 +505,9 @@ class TemplateTest extends TestCase
     public static function providerSwitchInvalid()
     {
         return array(
-            array('Switch: {switch}{case 1} one {break}{/switch} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{case} one {break}{/switch} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{break}{case} one {/switch} end', 'Fenom\CompileException', "Improper usage of the tag {break}"),
+            array('Switch: {switch}{case 1} one {break}{/switch} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Switch: {switch 1}{case} one {break}{/switch} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Switch: {switch 1}{break}{case} one {/switch} end', 'Fenom\Error\CompileException', "Improper usage of the tag {break}"),
         );
     }
 
@@ -525,7 +525,7 @@ class TemplateTest extends TestCase
     public static function providerWhileInvalid()
     {
         return array(
-            array('While: {while} block {/while} end', 'Fenom\CompileException', "Unexpected end of expression"),
+            array('While: {while} block {/while} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
         );
     }
 
@@ -555,30 +555,30 @@ class TemplateTest extends TestCase
     public static function providerForInvalid()
     {
         return array(
-            array('For: {for} block1 {/for} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('For: {for $a=} block1 {/for} end', 'Fenom\CompileException', "Unexpected end of expression"),
-            array('For: {for $a+1=3 to=6} block1 {/for} end', 'Fenom\CompileException', "Unexpected token '+'"),
-            array('For: {for max($a,$b)=3 to=6} block1 {/for} end', 'Fenom\CompileException', "Unexpected token 'max'"),
-            array('For: {for to=6 $a=3} block1 {/for} end', 'Fenom\CompileException', "Unexpected token 'to'"),
-            array('For: {for index=$i $a=3 to=6} block1 {/for} end', 'Fenom\CompileException', "Unexpected token 'index'"),
-            array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Fenom\CompileException', "Unexpected token 'first'"),
-            array('For: {for last=$i $a=3 to=6} block1 {/for} end', 'Fenom\CompileException', "Unexpected token 'last'"),
-            array('For: {for $a=4 to=6 unk=4} block1 {/for} end', 'Fenom\CompileException', "Unknown parameter 'unk'"),
-            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end', 'Fenom\CompileException', "Improper usage of the tag {break}"),
-            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end', 'Fenom\CompileException', "Improper usage of the tag {continue}"),
+            array('For: {for} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('For: {for $a=} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('For: {for $a+1=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('For: {for max($a,$b)=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('For: {for to=6 $a=3} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'to'"),
+            array('For: {for index=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'index'"),
+            array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'first'"),
+            array('For: {for last=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'last'"),
+            array('For: {for $a=4 to=6 unk=4} block1 {/for} end', 'Fenom\Error\CompileException', "Unknown parameter 'unk'"),
+            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end', 'Fenom\Error\CompileException', "Improper usage of the tag {break}"),
+            array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end', 'Fenom\Error\CompileException', "Improper usage of the tag {continue}"),
         );
     }
 
     public static function providerLayersInvalid()
     {
         return array(
-            array('Layers: {foreach $list as $e} block1 {if 1} {foreachelse} {/if} {/foreach} end', 'Fenom\CompileException', "Unexpected tag 'foreachelse' (this tag can be used with 'foreach')"),
-            array('Layers: {foreach $list as $e} block1 {if 1}  {/foreach} {/if} end', 'Fenom\CompileException', "Unexpected closing of the tag 'foreach'"),
-            array('Layers: {for $a=4 to=6} block1 {if 1} {forelse} {/if} {/for} end', 'Fenom\CompileException', "Unexpected tag 'forelse' (this tag can be used with 'for')"),
-            array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end', 'Fenom\CompileException', "Unexpected closing of the tag 'for'"),
-            array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end', 'Fenom\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
-            array('Layers: {/switch} end', 'Fenom\CompileException', "Unexpected closing of the tag 'switch'"),
-            array('Layers: {if 1} end', 'Fenom\CompileException', "Unclosed tag: {if}"),
+            array('Layers: {foreach $list as $e} block1 {if 1} {foreachelse} {/if} {/foreach} end', 'Fenom\Error\CompileException', "Unexpected tag 'foreachelse' (this tag can be used with 'foreach')"),
+            array('Layers: {foreach $list as $e} block1 {if 1}  {/foreach} {/if} end', 'Fenom\Error\CompileException', "Unexpected closing of the tag 'foreach'"),
+            array('Layers: {for $a=4 to=6} block1 {if 1} {forelse} {/if} {/for} end', 'Fenom\Error\CompileException', "Unexpected tag 'forelse' (this tag can be used with 'for')"),
+            array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end', 'Fenom\Error\CompileException', "Unexpected closing of the tag 'for'"),
+            array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end', 'Fenom\Error\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
+            array('Layers: {/switch} end', 'Fenom\Error\CompileException', "Unexpected closing of the tag 'switch'"),
+            array('Layers: {if 1} end', 'Fenom\Error\CompileException', "Unclosed tag: {if}"),
         );
     }
 

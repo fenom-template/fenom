@@ -90,7 +90,7 @@ class MacrosTest extends TestCase
 
     /**
      * @expectedExceptionMessage Undefined macro 'plus'
-     * @expectedException \Fenom\CompileException
+     * @expectedException \Fenom\Error\CompileException
      */
     public function testImportMiss()
     {

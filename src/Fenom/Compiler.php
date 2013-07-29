@@ -8,6 +8,8 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
+use Fenom\Error\InvalidUsageException;
+use Fenom\Error\UnexpectedTokenException;
 use Fenom\Tokenizer;
 use Fenom\Template;
 use Fenom\Scope;

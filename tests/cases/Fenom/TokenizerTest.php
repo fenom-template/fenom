@@ -57,7 +57,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         try {
             $tokens->skip(T_STRING)->skip('(')->skip(':');
         } catch (\Exception $e) {
-            $this->assertInstanceOf('Fenom\UnexpectedTokenException', $e);
+            $this->assertInstanceOf('Fenom\Error\UnexpectedTokenException', $e);
             $this->assertStringStartsWith("Unexpected token '3' in expression, expect ':'", $e->getMessage());
         }
         $this->assertTrue($tokens->valid());
