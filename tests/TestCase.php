@@ -2,7 +2,8 @@
 namespace Fenom;
 use Fenom, Fenom\Provider as FS;
 
-class TestCase extends \PHPUnit_Framework_TestCase {
+class TestCase extends \PHPUnit_Framework_TestCase
+{
     /**
      * @var Fenom
      */
@@ -10,26 +11,27 @@ class TestCase extends \PHPUnit_Framework_TestCase {
 
     public $values = array(
         "zero" => 0,
-        "one"   => 1,
+        "one" => 1,
         "two" => 2,
         "three" => 3,
         "float" => 4.5,
-        "bool"  => true,
+        "bool" => true,
         0 => "empty value",
         1 => "one value",
         2 => "two value",
         3 => "three value",
     );
 
-    public static function getVars() {
+    public static function getVars()
+    {
         return array(
             "zero" => 0,
-            "one"   => 1,
+            "one" => 1,
             "two" => 2,
             "three" => 3,
             "float" => 4.5,
-            "bool"  => true,
-            "obj"  => new \StdClass,
+            "bool" => true,
+            "obj" => new \StdClass,
             "list" => array(
                 "a" => 1,
                 "b" => 2
@@ -41,50 +43,57 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         );
     }
 
-    public function setUp() {
-        if(!file_exists(FENOM_RESOURCES.'/compile')) {
-            mkdir(FENOM_RESOURCES.'/compile', 0777, true);
+    public function setUp()
+    {
+        if (!file_exists(FENOM_RESOURCES . '/compile')) {
+            mkdir(FENOM_RESOURCES . '/compile', 0777, true);
         } else {
-            FS::clean(FENOM_RESOURCES.'/compile/');
+            FS::clean(FENOM_RESOURCES . '/compile/');
         }
 
-        $this->fenom = Fenom::factory(FENOM_RESOURCES.'/template', FENOM_RESOURCES.'/compile');
-        $this->fenom->addModifier('dots', __CLASS__.'::dots');
-        $this->fenom->addModifier('concat', __CLASS__.'::concat');
-        $this->fenom->addFunction('test_function', __CLASS__.'::inlineFunction');
-        $this->fenom->addBlockFunction('test_block_function', __CLASS__.'::blockFunction');
+        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/template', FENOM_RESOURCES . '/compile');
+        $this->fenom->addModifier('dots', __CLASS__ . '::dots');
+        $this->fenom->addModifier('concat', __CLASS__ . '::concat');
+        $this->fenom->addFunction('test_function', __CLASS__ . '::inlineFunction');
+        $this->fenom->addBlockFunction('test_block_function', __CLASS__ . '::blockFunction');
     }
 
-    public static function dots($value) {
-        return $value."...";
+    public static function dots($value)
+    {
+        return $value . "...";
     }
 
-	public static function concat() {
-		return call_user_func_array('var_export', func_get_args());
-	}
+    public static function concat()
+    {
+        return call_user_func_array('var_export', func_get_args());
+    }
 
-    public static function inlineFunction($params) {
+    public static function inlineFunction($params)
+    {
         return isset($params["text"]) ? $params["text"] : "";
     }
 
-    public static function blockFunction($params, $text) {
+    public static function blockFunction($params, $text)
+    {
         return $text;
     }
 
-    public static function setUpBeforeClass() {
-        if(!file_exists(FENOM_RESOURCES.'/template')) {
-            mkdir(FENOM_RESOURCES.'/template', 0777, true);
+    public static function setUpBeforeClass()
+    {
+        if (!file_exists(FENOM_RESOURCES . '/template')) {
+            mkdir(FENOM_RESOURCES . '/template', 0777, true);
         } else {
-            FS::clean(FENOM_RESOURCES.'/template/');
+            FS::clean(FENOM_RESOURCES . '/template/');
         }
     }
 
-    public function tpl($name, $code) {
+    public function tpl($name, $code)
+    {
         $dir = dirname($name);
-        if($dir != "." && !is_dir(FENOM_RESOURCES.'/template/'.$dir)) {
-            mkdir(FENOM_RESOURCES.'/template/'.$dir, 0777, true);
+        if ($dir != "." && !is_dir(FENOM_RESOURCES . '/template/' . $dir)) {
+            mkdir(FENOM_RESOURCES . '/template/' . $dir, 0777, true);
         }
-        file_put_contents(FENOM_RESOURCES.'/template/'.$name, $code);
+        file_put_contents(FENOM_RESOURCES . '/template/' . $name, $code);
     }
 
     /**
@@ -96,20 +105,22 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param int $options
      * @param bool $dump dump source and result code (for debug)
      */
-    public function exec($code, $vars, $result, $options = 0, $dump = false) {
+    public function exec($code, $vars, $result, $options = 0, $dump = false)
+    {
         $this->fenom->setOptions($options);
         $tpl = $this->fenom->compileCode($code, "runtime.tpl");
-        if($dump) {
-            echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
+        if ($dump) {
+            echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody() . "\n========= DUMP END =============\n";
         }
         $this->assertSame(Modifier::strip($result), Modifier::strip($tpl->fetch($vars), true), "Test $code");
     }
 
-    public function execTpl($name, $code, $vars, $result, $dump = false) {
+    public function execTpl($name, $code, $vars, $result, $dump = false)
+    {
         $this->tpl($name, $code);
         $tpl = $this->fenom->getTemplate($name);
-        if($dump) {
-            echo "\n========= DUMP BEGIN ===========\n".$code."\n--- to ---\n".$tpl->getBody()."\n========= DUMP END =============\n";
+        if ($dump) {
+            echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody() . "\n========= DUMP END =============\n";
         }
         $this->assertSame(Modifier::strip($result, true), Modifier::strip($tpl->fetch($vars), true), "Test tpl $name");
     }
@@ -121,12 +132,13 @@ class TestCase extends \PHPUnit_Framework_TestCase {
      * @param string $message exception message
      * @param int $options Fenom's options
      */
-    public function execError($code, $exception, $message, $options = 0) {
+    public function execError($code, $exception, $message, $options = 0)
+    {
         $opt = $this->fenom->getOptions();
         $this->fenom->setOptions($options);
         try {
             $this->fenom->compileCode($code, "inline.tpl");
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             $this->assertSame($exception, get_class($e), "Exception $code");
             $this->assertStringStartsWith($message, $e->getMessage());
             $this->fenom->setOptions($opt);
@@ -136,28 +148,31 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         $this->fail("Code $code must be invalid");
     }
 
-    public function assertRender($tpl, $result, $debug = false) {
+    public function assertRender($tpl, $result, $debug = false)
+    {
         $template = $this->fenom->compileCode($tpl);
-        if($debug) {
-            print_r("$tpl:\n".$template->getBody());
+        if ($debug) {
+            print_r("$tpl:\n" . $template->getBody());
         }
         $this->assertSame($result, $template->fetch($this->values));
     }
 
 
-	public static function providerNumbers() {
-		return array(
-			array('0', 0),
-			array('77', 77),
-			array('-33', -33),
-			array('0.2', 0.2),
-			array('-0.3', -0.3),
-			array('1e6', 1e6),
-			array('-2e6', -2e6),
-		);
-	}
+    public static function providerNumbers()
+    {
+        return array(
+            array('0', 0),
+            array('77', 77),
+            array('-33', -33),
+            array('0.2', 0.2),
+            array('-0.3', -0.3),
+            array('1e6', 1e6),
+            array('-2e6', -2e6),
+        );
+    }
 
-    public static function providerStrings() {
+    public static function providerStrings()
+    {
         return array(
             array('"str"', 'str'),
             array('"str\nand\nmany\nlines"', "str\nand\nmany\nlines"),
@@ -187,81 +202,92 @@ class TestCase extends \PHPUnit_Framework_TestCase {
         );
     }
 
-	public function providerVariables() {
-		return array();
-	}
+    public function providerVariables()
+    {
+        return array();
+    }
 
-	public static function providerObjects() {
-		return array();
-	}
+    public static function providerObjects()
+    {
+        return array();
+    }
 
-	public static function providerArrays() {
-		$scalars = array();
-		$data = array(
-			array('[]', array()),
-			array('[[],[]]', array(array(), array())),
-		);
-		foreach(self::providerScalars() as $scalar) {
-			$scalars[0][] = $scalar[0];
-			$scalars[1][] = $scalar[1];
+    public static function providerArrays()
+    {
+        $scalars = array();
+        $data = array(
+            array('[]', array()),
+            array('[[],[]]', array(array(), array())),
+        );
+        foreach (self::providerScalars() as $scalar) {
+            $scalars[0][] = $scalar[0];
+            $scalars[1][] = $scalar[1];
 
-			$data[] = array(
-				"[".$scalar[0]."]",
-				array($scalar[1])
-			);
-			$data[] = array(
-				"['some_key' =>".$scalar[0]."]",
-				array('some_key' => $scalar[1])
-			);
-		}
-		$data[] = array(
-			"[".implode(", ", $scalars[0])."]",
-			$scalars[1]
-		);
-		return $data;
-	}
+            $data[] = array(
+                "[" . $scalar[0] . "]",
+                array($scalar[1])
+            );
+            $data[] = array(
+                "['some_key' =>" . $scalar[0] . "]",
+                array('some_key' => $scalar[1])
+            );
+        }
+        $data[] = array(
+            "[" . implode(", ", $scalars[0]) . "]",
+            $scalars[1]
+        );
+        return $data;
+    }
 
-	public static function providerScalars() {
-		return array_merge(
-			self::providerNumbers(),
-			self::providerStrings()
-		);
-	}
+    public static function providerScalars()
+    {
+        return array_merge(
+            self::providerNumbers(),
+            self::providerStrings()
+        );
+    }
 
-	public static function providerValues() {
-		return array_merge(
-			self::providerScalars(),
-			self::providerArrays(),
-			self::providerVariables(),
-			self::providerObjects()
-		);
-	}
+    public static function providerValues()
+    {
+        return array_merge(
+            self::providerScalars(),
+            self::providerArrays(),
+            self::providerVariables(),
+            self::providerObjects()
+        );
+    }
 }
 
-class Fake implements \ArrayAccess {
+class Fake implements \ArrayAccess
+{
     public $vars;
 
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return true;
     }
 
-    public function offsetGet($offset) {
-        if($offset == "object") {
+    public function offsetGet($offset)
+    {
+        if ($offset == "object") {
             return new self();
         } else {
             return new self($offset);
         }
     }
 
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         $this->vars[$offset] = $value;
     }
 
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         unset($this->vars[$offset]);
     }
 
-	public function proxy() {
-		return implode(", ", func_get_args());
-	}
+    public function proxy()
+    {
+        return implode(", ", func_get_args());
+    }
 }

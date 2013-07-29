@@ -1,9 +1,11 @@
 <?php
 namespace Fenom;
 
-class MacrosTest extends TestCase {
+class MacrosTest extends TestCase
+{
 
-    public function setUp() {
+    public function setUp()
+    {
         parent::setUp();
         $this->tpl("math.tpl", '
         {macro plus(x, y)}
@@ -52,31 +54,35 @@ class MacrosTest extends TestCase {
         {macro.factorial num=10}');
     }
 
-    public function _testSandbox() {
+    public function _testSandbox()
+    {
         try {
-        $this->fenom->compile("macro_recursive.tpl");
-        $this->fenom->flush();
-        var_dump($this->fenom->fetch("macro_recursive.tpl", []));
-        } catch(\Exception $e) {
-            var_dump($e->getMessage().": ".$e->getTraceAsString());
+            $this->fenom->compile("macro_recursive.tpl");
+            $this->fenom->flush();
+            var_dump($this->fenom->fetch("macro_recursive.tpl", []));
+        } catch (\Exception $e) {
+            var_dump($e->getMessage() . ": " . $e->getTraceAsString());
         }
         exit;
     }
 
-    public function testMacros() {
+    public function testMacros()
+    {
         $tpl = $this->fenom->compile('math.tpl');
 
         $this->assertStringStartsWith('x + y = ', trim($tpl->macros["plus"]["body"]));
         $this->assertSame('Math: x + y = 5 , x - y - z = 6', Modifier::strip($tpl->fetch(array()), true));
     }
 
-    public function testImport() {
+    public function testImport()
+    {
         $tpl = $this->fenom->compile('import.tpl');
 
         $this->assertSame('Imp: x + y = 3 , x - y - z = 3', Modifier::strip($tpl->fetch(array()), true));
     }
 
-    public function testImportCustom() {
+    public function testImportCustom()
+    {
         $tpl = $this->fenom->compile('import_custom.tpl');
 
         $this->assertSame('a: x + y = 3 , x - y - z = 3 , new minus macros .', Modifier::strip($tpl->fetch(array()), true));
@@ -86,13 +92,15 @@ class MacrosTest extends TestCase {
      * @expectedExceptionMessage Undefined macro 'plus'
      * @expectedException \Fenom\CompileException
      */
-    public function testImportMiss() {
+    public function testImportMiss()
+    {
         $tpl = $this->fenom->compile('import_miss.tpl');
 
         $this->assertSame('a: x + y = 3 , x - y - z = 3 , new minus macros .', Modifier::strip($tpl->fetch(array()), true));
     }
 
-    public function testRecursive() {
+    public function testRecursive()
+    {
         $this->fenom->compile('macro_recursive.tpl');
         $this->fenom->flush();
         $tpl = $this->fenom->getTemplate('macro_recursive.tpl');

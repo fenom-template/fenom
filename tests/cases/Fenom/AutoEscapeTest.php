@@ -3,9 +3,11 @@
 namespace Fenom;
 
 
-class AutoEscapeTest extends TestCase {
+class AutoEscapeTest extends TestCase
+{
 
-    public static function providerHTML() {
+    public static function providerHTML()
+    {
         $html = "<script>alert('injection');</script>";
         $escaped = htmlspecialchars($html, ENT_COMPAT, 'UTF-8');
         $vars = array(
@@ -17,7 +19,7 @@ class AutoEscapeTest extends TestCase {
             array('{$html}, {$html}', "$escaped, $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{raw $html}, {$html}', "$html, $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{raw $html}, {$html}', "$html, $escaped", $vars, \Fenom::AUTO_ESCAPE),
-            array('{raw "{$html|up}"}, {$html}', strtoupper($html).", $escaped", $vars, \Fenom::AUTO_ESCAPE),
+            array('{raw "{$html|up}"}, {$html}', strtoupper($html) . ", $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{autoescape true}{$html}{/autoescape}, {$html}', "$escaped, $html", $vars, 0),
             array('{autoescape false}{$html}{/autoescape}, {$html}', "$html, $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{autoescape true}{$html}{/autoescape}, {$html}', "$escaped, $escaped", $vars, \Fenom::AUTO_ESCAPE),
@@ -31,7 +33,7 @@ class AutoEscapeTest extends TestCase {
             array('{test_function text=$html}, {$html}', "$html, $html", $vars, 0),
             array('{test_function text=$html}, {$html}', "$escaped, $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{raw:test_function text=$html}, {$html}', "$html, $escaped", $vars, \Fenom::AUTO_ESCAPE),
-            array('{raw:test_function text="{$html|up}"}, {$html}', strtoupper($html).", $escaped", $vars, \Fenom::AUTO_ESCAPE),
+            array('{raw:test_function text="{$html|up}"}, {$html}', strtoupper($html) . ", $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{autoescape true}{test_function text=$html}{/autoescape}, {test_function text=$html}', "$escaped, $html", $vars, 0),
             array('{autoescape false}{test_function text=$html}{/autoescape}, {test_function text=$html}', "$html, $escaped", $vars, \Fenom::AUTO_ESCAPE),
             array('{autoescape true}{test_function text=$html}{/autoescape}, {test_function text=$html}', "$escaped, $escaped", $vars, \Fenom::AUTO_ESCAPE),
@@ -56,7 +58,8 @@ class AutoEscapeTest extends TestCase {
     /**
      * @dataProvider providerHTML
      */
-    public function testEscaping($tpl, $result, $vars, $options) {
+    public function testEscaping($tpl, $result, $vars, $options)
+    {
         $this->values = $vars;
         $this->fenom->setOptions($options);
         $this->assertRender($tpl, $result);
