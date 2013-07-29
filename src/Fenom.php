@@ -47,6 +47,8 @@ class Fenom {
     const DEFAULT_FUNC_CLOSE     = 'Fenom\Compiler::stdFuncClose';
     const SMART_FUNC_PARSER      = 'Fenom\Compiler::smartFuncParser';
 
+    const MAX_MACRO_RECURSIVE    = 32;
+
     /**
      * @var int[] of possible options, as associative array
      * @see setOptions

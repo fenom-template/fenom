@@ -34,7 +34,7 @@ class Compiler {
             if($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
-                return '$_tpl = (array)$tpl; $tpl->exchangeArray('.self::toArray($p).'+$_tpl); ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
+                return '$_tpl = (array)$tpl; $tpl->exchangeArray('.self::toArray($p).'+$_tpl); ?>'.$inc->getBody().'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
             } else {
                 return '$tpl->getStorage()->getTemplate('.$cname.')->display('.self::toArray($p).'+(array)$tpl);';
             }
@@ -42,7 +42,7 @@ class Compiler {
             if($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) { // if FORCE_INCLUDE enabled and template name known
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
-                return '$_tpl = (array)$tpl; ?>'.$inc->_body.'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
+                return '$_tpl = (array)$tpl; ?>'.$inc->getBody().'<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
             } else {
                 return '$tpl->getStorage()->getTemplate('.$cname.')->display((array)$tpl);';
             }
@@ -493,7 +493,6 @@ class Compiler {
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope) {
         if($scope->level > 0) {
-            var_dump("".$scope->tpl);
             $scope->tpl->_compatible = true;
         }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
@@ -809,7 +808,6 @@ class Compiler {
                 if($alias) {
                     $name = $alias.'.'.$name;
                 }
-
                 $tpl->macros[$name] = $macro;
             }
             $tpl->addDepend($donor);
@@ -827,8 +825,9 @@ class Compiler {
      */
     public static function macroOpen(Tokenizer $tokens, Scope $scope) {
         $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
-        $scope["args"] = array();
-        $scope["defaults"] = array();
+        $scope["recursive"] = array();
+        $args = array();
+        $defaults = array();
         if(!$tokens->valid()) {
             return;
         }
@@ -836,12 +835,12 @@ class Compiler {
         if($tokens->is(')')) {
             return;
         }
-        while($tokens->is(Tokenizer::MACRO_STRING)) {
-            $scope["args"][] = $param = $tokens->getAndNext();
+        while($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
+            $args[] = $param = $tokens->getAndNext();
             if($tokens->is('=')) {
                 $tokens->next();
                 if($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
-                    $scope["defaults"][ $param ] = $tokens->getAndNext();
+                    $defaults[ $param ] = $tokens->getAndNext();
                 } else {
                     throw new InvalidUsageException("Macro parameters may have only scalar defaults");
                 }
@@ -849,7 +848,12 @@ class Compiler {
             $tokens->skipIf(',');
         }
         $tokens->skipIf(')');
-
+        $scope["macro"] = array(
+            "id" => $scope->tpl->i++,
+            "args" => $args,
+            "defaults" => $defaults,
+            "body" => ""
+        );
         return;
     }
 
@@ -858,12 +862,23 @@ class Compiler {
      * @param Scope $scope
      */
     public static function macroClose(Tokenizer $tokens, Scope $scope) {
-        $scope->tpl->macros[ $scope["name"] ] = array(
-            "body" => $content = $scope->getContent(),
-            "args" => $scope["args"],
-            "defaults" => $scope["defaults"]
-        );
-        $scope->tpl->_body = substr($scope->tpl->_body, 0, strlen($scope->tpl->_body) - strlen($content));
+        if($scope["recursive"]) {
+            $switch = "switch(\$call['mark']) {\n";
+            foreach($scope["recursive"] as $mark) {
+                $switch .= "case $mark: goto macro_$mark;\n";
+            }
+            $switch .= "}";
+            $stack = '$stack_'.$scope["macro"]['id'];
+            $scope["macro"]["body"] = '<?php '.$stack.' = array(); macro_'.$scope["macro"]['id'].': ?>'.$scope->cutContent().'<?php if('.$stack.') {'.PHP_EOL.
+            '$call = array_pop('.$stack.');'.PHP_EOL.
+            '$tpl = $call["tpl"];'.PHP_EOL.
+            $switch.PHP_EOL.
+            'unset($call, '.$stack.');'.PHP_EOL.
+            '} ?>';
+        } else {
+            $scope["macro"]["body"] = $scope->cutContent();
+        }
+        $scope->tpl->macros[ $scope["name"] ] = $scope["macro"];
     }
 
     /**

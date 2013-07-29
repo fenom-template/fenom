@@ -9,8 +9,8 @@ Fenom - Template Engine for PHP
 * Simple [syntax](./docs/syntax.md)
 * [Fast](./docs/benchmark.md)
 * [Secure](./docs/settings.md)
-* [Simple](./ideology.md)
-* [Flexible](./docs/main.md#extends)
+* Simple
+* [Flexible](./docs/ext/extensions.md)
 * [Lightweight](./docs/benchmark.md#stats)
 * [Powerful](./docs/main.md)
 * Easy to use:

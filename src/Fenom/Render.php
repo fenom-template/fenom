@@ -72,11 +72,10 @@ class Render extends \ArrayObject {
      * @param callable $code template body
      * @param array $props
      */
-    public function __construct(Fenom $fenom, \Closure $code, $props = array()) {
+    public function __construct(Fenom $fenom, \Closure $code, array $props = array()) {
         $this->_fenom = $fenom;
         $props += self::$_props;
         $this->_name = $props["name"];
-//        $this->_provider = $this->_fenom->getProvider($props["scm"]);
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
@@ -85,28 +84,48 @@ class Render extends \ArrayObject {
 
     /**
      * Get template storage
-     * @return Fenom
+     * @return \Fenom
      */
     public function getStorage() {
         return $this->_fenom;
     }
 
+    /**
+     * Get depends list
+     * @return array
+     */
     public function getDepends() {
         return $this->_depends;
     }
 
+    /**
+     * Get schema name
+     * @return string
+     */
     public function getScm() {
         return $this->_scm;
     }
 
+    /**
+     * Get provider of template source
+     * @return ProviderInterface
+     */
     public function getProvider() {
         return $this->_fenom->getProvider($this->_scm);
     }
 
+    /**
+     * Get name without schema
+     * @return string
+     */
     public function getBaseName() {
         return $this->_base_name;
     }
 
+    /**
+     * Get parse options
+     * @return int
+     */
     public function getOptions() {
         return $this->_options;
     }

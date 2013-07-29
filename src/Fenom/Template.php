@@ -39,12 +39,6 @@ class Template extends Render {
      */
     public $i = 1;
     /**
-     * Template PHP code
-     * @var string
-     */
-    public $_body;
-
-    /**
      * @var array of macros
      */
     public $macros = array();
@@ -63,9 +57,16 @@ class Template extends Render {
      * @var bool
      */
     public $escape = false;
+
     public $_extends;
     public $_extended = false;
     public $_compatible;
+
+    /**
+     * Template PHP code
+     * @var string
+     */
+    private $_body;
 
     /**
      * Call stack
@@ -362,9 +363,10 @@ class Template extends Render {
      * @return string
      */
     public function getTemplateCode() {
+        $before = $this->_before ? $this->_before."\n" : "";
         return "<?php \n".
         "/** Fenom template '".$this->_name."' compiled at ".date('Y-m-d H:i:s')." */\n".
-        ($this->_before ? $this->_before."\n" : "").
+        $before. // some code 'before' template
         "return new Fenom\\Render(\$fenom, ".$this->_getClosureSource().", ".var_export(array(
                 "options" => $this->_options,
                 "provider" => $this->_scm,
@@ -517,7 +519,7 @@ class Template extends Render {
             if($action !== "macro") {
                 $name = $action.".".$name;
             }
-            return $this->parseMacro($tokens, $name);
+            return $this->parseMacroCall($tokens, $name);
         }
 
         if($tag = $this->_fenom->getTag($action, $this)) { // call some function
@@ -839,7 +841,7 @@ class Template extends Render {
     }
 
     /**
-     * Parse 'is' and 'is not' operator
+     * Parse 'is' and 'is not' operators
      * @see $_checkers
      * @param Tokenizer $tokens
      * @param string $value
@@ -1095,7 +1097,7 @@ class Template extends Render {
             }
 
             if(!is_string($mods)) { // dynamic modifier
-                $mods = 'call_user_func($tpl->getStorage()->getModifier("'.$modifier_name.'"), ';
+                $mods = 'call_user_func($tpl->getStorage()->getModifier("'.$mods.'"), ';
             } else {
                 $mods .= "(";
             }
@@ -1188,24 +1190,42 @@ class Template extends Render {
      * @return string
      * @throws InvalidUsageException
      */
-    public function parseMacro(Tokenizer $tokens, $name) {
+    public function parseMacroCall(Tokenizer $tokens, $name) {
+        $recursive = false;
+        $macro = false;
         if(isset($this->macros[ $name ])) {
             $macro = $this->macros[ $name ];
-            $p = $this->parseParams($tokens);
-            $args = array();
-            foreach($macro["args"] as $arg) {
-                if(isset($p[ $arg ])) {
-                    $args[ $arg ] = $p[ $arg ];
-                } elseif(isset($macro["defaults"][ $arg ])) {
-                    $args[ $arg ] = $macro["defaults"][ $arg ];
-                } else {
-                    throw new InvalidUsageException("Macro '$name' require '$arg' argument");
+        } else {
+            foreach($this->_stack as $scope) {
+                if($scope->name == 'macro' && $scope['name'] == $name) { // invoke recursive
+                    $recursive = $scope;
+                    $macro = $scope['macro'];
+                    break;
                 }
             }
-            $args = $args ? '$tpl = '.Compiler::toArray($args).';' : '';
-            return '$_tpl = $tpl; '.$args.' ?>'.$macro["body"].'<?php $tpl = $_tpl; unset($_tpl);';
+            if(!$macro) {
+                throw new InvalidUsageException("Undefined macro '$name'");
+            }
+        }
+        $tokens->next();
+        $p = $this->parseParams($tokens);
+        $args = array();
+        foreach($macro['args'] as $arg) {
+            if(isset($p[ $arg ])) {
+                $args[ $arg ] = $p[ $arg ];
+            } elseif(isset($macro['defaults'][ $arg ])) {
+                $args[ $arg ] = $macro['defaults'][ $arg ];
+            } else {
+                throw new InvalidUsageException("Macro '$name' require '$arg' argument");
+            }
+        }
+        $args = $args ? '$tpl = '.Compiler::toArray($args).';' : '';
+        if($recursive) {
+            $n = $this->i++;
+            $recursive['recursive'][] = $n;
+            return '$stack_'.$macro['id'].'[] = array("tpl" => $tpl, "mark" => '.$n.'); '.$args.' goto macro_'.$macro['id'].'; macro_'.$n.':';
         } else {
-            throw new InvalidUsageException("Undefined macro '$name'");
+            return '$_tpl = $tpl; '.$args.' ?>'.$macro["body"].'<?php $tpl = $_tpl; unset($_tpl);';
         }
     }
 
@@ -1269,6 +1289,7 @@ class Template extends Render {
             return $this->parseExp($tokens, true);
         }
     }
+
 
     /**
      * Parse parameters as $key=$value

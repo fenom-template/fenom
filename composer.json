@@ -1,9 +1,8 @@
 {
     "name": "fenom/fenom",
     "type": "library",
-    "description": "Fenom - fast template engine for PHP",
-    "homepage": "http://bzick.github.io/fenom/",
-    "keywords": ["fenom", "template", "templating", "cytro"],
+    "description": "Fenom - excellent template engine for PHP",
+    "keywords": ["fenom", "template", "templating", "templater"],
     "license": "BSD-3",
     "authors": [
         {
