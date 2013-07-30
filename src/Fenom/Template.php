@@ -670,8 +670,9 @@ class Template extends Render {
                 }
                 $_exp[] = " ".$tokens->getAndNext()." ";
                 $term = 0;
-            } elseif($tokens->is('[')) {
+            } elseif(!$term && $tokens->is('[')) {
 				$_exp[] = $this->parseArray($tokens);
+				$term = 1;
             } else {
                 break;
             }
