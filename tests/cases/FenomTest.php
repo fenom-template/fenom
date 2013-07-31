@@ -114,4 +114,24 @@ class FenomTest extends \Fenom\TestCase
 //        printf("remove %010b from option %010b, flags %010b\n", $option, $this->fenom->getOptions(), $flags & ~$option);
 //        $this->assertSame($this->fenom->getOptions(), $flags & ~$option);
     }
+
+    public function testFilter() {
+        $punit = $this;
+        $this->fenom->addPreFilter(function ($src, $tpl) use ($punit) {
+            $this->assertInstanceOf('Fenom\Template', $tpl);
+            return "== $src ==";
+        });
+
+        $this->fenom->addPostFilter(function ($code, $tpl) use ($punit) {
+            $this->assertInstanceOf('Fenom\Template', $tpl);
+            return "+++ $code +++";
+        });
+
+        $this->fenom->addFilter(function ($text, $tpl) use ($punit) {
+            $this->assertInstanceOf('Fenom\Template', $tpl);
+            return "|--- $text ---|";
+        });
+
+        $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} god {/var} world')->fetch(array()));
+    }
 }

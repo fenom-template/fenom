@@ -8,8 +8,8 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
-use Fenom,
-    Fenom\Error\UnexpectedTokenException;
+use Fenom;
+use Fenom\Error\UnexpectedTokenException;
 use Fenom\Error\CompileException;
 use Fenom\Error\InvalidUsageException;
 use Fenom\Error\SecurityException;
@@ -97,7 +97,7 @@ class Template extends Render
 
     private $_before;
 
-    private $_filter = array();
+    private $_filters = array();
 
     private static $_checkers = array(
         'integer' => 'is_int(%s)',
@@ -136,6 +136,7 @@ class Template extends Render
     {
         $this->_fenom = $fenom;
         $this->_options = $options;
+        $this->_filters = $this->_fenom->getFilters();
     }
 
     /**
@@ -196,6 +197,9 @@ class Template extends Render
     {
         $end = $pos = 0;
         $this->escape = $this->_options & Fenom::AUTO_ESCAPE;
+        foreach($this->_fenom->getPreFilters() as $filter) {
+            $this->_src = call_user_func($filter, $this->_src, $this);
+        }
 
         while (($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch ($this->_src[$start + 1]) { // check next character
@@ -275,11 +279,15 @@ class Template extends Render
             }
         }
         $this->addDepend($this); // for 'verify' performance
+        foreach($this->_fenom->getPostFilters() as $filter) {
+            $this->_body = call_user_func($filter, $this->_body, $this);
+        }
     }
 
     /**
-     * Execute some code in loading cache
+     * Execute some code at loading cache
      * @param $code
+     * @return void
      */
     public function before($code)
     {
@@ -303,15 +311,18 @@ class Template extends Render
     private function _appendText($text)
     {
         $this->_line += substr_count($text, "\n");
-        if ($this->_filter) {
+        if ($this->_filters) {
             if (strpos($text, "<?") === false) {
+                foreach ($this->_filters as $filter) {
+                    $text = call_user_func($filter, $text, $this);
+                }
                 $this->_body .= $text;
             } else {
                 $fragments = explode("<?", $text);
                 foreach ($fragments as &$fragment) {
                     if ($fragment) {
-                        foreach ($this->_filter as $filter) {
-                            $fragment = call_user_func($filter, $fragment);
+                        foreach ($this->_filters as $filter) {
+                            $fragment = call_user_func($filter, $fragment, $this);
                         }
                     }
                 }

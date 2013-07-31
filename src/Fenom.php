@@ -7,8 +7,8 @@
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
-use Fenom\Template,
-    Fenom\ProviderInterface;
+use Fenom\ProviderInterface;
+use Fenom\Template;
 
 /**
  * Fenom Template Engine
@@ -68,9 +68,25 @@ class Fenom
     );
 
     /**
+     * @var callable[]
+     */
+    public $pre_filters = array();
+
+    /**
+     * @var callable[]
+     */
+    public $filters = array();
+
+    /**
+     * @var callable[]
+     */
+    public $post_filters = array();
+
+    /**
      * @var Fenom\Render[] Templates storage
      */
     protected $_storage = array();
+
     /**
      * @var string compile directory
      */
@@ -80,10 +96,6 @@ class Fenom
      * @var int masked options
      */
     protected $_options = 0;
-
-    protected $_on_pre_cmp = array();
-    protected $_on_cmp = array();
-    protected $_on_post_cmp = array();
 
     /**
      * @var ProviderInterface
@@ -98,28 +110,28 @@ class Fenom
      * @var string[] list of modifiers [modifier_name => callable]
      */
     protected $_modifiers = array(
-        "upper" => 'strtoupper',
-        "up" => 'strtoupper',
-        "lower" => 'strtolower',
-        "low" => 'strtolower',
+        "upper"     => 'strtoupper',
+        "up"        => 'strtoupper',
+        "lower"     => 'strtolower',
+        "low"       => 'strtolower',
         "date_format" => 'Fenom\Modifier::dateFormat',
-        "date" => 'Fenom\Modifier::date',
-        "truncate" => 'Fenom\Modifier::truncate',
-        "escape" => 'Fenom\Modifier::escape',
-        "e" => 'Fenom\Modifier::escape', // alias of escape
-        "unescape" => 'Fenom\Modifier::unescape',
-        "strip" => 'Fenom\Modifier::strip',
-        "length" => 'Fenom\Modifier::length',
-        "iterable" => 'Fenom\Modifier::isIterable'
+        "date"      => 'Fenom\Modifier::date',
+        "truncate"  => 'Fenom\Modifier::truncate',
+        "escape"    => 'Fenom\Modifier::escape',
+        "e"         => 'Fenom\Modifier::escape', // alias of escape
+        "unescape"  => 'Fenom\Modifier::unescape',
+        "strip"     => 'Fenom\Modifier::strip',
+        "length"    => 'Fenom\Modifier::length',
+        "iterable"  => 'Fenom\Modifier::isIterable'
     );
 
     /**
      * @var array of allowed PHP functions
      */
     protected $_allowed_funcs = array(
-        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
-        "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
-        "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
+        "count"     => 1, "is_string" => 1, "is_array"   => 1, "is_numeric" => 1, "is_int"      => 1,
+        "is_object" => 1, "strtotime" => 1, "gettype"    => 1, "is_double"  => 1, "json_encode" => 1, "json_decode" => 1,
+        "ip2long"   => 1, "long2ip"   => 1, "strip_tags" => 1, "nl2br"      => 1, "explode"     => 1, "implode"     => 1
     );
 
     /**
@@ -292,27 +304,47 @@ class Fenom
     /**
      *
      * @param callable $cb
+     * @return self
      */
-    public function addPreCompileFilter($cb)
+    public function addPreFilter($cb)
     {
-        $this->_on_pre_cmp[] = $cb;
+        $this->pre_filters[] = $cb;
+        return $this;
+    }
+
+    public function getPreFilters() {
+        return $this->pre_filters;
     }
 
     /**
      *
      * @param callable $cb
+     * @return self
      */
-    public function addPostCompileFilter($cb)
+    public function addPostFilter($cb)
     {
-        $this->_on_post_cmp[] = $cb;
+        $this->post_filters[] = $cb;
+        return $this;
+    }
+
+
+    public function getPostFilters() {
+        return $this->post_filters;
     }
 
     /**
      * @param callable $cb
+     * @return self
      */
-    public function addCompileFilter($cb)
+    public function addFilter($cb)
     {
-        $this->_on_cmp[] = $cb;
+        $this->filters[] = $cb;
+        return $this;
+    }
+
+
+    public function getFilters() {
+        return $this->filters;
     }
 
     /**
