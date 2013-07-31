@@ -617,20 +617,23 @@ class Fenom {
      * @return Fenom\Template
      */
     public function getTemplate($template, $options = 0) {
-        $options |= $this->_options;
-        $key = dechex($options)."@".$template;
-        if(isset($this->_storage[ $key ])) {
+		$options |= $this->_options;
+
+		if (($options & self::FORCE_COMPILE) === self::FORCE_COMPILE) {
+			return $this->compile($template, ($options & self::DISABLE_CACHE) === self::DISABLE_CACHE, $options);
+		}
+
+		$key = dechex($options)."@".$template;
+		if(isset($this->_storage[ $key ])) {
             /** @var Fenom\Template $tpl  */
             $tpl = $this->_storage[ $key ];
-            if(($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
+            if(($options & self::AUTO_RELOAD) && !$tpl->isValid()) {
                 return $this->_storage[ $key ] = $this->compile($template, true, $options);
             } else {
                 return $tpl;
             }
-        } elseif($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
         } else {
-            return $this->_storage[ $key ] = $this->_load($template, $options);
+			return $this->_storage[ $key ] = $this->_load($template, $options);
         }
     }
 
@@ -650,6 +653,23 @@ class Fenom {
         return false;
     }
 
+	/**
+	 * @param $tpl
+	 * @param $options
+	 * @return Fenom\Render|null
+	 */
+	public function getCachedTemplate($tpl, $options = 0) {
+		$options |= $this->_options;
+		$cachePath = $this->_compile_dir . DIRECTORY_SEPARATOR . $this->_getCacheName($tpl, $options);
+		if (is_file($cachePath)) {
+			$fenom = $this;
+			/** @noinspection PhpIncludeInspection */
+			return include($cachePath);
+		} else {
+			return null;
+		}
+	}
+
     /**
      * Load template from cache or create cache if it doesn't exists.
      *
@@ -657,15 +677,14 @@ class Fenom {
      * @param int $opts
      * @return Fenom\Render
      */
-    protected function _load($tpl, $opts) {
-        $file_name = $this->_getCacheName($tpl, $opts);
-        if(!is_file($this->_compile_dir."/".$file_name)) {
-            return $this->compile($tpl, true, $opts);
-        } else {
-            $fenom = $this;
-            return include($this->_compile_dir."/".$file_name);
-        }
-    }
+	protected function _load($tpl, $opts) {
+		$cached = $this->getCachedTemplate($tpl, $opts);
+		if ($cached && ( !($opts & self::AUTO_RELOAD) || $cached->isValid() )) {
+			return $cached;
+		}
+
+		return $this->compile($tpl, true, $opts);
+	}
 
     /**
      * Generate unique name of compiled template
