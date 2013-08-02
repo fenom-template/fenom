@@ -389,6 +389,8 @@ class TemplateTest extends TestCase
             array('{$empty.bool?:"empty"}', $a, "empty"),
             array('{$empty.unexist?:"empty"}', $a, "empty"),
             // ? ... : ....
+            array('{$unexists ? "no way" : "right"}', $a),
+            array('{$a ? "right" : "no way"}', $a),
             // !
             array('{if $a!} right {/if}', $a),
             array('{if $unexists!} no way {else} right {/if}', $a),
