@@ -110,28 +110,28 @@ class Fenom
      * @var string[] list of modifiers [modifier_name => callable]
      */
     protected $_modifiers = array(
-        "upper"     => 'strtoupper',
-        "up"        => 'strtoupper',
-        "lower"     => 'strtolower',
-        "low"       => 'strtolower',
+        "upper" => 'strtoupper',
+        "up" => 'strtoupper',
+        "lower" => 'strtolower',
+        "low" => 'strtolower',
         "date_format" => 'Fenom\Modifier::dateFormat',
-        "date"      => 'Fenom\Modifier::date',
-        "truncate"  => 'Fenom\Modifier::truncate',
-        "escape"    => 'Fenom\Modifier::escape',
-        "e"         => 'Fenom\Modifier::escape', // alias of escape
-        "unescape"  => 'Fenom\Modifier::unescape',
-        "strip"     => 'Fenom\Modifier::strip',
-        "length"    => 'Fenom\Modifier::length',
-        "iterable"  => 'Fenom\Modifier::isIterable'
+        "date" => 'Fenom\Modifier::date',
+        "truncate" => 'Fenom\Modifier::truncate',
+        "escape" => 'Fenom\Modifier::escape',
+        "e" => 'Fenom\Modifier::escape', // alias of escape
+        "unescape" => 'Fenom\Modifier::unescape',
+        "strip" => 'Fenom\Modifier::strip',
+        "length" => 'Fenom\Modifier::length',
+        "iterable" => 'Fenom\Modifier::isIterable'
     );
 
     /**
      * @var array of allowed PHP functions
      */
     protected $_allowed_funcs = array(
-        "count"     => 1, "is_string" => 1, "is_array"   => 1, "is_numeric" => 1, "is_int"      => 1,
-        "is_object" => 1, "strtotime" => 1, "gettype"    => 1, "is_double"  => 1, "json_encode" => 1, "json_decode" => 1,
-        "ip2long"   => 1, "long2ip"   => 1, "strip_tags" => 1, "nl2br"      => 1, "explode"     => 1, "implode"     => 1
+        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
+        "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
+        "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
     );
 
     /**
@@ -312,7 +312,8 @@ class Fenom
         return $this;
     }
 
-    public function getPreFilters() {
+    public function getPreFilters()
+    {
         return $this->pre_filters;
     }
 
@@ -328,7 +329,8 @@ class Fenom
     }
 
 
-    public function getPostFilters() {
+    public function getPostFilters()
+    {
         return $this->post_filters;
     }
 
@@ -343,7 +345,8 @@ class Fenom
     }
 
 
-    public function getFilters() {
+    public function getFilters()
+    {
         return $this->filters;
     }
 

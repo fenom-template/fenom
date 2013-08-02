@@ -328,7 +328,7 @@ class Tokenizer
      * @return mixed
      * @throws UnexpectedTokenException
      */
-    public function getAndNext(/* $token1, ... */)
+    public function getAndNext( /* $token1, ... */)
     {
         if ($this->curr) {
             $cur = $this->curr[1];

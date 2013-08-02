@@ -115,7 +115,8 @@ class FenomTest extends \Fenom\TestCase
 //        $this->assertSame($this->fenom->getOptions(), $flags & ~$option);
     }
 
-    public function testFilter() {
+    public function testFilter()
+    {
         $punit = $this;
         $this->fenom->addPreFilter(function ($src, $tpl) use ($punit) {
             $this->assertInstanceOf('Fenom\Template', $tpl);
