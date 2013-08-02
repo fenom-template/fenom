@@ -186,9 +186,10 @@ class TemplateTest extends TestCase
     {
         return array(
             array('If: {-"hi"} end', 'Fenom\Error\CompileException', "Unexpected token '-'"),
+            array('If: {-[1,2]} end', 'Fenom\Error\CompileException', "Unexpected token '-'"),
             array('If: {($a++)++} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('If: {$a + * $c} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
-            array('If: {$a + } end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
+            array('If: {$a + } end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('If: {$a + =} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
             array('If: {$a + 1 =} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
             array('If: {$a + 1 = 6} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
@@ -334,7 +335,7 @@ class TemplateTest extends TestCase
             array('Create: {var $v = $a|upper++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)} Result: {$v} end', 'Fenom\Error\CompileException', "Function max not found", Fenom::DENY_NATIVE_FUNCS),
-            array('Create: {var $v = 4*} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
+            array('Create: {var $v = 4*} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('Create: {var $v = ""$a} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '\$a'"),
             array('Create: {var $v = [1,2} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('Create: {var $v = empty(2)} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 2, isset() and empty() accept only variables"),
@@ -672,7 +673,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{$one.two->three[e]()}')->getBody());
+            var_dump($this->fenom->compileCode('{if 0 is empty} block1 {else} block2 {/if}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }

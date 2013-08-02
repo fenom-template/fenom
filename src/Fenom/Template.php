@@ -603,135 +603,165 @@ class Template extends Render
     }
 
     /**
-     * Parse expressions. The mix of math operations, boolean operations, scalars, arrays and variables.
+     * Parse expressions. The mix of operations and terms.
      *
-     * @static
      * @param Tokenizer $tokens
      * @param bool $required
-     * @throws TokenizeException
-     * @throws UnexpectedTokenException
-     * @throws \Exception
      * @return string
+     * @throws Error\UnexpectedTokenException
      */
-    public function parseExp(Tokenizer $tokens, $required = false)
-    {
-        $_exp = array(); // expression as PHP code
-        $term = false; // last item was variable or value.
-        // 0 - was operator, but trem required
-        // false - was operator or no one term
-        // true - was trem
-        // 1 - term is strict varaible
-        $cond = false; // last item was operator
-        while ($tokens->valid()) {
-            if (!$term && $tokens->is(Tokenizer::MACRO_SCALAR, '"', '`', T_ENCAPSED_AND_WHITESPACE)) { // like quoted string
-                $_exp[] = $this->parseScalar($tokens, true);
-                $term = true;
-            } elseif (!$term && $tokens->is(Tokenizer::MACRO_INCDEC)) { // like variable
-                $_exp[] = $this->parseVariable($tokens);
-                $term = true;
-            } elseif (!$term && $tokens->is(T_VARIABLE)) { // like variable too
-                $var = $this->parseVar($tokens);
-                if ($tokens->is(Tokenizer::MACRO_EQUALS)) {
-                    $_exp[] = $var;
-                    if ($tokens->isLast()) {
-                        break;
-                    }
-                    $_exp[] = $tokens->getAndNext();
-                    $term = 0;
-                } elseif ($tokens->is(Tokenizer::MACRO_INCDEC, "|", "!", "?", '(')) {
-                    $_exp[] = $this->parseVariable($tokens, 0, $var);
-                    $term = true;
-                } else {
-                    $_exp[] = $var;
-                    $term = 1;
-                }
-            } elseif (!$term && $tokens->is("(")) { // open bracket
-                $tokens->next();
-                $_exp[] = "(" . $this->parseExp($tokens, true) . ")";
-                $tokens->get(")");
-                $tokens->next();
-                $term = 1;
-            } elseif ($tokens->is(T_STRING)) {
-                if ($term) { // parse 'in' or 'is' operators
-                    if (!$_exp) {
-                        break;
-                    }
-                    $operator = $tokens->current();
-                    if ($operator == "is") {
-                        $item = array_pop($_exp);
-                        $_exp[] = $this->parseIs($tokens, $item, $term === 1);
-                    } elseif ($operator == "in" || ($operator == "not" && $tokens->isNextToken("in"))) {
-                        $item = array_pop($_exp);
-                        $_exp[] = $this->parseIn($tokens, $item, $term === 1);
-                    } else {
-                        break;
-                    }
-                } else { // function or special value
-                    if ($tokens->isSpecialVal()) {
-                        $_exp[] = $tokens->getAndNext();
-                    } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
-                        $func = $this->_fenom->getModifier($tokens->current(), $this);
-                        if (!$func) {
-                            throw new \Exception("Function " . $tokens->getAndNext() . " not found");
-                        }
-                        $tokens->next();
-                        $func = $func . $this->parseArgs($tokens);
-                        if ($tokens->is('|')) {
-                            $_exp[] = $this->parseModifier($tokens, $func);
-                        } else {
-                            $_exp[] = $func;
-                        }
-                    } else {
-                        break;
-                    }
-                    $term = true;
-                }
-            } elseif (!$term && $tokens->is(T_ISSET, T_EMPTY)) { // empty and isset operators
-                $func = $tokens->getAndNext();
-                if ($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
-                    $tokens->next();
-                    $_exp[] = $func . "(" . $this->parseVar($tokens) . ")";
-                    $tokens->need(')')->next();
-                } else {
-                    throw new TokenizeException("Unexpected token " . $tokens->getNext() . ", isset() and empty() accept only variables");
-                }
-                $term = true;
-            } elseif (!$term && $tokens->is(Tokenizer::MACRO_UNARY)) {
-                if (!$tokens->isNext(T_VARIABLE, T_DNUMBER, T_LNUMBER, T_STRING, T_ISSET, T_EMPTY, '(')) {
-                    break;
-                }
-                $_exp[] = $tokens->getAndNext();
-                $term = 0;
-            } elseif ($tokens->is(Tokenizer::MACRO_BINARY)) { // like binary operator, see Tokenizer::MACRO_BINARY
-                if (!$term) {
-                    throw new UnexpectedTokenException($tokens);
-                }
-                if ($tokens->isLast()) {
-                    break;
-                }
+    public function parseExp(Tokenizer $tokens, $required = false) {
+        $exp  = array();
+        $var  = false; // last term was: true - variable, false - mixed
+        $op   = false; // last exp was operator
+        $cond = false; // was conditional operator
+        while($tokens->valid()) {
+            // parse term
+            $term = $this->parseTerm($tokens, $var);
+            if($term !== false) {
+                $exp[] = $term;
+                $op = false;
+            } else {
+                break;
+            }
+
+            if(!$tokens->valid()) {
+                break;
+            }
+
+            // parse operator
+            if($tokens->is(Tokenizer::MACRO_BINARY)) {
                 if ($tokens->is(Tokenizer::MACRO_COND)) {
                     if ($cond) {
                         break;
                     }
                     $cond = true;
-                } elseif ($tokens->is(Tokenizer::MACRO_BOOLEAN)) {
-                    $cond = false;
                 }
-                $_exp[] = " " . $tokens->getAndNext() . " ";
-                $term = 0;
-            } elseif ($tokens->is('[')) {
-                $_exp[] = $this->parseArray($tokens);
+                $op = $tokens->getAndNext();
+            } elseif($tokens->is(Tokenizer::MACRO_EQUALS)) {
+                if(!$var) {
+                    break;
+                }
+                $op = $tokens->getAndNext();
+            } elseif($tokens->is(T_STRING)) {
+                if (!$exp) {
+                    break;
+                }
+                $operator = $tokens->current();
+                if ($operator == "is") {
+                    $item = array_pop($exp);
+                    $exp[] = $this->parseIs($tokens, $item, $var);
+                } elseif ($operator == "in" || ($operator == "not" && $tokens->isNextToken("in"))) {
+                    $item = array_pop($exp);
+                    $exp[] = $this->parseIn($tokens, $item, $var);
+                } else {
+                    break;
+                }
+            } elseif($tokens->is('~')) {
+                // string concat coming soon
             } else {
                 break;
             }
+            if($op) {
+                $exp[] = $op;
+            }
         }
-        if ($term === 0) {
+
+        if ($op) {
             throw new UnexpectedTokenException($tokens);
         }
-        if ($required && !$_exp) {
+        if ($required && !$exp) {
             throw new UnexpectedTokenException($tokens);
         }
-        return implode('', $_exp);
+        return implode(' ', $exp);
+    }
+
+    /**
+     * Parse any term: -2, ++$var, 'adf'|mod:4
+     *
+     * @param Tokenizer $tokens
+     * @param bool $is_var
+     * @return bool|string
+     * @throws Error\UnexpectedTokenException
+     * @throws Error\TokenizeException
+     * @throws \Exception
+     */
+    public function parseTerm(Tokenizer $tokens, &$is_var = false) {
+        $is_var = false;
+        $unary  = "";
+        term: {
+            if($tokens->is(T_LNUMBER, T_DNUMBER)) {
+                return $unary.$this->parseScalar($tokens, true);
+            } elseif($tokens->is(T_CONSTANT_ENCAPSED_STRING, '"', T_ENCAPSED_AND_WHITESPACE)) {
+                if($unary) {
+                    throw new UnexpectedTokenException($tokens->back());
+                }
+                return $this->parseScalar($tokens, true);
+            } elseif($tokens->is(T_VARIABLE)) {
+                $var = $this->parseVar($tokens);
+                if ($tokens->is(Tokenizer::MACRO_INCDEC, "|", "!", "?")) {
+                    return $unary.$this->parseVariable($tokens, 0, $var);
+                } elseif($tokens->is("(") && $tokens->hasBackList(T_STRING)) { // method call
+                    return $unary.$this->parseVariable($tokens, 0, $var);
+                } elseif($unary) {
+                    return $unary.$var;
+                } else {
+                    $is_var = true;
+                    return $var;
+                }
+            } elseif($tokens->is(Tokenizer::MACRO_INCDEC)) {
+                return $unary.$this->parseVariable($tokens);
+            } elseif($tokens->is("(")) {
+                $tokens->next();
+                $exp = $unary."(" . $this->parseExp($tokens, true).")";
+                $tokens->need(")")->next();
+                return $exp;
+            } elseif($tokens->is(Tokenizer::MACRO_UNARY)) {
+                if($unary) {
+                    throw new UnexpectedTokenException($tokens);
+                }
+                $unary = $tokens->getAndNext();
+                goto term;
+            } elseif($tokens->is(T_STRING)) {
+                if ($tokens->isSpecialVal()) {
+                    return $unary.$tokens->getAndNext();
+                } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
+                    $func = $this->_fenom->getModifier($tokens->current(), $this);
+                    if (!$func) {
+                        throw new \Exception("Function " . $tokens->getAndNext() . " not found");
+                    }
+                    $tokens->next();
+                    $func = $func . $this->parseArgs($tokens);
+                    if ($tokens->is('|')) {
+                        return $unary.$this->parseModifier($tokens, $func);
+                    } else {
+                        return $unary.$func;
+                    }
+                } else {
+                    return false;
+                }
+            } elseif($tokens->is(T_ISSET, T_EMPTY)) {
+                $func = $tokens->getAndNext();
+                if ($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
+                    $tokens->next();
+                    $exp = $func . "(" . $this->parseVar($tokens) . ")";
+                    $tokens->need(')')->next();
+                    return $unary.$exp;
+                } else {
+                    throw new TokenizeException("Unexpected token " . $tokens->getNext() . ", isset() and empty() accept only variables");
+                }
+            } elseif($tokens->is('[')) {
+                if($unary) {
+                    throw new UnexpectedTokenException($tokens->back());
+                }
+                return $this->parseArray($tokens);
+            } elseif($unary) {
+                $tokens->back();
+                throw new UnexpectedTokenException($tokens);
+            } else {
+                return false;
+            }
+        }
     }
 
     /**
@@ -1031,7 +1061,7 @@ class Template extends Render
                     break;
                 case T_ENCAPSED_AND_WHITESPACE:
                 case '"':
-                    $_scalar .= $this->parseSubstr($tokens);
+                    $_scalar .= $this->parseQuote($tokens);
                     break;
                 default:
                     throw new TokenizeException("Unexpected scalar token '" . $tokens->current() . "'");
@@ -1050,7 +1080,7 @@ class Template extends Render
      * @throws UnexpectedTokenException
      * @return string
      */
-    public function parseSubstr(Tokenizer $tokens)
+    public function parseQuote(Tokenizer $tokens)
     {
         if ($tokens->is('"', "`")) {
             $stop = $tokens->current();
@@ -1109,6 +1139,16 @@ class Template extends Render
     }
 
     /**
+     * @param Tokenizer $tokens
+     * @param null $first_member
+     */
+    public function parseConcat(Tokenizer $tokens, $first_member = null) {
+        $concat = array();
+        if($first_member) {
+        }
+    }
+
+    /**
      * Parse modifiers
      * |modifier:1:2.3:'string':false:$var:(4+5*$var3)|modifier2:"str {$var+3} ing":$arr.item
      *
@@ -1137,7 +1177,7 @@ class Template extends Render
                 } elseif ($tokens->is(T_VARIABLE)) {
                     $args[] = $this->parseVariable($tokens, self::DENY_MODS);
                 } elseif ($tokens->is('"', '`', T_ENCAPSED_AND_WHITESPACE)) {
-                    $args[] = $this->parseSubstr($tokens);
+                    $args[] = $this->parseQuote($tokens);
                 } elseif ($tokens->is('(')) {
                     $args[] = $this->parseExp($tokens, true);
                 } elseif ($tokens->is('[')) {
@@ -1187,7 +1227,7 @@ class Template extends Render
                     $key = false;
                     $val = true;
                 } elseif ($tokens->is('"') && !$val) {
-                    $_arr .= $this->parseSubstr($tokens);
+                    $_arr .= $this->parseQuote($tokens);
                     $key = false;
                     $val = true;
                 } elseif ($tokens->is(T_DOUBLE_ARROW) && $val) {
