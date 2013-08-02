@@ -907,9 +907,7 @@ class Template extends Render
             }
         } else {
             $expr1 = $this->parseExp($tokens, true);
-            if (!$tokens->is(":")) {
-                throw new UnexpectedTokenException($tokens, null, "ternary operator");
-            }
+            $tokens->need(':')->skip();
             $expr2 = $this->parseExp($tokens, true);
             if ($empty) {
                 return '(empty(' . $var . ') ? ' . $expr2 . ' : ' . $expr1 . ')';

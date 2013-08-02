@@ -404,7 +404,11 @@ class TemplateTest extends TestCase
             array('{if $nonempty.double!} right {/if}', $a),
             array('{if $nonempty.bool!} right {/if}', $a),
             // ! ... : ...
+            array('{$unexists ! "no way" : "right"}', $a),
+            array('{$a ! "right" : "no way"}', $a),
             // !: ...
+            array('{$unexists !: "right"}', $a),
+            array('{$a !: "right"}', $a, '1'),
         );
     }
 
@@ -673,7 +677,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{if 0 is empty} block1 {else} block2 {/if}')->getBody());
+            var_dump($this->fenom->compileCode('{$a!"no way":"right"}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
