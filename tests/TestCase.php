@@ -34,7 +34,9 @@ class TestCase extends \PHPUnit_Framework_TestCase
             "obj" => new \StdClass,
             "list" => array(
                 "a" => 1,
-                "b" => 2
+                "one" => 1,
+                "b" => 2,
+                "two" => 2
             ),
             0 => "empty value",
             1 => "one value",
@@ -204,7 +206,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
 
     public function providerVariables()
     {
-        return array();
+        return array(
+            array('$one', 1),
+            array('$list.one', 1),
+            array('$list[$$.DEVELOP]', 1),
+        );
     }
 
     public static function providerObjects()

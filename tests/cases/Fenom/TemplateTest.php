@@ -676,10 +676,20 @@ class TemplateTest extends TestCase
         );
     }
 
+    public static function providerConcat() {
+        return array(
+            array('{"string" ~ $one ~ up("end")}', "string1END"),
+            array('{"string" ~ $one++ ~ "end"}', "string1end"),
+            array('{"string" ~ ++$one ~ "end"}', "string2end"),
+            array('{"string" ~ "one" ~ "end"}', "stringoneend"),
+            array('{"string" ~ 1 ~ "end"}', "string1end"),
+        );
+    }
+
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{$a!"no way":"right"}')->getBody());
+            var_dump($this->fenom->compileCode('{$a++~"hi"~time("Y:m:d")}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
@@ -888,6 +898,14 @@ class TemplateTest extends TestCase
      * @dataProvider providerInOperator
      */
     public function testInOperator($code, $result)
+    {
+        $this->exec($code, self::getVars(), $result);
+    }
+
+    /**
+     * @dataProvider providerConcat
+     */
+    public function testConcat($code, $result)
     {
         $this->exec($code, self::getVars(), $result);
     }
