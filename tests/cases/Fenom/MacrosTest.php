@@ -54,17 +54,18 @@ class MacrosTest extends TestCase
         {macro.factorial num=10}');
     }
 
-//    public function _testSandbox()
-//    {
-//        try {
-//            $this->fenom->compile("macro_recursive.tpl");
+    public function _testSandbox()
+    {
+        try {
+            $this->fenom->compile("macro_recursive.tpl");
 //            $this->fenom->flush();
 //            var_dump($this->fenom->fetch("macro_recursive.tpl", []));
-//        } catch (\Exception $e) {
-//            var_dump($e->getMessage() . ": " . $e->getTraceAsString());
-//        }
-//        exit;
-//    }
+            var_dump( $this->fenom->compile("macro_recursive.tpl")->getTemplateCode());
+        } catch (\Exception $e) {
+            var_dump($e->getMessage() . ": " . $e->getTraceAsString());
+        }
+        exit;
+    }
 
     public function testMacros()
     {

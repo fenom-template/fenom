@@ -21,7 +21,8 @@ class Render extends \ArrayObject
         "base_name" => "",
         "scm" => false,
         "time" => 0,
-        "depends" => array()
+        "depends" => array(),
+        "macros" => array()
     );
     /**
      * @var \Closure
@@ -81,6 +82,7 @@ class Render extends \ArrayObject
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
+        $this->_macros = $props["macros"];
         $this->_code = $code;
     }
 
@@ -181,6 +183,15 @@ class Render extends \ArrayObject
             }
         }
         return true;
+    }
+
+    /**
+     * Get internal macro
+     * @param $name
+     * @return mixed
+     */
+    public function getMacro($name) {
+        return $this->_macros[$name];
     }
 
     /**

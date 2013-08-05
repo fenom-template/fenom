@@ -397,18 +397,31 @@ class Template extends Render
      */
     public function getTemplateCode()
     {
+
+        if($this->macros) {
+            $macros = array();
+            foreach($this->macros as $m) {
+                if($m["recursive"]) {
+                    $macros[] = "\t\t'".$m["name"]."' => function (\$tpl) {\n?>".$m["body"]."<?php\n}";
+                }
+            }
+            $macros = "\n".implode(",\n", $macros);
+        } else {
+            $macros = "";
+        }
         $before = $this->_before ? $this->_before . "\n" : "";
         return "<?php \n" .
         "/** Fenom template '" . $this->_name . "' compiled at " . date('Y-m-d H:i:s') . " */\n" .
         $before . // some code 'before' template
-        "return new Fenom\\Render(\$fenom, " . $this->_getClosureSource() . ", " . var_export(array(
-            "options" => $this->_options,
-            "provider" => $this->_scm,
-            "name" => $this->_name,
-            "base_name" => $this->_base_name,
-            "time" => $this->_time,
-            "depends" => $this->_depends
-        ), true) . ");\n";
+        "return new Fenom\\Render(\$fenom, " . $this->_getClosureSource() . ", array(\n".
+            "\t'options' => {$this->_options},\n".
+            "\t'provider' => ".var_export($this->_scm, true).",\n".
+            "\t'name' => ".var_export($this->_name, true).",\n".
+            "\t'base_name' => ".var_export($this->_base_name, true).",\n".
+            "\t'time' => {$this->_time},\n".
+            "\t'depends' => ".var_export($this->_base_name, true).",\n".
+            "\t'macros' => array({$macros}),
+        ));\n";
     }
 
     /**
@@ -1323,14 +1336,14 @@ class Template extends Render
                 throw new InvalidUsageException("Macro '$name' require '$arg' argument");
             }
         }
-        $args = $args ? '$tpl = ' . Compiler::toArray($args) . ';' : '';
+        $n = $this->i++;
         if ($recursive) {
-            $n = $this->i++;
-            $recursive['recursive'][] = $n;
-            return '$stack_' . $macro['id'] . '[] = array("tpl" => $tpl, "mark" => ' . $n . '); ' . $args . ' goto macro_' . $macro['id'] . '; macro_' . $n . ':';
+            $recursive['recursive'] = true;
+            $body = '$tpl->getMacro("'.$name.'")->__invoke($tpl);';
         } else {
-            return '$_tpl = $tpl; ' . $args . ' ?>' . $macro["body"] . '<?php $tpl = $_tpl; unset($_tpl);';
+            $body = '?>'.$macro["body"].'<?php';
         }
+        return '$_tpl'.$n.' = $tpl->exchangeArray(' . Compiler::toArray($args) . ');' . PHP_EOL . $body . PHP_EOL . '$tpl->exchangeArray($_tpl'.$n.'); unset($_tpl'.$n.');';
     }
 
     /**

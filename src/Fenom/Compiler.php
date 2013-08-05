@@ -873,7 +873,7 @@ class Compiler
     public static function macroOpen(Tokenizer $tokens, Scope $scope)
     {
         $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
-        $scope["recursive"] = array();
+        $scope["recursive"] = false;
         $args = array();
         $defaults = array();
         if (!$tokens->valid()) {
@@ -897,10 +897,11 @@ class Compiler
         }
         $tokens->skipIf(')');
         $scope["macro"] = array(
-            "id" => $scope->tpl->i++,
+            "name" => $scope["name"],
             "args" => $args,
             "defaults" => $defaults,
-            "body" => ""
+            "body" => "",
+            "recursive" => false
         );
         return;
     }
@@ -912,21 +913,9 @@ class Compiler
     public static function macroClose(Tokenizer $tokens, Scope $scope)
     {
         if ($scope["recursive"]) {
-            $switch = "switch(\$call['mark']) {\n";
-            foreach ($scope["recursive"] as $mark) {
-                $switch .= "case $mark: goto macro_$mark;\n";
-            }
-            $switch .= "}";
-            $stack = '$stack_' . $scope["macro"]['id'];
-            $scope["macro"]["body"] = '<?php ' . $stack . ' = array(); macro_' . $scope["macro"]['id'] . ': ?>' . $scope->cutContent() . '<?php if(' . $stack . ') {' . PHP_EOL .
-                '$call = array_pop(' . $stack . ');' . PHP_EOL .
-                '$tpl = $call["tpl"];' . PHP_EOL .
-                $switch . PHP_EOL .
-                'unset($call, ' . $stack . ');' . PHP_EOL .
-                '} ?>';
-        } else {
-            $scope["macro"]["body"] = $scope->cutContent();
+            $scope["macro"]["recursive"] = true;
         }
+        $scope["macro"]["body"] = $scope->cutContent();
         $scope->tpl->macros[$scope["name"]] = $scope["macro"];
     }
 
