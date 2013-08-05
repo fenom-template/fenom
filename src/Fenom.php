@@ -216,11 +216,6 @@ class Fenom
             'type' => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagUse'
         ),
-        'capture' => array( // {capture ...} {/capture}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::captureOpen',
-            'close' => 'Fenom\Compiler::captureClose'
-        ),
         'filter' => array( // {filter} ... {/filter}
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::filterOpen',
