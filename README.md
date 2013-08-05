@@ -12,7 +12,7 @@ Fenom - Template Engine for PHP
 * Simple
 * [Flexible](./docs/ext/extensions.md)
 * [Lightweight](./docs/benchmark.md#stats)
-* [Powerful](./docs/main.md)
+* [Powerful](./docs/readme.md)
 * Easy to use:
 
 Simple template
