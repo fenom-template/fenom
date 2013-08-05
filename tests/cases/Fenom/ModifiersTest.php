@@ -2,11 +2,13 @@
 namespace Fenom;
 
 
-class ModifiersTest extends TestCase {
+class ModifiersTest extends TestCase
+{
 
-    public static function providerTruncate() {
+    public static function providerTruncate()
+    {
         $lorem = 'Lorem ipsum dolor sit amet'; // en
-        $uni   = 'Лорем ипсум долор сит амет'; // ru
+        $uni = 'Лорем ипсум долор сит амет'; // ru
         return array(
             // ascii chars
             array($lorem, 'Lorem ip...', 8),
@@ -33,7 +35,8 @@ class ModifiersTest extends TestCase {
      * @param bool $by_words
      * @param bool $middle
      */
-    public function testTruncate($in, $out, $count, $delim = '...', $by_words = false, $middle = false) {
+    public function testTruncate($in, $out, $count, $delim = '...', $by_words = false, $middle = false)
+    {
         $tpl = $this->fenom->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
         $this->assertEquals($out, $tpl->fetch(array(
             "text" => $in,
@@ -44,7 +47,8 @@ class ModifiersTest extends TestCase {
         )));
     }
 
-    public static function providerUpLow() {
+    public static function providerUpLow()
+    {
         return array(
             array("up", "lorem", "LOREM"),
             array("up", "Lorem", "LOREM"),
@@ -64,14 +68,16 @@ class ModifiersTest extends TestCase {
      * @param $in
      * @param $out
      */
-    public function testUpLow($modifier, $in, $out) {
-        $tpl = $this->fenom->compileCode('{$text|'.$modifier.'}');
+    public function testUpLow($modifier, $in, $out)
+    {
+        $tpl = $this->fenom->compileCode('{$text|' . $modifier . '}');
         $this->assertEquals($out, $tpl->fetch(array(
             "text" => $in,
         )));
     }
 
-    public static function providerLength() {
+    public static function providerLength()
+    {
         return array(
             array("length", 6),
             array("длина", 5),
@@ -90,7 +96,8 @@ class ModifiersTest extends TestCase {
      * @param $in
      * @param $out
      */
-    public function testLength($in, $out) {
+    public function testLength($in, $out)
+    {
         $tpl = $this->fenom->compileCode('{$data|length}');
         $this->assertEquals($out, $tpl->fetch(array(
             "data" => $in,

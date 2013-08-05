@@ -14,7 +14,8 @@ namespace Fenom;
  * @package Fenom
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
-interface ProviderInterface {
+interface ProviderInterface
+{
     /**
      * @param string $tpl
      * @return bool

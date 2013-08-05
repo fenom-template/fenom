@@ -1,6 +1,19 @@
 CHANGELOG
 =========
 
+## 1.2.0
+
+- Feature #28: macros may be called recursively
+- Feature #29: add {unset} tag
+- Add hook for loading modifiers and tags
+- Add hook for loading modifiers and tags
+- Feature #3: Add string operator '~'
+- Improve parsers: parserExp, parserVar, parserVariable, parserMacro
+- Fix ternary bug
+- Bugs--
+- Tests++
+- Docs++
+
 ## 1.1.0
 
 - Bug #19: Bug with "if" expressions starting with "("

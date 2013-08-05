@@ -10,11 +10,13 @@
 namespace Fenom;
 
 use Fenom\ProviderInterface;
+
 /**
  * Base template provider
  * @author Ivan Shalganov
  */
-class Provider implements ProviderInterface {
+class Provider implements ProviderInterface
+{
     private $_path;
 
     /**
@@ -22,10 +24,11 @@ class Provider implements ProviderInterface {
      *
      * @param string $path
      */
-    public static function clean($path) {
-        if(is_file($path)) {
+    public static function clean($path)
+    {
+        if (is_file($path)) {
             unlink($path);
-        } elseif(is_dir($path)) {
+        } elseif (is_dir($path)) {
             $iterator = iterator_to_array(
                 new \RecursiveIteratorIterator(
                     new \RecursiveDirectoryIterator($path,
@@ -33,13 +36,13 @@ class Provider implements ProviderInterface {
                     \RecursiveIteratorIterator::CHILD_FIRST
                 )
             );
-            foreach($iterator as $file) {
-                /* @var \splFileInfo $file*/
-                if($file->isFile()) {
-                    if(strpos($file->getBasename(), ".") !== 0) {
+            foreach ($iterator as $file) {
+                /* @var \splFileInfo $file */
+                if ($file->isFile()) {
+                    if (strpos($file->getBasename(), ".") !== 0) {
                         unlink($file->getRealPath());
                     }
-                } elseif($file->isDir()) {
+                } elseif ($file->isDir()) {
                     rmdir($file->getRealPath());
                 }
             }
@@ -51,9 +54,10 @@ class Provider implements ProviderInterface {
      *
      * @param string $path
      */
-    public static function rm($path) {
+    public static function rm($path)
+    {
         self::clean($path);
-        if(is_dir($path)) {
+        if (is_dir($path)) {
             rmdir($path);
         }
     }
@@ -62,8 +66,9 @@ class Provider implements ProviderInterface {
      * @param string $template_dir directory of templates
      * @throws \LogicException if directory doesn't exists
      */
-    public function __construct($template_dir) {
-        if($_dir = realpath($template_dir)) {
+    public function __construct($template_dir)
+    {
+        if ($_dir = realpath($template_dir)) {
             $this->_path = $_dir;
         } else {
             throw new \LogicException("Template directory {$template_dir} doesn't exists");
@@ -76,7 +81,8 @@ class Provider implements ProviderInterface {
      * @param int $time load last modified time
      * @return string
      */
-    public function getSource($tpl, &$time) {
+    public function getSource($tpl, &$time)
+    {
         $tpl = $this->_getTemplatePath($tpl);
         clearstatcache(null, $tpl);
         $time = filemtime($tpl);
@@ -88,7 +94,8 @@ class Provider implements ProviderInterface {
      * @param string $tpl
      * @return int
      */
-    public function getLastModified($tpl) {
+    public function getLastModified($tpl)
+    {
         clearstatcache(null, $tpl = $this->_getTemplatePath($tpl));
         return filemtime($tpl);
     }
@@ -99,7 +106,8 @@ class Provider implements ProviderInterface {
      * @param string $extension all templates must have this extension, default .tpl
      * @return array|\Iterator
      */
-    public function getList($extension = "tpl") {
+    public function getList($extension = "tpl")
+    {
         $list = array();
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($this->_path,
@@ -107,9 +115,9 @@ class Provider implements ProviderInterface {
             \RecursiveIteratorIterator::CHILD_FIRST
         );
         $path_len = strlen($this->_path);
-        foreach($iterator as $file) {
+        foreach ($iterator as $file) {
             /* @var \SplFileInfo $file */
-            if($file->isFile() && $file->getExtension() == $extension) {
+            if ($file->isFile() && $file->getExtension() == $extension) {
                 $list[] = substr($file->getPathname(), $path_len + 1);
             }
         }
@@ -122,8 +130,9 @@ class Provider implements ProviderInterface {
      * @return string
      * @throws \RuntimeException
      */
-    protected function _getTemplatePath($tpl) {
-        if(($path = realpath($this->_path."/".$tpl)) && strpos($path, $this->_path) === 0) {
+    protected function _getTemplatePath($tpl)
+    {
+        if (($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0) {
             return $path;
         } else {
             throw new \RuntimeException("Template $tpl not found");
@@ -134,8 +143,9 @@ class Provider implements ProviderInterface {
      * @param string $tpl
      * @return bool
      */
-    public function templateExists($tpl) {
-        return file_exists($this->_path."/".$tpl);
+    public function templateExists($tpl)
+    {
+        return file_exists($this->_path . "/" . $tpl);
     }
 
     /**
@@ -144,10 +154,11 @@ class Provider implements ProviderInterface {
      * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
      * @return bool
      */
-    public function verify(array $templates) {
-        foreach($templates as $template => $mtime) {
-            clearstatcache(null, $template = $this->_path.'/'.$template);
-            if(@filemtime($template) !== $mtime) {
+    public function verify(array $templates)
+    {
+        foreach ($templates as $template => $mtime) {
+            clearstatcache(null, $template = $this->_path . '/' . $template);
+            if (@filemtime($template) !== $mtime) {
                 return false;
             }
 

@@ -14,7 +14,8 @@ namespace Fenom;
  *
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
-class Scope extends \ArrayObject {
+class Scope extends \ArrayObject
+{
 
     public $line = 0;
     public $name;
@@ -33,20 +34,21 @@ class Scope extends \ArrayObject {
     /**
      * Creating cope
      *
-     * @param string   $name
+     * @param string $name
      * @param Template $tpl
-     * @param int      $line
-     * @param array    $action
-     * @param int      $level
+     * @param int $line
+     * @param array $action
+     * @param int $level
      * @param $body
      */
-    public function __construct($name, $tpl, $line, $action, $level, &$body) {
+    public function __construct($name, $tpl, $line, $action, $level, &$body)
+    {
         $this->line = $line;
         $this->name = $name;
         $this->tpl = $tpl;
         $this->_action = $action;
         $this->level = $level;
-        $this->_body = &$body;
+        $this->_body = & $body;
         $this->_offset = strlen($body);
     }
 
@@ -54,7 +56,8 @@ class Scope extends \ArrayObject {
      *
      * @param string $function
      */
-    public function setFuncName($function) {
+    public function setFuncName($function)
+    {
         $this["function"] = $function;
         $this->is_compiler = false;
         $this->escape = $this->tpl->escape;
@@ -66,7 +69,8 @@ class Scope extends \ArrayObject {
      * @param Tokenizer $tokenizer
      * @return mixed
      */
-    public function open($tokenizer) {
+    public function open($tokenizer)
+    {
         return call_user_func($this->_action["open"], $tokenizer, $this);
     }
 
@@ -77,9 +81,10 @@ class Scope extends \ArrayObject {
      * @param int $level
      * @return bool
      */
-    public function hasTag($tag, $level) {
-        if(isset($this->_action["tags"][$tag])) {
-            if($level) {
+    public function hasTag($tag, $level)
+    {
+        if (isset($this->_action["tags"][$tag])) {
+            if ($level) {
                 return isset($this->_action["float_tags"][$tag]);
             } else {
                 return true;
@@ -95,7 +100,8 @@ class Scope extends \ArrayObject {
      * @param Tokenizer $tokenizer
      * @return string
      */
-    public function tag($tag, $tokenizer) {
+    public function tag($tag, $tokenizer)
+    {
         return call_user_func($this->_action["tags"][$tag], $tokenizer, $this);
     }
 
@@ -105,7 +111,8 @@ class Scope extends \ArrayObject {
      * @param Tokenizer $tokenizer
      * @return string
      */
-    public function close($tokenizer) {
+    public function close($tokenizer)
+    {
         return call_user_func($this->_action["close"], $tokenizer, $this);
     }
 
@@ -115,7 +122,8 @@ class Scope extends \ArrayObject {
      * @throws \LogicException
      * @return string
      */
-    public function getContent() {
+    public function getContent()
+    {
         return substr($this->_body, $this->_offset);
     }
 
@@ -125,7 +133,8 @@ class Scope extends \ArrayObject {
      * @return string
      * @throws \LogicException
      */
-    public function cutContent() {
+    public function cutContent()
+    {
         $content = substr($this->_body, $this->_offset + 1);
         $this->_body = substr($this->_body, 0, $this->_offset);
         return $content;
@@ -136,12 +145,14 @@ class Scope extends \ArrayObject {
      *
      * @param $new_content
      */
-    public function replaceContent($new_content) {
+    public function replaceContent($new_content)
+    {
         $this->cutContent();
         $this->_body .= $new_content;
     }
 
-    public function unEscapeContent() {
+    public function unEscapeContent()
+    {
 
     }
 }

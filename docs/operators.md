@@ -81,6 +81,10 @@ Operators
 * `--$a` - decrement the variable and use it
 * `$a--` - use the variable and decrement it
 
+### String operator
+
+* `$a ~ $b` - return concatenation of variables `$a` and `$b`
+
 ### Ternary operator
 
 * `$a ? $b : $c` - returns `$b` if `$a` is not empty, and `$c` otherwise
