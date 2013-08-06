@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+## 1.2.1
+
+- Fix #39: compile error with boolean operators
+
 ## 1.2.0
 
 - Feature #28: macros may be called recursively
