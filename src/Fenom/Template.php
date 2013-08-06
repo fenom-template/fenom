@@ -648,6 +648,8 @@ class Template extends Render
                         break;
                     }
                     $cond = true;
+                } elseif ($tokens->is(Tokenizer::MACRO_BOOLEAN)) {
+                    $cond = false;
                 }
                 $op = $tokens->getAndNext();
             } elseif ($tokens->is(Tokenizer::MACRO_EQUALS)) { // assignment operator: $a = 4, $a += 3, ...
@@ -1268,36 +1270,6 @@ class Template extends Render
             }
         }
         throw new UnexpectedTokenException($tokens);
-    }
-
-    /**
-     * Parse constant
-     * #Ns\MyClass::CONST1, #CONST1, #MyClass::CONST1
-     *
-     * @param Tokenizer $tokens
-     * @return string
-     * @throws InvalidUsageException
-     */
-    public function parseConst(Tokenizer $tokens)
-    {
-        $tokens->get('#');
-        $name = $tokens->getNext(T_STRING);
-        $tokens->next();
-        if ($tokens->is(T_NAMESPACE)) {
-            $name .= '\\';
-            $name .= $tokens->getNext(T_STRING);
-            $tokens->next();
-        }
-        if ($tokens->is(T_DOUBLE_COLON)) {
-            $name .= '::';
-            $name .= $tokens->getNext(T_STRING);
-            $tokens->next();
-        }
-        if (defined($name)) {
-            return $name;
-        } else {
-            throw new InvalidUsageException("Use undefined constant $name");
-        }
     }
 
     /**
