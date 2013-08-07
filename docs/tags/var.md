@@ -1,7 +1,7 @@
-Tag {var} [RU]
-==============
+Tag {var}
+=========
 
-Тег {var} предназначен для создания переменных в шаблонах.
+The tag {var} is used for assigning template variables during the execution of a template.
 
 ```smarty
 {var $var=EXPR}
@@ -19,8 +19,8 @@ Tag {var} [RU]
 {/var}
 ```
 
-К названию новой переменной предъявляются те же требования, что и к [именам переменных](http://www.php.net/manual/en/language.variables.basics.php) в PHP.
-Выражение EXPR подразумевает любое поддерживаемое выражение.
+Variable names follow the same rules as other labels in PHP. 
+A valid variable name starts with a letter or underscore, followed by any number of letters, numbers, or underscores.
 
 ```smarty
 {var $v = 5}
@@ -34,18 +34,26 @@ Tag {var} [RU]
 {var $v = $y-$x}
 {var $v = $y*$x-2}
 {var $v = ($y^$x)+7}
+```
 
-Присваивание массивов
+Creating array
 
+```smarty
 {var $v = [1,2,3]}
 {var $v = []}
 {var $v = ["one"|upper => 1, 4 => $x, "three" => 3]}
 {var $v = ["key1" => $y*$x-2, "key2" => ["z" => $z]]}
+```
 
-Присваивание результата выполнения функции
+Getting function result into variable
 
+```smarty
 {var $v = count([1,2,3])+7}
+```
 
+Collect the output of the template into a variable 
+
+```smarty
 {var $v}
     Some long {$text|trim}
 {/var}
