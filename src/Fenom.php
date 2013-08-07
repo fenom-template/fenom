@@ -848,7 +848,7 @@ class Fenom
     {
         foreach ($values as $key => $value) {
             if (isset($options[$key])) {
-                if ($options[$key]) {
+                if ($value) {
                     $mask |= $options[$key];
                 } else {
                     $mask &= ~$options[$key];
