@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+## 1.2.2
+
+- Fix bug in setOptions method
+
 ## 1.2.1
 
 - Fix #39: compile error with boolean operators

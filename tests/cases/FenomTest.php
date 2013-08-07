@@ -109,10 +109,8 @@ class FenomTest extends \Fenom\TestCase
 
         $this->fenom->setOptions($options);
         $this->assertSame($this->fenom->getOptions(), $flags);
-//        printf("from %010b, flags %010b\n", $this->fenom->getOptions(), $flags);
-//        $this->fenom->setOptions(array($code => false));
-//        printf("remove %010b from option %010b, flags %010b\n", $option, $this->fenom->getOptions(), $flags & ~$option);
-//        $this->assertSame($this->fenom->getOptions(), $flags & ~$option);
+        $this->fenom->setOptions(array($code => false));
+        $this->assertSame($this->fenom->getOptions(), $flags & ~$option);
     }
 
     public function testFilter()
