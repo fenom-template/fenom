@@ -274,6 +274,7 @@ class TemplateTest extends TestCase
             array('if: {if true} block1 {else} block2 {/if} end', $a, 'if: block1 end'),
             array('if: {if false} block1 {else} block2 {/if} end', $a, 'if: block2 end'),
             array('if: {if null} block1 {else} block2 {/if} end', $a, 'if: block2 end'),
+            array('if: {if max(2, 4) > 1 && max(2, 3) < 1} block1 {else} block2 {/if} end', $a, 'if: block2 end'),
             array('if: {if ($val1 || $val0) && $x} block1 {else} block2 {/if} end',
                 $a, 'if: block1 end'),
             array('if: {if $unexist} block1 {else} block2 {/if} end', $a, 'if: block2 end', Fenom::FORCE_VERIFY),
@@ -689,7 +690,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{$a++~"hi"~time("Y:m:d")}')->getBody());
+            var_dump($this->fenom->compileCode('{if max(2, 4) > 1 && max(2, 3) < 1} block1 {else} block2 {/if}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
