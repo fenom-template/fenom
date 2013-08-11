@@ -190,7 +190,8 @@ class Render extends \ArrayObject
      * @param $name
      * @return mixed
      */
-    public function getMacro($name) {
+    public function getMacro($name)
+    {
         return $this->_macros[$name];
     }
 

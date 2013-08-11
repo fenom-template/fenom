@@ -16,6 +16,15 @@ class TemplateTest extends TestCase
     {
         parent::setUp();
         $this->tpl('welcome.tpl', '<b>Welcome, {$username} ({$email})</b>');
+        $_GET['one'] = 'get1';
+        $_POST['one'] = 'post1';
+        $_REQUEST['one'] = 'request1';
+        $_FILES['one'] = 'files1';
+        $_SERVER['one'] = 'server1';
+        $_SESSION['one'] = 'session1';
+        $GLOBALS['one'] = 'globals1';
+        $_ENV['one'] = 'env1';
+        $_COOKIE['one'] = 'cookie1';
     }
 
     public static function providerVars()
@@ -687,10 +696,29 @@ class TemplateTest extends TestCase
         );
     }
 
+    public static function providerAccessor() {
+        return array(
+            array('{$.get.one}', 'get1'),
+            array('{$.post.one}', 'post1'),
+            array('{$.request.one}', 'request1'),
+            array('{$.session.one}', 'session1'),
+            array('{$.files.one}', 'files1'),
+            array('{$.globals.one}', 'globals1'),
+            array('{$.cookie.one}', 'cookie1'),
+            array('{$.server.one}', 'server1'),
+            array('{$.const.PHP_EOL}', PHP_EOL),
+            array('{$.version}', Fenom::VERSION),
+
+            array('{$.get.one?}', '1'),
+            array('{$.get.one is set}', '1'),
+            array('{$.get.two is empty}', '1'),
+        );
+    }
+
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{if max(2, 4) > 1 && max(2, 3) < 1} block1 {else} block2 {/if}')->getBody());
+            var_dump($this->fenom->compileCode('{$.const.access?}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
@@ -907,6 +935,15 @@ class TemplateTest extends TestCase
      * @dataProvider providerConcat
      */
     public function testConcat($code, $result)
+    {
+        $this->exec($code, self::getVars(), $result);
+    }
+
+    /**
+     * @group accessor
+     * @dataProvider providerAccessor
+     */
+    public function testAccessor($code, $result)
     {
         $this->exec($code, self::getVars(), $result);
     }
