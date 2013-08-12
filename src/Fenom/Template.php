@@ -918,15 +918,16 @@ class Template extends Render
     {
         $is_var = false;
         $vars = array(
-            'get' => '$_GET',
-            'post' => '$_POST',
+            'get'     => '$_GET',
+            'post'    => '$_POST',
             'session' => '$_SESSION',
-            'cookie' => '$_COOKIE',
+            'cookie'  => '$_COOKIE',
             'request' => '$_REQUEST',
-            'files' => '$_FILES',
+            'files'   => '$_FILES',
             'globals' => '$GLOBALS',
-            'server' => '$_SERVER',
-            'env' => '$_ENV',
+            'server'  => '$_SERVER',
+            'env'     => '$_ENV',
+            'tpl'     => '$tpl->info'
         );
         if ($this->_options & Fenom::DENY_ACCESSOR) {
             throw new \LogicException("Accessor are disabled");
@@ -947,12 +948,6 @@ class Template extends Render
                 break;
             case 'version':
                 $var = '\Fenom::VERSION';
-                break;
-            case 'tpl':
-                $var = '$tpl->getName()';
-                break;
-            case 'schema':
-                $var = '$tpl->getScm()';
                 break;
             default:
                 throw new UnexpectedTokenException($tokens);

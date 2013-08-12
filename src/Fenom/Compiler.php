@@ -33,14 +33,6 @@ class Compiler
     public static function tagInclude(Tokenizer $tokens, Template $tpl)
     {
         $name = false;
-//        if($tokens->is('[')) {
-//            $tokens->next();
-//            if(!$name && $tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
-//                if($tpl->getStorage()->templateExists($_name = substr($tokens->getAndNext(), 1, -1))) {
-//                    $name = $_name;
-//                }
-//            }
-//        }
         $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
         if ($p) { // if we have additionally variables
@@ -706,7 +698,7 @@ class Compiler
      */
     public static function varOpen(Tokenizer $tokens, Scope $scope)
     {
-        $var = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
+        $var = $scope->tpl->parseVar($tokens);
         if ($tokens->is('=')) { // inline tag {var ...}
             $scope->is_closed = true;
             $tokens->next();

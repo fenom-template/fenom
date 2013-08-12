@@ -1,11 +1,11 @@
 Syntax [RU]
 ===========
 
-Fenom have [Smarty](http://www.smarty.net/) like syntax.
+Fenom implement [Smarty](http://www.smarty.net/) syntax with some improvements
 
 ## Variable
 
-### Get/print value
+### Use variables
 
 ```smarty
 {$foo}
@@ -20,7 +20,31 @@ Fenom have [Smarty](http://www.smarty.net/) like syntax.
 {$foo.$bar}
 {$foo[$bar]}
 {$foo->bar}
-{$foo->bar()}
+{$foo->bar.buz}
+```
+
+### System variable
+
+Unnamed system variable starts with `$.` and allow access to global variables and system info:
+
+* `$.get` is `$_GET`.
+* `$.post` is `$_POST`.
+* `$.cookie` is `$_COOKIE`.
+* `$.session` is `$_SESSION`.
+* `$.globals` is `$GLOBALS`.
+* `$.request` is `$_REQUEST`.
+* `$.files` is `$_FILES`.
+* `$.server` is `$_SERVER`.
+* `$.env` is `$_ENV`.
+* `$.tpl.name` returns current template name.
+* `$.tpl.schema` returns current schema of the template.
+* `$.version` returns version of the Fenom.
+* `$.const` paste constant.
+
+```smarty
+{if $.get.debug? && $.const.DEBUG}
+   ...
+{/if}
 ```
 
 ### Multidimensional value support

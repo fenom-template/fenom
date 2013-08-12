@@ -235,4 +235,22 @@ class Render extends \ArrayObject
     {
         throw new \BadMethodCallException("Unknown method " . $method);
     }
+
+    public function __get($name)
+    {
+        if($name == 'info') {
+            return array(
+                'name' => $this->_name,
+                'schema' => $this->_scm,
+                'time' => $this->_time
+            );
+        } else {
+            return null;
+        }
+    }
+
+    public function __isset($name)
+    {
+        return $name == 'info';
+    }
 }
