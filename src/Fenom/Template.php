@@ -397,18 +397,6 @@ class Template extends Render
      */
     public function getTemplateCode()
     {
-
-        if ($this->macros) {
-            $macros = array();
-            foreach ($this->macros as $m) {
-                if ($m["recursive"]) {
-                    $macros[] = "\t\t'" . $m["name"] . "' => function (\$tpl) {\n?>" . $m["body"] . "<?php\n}";
-                }
-            }
-            $macros = "\n" . implode(",\n", $macros);
-        } else {
-            $macros = "";
-        }
         $before = $this->_before ? $this->_before . "\n" : "";
         return "<?php \n" .
         "/** Fenom template '" . $this->_name . "' compiled at " . date('Y-m-d H:i:s') . " */\n" .
@@ -420,8 +408,27 @@ class Template extends Render
         "\t'base_name' => " . var_export($this->_base_name, true) . ",\n" .
         "\t'time' => {$this->_time},\n" .
         "\t'depends' => " . var_export($this->_base_name, true) . ",\n" .
-        "\t'macros' => array({$macros}),
+        "\t'macros' => " . $this->_getMacrosArray() . ",\n
         ));\n";
+    }
+
+    /**
+     * Make array with macros code
+     * @return string
+     */
+    private function _getMacrosArray()
+    {
+        if ($this->macros) {
+            $macros = array();
+            foreach ($this->macros as $m) {
+                if ($m["recursive"]) {
+                    $macros[] = "\t\t'" . $m["name"] . "' => function (\$tpl) {\n?>" . $m["body"] . "<?php\n}";
+                }
+            }
+            return "array(\n" . implode(",\n", $macros).")";
+        } else {
+            return 'array()';
+        }
     }
 
     /**
@@ -444,7 +451,7 @@ class Template extends Render
     {
         if (!$this->_code) {
             // evaluate template's code
-            eval("\$this->_code = " . $this->_getClosureSource() . ";");
+            eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = ".$this->_getMacrosArray() .';');
             if (!$this->_code) {
                 throw new CompileException("Fatal error while creating the template");
             }

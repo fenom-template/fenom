@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+## 1.3.0
+
+- Feature #41: Add system variable `$`.
+- Fix bug when recursive macros doesn't work in Template
+- Recognize variable parser
+- Tests++
+- Docs--
+
 ### 1.2.2 (2013-08-07)
 
 - Fix bug in setOptions method

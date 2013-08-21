@@ -51,16 +51,21 @@ class MacrosTest extends TestCase
             {/if}
         {/macro}
 
-        {macro.factorial num=10}');
+        XXXX: {macro.factorial num=10}');
+
+        $this->tpl("macro_recursive_import.tpl", '
+        {import "macro_recursive.tpl" as math}
+
+        YYYY: {math.factorial num=10}');
     }
 
-    public function _testSandbox()
+    public function testSandbox()
     {
         try {
-            $this->fenom->compile("macro_recursive.tpl");
+//            $this->fenom->compile("macro_recursive.tpl")->display([]);
 //            $this->fenom->flush();
 //            var_dump($this->fenom->fetch("macro_recursive.tpl", []));
-            var_dump( $this->fenom->compile("macro_recursive.tpl")->getTemplateCode());
+            var_dump( $this->fenom->compile("macro_recursive_import.tpl")->getTemplateCode([]));
         } catch (\Exception $e) {
             var_dump($e->getMessage() . ": " . $e->getTraceAsString());
         }
@@ -103,6 +108,14 @@ class MacrosTest extends TestCase
     public function testRecursive()
     {
         $this->fenom->compile('macro_recursive.tpl');
+        $this->fenom->flush();
+        $tpl = $this->fenom->getTemplate('macro_recursive.tpl');
+        $this->assertSame("10 9 8 7 6 5 4 3 2 1 1 2 3 4 5 6 7 8 9 10", Modifier::strip($tpl->fetch(array()), true));
+    }
+
+    public function testImportRecursive()
+    {
+        $this->fenom->compile('macro_recursive_import.tpl');
         $this->fenom->flush();
         $tpl = $this->fenom->getTemplate('macro_recursive.tpl');
         $this->assertSame("10 9 8 7 6 5 4 3 2 1 1 2 3 4 5 6 7 8 9 10", Modifier::strip($tpl->fetch(array()), true));

@@ -9,6 +9,7 @@
  */
 namespace Fenom;
 use Fenom;
+use Symfony\Component\Yaml\Exception\RuntimeException;
 
 /**
  * Primitive template
@@ -68,6 +69,11 @@ class Render extends \ArrayObject
      * @var ProviderInterface
      */
     protected $_provider;
+
+    /**
+     * @var \Closure[]
+     */
+    protected $_macros;
 
     /**
      * @param Fenom $fenom
@@ -192,6 +198,10 @@ class Render extends \ArrayObject
      */
     public function getMacro($name)
     {
+        if(empty($this->_macros[$name])) {
+            var_dump($this->_macros[$name]); exit;
+            throw new RuntimeException('macro not found');
+        }
         return $this->_macros[$name];
     }
 
