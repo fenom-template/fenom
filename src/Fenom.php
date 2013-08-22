@@ -757,12 +757,15 @@ class Fenom
     protected function _load($tpl, $opts)
     {
         $file_name = $this->_getCacheName($tpl, $opts);
-        if (!is_file($this->_compile_dir . "/" . $file_name)) {
-            return $this->compile($tpl, true, $opts);
-        } else {
+        if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this;
-            return include($this->_compile_dir . "/" . $file_name);
+            $_tpl = include($this->_compile_dir . "/" . $file_name);
+            /* @var Fenom\Render $tpl */
+            if($_tpl->isValid()) {
+                return $_tpl;
+            }
         }
+        return $this->compile($tpl, true, $opts);
     }
 
     /**

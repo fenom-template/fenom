@@ -11,3 +11,5 @@ tests/resources/template/*
 benchmark/compile/*
 benchmark/templates/inheritance/smarty
 benchmark/templates/inheritance/twig
+benchmark/sandbox/compiled/*
+!.gitkeep

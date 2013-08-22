@@ -99,7 +99,7 @@ class Template extends Render
 
     private $_filters = array();
 
-    private static $_checkers = array(
+    protected static $_tests = array(
         'integer' => 'is_int(%s)',
         'int' => 'is_int(%s)',
         'float' => 'is_float(%s)',
@@ -223,6 +223,10 @@ class Template extends Render
                     unset($comment); // cleanup
                     break;
                 default:
+//                    var_dump($this->_src[$pos]);
+                    if($this->_src[$pos] === "\n") {
+                        $pos++;
+                    }
                     $this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $end = $start + 1;
                     do {
@@ -260,6 +264,9 @@ class Template extends Render
         }
 
         gc_collect_cycles();
+        if($end < strlen($this->_src) && $this->_src[$end + 1] === "\n") {
+            $end++;
+        }
         $this->_appendText(substr($this->_src, $end ? $end + 1 : 0)); // append tail of the template
         if ($this->_stack) {
             $_names = array();
@@ -466,6 +473,7 @@ class Template extends Render
      */
     public function addDepend(Render $tpl)
     {
+//        var_dump($tpl->getScm(),"$tpl", (new \Exception())->getTraceAsString() );
         $this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
     }
 
@@ -1007,7 +1015,7 @@ class Template extends Render
 
     /**
      * Parse 'is' and 'is not' operators
-     * @see $_checkers
+     * @see _tests
      * @param Tokenizer $tokens
      * @param string $value
      * @param bool $variable
@@ -1030,10 +1038,10 @@ class Template extends Render
             if (!$variable && ($action == "set" || $action == "empty")) {
                 $action = "_$action";
                 $tokens->next();
-                return $invert . sprintf(self::$_checkers[$action], $value);
-            } elseif (isset(self::$_checkers[$action])) {
+                return $invert . sprintf(self::$_tests[$action], $value);
+            } elseif (isset(self::$_tests[$action])) {
                 $tokens->next();
-                return $invert . sprintf(self::$_checkers[$action], $value);
+                return $invert . sprintf(self::$_tests[$action], $value);
             } elseif ($tokens->isSpecialVal()) {
                 $tokens->next();
                 return '(' . $value . ' ' . $equal . '= ' . $action . ')';
