@@ -17,7 +17,7 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '1.2';
+    const VERSION = '1.3';
 
     /* Actions */
     const INLINE_COMPILER = 1;
@@ -27,6 +27,7 @@ class Fenom
     const MODIFIER = 5;
 
     /* Options */
+    const DENY_ACCESSOR = 0x8;
     const DENY_METHODS = 0x10;
     const DENY_NATIVE_FUNCS = 0x20;
     const FORCE_INCLUDE = 0x40;
@@ -55,6 +56,7 @@ class Fenom
      * @see setOptions
      */
     private static $_options_list = array(
+        "disable_accessor" => self::DENY_ACCESSOR,
         "disable_methods" => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_NATIVE_FUNCS,
         "disable_cache" => self::DISABLE_CACHE,
@@ -129,7 +131,7 @@ class Fenom
      * @var array of allowed PHP functions
      */
     protected $_allowed_funcs = array(
-        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1,
+        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1, 'constant' => 1,
         "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
         "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
     );
@@ -755,12 +757,15 @@ class Fenom
     protected function _load($tpl, $opts)
     {
         $file_name = $this->_getCacheName($tpl, $opts);
-        if (!is_file($this->_compile_dir . "/" . $file_name)) {
-            return $this->compile($tpl, true, $opts);
-        } else {
+        if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this;
-            return include($this->_compile_dir . "/" . $file_name);
+            $_tpl = include($this->_compile_dir . "/" . $file_name);
+            /* @var Fenom\Render $tpl */
+            if($_tpl->isValid()) {
+                return $_tpl;
+            }
         }
+        return $this->compile($tpl, true, $opts);
     }
 
     /**

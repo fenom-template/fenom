@@ -20,7 +20,7 @@ defined('T_TRAIT_C') || define('T_TRAIT_C', 365);
 /**
  * for PHP <5.5 compatible
  */
-defined('T_YIELD') || define('T_YIELD', 390);
+defined('T_YIELD') || define('T_YIELD', 267);
 
 /**
  * Each token have structure

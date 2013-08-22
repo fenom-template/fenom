@@ -33,14 +33,6 @@ class Compiler
     public static function tagInclude(Tokenizer $tokens, Template $tpl)
     {
         $name = false;
-//        if($tokens->is('[')) {
-//            $tokens->next();
-//            if(!$name && $tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
-//                if($tpl->getStorage()->templateExists($_name = substr($tokens->getAndNext(), 1, -1))) {
-//                    $name = $_name;
-//                }
-//            }
-//        }
         $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
         if ($p) { // if we have additionally variables
@@ -74,7 +66,7 @@ class Compiler
     public static function ifOpen(Tokenizer $tokens, Scope $scope)
     {
         $scope["else"] = false;
-        return 'if(' . $scope->tpl->parseExp($tokens, true) . ') {';
+        return 'if(' . $scope->tpl->parseExpr($tokens) . ') {';
     }
 
     /**
@@ -91,7 +83,7 @@ class Compiler
         if ($scope["else"]) {
             throw new InvalidUsageException('Incorrect use of the tag {elseif}');
         }
-        return '} elseif(' . $scope->tpl->parseExp($tokens, true) . ') {';
+        return '} elseif(' . $scope->tpl->parseExpr($tokens) . ') {';
     }
 
     /**
@@ -137,11 +129,11 @@ class Compiler
         }
         $tokens->get(T_AS);
         $tokens->next();
-        $value = $scope->tpl->parseVariable($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
+        $value = $scope->tpl->parseVar($tokens);
         if ($tokens->is(T_DOUBLE_ARROW)) {
             $tokens->next();
             $key = $value;
-            $value = $scope->tpl->parseVariable($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
+            $value = $scope->tpl->parseVar($tokens);
         }
 
         $scope["after"] = array();
@@ -154,7 +146,7 @@ class Compiler
             }
             $tokens->getNext("=");
             $tokens->next();
-            $p[$param] = $scope->tpl->parseVariable($tokens, Template::DENY_MODS | Template::DENY_ARRAY);
+            $p[$param] = $scope->tpl->parseVar($tokens);
         }
 
         if ($p["index"]) {
@@ -228,7 +220,7 @@ class Compiler
         $var = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
         $tokens->get("=");
         $tokens->next();
-        $val = $scope->tpl->parseExp($tokens, true);
+        $val = $scope->tpl->parseExpr($tokens);
         $p = $scope->tpl->parseParams($tokens, $p);
 
         if (is_numeric($p["step"])) {
@@ -305,7 +297,7 @@ class Compiler
      */
     public static function whileOpen(Tokenizer $tokens, Scope $scope)
     {
-        return 'while(' . $scope->tpl->parseExp($tokens, true) . ') {';
+        return 'while(' . $scope->tpl->parseExpr($tokens) . ') {';
     }
 
     /**
@@ -319,7 +311,7 @@ class Compiler
     public static function switchOpen(Tokenizer $tokens, Scope $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = true;
-        $scope["switch"] = 'switch(' . $scope->tpl->parseExp($tokens, true) . ') {';
+        $scope["switch"] = 'switch(' . $scope->tpl->parseExpr($tokens) . ') {';
         // lazy init
         return '';
     }
@@ -334,7 +326,7 @@ class Compiler
      */
     public static function tagCase(Tokenizer $tokens, Scope $scope)
     {
-        $code = 'case ' . $scope->tpl->parseExp($tokens, true) . ': ';
+        $code = 'case ' . $scope->tpl->parseExpr($tokens) . ': ';
         if ($scope["switch"]) {
             unset($scope["no-break"], $scope["no-continue"]);
             $code = $scope["switch"] . "\n" . $code;
@@ -706,14 +698,14 @@ class Compiler
      */
     public static function varOpen(Tokenizer $tokens, Scope $scope)
     {
-        $var = $scope->tpl->parseVariable($tokens, Template::DENY_MODS);
+        $var = $scope->tpl->parseVar($tokens);
         if ($tokens->is('=')) { // inline tag {var ...}
             $scope->is_closed = true;
             $tokens->next();
             if ($tokens->is("[")) {
                 return $var . '=' . $scope->tpl->parseArray($tokens);
             } else {
-                return $var . '=' . $scope->tpl->parseExp($tokens, true);
+                return $var . '=' . $scope->tpl->parseExpr($tokens);
             }
         } else {
             $scope["name"] = $var;
@@ -771,7 +763,7 @@ class Compiler
         if ($tokens->is("[")) {
             $exp = $tpl->parseArray($tokens);
         } else {
-            $exp = $tpl->parseExp($tokens, true);
+            $exp = $tpl->parseExpr($tokens);
         }
         if ($tokens->valid()) {
             $p = $tpl->parseParams($tokens);
@@ -944,7 +936,7 @@ class Compiler
                 throw new InvalidUsageException("Raw mode allow for expressions or functions");
             }
         } else {
-            $code = $tpl->out($tpl->parseExp($tokens, true));
+            $code = $tpl->out($tpl->parseExpr($tokens));
         }
         $tpl->escape = $escape;
         return $code;

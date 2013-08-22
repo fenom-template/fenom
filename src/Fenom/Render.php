@@ -9,6 +9,7 @@
  */
 namespace Fenom;
 use Fenom;
+use Symfony\Component\Yaml\Exception\RuntimeException;
 
 /**
  * Primitive template
@@ -68,6 +69,11 @@ class Render extends \ArrayObject
      * @var ProviderInterface
      */
     protected $_provider;
+
+    /**
+     * @var \Closure[]
+     */
+    protected $_macros;
 
     /**
      * @param Fenom $fenom
@@ -190,7 +196,11 @@ class Render extends \ArrayObject
      * @param $name
      * @return mixed
      */
-    public function getMacro($name) {
+    public function getMacro($name)
+    {
+        if(empty($this->_macros[$name])) {
+            throw new RuntimeException('macro not found');
+        }
         return $this->_macros[$name];
     }
 
@@ -233,5 +243,23 @@ class Render extends \ArrayObject
     public function __call($method, $args)
     {
         throw new \BadMethodCallException("Unknown method " . $method);
+    }
+
+    public function __get($name)
+    {
+        if($name == 'info') {
+            return array(
+                'name' => $this->_name,
+                'schema' => $this->_scm,
+                'time' => $this->_time
+            );
+        } else {
+            return null;
+        }
+    }
+
+    public function __isset($name)
+    {
+        return $name == 'info';
     }
 }
