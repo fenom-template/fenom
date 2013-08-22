@@ -65,8 +65,8 @@ class MacrosTest extends TestCase
 //            $this->fenom->compile("macro_recursive.tpl")->display([]);
 //            $this->fenom->flush();
 //            var_dump($this->fenom->fetch("macro_recursive.tpl", []));
-            var_dump( $this->fenom->compile("macro_recursive_import.tpl")->display([]));
-            var_dump( $this->fenom->display("macro_recursive_import.tpl", []));
+            var_dump( $this->fenom->compile("macro_recursive_import.tpl")->display(array()));
+            var_dump( $this->fenom->display("macro_recursive_import.tpl", array()));
         } catch (\Exception $e) {
             var_dump($e->getMessage() . ": " . $e->getTraceAsString());
         }
