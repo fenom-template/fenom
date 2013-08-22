@@ -51,15 +51,15 @@ class MacrosTest extends TestCase
             {/if}
         {/macro}
 
-        XXXX: {macro.factorial num=10}');
+        {macro.factorial num=10}');
 
         $this->tpl("macro_recursive_import.tpl", '
         {import "macro_recursive.tpl" as math}
 
-        YYYY: {math.factorial num=10}');
+        {math.factorial num=10}');
     }
 
-    public function testSandbox()
+    public function _testSandbox()
     {
         try {
 //            $this->fenom->compile("macro_recursive.tpl")->display([]);
