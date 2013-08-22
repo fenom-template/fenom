@@ -224,9 +224,9 @@ class Template extends Render
                     break;
                 default:
 //                    var_dump($this->_src[$pos]);
-                    if($this->_src[$pos] === "\n") {
-                        $pos++;
-                    }
+//                    if($this->_src[$pos] === "\n") {
+//                        $pos++;
+//                    }
                     $this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $end = $start + 1;
                     do {
@@ -264,9 +264,9 @@ class Template extends Render
         }
 
         gc_collect_cycles();
-        if($end < strlen($this->_src) && $this->_src[$end + 1] === "\n") {
-            $end++;
-        }
+//        if($end < strlen($this->_src) && $this->_src[$end + 1] === "\n") {
+//            $end++;
+//        }
         $this->_appendText(substr($this->_src, $end ? $end + 1 : 0)); // append tail of the template
         if ($this->_stack) {
             $_names = array();
