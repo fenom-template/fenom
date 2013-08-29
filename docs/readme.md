@@ -6,7 +6,7 @@ Documentation
 * [Install](./install.md)
 * [Usage](./usage.md)
 * [Fenom adapters](./adapters.md)
-* [Develop](./develop.md)
+* [Develop](./dev/readme.md)
 * [Settings](./settings.md)
 * [Callbacks and filters](./callbacks.md)
 * [Syntax](./syntax.md)
