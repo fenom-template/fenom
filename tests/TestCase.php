@@ -56,6 +56,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->fenom = Fenom::factory(FENOM_RESOURCES . '/template', FENOM_RESOURCES . '/compile');
         $this->fenom->addModifier('dots', __CLASS__ . '::dots');
         $this->fenom->addModifier('concat', __CLASS__ . '::concat');
+        $this->fenom->addModifier('append', __CLASS__ . '::append');
         $this->fenom->addFunction('test_function', __CLASS__ . '::inlineFunction');
         $this->fenom->addBlockFunction('test_block_function', __CLASS__ . '::blockFunction');
     }
@@ -69,6 +70,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         return call_user_func_array('var_export', func_get_args());
     }
+
+    public static function append()
+    {
+        return implode("", func_get_args());
+    }
+
 
     public static function inlineFunction($params)
     {

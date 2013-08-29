@@ -264,9 +264,6 @@ class Template extends Render
         }
 
         gc_collect_cycles();
-//        if($end < strlen($this->_src) && $this->_src[$end + 1] === "\n") {
-//            $end++;
-//        }
         $this->_appendText(substr($this->_src, $end ? $end + 1 : 0)); // append tail of the template
         if ($this->_stack) {
             $_names = array();
@@ -341,26 +338,6 @@ class Template extends Render
     }
 
     /**
-     * Append PHP_EOL after each '?>'
-     * @param int $code
-     * @return string
-     */
-    private function _escapeCode($code)
-    {
-        $c = "";
-        foreach (token_get_all($code) as $token) {
-            if (is_string($token)) {
-                $c .= $token;
-            } elseif ($token[0] == T_CLOSE_TAG) {
-                $c .= $token[1] . PHP_EOL;
-            } else {
-                $c .= $token[1];
-            }
-        }
-        return $c;
-    }
-
-    /**
      * Append PHP code to template body
      *
      * @param string $code
@@ -372,10 +349,7 @@ class Template extends Render
             return;
         } else {
             $this->_line += substr_count($source, "\n");
-            if (strpos($code, '?>') !== false) {
-                $code = $this->_escapeCode($code); // paste PHP_EOL
-            }
-            $this->_body .= "<?php\n/* {$this->_name}:{$this->_line}: {$source} */\n $code ?>" . PHP_EOL;
+            $this->_body .= "<?php\n/* {$this->_name}:{$this->_line}: {$source} */\n $code ?>";
         }
     }
 
@@ -1266,13 +1240,15 @@ class Template extends Render
             $args = array();
 
             while ($tokens->is(":")) {
-                $token = $tokens->getNext(Tokenizer::MACRO_SCALAR, T_VARIABLE, '"', Tokenizer::MACRO_STRING, "(", "[");
+                $token = $tokens->getNext(Tokenizer::MACRO_SCALAR, T_VARIABLE, '"', Tokenizer::MACRO_STRING, "(", "[", '$');
 
                 if ($tokens->is(Tokenizer::MACRO_SCALAR) || $tokens->isSpecialVal()) {
                     $args[] = $token;
                     $tokens->next();
                 } elseif ($tokens->is(T_VARIABLE)) {
                     $args[] = $this->parseVariable($tokens, self::DENY_MODS);
+                } elseif ($tokens->is('$')) {
+                    $args[] = $this->parseAccessor($tokens, $is_var);
                 } elseif ($tokens->is('"', '`', T_ENCAPSED_AND_WHITESPACE)) {
                     $args[] = $this->parseQuote($tokens);
                 } elseif ($tokens->is('(')) {

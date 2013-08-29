@@ -9,7 +9,7 @@ class TagsTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{var $a=Fenom\TestCase::dots("asd")}')->getBody());
+            var_dump($this->fenom->compileCode("{var \$a=12313}\nVar: {\$a}")->getBody());
         } catch (\Exception $e) {
             echo "$e";
         }
@@ -21,7 +21,7 @@ class TagsTest extends TestCase
      */
     public function testVar($tpl_val, $val)
     {
-        $this->assertRender("{var \$a=$tpl_val}\nVar: {\$a}", "\nVar: " . $val);
+        $this->assertRender("{var \$a=$tpl_val}\nVar: {\$a}", "Var: " . $val);
     }
 
     /**
@@ -29,7 +29,7 @@ class TagsTest extends TestCase
      */
     public function testVarBlock($tpl_val, $val)
     {
-        $this->assertRender("{var \$a}before {{$tpl_val}} after{/var}\nVar: {\$a}", "\nVar: before " . $val . " after");
+        $this->assertRender("{var \$a}before {{$tpl_val}} after{/var}\nVar: {\$a}", "Var: before " . $val . " after");
     }
 
     /**
@@ -37,7 +37,7 @@ class TagsTest extends TestCase
      */
     public function testVarBlockModified($tpl_val, $val)
     {
-        $this->assertRender("{var \$a|low|dots}before {{$tpl_val}} after{/var}\nVar: {\$a}", "\nVar: " . strtolower("before " . $val . " after") . "...");
+        $this->assertRender("{var \$a|low|dots}before {{$tpl_val}} after{/var}\nVar: {\$a}", "Var: " . strtolower("before " . $val . " after") . "...");
     }
 
     public function testCycle()
