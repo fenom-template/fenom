@@ -708,6 +708,7 @@ class TemplateTest extends TestCase
             array('{$.server.one}', 'server1'),
             array('{$.const.PHP_EOL}', PHP_EOL),
             array('{$.version}', Fenom::VERSION),
+            array('{"string"|append:"_":$.get.one}', 'string_get1'),
 
             array('{$.get.one?}', '1'),
             array('{$.get.one is set}', '1'),
@@ -718,7 +719,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{$.const.access?}')->getBody());
+            var_dump($this->fenom->compileCode('{"string"|append:$.get.one}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }

@@ -1,11 +1,19 @@
 CHANGELOG
 =========
 
-## 1.3.0
+## 1.3.1 (2013-08-29)
+
+- Bug: accessor don't work in modifier
+- Removed too many EOL in template code
+- Tests++
+
+## 1.3.0 (2013-08-23)
 
 - Feature #41: Add system variable `$`.
-- Fix bug when recursive macros doesn't work in Template
+- Fix bug when recursive macros doesn't work in `Fenom\Template`
 - Recognize variable parser
+- Recognize macros parser
+- Fix `auto_reload` option
 - Tests++
 - Docs--
 
