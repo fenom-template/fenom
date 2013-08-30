@@ -14,3 +14,32 @@ Tag {include} [RU]
 ```
 
 Все изменения переменных в подключаемом шаблоне не будут воздействовать на родительский шаблон.
+
+### {insert}
+
+The tag insert template template code instead self.
+
+* No dynamic name allowed
+* No variables as attribute allowed
+
+For example,
+
+```smarty
+a: {$a}
+{insert 'b.tpl'}
+c: {$c}
+```
+
+b.tpl:
+
+```
+b: {$b}
+```
+
+Во время разбора шаблона код шаблона `b.tpl` будет вставлен в код шаблона `main.tpl` как есть:
+
+```smarty
+a: {$a}
+b: {$b}
+c: {$c}
+```
