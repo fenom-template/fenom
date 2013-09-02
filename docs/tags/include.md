@@ -17,12 +17,12 @@ Tag {include} [RU]
 
 ### {insert}
 
-The tag insert template template code instead self.
+The tag insert template code instead self.
 
 * No dynamic name allowed
 * No variables as attribute allowed
 
-For example,
+For example, main.tpl:
 
 ```smarty
 a: {$a}

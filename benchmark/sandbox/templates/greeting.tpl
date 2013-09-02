@@ -1,8 +1,5 @@
-Greeting,
-{if $user}
-    {$user.name}!
-{else}
-    anonymous?
-{/if}
+{import 'macros.tpl' as mc}
 
-3
+A1
+{mc.factorial num=10}
+A2

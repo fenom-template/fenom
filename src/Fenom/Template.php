@@ -223,10 +223,6 @@ class Template extends Render
                     unset($comment); // cleanup
                     break;
                 default:
-//                    var_dump($this->_src[$pos]);
-//                    if($this->_src[$pos] === "\n") {
-//                        $pos++;
-//                    }
                     $this->_appendText(substr($this->_src, $pos, $start - $pos));
                     $end = $start + 1;
                     do {
@@ -388,7 +384,7 @@ class Template extends Render
         "\t'name' => " . var_export($this->_name, true) . ",\n" .
         "\t'base_name' => " . var_export($this->_base_name, true) . ",\n" .
         "\t'time' => {$this->_time},\n" .
-        "\t'depends' => " . var_export($this->_base_name, true) . ",\n" .
+        "\t'depends' => " . var_export($this->_depends, true) . ",\n" .
         "\t'macros' => " . $this->_getMacrosArray() . ",\n
         ));\n";
     }
@@ -406,7 +402,7 @@ class Template extends Render
                     $macros[] = "\t\t'" . $m["name"] . "' => function (\$tpl) {\n?>" . $m["body"] . "<?php\n}";
                 }
             }
-            return "array(\n" . implode(",\n", $macros).")";
+            return "array(\n" . implode(",\n", $macros) . ")";
         } else {
             return 'array()';
         }
@@ -432,7 +428,7 @@ class Template extends Render
     {
         if (!$this->_code) {
             // evaluate template's code
-            eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = ".$this->_getMacrosArray() .';');
+            eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
                 throw new CompileException("Fatal error while creating the template");
             }
@@ -447,7 +443,6 @@ class Template extends Render
      */
     public function addDepend(Render $tpl)
     {
-//        var_dump($tpl->getScm(),"$tpl", (new \Exception())->getTraceAsString() );
         $this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
     }
 
@@ -606,7 +601,6 @@ class Template extends Render
      * Parse expressions. The mix of operators and terms.
      *
      * @param Tokenizer $tokens
-     * @return string
      * @throws Error\UnexpectedTokenException
      */
     public function parseExpr(Tokenizer $tokens)
@@ -619,6 +613,18 @@ class Template extends Render
             // parse term
             $term = $this->parseTerm($tokens, $var); // term of the expression
             if ($term !== false) {
+                if($this->_options & Fenom::FORCE_VERIFY) {
+                    $term = '(isset('.$term.') ? '.$term.' : null)';
+                    $var = false;
+                }
+                if ($tokens->is('|')) {
+                    $term = $this->parseModifier($tokens, $term);
+                    $var = false;
+                }
+                if ($tokens->is('?', '!')) {
+                    $term = $this->parseTernary($tokens, $term, $tokens->current());
+                    $var = false;
+                }
                 $exp[] = $term;
                 $op = false;
             } else {
@@ -683,14 +689,14 @@ class Template extends Render
     }
 
     /**
-     * Parse any term of expression: -2, ++$var, 'adf'|mod:4
+     * Parse any term of expression: -2, ++$var, 'adf'
      *
      * @param Tokenizer $tokens
-     * @param bool $is_var
-     * @return bool|string
+     * @param bool $is_var is parsed term - plain variable
      * @throws Error\UnexpectedTokenException
      * @throws Error\TokenizeException
      * @throws \Exception
+     * @return bool|string
      */
     public function parseTerm(Tokenizer $tokens, &$is_var = false)
     {
@@ -701,63 +707,50 @@ class Template extends Render
             $unary = "";
         }
         if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
-            return $unary . $this->parseScalar($tokens, true);
+            $code = $unary . $this->parseScalar($tokens, true);
         } elseif ($tokens->is(T_CONSTANT_ENCAPSED_STRING, '"', T_ENCAPSED_AND_WHITESPACE)) {
             if ($unary) {
                 throw new UnexpectedTokenException($tokens->back());
             }
-            return $this->parseScalar($tokens, true);
+            $code = $this->parseScalar($tokens, true);
         } elseif ($tokens->is(T_VARIABLE)) {
-            $var = $this->parseVar($tokens);
-            if ($tokens->is(Tokenizer::MACRO_INCDEC, "|", "!", "?")) {
-                return $unary . $this->parseVariable($tokens, 0, $var);
-            } elseif ($tokens->is("(") && $tokens->hasBackList(T_STRING)) { // method call
-                return $unary . $this->parseVariable($tokens, 0, $var);
-            } elseif ($unary) {
-                return $unary . $var;
+            $code = $unary . $this->parseVariable($tokens);
+            if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
+                if ($this->_options & Fenom::DENY_METHODS) {
+                    throw new \LogicException("Forbidden to call methods");
+                }
+                $code .= $this->parseArgs($tokens);
+            } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
+                $code .= $tokens->getAndNext();
             } else {
                 $is_var = true;
-                return $var;
             }
         } elseif ($tokens->is('$')) {
             $var = $this->parseAccessor($tokens, $is_var);
-            if ($tokens->is(Tokenizer::MACRO_INCDEC, "|", "!", "?")) {
-                return $unary . $this->parseVariable($tokens, 0, $var);
-            } else {
-                return $unary . $var;
-            }
+            $code = $unary . $var;
         } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-            return $unary . $this->parseVariable($tokens);
+            $code = $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
         } elseif ($tokens->is("(")) {
             $tokens->next();
-            $exp = $unary . "(" . $this->parseExpr($tokens) . ")";
+            $code = $unary . "(" . $this->parseExpr($tokens) . ")";
             $tokens->need(")")->next();
-            return $exp;
         } elseif ($tokens->is(T_STRING)) {
             if ($tokens->isSpecialVal()) {
-                return $unary . $tokens->getAndNext();
+                $code = $unary . $tokens->getAndNext();
             } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
                 $func = $this->_fenom->getModifier($tokens->current(), $this);
                 if (!$func) {
                     throw new \Exception("Function " . $tokens->getAndNext() . " not found");
                 }
-                $tokens->next();
-                $func = $func . $this->parseArgs($tokens);
-                if ($tokens->is('|')) {
-                    return $unary . $this->parseModifier($tokens, $func);
-                } else {
-                    return $unary . $func;
-                }
+                $code = $unary . $func . $this->parseArgs($tokens->next());
             } else {
                 return false;
             }
         } elseif ($tokens->is(T_ISSET, T_EMPTY)) {
             $func = $tokens->getAndNext();
             if ($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
-                $tokens->next();
-                $exp = $func . "(" . $this->parseVar($tokens) . ")";
+                $code = $unary . $func . "(" . $this->parseVariable($tokens->next()) . ")";
                 $tokens->need(')')->next();
-                return $unary . $exp;
             } else {
                 throw new TokenizeException("Unexpected token " . $tokens->getNext() . ", isset() and empty() accept only variables");
             }
@@ -765,43 +758,29 @@ class Template extends Render
             if ($unary) {
                 throw new UnexpectedTokenException($tokens->back());
             }
-            return $this->parseArray($tokens);
+            $code = $this->parseArray($tokens);
         } elseif ($unary) {
-            $tokens->back();
-            throw new UnexpectedTokenException($tokens);
+            throw new UnexpectedTokenException($tokens->back());
         } else {
             return false;
         }
 
+        return $code;
     }
 
     /**
-     * Parse simple variable (without modifier etc)
-     *
-     * @param Tokenizer $tokens
-     * @return string
-     */
-    public function parseVar(Tokenizer $tokens)
-    {
-        $var = $tokens->get(T_VARIABLE);
-        $_var = '$tpl["' . substr($var, 1) . '"]';
-        $tokens->next();
-        $_var = $this->_var($tokens, $_var);
-        if ($this->_options & Fenom::FORCE_VERIFY) {
-            return 'isset(' . $_var . ') ? ' . $_var . ' : null';
-        } else {
-            return $_var;
-        }
-    }
-
-    /**
+     * Parse variable name: $a, $a.b, $a.b[c]
      * @param Tokenizer $tokens
      * @param $var
      * @return string
      * @throws Error\UnexpectedTokenException
      */
-    protected function _var(Tokenizer $tokens, $var)
+    public function parseVariable(Tokenizer $tokens, $var = null)
     {
+        if(!$var) {
+            $var = '$tpl["' . substr( $tokens->get(T_VARIABLE), 1) . '"]';
+            $tokens->next();
+        }
         while ($t = $tokens->key()) {
             if ($t === ".") {
                 $tokens->next();
@@ -845,78 +824,22 @@ class Template extends Render
     }
 
     /**
-     * Parse complex variable
-     * $var.foo[bar]["a"][1+3/$var]|mod:3:"w":$var3|mod3
-     * ++$var|mod
-     * $var--|mod
-     *
-     * @see parseModifier
-     * @static
-     * @param Tokenizer $tokens
-     * @param int $options set parser options
-     * @param string $var already parsed plain variable
-     * @throws \LogicException
-     * @throws InvalidUsageException
-     * @return string
-     */
-    public function parseVariable(Tokenizer $tokens, $options = 0, $var = null)
-    {
-        $stained = false;
-        if (!$var) {
-            if ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-                $stained = true;
-                $var = $tokens->getAndNext() . $this->parseVar($tokens, $options);
-            } else {
-                $var = $this->parseVar($tokens, $options);
-            }
-            if ($tokens->is(T_OBJECT_OPERATOR)) { // parse
-                $var .= '->' . $tokens->getNext(T_STRING);
-                $tokens->next();
-            }
-        }
-
-        if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
-            if ($stained) {
-                throw new InvalidUsageException("Can not increment or decrement of the method result");
-            }
-            if ($this->_options & Fenom::DENY_METHODS) {
-                throw new \LogicException("Forbidden to call methods");
-            }
-            $var .= $this->parseArgs($tokens);
-            $stained = true;
-        }
-        if ($tokens->is('?', '!')) {
-            return $this->parseTernary($tokens, $var, $tokens->current());
-        }
-        if ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-            if ($stained) {
-                throw new InvalidUsageException("Can not use two increments and/or decrements for one variable");
-            }
-            $var .= $tokens->getAndNext();
-        }
-        if ($tokens->is('|') && !($options & self::DENY_MODS)) {
-            return $this->parseModifier($tokens, $var);
-        }
-        return $var;
-    }
-
-    /**
      * Parse accessor
      */
     public function parseAccessor(Tokenizer $tokens, &$is_var)
     {
         $is_var = false;
         $vars = array(
-            'get'     => '$_GET',
-            'post'    => '$_POST',
+            'get' => '$_GET',
+            'post' => '$_POST',
             'session' => '$_SESSION',
-            'cookie'  => '$_COOKIE',
+            'cookie' => '$_COOKIE',
             'request' => '$_REQUEST',
-            'files'   => '$_FILES',
+            'files' => '$_FILES',
             'globals' => '$GLOBALS',
-            'server'  => '$_SERVER',
-            'env'     => '$_ENV',
-            'tpl'     => '$tpl->info'
+            'server' => '$_SERVER',
+            'env' => '$_ENV',
+            'tpl' => '$tpl->info'
         );
         if ($this->_options & Fenom::DENY_ACCESSOR) {
             throw new \LogicException("Accessor are disabled");
@@ -925,7 +848,7 @@ class Template extends Render
         $tokens->next();
         if (isset($vars[$key])) {
             $is_var = true;
-            return $this->_var($tokens, $vars[$key]);
+            return $this->parseVariable($tokens, $vars[$key]);
         }
         switch ($key) {
             case 'const':
@@ -942,11 +865,7 @@ class Template extends Render
                 throw new UnexpectedTokenException($tokens);
         }
 
-        if ($tokens->is('|')) {
-            return $this->parseModifier($tokens, $var);
-        } else {
-            return $var;
-        }
+        return $var;
     }
 
     /**
@@ -1021,12 +940,8 @@ class Template extends Render
                 return '(' . $value . ' ' . $equal . '= ' . $action . ')';
             }
             return $invert . '(' . $value . ' instanceof \\' . $this->parseName($tokens) . ')';
-        } elseif ($tokens->is(T_VARIABLE)) {
-            return '(' . $value . ' ' . $equal . '= ' . $this->parseVariable($tokens) . ')';
-        } elseif ($tokens->is(Tokenizer::MACRO_SCALAR)) {
-            return '(' . $value . ' ' . $equal . '= ' . $this->parseScalar($tokens) . ')';
-        } elseif ($tokens->is('[')) {
-            return '(' . $value . ' ' . $equal . '= ' . $this->parseArray($tokens) . ')';
+        } elseif ($tokens->is(T_VARIABLE, '[', Tokenizer::MACRO_SCALAR, '"')) {
+            return '(' . $value . ' ' . $equal . '= ' . $this->parseTerm($tokens) . ')';
         } elseif ($tokens->is(T_NS_SEPARATOR)) { //
             return $invert . '(' . $value . ' instanceof \\' . $this->parseName($tokens) . ')';
         } else {
@@ -1085,7 +1000,7 @@ class Template extends Render
             if (!$checker) {
                 $checker = "auto";
             }
-            return $invert . sprintf($checkers[$checker], $value, $this->parseVariable($tokens));
+            return $invert . sprintf($checkers[$checker], $value, $this->parseTerm($tokens));
         } else {
             throw new UnexpectedTokenException($tokens);
         }
@@ -1115,30 +1030,25 @@ class Template extends Render
      * Parse scalar values
      *
      * @param Tokenizer $tokens
-     * @param bool $allow_mods
+     * @throws Error\UnexpectedTokenException
      * @return string
-     * @throws TokenizeException
      */
-    public function parseScalar(Tokenizer $tokens, $allow_mods = true)
+    public function parseScalar(Tokenizer $tokens)
     {
         $_scalar = "";
-        if ($token = $tokens->key()) {
-            switch ($token) {
-                case T_CONSTANT_ENCAPSED_STRING:
-                case T_LNUMBER:
-                case T_DNUMBER:
-                    $_scalar .= $tokens->getAndNext();
-                    break;
-                case T_ENCAPSED_AND_WHITESPACE:
-                case '"':
-                    $_scalar .= $this->parseQuote($tokens);
-                    break;
-                default:
-                    throw new TokenizeException("Unexpected scalar token '" . $tokens->current() . "'");
-            }
-            if ($allow_mods && $tokens->is("|")) {
-                return $this->parseModifier($tokens, $_scalar);
-            }
+        $token = $tokens->key();
+        switch ($token) {
+            case T_CONSTANT_ENCAPSED_STRING:
+            case T_LNUMBER:
+            case T_DNUMBER:
+                $_scalar .= $tokens->getAndNext();
+                break;
+            case T_ENCAPSED_AND_WHITESPACE:
+            case '"':
+                $_scalar .= $this->parseQuote($tokens);
+                break;
+            default:
+                throw new UnexpectedTokenException($tokens);
         }
         return $_scalar;
     }
@@ -1152,7 +1062,7 @@ class Template extends Render
      */
     public function parseQuote(Tokenizer $tokens)
     {
-        if ($tokens->is('"', "`")) {
+        if ($tokens->is('"')) {
             $stop = $tokens->current();
             $_str = '"';
             $tokens->next();
@@ -1209,17 +1119,6 @@ class Template extends Render
     }
 
     /**
-     * @param Tokenizer $tokens
-     * @param null $first_member
-     */
-    public function parseConcat(Tokenizer $tokens, $first_member = null)
-    {
-        $concat = array();
-        if ($first_member) {
-        }
-    }
-
-    /**
      * Parse modifiers
      * |modifier:1:2.3:'string':false:$var:(4+5*$var3)|modifier2:"str {$var+3} ing":$arr.item
      *
@@ -1240,25 +1139,8 @@ class Template extends Render
             $args = array();
 
             while ($tokens->is(":")) {
-                $token = $tokens->getNext(Tokenizer::MACRO_SCALAR, T_VARIABLE, '"', Tokenizer::MACRO_STRING, "(", "[", '$');
-
-                if ($tokens->is(Tokenizer::MACRO_SCALAR) || $tokens->isSpecialVal()) {
-                    $args[] = $token;
-                    $tokens->next();
-                } elseif ($tokens->is(T_VARIABLE)) {
-                    $args[] = $this->parseVariable($tokens, self::DENY_MODS);
-                } elseif ($tokens->is('$')) {
-                    $args[] = $this->parseAccessor($tokens, $is_var);
-                } elseif ($tokens->is('"', '`', T_ENCAPSED_AND_WHITESPACE)) {
-                    $args[] = $this->parseQuote($tokens);
-                } elseif ($tokens->is('(')) {
-                    $args[] = $this->parseExpr($tokens);
-                } elseif ($tokens->is('[')) {
-                    $args[] = $this->parseArray($tokens);
-                } elseif ($tokens->is(T_STRING) && $tokens->isNext('(')) {
-                    $args[] = $tokens->getAndNext() . $this->parseArgs($tokens);
-                } else {
-                    break;
+                if (!$args[] = $this->parseTerm($tokens->next())) {
+                    throw new UnexpectedTokenException($tokens);
                 }
             }
 
@@ -1358,14 +1240,14 @@ class Template extends Render
                 throw new InvalidUsageException("Macro '$name' require '$arg' argument");
             }
         }
-        $n = $this->i++;
+        $n = sprintf('%u_%d', crc32($this->_name), $this->i++);
         if ($recursive) {
             $recursive['recursive'] = true;
             $body = '$tpl->getMacro("' . $name . '")->__invoke($tpl);';
         } else {
             $body = '?>' . $macro["body"] . '<?php';
         }
-        return '$_tpl' . $n . ' = $tpl->exchangeArray(' . Compiler::toArray($args) . ');' . PHP_EOL . $body . PHP_EOL . '$tpl->exchangeArray($_tpl' . $n . '); unset($_tpl' . $n . ');';
+        return '$_tpl' . $n . ' = $tpl->exchangeArray(' . Compiler::toArray($args) . ');' . PHP_EOL . $body . PHP_EOL . '$tpl->exchangeArray($_tpl' . $n . '); /* X */ unset($_tpl' . $n . ');';
     }
 
     /**
@@ -1457,7 +1339,7 @@ class Template extends Render
                 } else {
                     $params[$key] = 'true';
                 }
-            } elseif ($tokens->is(Tokenizer::MACRO_SCALAR, '"', '`', T_VARIABLE, "[", '(')) {
+            } elseif ($tokens->is(Tokenizer::MACRO_SCALAR, '"', T_VARIABLE, "[", '(')) {
                 $params[] = $this->parseExpr($tokens);
             } else {
                 break;

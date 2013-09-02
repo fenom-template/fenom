@@ -157,17 +157,16 @@ class Fenom
             'close' => 'Fenom\Compiler::stdClose',
             'tags' => array(
                 'elseif' => 'Fenom\Compiler::tagElseIf',
-                'else' => 'Fenom\Compiler::tagElse',
+                'else' => 'Fenom\Compiler::tagElse'
             )
         ),
-        'switch' => array( // {switch ...} {case ...} {break} {default} {/switch}
+        'switch' => array( // {switch ...} {case ..., ...}  {default} {/switch}
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::switchOpen',
-            'close' => 'Fenom\Compiler::stdClose',
+            'close' => 'Fenom\Compiler::switchClose',
             'tags' => array(
                 'case' => 'Fenom\Compiler::tagCase',
-                'default' => 'Fenom\Compiler::tagDefault',
-                'break' => 'Fenom\Compiler::tagBreak',
+                'default' => 'Fenom\Compiler::tagDefault'
             ),
             'float_tags' => array('break' => 1)
         ),
@@ -196,6 +195,10 @@ class Fenom
             'type' => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagInclude'
         ),
+        'insert' => array( // {include ...}
+            'type' => self::INLINE_COMPILER,
+            'parser' => 'Fenom\Compiler::tagInsert'
+        ),
         'var' => array( // {var ...}
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::varOpen',
@@ -205,8 +208,7 @@ class Fenom
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::tagBlockOpen',
             'close' => 'Fenom\Compiler::tagBlockClose',
-            'tags' => array(
-                'parent' => 'Fenom\Compiler::tagParent'
+            'tags' => array(//                'parent' => 'Fenom\Compiler::tagParent' // not implemented yet
             ),
             'float_tags' => array('parent' => 1)
         ),
@@ -608,15 +610,18 @@ class Fenom
      *
      * @param string $scm scheme name
      * @param Fenom\ProviderInterface $provider provider object
+     * @return $this
      */
     public function addProvider($scm, \Fenom\ProviderInterface $provider)
     {
         $this->_providers[$scm] = $provider;
+        return $this;
     }
 
     /**
      * Set options
      * @param int|array $options
+     * @return $this
      */
     public function setOptions($options)
     {
@@ -625,6 +630,7 @@ class Fenom
         }
         $this->_storage = array();
         $this->_options = $options;
+        return $this;
     }
 
     /**
@@ -758,10 +764,11 @@ class Fenom
     {
         $file_name = $this->_getCacheName($tpl, $opts);
         if (is_file($this->_compile_dir . "/" . $file_name)) {
-            $fenom = $this;
+            $fenom = $this; // used in template
             $_tpl = include($this->_compile_dir . "/" . $file_name);
-            /* @var Fenom\Render $tpl */
-            if($_tpl->isValid()) {
+            /* @var Fenom\Render $_tpl */
+//            var_dump($tpl, $_tpl->isValid()); exit;
+            if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
                 return $_tpl;
             }
         }

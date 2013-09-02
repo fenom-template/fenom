@@ -137,6 +137,7 @@ class TemplateTest extends TestCase
             array('Mod: {$date|date:"Y m d"}!', $b, 'Mod: 2012 07 26!'),
             array('Mod: {$tags|strip_tags}!', $b, 'Mod: my name is Legion!'),
             array('Mod: {$b.c|json_encode}!', $b, 'Mod: "Username"!'),
+            array('Mod: {($time/1024/1024)|round:2}!', $b, 'Mod: 1281.09!'),
             array('Mod: {time()|date:"Y m d"}!', $b, 'Mod: ' . date("Y m d") . '!'),
         );
     }
@@ -341,7 +342,7 @@ class TemplateTest extends TestCase
             array('Create: {var $v = 1++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = c} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 'c'"),
             array('Create: {var $v = ($a)++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = --$a++} Result: {$v} end', 'Fenom\Error\CompileException', "Can not use two increments and/or decrements for one variable"),
+            array('Create: {var $v = --$a++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = $a|upper++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
             array('Create: {var $v = max($a,2)} Result: {$v} end', 'Fenom\Error\CompileException', "Function max not found", Fenom::DENY_NATIVE_FUNCS),
@@ -494,37 +495,40 @@ class TemplateTest extends TestCase
     public static function providerSwitch()
     {
         $code1 = 'Switch: {switch $a}
-        {case 1} one {break}
-        {case 2} two {break}
-        {case "string"} str {break}
+        {case 1, "one"} one
+        {case 2, "two"} two
+        {case "string"} str
         {default} def
         {/switch} end';
 
         $code2 = 'Switch: {switch $a}
-        {case 1} one {break}
-        {case 2} two {break}
-        {case "string"} str {break}
+        {case 1, "one"} one
+        {case 2, "two"} two
+        {case "string"} str
         {/switch} end';
 
         $code3 = 'Switch: {switch $a} invalid
-        {case 1} one {break}
+        {case 1, "one"} one
         {/switch} end';
 
         return array(
             array($code1, array("a" => 1), 'Switch: one end'),
+            array($code1, array("a" => 'one'), 'Switch: one end'),
             array($code1, array("a" => 2), 'Switch: two end'),
+            array($code1, array("a" => 'two'), 'Switch: two end'),
             array($code1, array("a" => "string"), 'Switch: str end'),
             array($code2, array("a" => "unk"), 'Switch: end'),
-            array($code3, array("a" => 1), 'Switch: invalid one end'),
+            array($code3, array("a" => 1), 'Switch: one end'),
+            array($code3, array("a" => 'one'), 'Switch: one end'),
         );
     }
 
     public static function providerSwitchInvalid()
     {
         return array(
-            array('Switch: {switch}{case 1} one {break}{/switch} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{case} one {break}{/switch} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
-            array('Switch: {switch 1}{break}{case} one {/switch} end', 'Fenom\Error\CompileException', "Improper usage of the tag {break}"),
+            array('Switch: {switch}{case 1} one {/switch} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Switch: {switch 1}{case} one{/switch} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Switch: {switch 1}{case $var} one {/switch} end', 'Fenom\Error\CompileException', "Unexpected token '\$var' in expression"),
         );
     }
 
@@ -575,7 +579,7 @@ class TemplateTest extends TestCase
             array('For: {for} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('For: {for $a=} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('For: {for $a+1=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
-            array('For: {for max($a,$b)=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'max'"),
+            array('For: {for max($a,$b)=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token '='"),
             array('For: {for to=6 $a=3} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'to'"),
             array('For: {for index=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'index'"),
             array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'first'"),
@@ -719,7 +723,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{"string"|append:$.get.one}')->getBody());
+            var_dump($this->fenom->setOptions(Fenom::FORCE_VERIFY)->compileCode('{if $unexist} block1 {else} block2 {/if}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
@@ -875,6 +879,7 @@ class TemplateTest extends TestCase
     }
 
     /**
+     * @group switch
      * @dataProvider providerSwitch
      */
     public function testSwitch($code, $vars, $result)
@@ -883,6 +888,7 @@ class TemplateTest extends TestCase
     }
 
     /**
+     * @group switch-bad
      * @dataProvider providerSwitchInvalid
      */
     public function testSwitchInvalid($code, $exception, $message, $options = 0)

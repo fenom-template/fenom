@@ -175,7 +175,7 @@ class Render extends \ArrayObject
      */
     public function isValid()
     {
-        if (count($this->_depends) === 1) { // if no external dependencies, only self
+        if (count($this->_depends[0]) === 1) { // if no external dependencies, only self
             $provider = $this->_fenom->getProvider($this->_scm);
             if ($provider->getLastModified($this->_name) !== $this->_time) {
                 return false;
@@ -198,7 +198,7 @@ class Render extends \ArrayObject
      */
     public function getMacro($name)
     {
-        if(empty($this->_macros[$name])) {
+        if (empty($this->_macros[$name])) {
             throw new RuntimeException('macro not found');
         }
         return $this->_macros[$name];
@@ -247,7 +247,7 @@ class Render extends \ArrayObject
 
     public function __get($name)
     {
-        if($name == 'info') {
+        if ($name == 'info') {
             return array(
                 'name' => $this->_name,
                 'schema' => $this->_scm,

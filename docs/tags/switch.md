@@ -31,7 +31,7 @@ For example,
 {/switch}
 ```
 
-If `$type = 'new'` template outputs
+set `$type = 'new'`, then template output
 
 ```
 It is new item
