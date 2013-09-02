@@ -1,10 +1,21 @@
-CHANGELOG
+Changelog
 =========
 
-## 1.3.1 (2013-08-29)
+## 1.4.0
 
-- Bug: accessor don't work in modifier
-- Removed too many EOL in template code
+- Redesign tag {switch}
+- Add tag {insert}
+- Add variable verification before using (option `Fenom::FORCE_VERIFY`)
+- Improve internal parsers
+- Fix #45: intersection of names of tmp vars
+- Fix #44: invalid `_depend` format in template
+- Docs++
+- Tests++
+
+### 1.3.1 (2013-08-29)
+
+- Fix: accessor don't work in modifier
+- Removed too many EOLs in template code
 - Tests++
 
 ## 1.3.0 (2013-08-23)
@@ -15,7 +26,7 @@ CHANGELOG
 - Recognize macros parser
 - Fix `auto_reload` option
 - Tests++
-- Docs--
+- Docs++
 
 ### 1.2.2 (2013-08-07)
 
@@ -29,7 +40,6 @@ CHANGELOG
 
 - Feature #28: macros may be called recursively
 - Feature #29: add {unset} tag
-- Add hook for loading modifiers and tags
 - Add hook for loading modifiers and tags
 - Feature #3: Add string operator '~'
 - Improve parsers: parserExp, parserVar, parserVariable, parserMacro

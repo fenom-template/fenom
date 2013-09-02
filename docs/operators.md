@@ -131,11 +131,11 @@ Tests can be negated by using the `not in` operator.
 
 * `$a in $b` - variable `$a` contains in `$b`, $b may be string, plain or assoc array.
 * `$a in list $b` - variable `$a` contains in array `$b` as value
-* `$a in keys $b` - variable `$a` contains in array `$b` as key
+* `$a in keys $b` - array `$b` contain key `$a`
 * `$a in string $b` - variable `$a` contains in string `$b` as substring
 
 ```smarty
 {'df' in 'abcdefg'}
 {5 in [1, 5, 25, 125]}
-{2 in keys [1, 5, 25, 125]}
+{99 in keys [1, 5, 25, 99 => 125]}
 ```
