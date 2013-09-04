@@ -622,7 +622,7 @@ class Template extends Render
                     $var = false;
                 }
                 if ($tokens->is('?', '!')) {
-                    $term = $this->parseTernary($tokens, $term, $tokens->current());
+                    $term = $this->parseTernary($tokens, $term, $var);
                     $var = false;
                 }
                 $exp[] = $term;
@@ -873,35 +873,59 @@ class Template extends Render
      *
      * @param Tokenizer $tokens
      * @param $var
-     * @param $type
+     * @param $is_var
      * @return string
      * @throws UnexpectedTokenException
      */
-    public function parseTernary(Tokenizer $tokens, $var, $type)
+    public function parseTernary(Tokenizer $tokens, $var, $is_var)
     {
-        $empty = ($type === "?");
+        $empty = $tokens->is('?');
         $tokens->next();
         if ($tokens->is(":")) {
             $tokens->next();
             if ($empty) {
-                return '(empty(' . $var . ') ? (' . $this->parseExpr($tokens) . ') : ' . $var . ')';
+                if($is_var) {
+                    return '(empty(' . $var . ') ? (' . $this->parseExpr($tokens) . ') : ' . $var . ')';
+                } else {
+                    return '(' . $var . ' ?: (' . $this->parseExpr($tokens) . ')';
+                }
             } else {
-                return '(isset(' . $var . ') ? ' . $var . ' : (' . $this->parseExpr($tokens) . '))';
+                if($is_var) {
+                    return '(isset(' . $var . ') ? ' . $var . ' : (' . $this->parseExpr($tokens) . '))';
+                } else {
+                    return '((' . $var . ' !== null) ? ' . $var . ' : (' . $this->parseExpr($tokens) . '))';
+                }
             }
         } elseif ($tokens->is(Tokenizer::MACRO_BINARY, Tokenizer::MACRO_BOOLEAN, Tokenizer::MACRO_MATH) || !$tokens->valid()) {
             if ($empty) {
-                return '!empty(' . $var . ')';
+                if($is_var) {
+                    return '!empty(' . $var . ')';
+                } else {
+                    return '(' . $var . ')';
+                }
             } else {
-                return 'isset(' . $var . ')';
+                if($is_var) {
+                    return 'isset(' . $var . ')';
+                } else {
+                    return '(' . $var . ' !== null)';
+                }
             }
         } else {
             $expr1 = $this->parseExpr($tokens);
             $tokens->need(':')->skip();
             $expr2 = $this->parseExpr($tokens);
             if ($empty) {
-                return '(empty(' . $var . ') ? ' . $expr2 . ' : ' . $expr1 . ')';
+                if($is_var) {
+                    return '(empty(' . $var . ') ? ' . $expr2 . ' : ' . $expr1 . ')';
+                } else {
+                    return '(' . $var . ' ? ' . $expr1 . ' : ' . $expr2 . ')';
+                }
             } else {
-                return '(isset(' . $var . ') ? ' . $expr1 . ' : ' . $expr2 . ')';
+                if($is_var) {
+                    return '(isset(' . $var . ') ? ' . $expr1 . ' : ' . $expr2 . ')';
+                } else {
+                    return '((' . $var . ' !== null) ? ' . $expr1 . ' : ' . $expr2 . ')';
+                }
             }
         }
     }
@@ -1035,22 +1059,23 @@ class Template extends Render
      */
     public function parseScalar(Tokenizer $tokens)
     {
-        $_scalar = "";
         $token = $tokens->key();
         switch ($token) {
             case T_CONSTANT_ENCAPSED_STRING:
             case T_LNUMBER:
             case T_DNUMBER:
-                $_scalar .= $tokens->getAndNext();
+                return $tokens->getAndNext();
                 break;
             case T_ENCAPSED_AND_WHITESPACE:
             case '"':
-                $_scalar .= $this->parseQuote($tokens);
+                return $this->parseQuote($tokens);
                 break;
+            case '$':
+                $tokens->next()->need('.')->next()->need(T_CONST)->next();
+                return 'constant('.$this->parseName($tokens).')';
             default:
                 throw new UnexpectedTokenException($tokens);
         }
-        return $_scalar;
     }
 
     /**

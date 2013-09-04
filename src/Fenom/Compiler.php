@@ -332,10 +332,12 @@ class Compiler
      */
     public static function switchOpen(Tokenizer $tokens, Scope $scope)
     {
-        $scope["expr"] = $scope->tpl->parseExpr($tokens);
+        $expr = $scope->tpl->parseExpr($tokens);
         $scope["case"] = array();
         $scope["last"] = array();
         $scope["default"] = '';
+        $scope["var"] = $scope->tpl->tmpVar();
+        $scope["expr"] = $scope["var"].' = strval('.$expr.')';
         // lazy init
         return '';
     }
@@ -409,13 +411,16 @@ class Compiler
     public static function switchClose(Tokenizer $tokens, Scope $scope)
     {
         self::_caseResort($scope);
-        $expr = $scope["expr"];
-        $code = "";
+        $expr = $scope["var"];
+        $code = $scope["expr"].";\n";
         $default = $scope["default"];
         foreach ($scope["case"] as $case => $content) {
+            if(is_numeric($case)) {
+                $case = "'$case'";
+            }
             $code .= "if($expr == $case) {\n?>$content<?php\n} else";
         }
-        $code .= " {\n?>$default<?php\n}";
+        $code .= " {\n?>$default<?php\n}\nunset(".$scope["var"].")";
         return $code;
     }
 
