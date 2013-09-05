@@ -35,7 +35,7 @@ class Fenom
     const FORCE_COMPILE = 0x100;
     const AUTO_ESCAPE = 0x200;
     const DISABLE_CACHE = 0x400;
-    const FORCE_VERIFY = 0x800; // reserved
+    const FORCE_VERIFY = 0x800;
     const AUTO_TRIM = 0x1000; // reserved
     const DENY_STATICS = 0x2000; // reserved
 

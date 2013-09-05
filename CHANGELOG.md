@@ -1,7 +1,13 @@
 Changelog
 =========
 
-## 1.4.0
+### 1.4.1 (2013-09-05)
+
+- Fix equating for {case} in {switch}
+- Fix ternary operator when option `force_verify` is enabled
+- Docs++
+
+## 1.4.0 (2013-09-02)
 
 - Redesign tag {switch}
 - Add tag {insert}
