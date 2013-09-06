@@ -816,7 +816,7 @@ class Fenom
             fclose($tpl_fp);
             $file_name = $this->_compile_dir . "/" . $cache;
             if (!rename($tpl_tmp, $file_name)) {
-                throw new \RuntimeException("Can't to move $tpl_tmp to $tpl");
+                throw new \RuntimeException("Can't to move $tpl_tmp to $file_name");
             }
         }
         return $template;
