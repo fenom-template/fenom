@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 1.4.2 (2013-09-06)
+
+- Added check the cache directory to record
+
 ### 1.4.1 (2013-09-05)
 
 - Fix equating for {case} in {switch}

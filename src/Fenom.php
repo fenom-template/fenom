@@ -292,10 +292,14 @@ class Fenom
      * Set compile directory
      *
      * @param string $dir directory to store compiled templates in
+     * @throws LogicException
      * @return Fenom
      */
     public function setCompileDir($dir)
     {
+        if(!is_writable($dir)) {
+            throw new LogicException("Cache directory $dir is not writable");
+        }
         $this->_compile_dir = $dir;
         return $this;
     }
