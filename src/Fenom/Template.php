@@ -99,6 +99,11 @@ class Template extends Render
 
     private $_filters = array();
 
+    /**
+     * @var int crc32 of the template name
+     */
+    private $_crc = 0;
+
     protected static $_tests = array(
         'integer' => 'is_int(%s)',
         'int' => 'is_int(%s)',
@@ -157,6 +162,7 @@ class Template extends Render
     public function load($name, $compile = true)
     {
         $this->_name = $name;
+        $this->_crc = crc32($this->_name);
         if ($provider = strstr($name, ":", true)) {
             $this->_scm = $provider;
             $this->_base_name = substr($name, strlen($provider) + 1);
@@ -300,7 +306,7 @@ class Template extends Render
      */
     public function tmpVar()
     {
-        return '$t' . ($this->i++);
+        return sprintf('$t%u_%d', $this->_crc, $this->i++);
     }
 
     /**

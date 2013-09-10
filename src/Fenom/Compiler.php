@@ -39,7 +39,8 @@ class Compiler
             if ($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) {
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
-                return '$_tpl = (array)$tpl; $tpl->exchangeArray(' . self::toArray($p) . '+$_tpl); ?>' . $inc->getBody() . '<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
+                $var = $tpl->tmpVar();
+                return $var.' = (array)$tpl; $tpl->exchangeArray(' . self::toArray($p) . '+'.$var.'); ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
             } else {
                 return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . '+(array)$tpl);';
             }
@@ -47,7 +48,8 @@ class Compiler
             if ($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) {
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
-                return '$_tpl = (array)$tpl; ?>' . $inc->getBody() . '<?php $tpl->exchangeArray($_tpl); unset($_tpl);';
+                $var = $tpl->tmpVar();
+                return $var.' = (array)$tpl; ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
             } else {
                 return '$tpl->getStorage()->getTemplate(' . $cname . ')->display((array)$tpl);';
             }
