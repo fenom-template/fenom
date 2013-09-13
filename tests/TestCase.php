@@ -103,6 +103,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             mkdir(FENOM_RESOURCES . '/template/' . $dir, 0777, true);
         }
         file_put_contents(FENOM_RESOURCES . '/template/' . $name, $code);
+        return filemtime(FENOM_RESOURCES . '/template/' . $name);
     }
 
     /**

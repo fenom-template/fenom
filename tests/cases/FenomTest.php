@@ -10,7 +10,7 @@ class FenomTest extends \Fenom\TestCase
     {
         return array(
             array("disable_methods", Fenom::DENY_METHODS),
-            array("disable_native_funcs", Fenom::DENY_INLINE_FUNCS),
+            array("disable_native_funcs", Fenom::DENY_NATIVE_FUNCS),
             array("disable_cache", Fenom::DISABLE_CACHE),
             array("force_compile", Fenom::FORCE_COMPILE),
             array("auto_reload", Fenom::AUTO_RELOAD),
@@ -18,6 +18,16 @@ class FenomTest extends \Fenom\TestCase
             array("auto_escape", Fenom::AUTO_ESCAPE),
             array("force_verify", Fenom::FORCE_VERIFY)
         );
+    }
+
+    public function testCreating() {
+        $time = $this->tpl('template1.tpl', 'Template 1 a');
+        Fenom::factory(FENOM_RESOURCES . '/template', FENOM_RESOURCES . '/compile');
+        $fenom = new Fenom($provider =new \Fenom\Provider(FENOM_RESOURCES . '/template'), FENOM_RESOURCES . '/compile', Fenom::AUTO_ESCAPE);
+        $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('template1.tpl'));
+        $this->assertSame($provider, $tpl->getProvider());
+        $this->assertSame('template1.tpl', $tpl->getBaseName());
+        $this->assertSame($time, $tpl->getTime());
     }
 
     public function testCompileFile()
@@ -43,14 +53,19 @@ class FenomTest extends \Fenom\TestCase
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
     }
 
+    /**
+     * @group testCheckMTime
+     */
     public function testCheckMTime()
     {
         $this->fenom->setOptions(Fenom::FORCE_COMPILE);
         $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
-
-        sleep(1);
+        $tpl = $this->fenom->getTemplate('custom.tpl');
+        $this->assertTrue($tpl->isValid());
+        usleep(1.5e6);
         $this->tpl('custom.tpl', 'Custom template (new)');
+        $this->assertFalse($tpl->isValid());
         $this->assertSame("Custom template (new)", $this->fenom->fetch('custom.tpl', array()));
     }
 

@@ -1,6 +1,15 @@
 Changelog
 =========
 
+### 1.4.4
+
+- Bug fixes
+- Tests++
+
+### 1.4.3
+
+- Bug fixes
+
 ### 1.4.2 (2013-09-06)
 
 - Added check the cache directory to record

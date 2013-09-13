@@ -305,26 +305,6 @@ class Tokenizer
     }
 
     /**
-     * Return substring. This method doesn't move pointer.
-     * @param int $offset
-     * @param int $limit
-     * @return string
-     */
-    public function getSubstr($offset, $limit = 0)
-    {
-        $str = '';
-        if (!$limit) {
-            $limit = $this->_max;
-        } else {
-            $limit += $offset;
-        }
-        for ($i = $offset; $i <= $limit; $i++) {
-            $str .= $this->tokens[$i][1] . $this->tokens[$i][2];
-        }
-        return $str;
-    }
-
-    /**
      * Return token and move pointer
      * @return mixed
      * @throws UnexpectedTokenException
