@@ -229,6 +229,7 @@ class TemplateTest extends TestCase
         $result4 = 'Include <b>Welcome, Flame (flame@dev.null)</b>  template';
         return array(
             array('Include {include "welcome.tpl"} template', $a, $result),
+            array('Include {include "welcome.tpl"} template', $a, $result, Fenom::FORCE_INCLUDE),
             array('Include {include $tpl} template', $a, $result),
             array('Include {include "$tpl"} template', $a, $result),
             array('Include {include "{$tpl}"} template', $a, $result),
@@ -238,7 +239,9 @@ class TemplateTest extends TestCase
             array('Include {include "wel{$fragment}.tpl"} template', $a, $result),
             array('Include {include "wel{$pr_fragment|lower}.tpl"} template', $a, $result),
             array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2),
+            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2, Fenom::FORCE_INCLUDE),
             array('Include {include "welcome.tpl" email="flame@dev.null"} template', $a, $result3),
+            array('Include {include "welcome.tpl" email="flame@dev.null"} template', $a, $result3, Fenom::FORCE_INCLUDE),
             array('Include {include "welcome.tpl" username="Flame" email="flame@dev.null"} template',
                 $a, $result4),
         );
@@ -249,6 +252,40 @@ class TemplateTest extends TestCase
         return array(
             array('Include {include} template', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('Include {include another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Unexpected token '='"),
+        );
+    }
+
+    public static function providerInsert()
+    {
+        $a = array(
+            "name" => "welcome",
+            "tpl" => "welcome.tpl",
+            "fragment" => "come",
+            "pr_fragment" => "Come",
+            "pr_name" => "Welcome",
+            "username" => "Master",
+            "email" => "dev@null.net"
+        );
+        $result = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
+        return array(
+            array('Include {insert "welcome.tpl"} template', $a, $result),
+            array("Include {insert 'welcome.tpl'} template", $a, $result),
+        );
+    }
+
+    public static function providerInsertInvalid()
+    {
+        return array(
+            array('Include {insert} template', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('Include {insert another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Template another not found"),
+            array('Include {insert $tpl} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "$tpl"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "{$tpl}"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "$name.tpl"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "{$name}.tpl"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "{$pr_name|lower}.tpl"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "wel{$fragment}.tpl"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
+            array('Include {insert "welcome.tpl" email="flame@dev.null"} template', 'Fenom\Error\CompileException', "Unexpected token 'email'"),
         );
     }
 
@@ -783,15 +820,36 @@ class TemplateTest extends TestCase
      * @group include
      * @dataProvider providerInclude
      */
-    public function testInclude($code, $vars, $result)
+    public function testInclude($code, $vars, $result, $options = 0)
     {
-        $this->exec($code, $vars, $result);
+        $this->exec($code, $vars, $result, $options);
     }
 
     /**
      * @dataProvider providerIncludeInvalid
      */
     public function testIncludeInvalid($code, $exception, $message, $options = 0)
+    {
+        $this->execError($code, $exception, $message, $options);
+    }
+
+    /**
+     * @group insert
+     * @dataProvider providerInsert
+     */
+    public function testInsert($code, $vars, $result)
+    {
+        $this->tpl('insert.tpl', $code);
+        $this->assertRender('insert.tpl', $result, $vars);
+        $tpl = $this->exec($code, $vars, $result);
+        $this->assertTrue($tpl->isValid());
+    }
+
+    /**
+     * @group insert
+     * @dataProvider providerInsertInvalid
+     */
+    public function testInsertInvalid($code, $exception, $message, $options = 0)
     {
         $this->execError($code, $exception, $message, $options);
     }

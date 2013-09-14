@@ -113,6 +113,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      * @param string $result expected result.
      * @param int $options
      * @param bool $dump dump source and result code (for debug)
+     * @return \Fenom\Template
      */
     public function exec($code, $vars, $result, $options = 0, $dump = false)
     {
@@ -122,6 +123,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody() . "\n========= DUMP END =============\n";
         }
         $this->assertSame(Modifier::strip($result), Modifier::strip($tpl->fetch($vars), true), "Test $code");
+        return $tpl;
     }
 
     public function execTpl($name, $code, $vars, $result, $dump = false)
@@ -268,39 +270,5 @@ class TestCase extends \PHPUnit_Framework_TestCase
             self::providerVariables(),
             self::providerObjects()
         );
-    }
-}
-
-class Fake implements \ArrayAccess
-{
-    public $vars;
-
-    public function offsetExists($offset)
-    {
-        return true;
-    }
-
-    public function offsetGet($offset)
-    {
-        if ($offset == "object") {
-            return new self();
-        } else {
-            return new self($offset);
-        }
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        $this->vars[$offset] = $value;
-    }
-
-    public function offsetUnset($offset)
-    {
-        unset($this->vars[$offset]);
-    }
-
-    public function proxy()
-    {
-        return implode(", ", func_get_args());
     }
 }

@@ -10,7 +10,7 @@ class FenomTest extends \Fenom\TestCase
     {
         return array(
             array("disable_methods", Fenom::DENY_METHODS),
-            array("disable_native_funcs", Fenom::DENY_INLINE_FUNCS),
+            array("disable_native_funcs", Fenom::DENY_NATIVE_FUNCS),
             array("disable_cache", Fenom::DISABLE_CACHE),
             array("force_compile", Fenom::FORCE_COMPILE),
             array("auto_reload", Fenom::AUTO_RELOAD),
@@ -18,6 +18,18 @@ class FenomTest extends \Fenom\TestCase
             array("auto_escape", Fenom::AUTO_ESCAPE),
             array("force_verify", Fenom::FORCE_VERIFY)
         );
+    }
+
+    public function testCreating() {
+        $time = $this->tpl('temp.tpl', 'Template 1 a');
+        $fenom = new Fenom($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'));
+        $fenom->setCompileDir(FENOM_RESOURCES . '/compile');
+        $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
+        $this->assertSame($provider, $tpl->getProvider());
+        $this->assertSame('temp.tpl', $tpl->getBaseName());
+        $this->assertSame('temp.tpl', $tpl->getName());
+        $this->assertSame($time, $tpl->getTime());
+        $fenom->clearAllCompiles();
     }
 
     public function testCompileFile()
@@ -43,14 +55,19 @@ class FenomTest extends \Fenom\TestCase
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
     }
 
+    /**
+     * @group testCheckMTime
+     */
     public function testCheckMTime()
     {
         $this->fenom->setOptions(Fenom::FORCE_COMPILE);
         $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
-
-        sleep(1);
+        $tpl = $this->fenom->getTemplate('custom.tpl');
+        $this->assertTrue($tpl->isValid());
+        usleep(1.5e6);
         $this->tpl('custom.tpl', 'Custom template (new)');
+        $this->assertFalse($tpl->isValid());
         $this->assertSame("Custom template (new)", $this->fenom->fetch('custom.tpl', array()));
     }
 
@@ -132,5 +149,46 @@ class FenomTest extends \Fenom\TestCase
         });
 
         $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} god {/var} world')->fetch(array()));
+    }
+
+    public function testAddInlineCompilerSmart() {
+        $this->fenom->addCompilerSmart('SayA','TestTags');
+        $this->tpl('inline_compiler.tpl', 'I just {SayA}.');
+        $this->assertSame('I just Say A.', $this->fenom->fetch('inline_compiler.tpl', array()));
+    }
+
+    public function testAddBlockCompilerSmart() {
+        $this->fenom->addBlockCompilerSmart('SayBlock', 'TestTags', array('SaySomething'), array('SaySomething'));
+        $this->tpl('block_compiler.tpl', '{SayBlock} and {SaySomething}. It is all, {/SayBlock}');
+        $this->assertSame('Start saying and say blah-blah-blah. It is all, Stop saying',
+            $this->fenom->fetch('block_compiler.tpl', array()));
+    }
+
+    public function testAddFunctions() {
+        $this->fenom->setOptions(Fenom::DENY_NATIVE_FUNCS);
+        $this->assertFalse($this->fenom->isAllowedFunction('substr'));
+        $this->fenom->addAllowedFunctions(array('substr'));
+        $this->assertTrue($this->fenom->isAllowedFunction('substr'));
+    }
+}
+
+
+
+class TestTags {
+
+    public static function tagSayA() {
+        return 'echo "Say A"';
+    }
+
+    public static function SayBlockOpen() {
+        return 'echo "Start saying"';
+    }
+
+    public static function tagSaySomething() {
+        return 'echo "say blah-blah-blah"';
+    }
+
+    public static function SayBlockClose() {
+        return 'echo "Stop saying"';
     }
 }
