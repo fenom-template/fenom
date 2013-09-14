@@ -103,6 +103,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             mkdir(FENOM_RESOURCES . '/template/' . $dir, 0777, true);
         }
         file_put_contents(FENOM_RESOURCES . '/template/' . $name, $code);
+        return filemtime(FENOM_RESOURCES . '/template/' . $name);
     }
 
     /**
@@ -163,9 +164,10 @@ class TestCase extends \PHPUnit_Framework_TestCase
     {
         $template = $this->fenom->compileCode($tpl);
         if ($debug) {
-            print_r("$tpl:\n" . $template->getBody());
+            print_r("\nDEBUG $tpl:\n" . $template->getBody());
         }
         $this->assertSame($result, $template->fetch($this->values));
+        return $template;
     }
 
 

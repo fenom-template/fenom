@@ -69,7 +69,7 @@ class Compiler
         }
         $inc = $tpl->getStorage()->compile($name, false);
         $tpl->addDepend($inc);
-        return '?>' . $tpl->getBody() . '<?php';
+        return '?>' . $inc->getBody() . '<?php';
     }
 
 

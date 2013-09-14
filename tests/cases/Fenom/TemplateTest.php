@@ -266,7 +266,7 @@ class TemplateTest extends TestCase
             "username" => "Master",
             "email" => "dev@null.net"
         );
-        $result = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
+        $result = 'Include <b>Welcome, Master (dev@null.net)</b> template';
         return array(
             array('Include {insert "welcome.tpl"} template', $a, $result),
             array("Include {insert 'welcome.tpl'} template", $a, $result),
@@ -839,10 +839,8 @@ class TemplateTest extends TestCase
      */
     public function testInsert($code, $vars, $result)
     {
-        $this->tpl('insert.tpl', $code);
-        $this->assertRender('insert.tpl', $result, $vars);
-        $tpl = $this->exec($code, $vars, $result);
-        $this->assertTrue($tpl->isValid());
+        $this->values = $vars;
+        $tpl = $this->assertRender($code, $result);
     }
 
     /**
