@@ -1034,4 +1034,5 @@ class Compiler
     {
         $scope->tpl->escape = $scope["escape"];
     }
+
 }

@@ -25,10 +25,6 @@ class UnexpectedTokenException extends \RuntimeException
         }
         if (!$tokens->curr) {
             $this->message = "Unexpected end of " . ($where ? : "expression") . "$expect";
-        } elseif ($tokens->curr[0] === T_WHITESPACE) {
-            $this->message = "Unexpected whitespace$expect";
-        } elseif ($tokens->curr[0] === T_BAD_CHARACTER) {
-            $this->message = "Unexpected bad characters (below ASCII 32 except \\t, \\n and \\r) in " . ($where ? : "expression") . "$expect";
         } else {
             $this->message = "Unexpected token '" . $tokens->current() . "' in " . ($where ? : "expression") . "$expect";
         }

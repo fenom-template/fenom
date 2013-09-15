@@ -163,7 +163,7 @@ class Template extends Render
     {
         $this->_name = $name;
         $this->_crc = crc32($this->_name);
-        if ($provider = strstr($name, ":", true)) {
+        if ($provider = strstr($name, ':', true)) {
             $this->_scm = $provider;
             $this->_base_name = substr($name, strlen($provider) + 1);
         } else {
