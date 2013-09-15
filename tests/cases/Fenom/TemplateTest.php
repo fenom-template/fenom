@@ -770,7 +770,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->setOptions(Fenom::FORCE_VERIFY)->addFilter(function ($txt) {return $txt;})->compileCode('- <?php {$a} ?> -')->fetch(['a' => 1]));
+            var_dump($this->fenom->setOptions(Fenom::FORCE_VERIFY)->addFilter(function ($txt) {return $txt;})->compileCode('- {$a} -')->fetch(array('a' => 1)));
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
