@@ -8,12 +8,16 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
     public function testTokens()
     {
-        $code = 'hello, please resolve this example: sin($x)+tan($x*$t) = {U|[0,1]}';
+        $code = 'hello, please  resolve this example: sin($x)+tan($x*$t) = {U|[0,1]}';
         $tokens = new Tokenizer($code);
+        $this->assertSame($tokens, $tokens->back());
         $this->assertSame(T_STRING, $tokens->key());
         $this->assertSame("hello", $tokens->current());
+        $this->assertSame(1, $tokens->getLine());
+
 
         $this->assertTrue($tokens->isNext(","));
+
         $this->assertFalse($tokens->isNext("="));
         $this->assertFalse($tokens->isNext(T_STRING));
         $this->assertFalse($tokens->isNext($tokens::MACRO_UNARY));
@@ -24,6 +28,13 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(",", $tokens->getNext());
         $this->assertSame(",", $tokens->key());
         $this->assertSame("please", $tokens->getNext(T_STRING));
+        $this->assertSame(array(
+            T_STRING,
+            'please',
+            '  ',
+            1,
+            'T_STRING'
+        ), $tokens->curr);
         $this->assertSame("resolve", $tokens->getNext($tokens::MACRO_UNARY, T_STRING));
 
         $tokens->next();
@@ -51,6 +62,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame($code, $tokens->getSnippetAsString(-100, 100));
         $this->assertSame('+', $tokens->getSnippetAsString(100, -100));
+        $this->assertSame('sin($x)+tan($x*$t)', $tokens->getSnippetAsString(-4, 6));
     }
 
     public function testSkip()
@@ -67,8 +79,14 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         }
         $this->assertTrue($tokens->valid());
         $this->assertSame("3", $tokens->current());
+
         $this->assertSame(T_LNUMBER, $tokens->key());
+        $this->assertSame($tokens, $tokens->next());
         $tokens->next();
+        $this->assertSame("double", $tokens->getAndNext());
+        $this->assertSame(")", $tokens->current());
+        $this->assertTrue($tokens->isLast());
+        $this->assertSame($tokens, $tokens->next());
     }
 
 }

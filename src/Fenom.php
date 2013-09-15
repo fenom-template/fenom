@@ -35,7 +35,7 @@ class Fenom
     const FORCE_COMPILE = 0x100;
     const AUTO_ESCAPE = 0x200;
     const DISABLE_CACHE = 0x400;
-    const FORCE_VERIFY = 0x800; // reserved
+    const FORCE_VERIFY = 0x800;
     const AUTO_TRIM = 0x1000; // reserved
     const DENY_STATICS = 0x2000; // reserved
 
@@ -288,10 +288,14 @@ class Fenom
      * Set compile directory
      *
      * @param string $dir directory to store compiled templates in
+     * @throws LogicException
      * @return Fenom
      */
     public function setCompileDir($dir)
     {
+        if(!is_writable($dir)) {
+            throw new LogicException("Cache directory $dir is not writable");
+        }
         $this->_compile_dir = $dir;
         return $this;
     }
@@ -796,7 +800,7 @@ class Fenom
             fclose($tpl_fp);
             $file_name = $this->_compile_dir . "/" . $cache;
             if (!rename($tpl_tmp, $file_name)) {
-                throw new \RuntimeException("Can't to move $tpl_tmp to $tpl");
+                throw new \RuntimeException("Can't to move $tpl_tmp to $file_name");
             }
         }
         return $template;

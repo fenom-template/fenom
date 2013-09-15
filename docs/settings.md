@@ -30,7 +30,6 @@ $fenom->setOptions($options);
 * **auto_escape**, `Fenom::AUTO_ESCAPE`, все выводящие переменные и результаты функций будут экранироваться
 * **auto_trim**, `Fenom::AUTO_TRIM`, при компиляции, все пробельные символы между тегами будут удлаены.
 * **force_verify**, `Fenom::FORCE_VERIFY`, проверять обращение каждой переменной и возвращать NULL если переменной не существует.
-* **deny_static_methods**, `Fenom::DENY_STATIC_METHODS`, отключает возможность вызова статичных методов в шаблоне.
 
 ```php
 $fenom->setOptions(array(

@@ -1,6 +1,12 @@
 Tag {switch}
 ============
 
+The `{switch}` tag is similar to a series of `{if}` statements on the same expression.
+In many occasions, you may want to compare the same variable (or expression) with many different values,
+and execute a different piece of code depending on which value it equals to. This is exactly what the `{switch}` tag is for.
+
+Tag `{switch}` accepts any expression. But `{case}` accepts only static scalar values or constants.
+
 ```smarty
 {switch <condition>}
 {case <value1>}
@@ -9,7 +15,7 @@ Tag {switch}
     ...
 {case <value3>}
     ...
-{default}
+{default case <value1>}
     ...
 {/switch}
 ```
@@ -24,14 +30,14 @@ For example,
     It is new or current item
 {case 'current'}
     It is current item
-{case 'new'}
+{case 'new', $.const.NEW_STATUS}
     It is new item, again
 {default}
     I don't know the type {$type}
 {/switch}
 ```
 
-set `$type = 'new'`, then template output
+if `$type = 'new'` then template output
 
 ```
 It is new item

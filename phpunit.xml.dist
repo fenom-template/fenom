@@ -34,8 +34,8 @@
             <directory>./src/</directory>
         </whitelist>
     </filter>
-
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
+        <!--<log type="coverage-php" target="build/cov/coverage.cov"/>-->
     </logging>
 </phpunit>
