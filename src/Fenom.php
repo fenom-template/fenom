@@ -17,7 +17,7 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '1.3';
+    const VERSION = '1.4';
 
     /* Actions */
     const INLINE_COMPILER = 1;
@@ -246,10 +246,6 @@ class Fenom
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::autoescapeOpen',
             'close' => 'Fenom\Compiler::autoescapeClose'
-        ),
-        'unset' => array(
-            'type' => self::INLINE_COMPILER,
-            'parser' => 'Fenom\Compiler::tagUnset'
         )
     );
 
@@ -434,18 +430,18 @@ class Fenom
             "float_tags" => array()
         );
         if (method_exists($storage, $compiler . "Open")) {
-            $c["open"] = $compiler . "Open";
+            $c["open"] = array($storage, $compiler . "Open");
         } else {
             throw new \LogicException("Open compiler {$compiler}Open not found");
         }
         if (method_exists($storage, $compiler . "Close")) {
-            $c["close"] = $compiler . "Close";
+            $c["close"] = array($storage, $compiler . "Close");
         } else {
             throw new \LogicException("Close compiler {$compiler}Close not found");
         }
         foreach ($tags as $tag) {
             if (method_exists($storage, "tag" . $tag)) {
-                $c["tags"][$tag] = "tag" . $tag;
+                $c["tags"][$tag] = array($storage, "tag" . $tag);
                 if ($floats && in_array($tag, $floats)) {
                     $c['float_tags'][$tag] = 1;
                 }
@@ -542,17 +538,6 @@ class Fenom
     protected function _loadModifier($modifier, $template)
     {
         return false;
-    }
-
-    /**
-     * @param string $function
-     * @param Fenom\Template $template
-     * @return bool|string
-     * @deprecated
-     */
-    public function getFunction($function, Template $template = null)
-    {
-        return $this->getTag($function, $template);
     }
 
     /**
@@ -771,7 +756,6 @@ class Fenom
             $fenom = $this; // used in template
             $_tpl = include($this->_compile_dir . "/" . $file_name);
             /* @var Fenom\Render $_tpl */
-//            var_dump($tpl, $_tpl->isValid()); exit;
             if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
                 return $_tpl;
             }

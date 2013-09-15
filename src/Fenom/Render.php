@@ -85,6 +85,7 @@ class Render extends \ArrayObject
         $this->_fenom = $fenom;
         $props += self::$_props;
         $this->_name = $props["name"];
+        $this->_base_name = $props["base_name"];
         $this->_scm = $props["scm"];
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];

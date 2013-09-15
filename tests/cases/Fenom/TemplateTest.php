@@ -209,6 +209,7 @@ class TemplateTest extends TestCase
             array('If: {$a != 5 => 4} end', 'Fenom\Error\CompileException', "Unexpected token '=>'"),
             array('If: {$a + (*6)} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
             array('If: {$a + ( 6} end', 'Fenom\Error\CompileException', "Unexpected end of expression, expect ')'"),
+            array('If: {$a end', 'Fenom\Error\CompileException', "Unclosed tag in line"),
         );
     }
 
@@ -266,7 +267,7 @@ class TemplateTest extends TestCase
             "username" => "Master",
             "email" => "dev@null.net"
         );
-        $result = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
+        $result = 'Include <b>Welcome, Master (dev@null.net)</b> template';
         return array(
             array('Include {insert "welcome.tpl"} template', $a, $result),
             array("Include {insert 'welcome.tpl'} template", $a, $result),
@@ -684,6 +685,7 @@ class TemplateTest extends TestCase
             array('{if null is set} block1 {else} block2 {/if}', 'block2'),
             array('{if 0 is empty} block1 {else} block2 {/if}', 'block1'),
             array('{if "" is empty} block1 {else} block2 {/if}', 'block1'),
+            array('{if [] is empty} block1 {else} block2 {/if}', 'block1'),
             array('{if "data" is empty} block1 {else} block2 {/if}', 'block2'),
             array('{if time() is not empty} block1 {else} block2 {/if}', 'block1'),
             // is empty
@@ -700,8 +702,10 @@ class TemplateTest extends TestCase
             // event, odd
             array('{if $one is odd} block1 {else} block2 {/if}', 'block1'),
             array('{if $one is even} block1 {else} block2 {/if}', 'block2'),
+            array('{if ($one + 1) is even} block1 {else} block2 {/if}', 'block1'),
             array('{if $two is even} block1 {else} block2 {/if}', 'block1'),
             array('{if $two is odd} block1 {else} block2 {/if}', 'block2'),
+            array('{if ($two+1) is odd} block1 {else} block2 {/if}', 'block1'),
             // template
             array('{if "welcome.tpl" is template} block1 {else} block2 {/if}', 'block1'),
             array('{if "welcome2.tpl" is template} block1 {else} block2 {/if}', 'block2'),
@@ -754,13 +758,19 @@ class TemplateTest extends TestCase
             array('{$.get.one?}', '1'),
             array('{$.get.one is set}', '1'),
             array('{$.get.two is empty}', '1'),
+
+            array('{$.version}', Fenom::VERSION),
+            array('{$.tpl?}', '1'),
+            array('{$.tpl.name}', 'runtime.tpl'),
+            array('{$.tpl.time}', '0'),
+            array('{$.tpl.schema}', ''),
         );
     }
 
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->setOptions(Fenom::FORCE_VERIFY)->compileCode('{if $unexist} block1 {else} block2 {/if}')->getBody());
+            var_dump($this->fenom->setOptions(Fenom::FORCE_VERIFY)->addFilter(function ($txt) {return $txt;})->compileCode('- <?php {$a} ?> -')->fetch(['a' => 1]));
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
         }
@@ -839,7 +849,11 @@ class TemplateTest extends TestCase
      */
     public function testInsert($code, $vars, $result)
     {
-        $this->exec($code, $vars, $result);
+        $this->values = $vars;
+        $this->tpl("insert.tpl", $code);
+        $tpl = $this->fenom->getTemplate('insert.tpl');
+        $this->assertSame($result, $tpl->fetch($vars));
+        $this->assertTrue($tpl->isValid());
     }
 
     /**
