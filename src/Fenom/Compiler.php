@@ -1028,23 +1028,4 @@ class Compiler
         $scope->tpl->escape = $scope["escape"];
     }
 
-    /**
-     * Unset present variables
-     *
-     * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @return string
-     * @throws InvalidUsageException
-     */
-    public static function tagUnset(Tokenizer $tokens, Template $tpl)
-    {
-        $vars = array();
-        while ($tokens->valid()) {
-            $vars[] = $tpl->parseVariable($tokens);
-        }
-        if (!$vars) {
-            throw new InvalidUsageException("Unset must accept variable(s)");
-        }
-        return 'unset(' . implode(', ', $vars) . ')';
-    }
 }

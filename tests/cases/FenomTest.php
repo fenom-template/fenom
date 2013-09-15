@@ -32,6 +32,17 @@ class FenomTest extends \Fenom\TestCase
         $fenom->clearAllCompiles();
     }
 
+    public function testFactory() {
+        $time = $this->tpl('temp.tpl', 'Template 1 a');
+        $fenom = Fenom::factory($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'), FENOM_RESOURCES . '/compile', Fenom::AUTO_ESCAPE);
+        $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
+        $this->assertSame($provider, $tpl->getProvider());
+        $this->assertSame('temp.tpl', $tpl->getBaseName());
+        $this->assertSame('temp.tpl', $tpl->getName());
+        $this->assertSame($time, $tpl->getTime());
+        $fenom->clearAllCompiles();
+    }
+
     public function testCompileFile()
     {
         $a = array(
@@ -148,7 +159,8 @@ class FenomTest extends \Fenom\TestCase
             return "|--- $text ---|";
         });
 
-        $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} god {/var} world')->fetch(array()));
+        $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} misterio {/var} world')->fetch(array()));
+        $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} <?php  misterio ?> {/var} world')->fetch(array()));
     }
 
     public function testAddInlineCompilerSmart() {

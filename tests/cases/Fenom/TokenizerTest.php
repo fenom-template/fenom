@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+use Fenom\Error\UnexpectedTokenException;
 use Fenom\Tokenizer;
 
 class TokenizerTest extends \PHPUnit_Framework_TestCase
@@ -35,6 +36,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame("sin", $tokens->getNext($tokens::MACRO_STRING));
         $this->assertSame("sin", $tokens->current());
+        $this->assertTrue($tokens->isPrev(":"));
         $this->assertSame(T_STRING, $tokens->key());
         $this->assertTrue($tokens->is(T_STRING));
         $this->assertTrue($tokens->is($tokens::MACRO_STRING));
@@ -46,6 +48,9 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $tokens->next();
         $tokens->next();
         $this->assertSame("+", $tokens->getNext($tokens::MACRO_BINARY));
+
+        $this->assertSame($code, $tokens->getSnippetAsString(-100, 100));
+        $this->assertSame('+', $tokens->getSnippetAsString(100, -100));
     }
 
     public function testSkip()
@@ -65,4 +70,5 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(T_LNUMBER, $tokens->key());
         $tokens->next();
     }
+
 }

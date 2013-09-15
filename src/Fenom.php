@@ -17,7 +17,7 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '1.3';
+    const VERSION = '1.4';
 
     /* Actions */
     const INLINE_COMPILER = 1;
@@ -246,10 +246,6 @@ class Fenom
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::autoescapeOpen',
             'close' => 'Fenom\Compiler::autoescapeClose'
-        ),
-        'unset' => array(
-            'type' => self::INLINE_COMPILER,
-            'parser' => 'Fenom\Compiler::tagUnset'
         )
     );
 
@@ -538,17 +534,6 @@ class Fenom
     protected function _loadModifier($modifier, $template)
     {
         return false;
-    }
-
-    /**
-     * @param string $function
-     * @param Fenom\Template $template
-     * @return bool|string
-     * @deprecated
-     */
-    public function getFunction($function, Template $template = null)
-    {
-        return $this->getTag($function, $template);
     }
 
     /**
