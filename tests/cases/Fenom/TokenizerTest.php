@@ -10,6 +10,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
     {
         $code = 'hello, please  resolve this example: sin($x)+tan($x*$t) = {U|[0,1]}';
         $tokens = new Tokenizer($code);
+        $this->assertSame(27, $tokens->count());
         $this->assertSame($tokens, $tokens->back());
         $this->assertSame(T_STRING, $tokens->key());
         $this->assertSame("hello", $tokens->current());
@@ -55,6 +56,8 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse($tokens->is(T_DNUMBER));
         $this->assertFalse($tokens->is(":"));
         $this->assertSame("(", $tokens->getNext("(", ")"));
+        $this->assertTrue($tokens->hasBackList(T_STRING, ':'));
+        $this->assertFalse($tokens->hasBackList(T_LNUMBER, ':'));
 
         $tokens->next();
         $tokens->next();
@@ -87,6 +90,11 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(")", $tokens->current());
         $this->assertTrue($tokens->isLast());
         $this->assertSame($tokens, $tokens->next());
+        $tokens->p = 1000;
+        $this->assertSame($tokens, $tokens->next());
+        $tokens->p = -1000;
+        $this->assertSame($tokens, $tokens->back());
+        $this->assertNull($tokens->undef);
     }
 
 }

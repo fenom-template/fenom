@@ -570,12 +570,12 @@ class Compiler
             $tpl->addDepend($donor);
             return '?>' . $donor->getBody() . '<?php ';
         } else {
-//            throw new InvalidUsageException('template name must be given explicitly yet');
+            throw new InvalidUsageException('template name must be given explicitly yet');
             // under construction
-            $tpl->_compatible = true;
-            return '$donor = $tpl->getStorage()->getTemplate(' . $cname . ', \Fenom\Template::EXTENDED);' . PHP_EOL .
-            '$donor->fetch((array)$tpl);' . PHP_EOL .
-            '$tpl->b += (array)$donor->b';
+//            $tpl->_compatible = true;
+//            return '$donor = $tpl->getStorage()->getTemplate(' . $cname . ', \Fenom\Template::EXTENDED);' . PHP_EOL .
+//            '$donor->fetch((array)$tpl);' . PHP_EOL .
+//            '$tpl->b += (array)$donor->b';
         }
     }
 
@@ -1000,10 +1000,10 @@ class Compiler
             $tag = $tpl->getStorage()->getTag($func, $tpl);
             if ($tag["type"] == \Fenom::INLINE_FUNCTION) {
                 $code = $tpl->parseAct($tokens);
-            } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
-                $code = $tpl->parseAct($tokens);
-                $tpl->getLastScope()->escape = false;
-                return $code;
+//            } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
+//                $code = $tpl->parseAct($tokens);
+//                $tpl->getLastScope()->escape = false;
+//                return $code;
             } else {
                 throw new InvalidUsageException("Raw mode allow for expressions or functions");
             }
