@@ -1,13 +1,13 @@
-Settings [RU]
-=============
+Settings
+========
 
-### Engine settings
-
-Что бы установить папку для хранения кеша собранных шаблонов
+### Template cache
 
 ```php
 $fenom->setCompileDir($dir);
 ```
+
+This method set the name of the directory where template caches are stored. By default this is `/tmp`. This directory must be writeable.
 
 ### Template settings
 
@@ -20,7 +20,7 @@ $fenom->setOptions($options);
 
 Параметры могут быть массивом `'option_name' => true` (если ключ не указан автоматически задаётся false) или битовой маской.
 
-* **disable_methods**, `Fenom::DENY_METHODS`, запретить вызов методов у объектов
+* **disable_methods**, `Fenom::DENY_METHODS`, disable calling methods in templates. Any method call in the template will throw `Fenom\SecurityException`.
 * **disable_native_funcs**, `Fenom::DENY_INLINE_FUNCS`, запретить использование PHP функций, кроме разрешенных.
 * **auto_reload**, `Fenom::AUTO_RELOAD`, пересобирать шаблон если его оригинал был изменён (замедляет работу шаблонизатора).
 * **force_compile**, `Fenom::FORCE_COMPILE`, пересобирать шаблон при каждом вызове (сильно замедляет работу шаблонизатора).
