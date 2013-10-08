@@ -139,9 +139,10 @@ class Template extends Render
      */
     public function __construct(Fenom $fenom, $options)
     {
-        $this->_fenom = $fenom;
-        $this->_options = $options;
-        $this->_filters = $this->_fenom->getFilters();
+        $this->_fenom       = $fenom;
+        $this->_options     = $options;
+        $this->_filters     = $this->_fenom->getFilters();
+        $this->_tag_filters = $this->_fenom->getTagFilters();
     }
 
     /**
@@ -248,6 +249,11 @@ class Template extends Render
                                 $this->_appendText($tag);
                             }
                         } else {
+                            if($this->_tag_filters) {
+                                foreach($this->_tag_filters as $filter) {
+                                    $_tag = call_user_func($filter, $_tag, $this);
+                                }
+                            }
                             $tokens = new Tokenizer($_tag); // tokenize the tag
                             if ($tokens->isIncomplete()) { // all strings finished?
                                 $need_more = true;
@@ -607,6 +613,7 @@ class Template extends Render
      * Parse expressions. The mix of operators and terms.
      *
      * @param Tokenizer $tokens
+     * @return string
      * @throws Error\UnexpectedTokenException
      */
     public function parseExpr(Tokenizer $tokens)

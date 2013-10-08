@@ -82,6 +82,11 @@ class Fenom
     /**
      * @var callable[]
      */
+    public $tag_filters = array();
+
+    /**
+     * @var callable[]
+     */
     public $post_filters = array();
 
     /**
@@ -347,6 +352,22 @@ class Fenom
     public function getFilters()
     {
         return $this->filters;
+    }
+
+    /**
+     * @param callable $cbcd
+     * @return self
+     */
+    public function addTagFilter($cb)
+    {
+        $this->tag_filters[] = $cb;
+        return $this;
+    }
+
+
+    public function getTagFilters()
+    {
+        return $this->tag_filters;
     }
 
     /**

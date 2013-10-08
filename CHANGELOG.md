@@ -1,7 +1,18 @@
 Changelog
 =========
 
-### 1.4.7 (2013-09-19)
+## 1.5.0
+
+- Add tag filter
+- Redesign `extends` algorithm
+    - Blocks does not support dynamic names
+    - Blocks can't be nested
+- Add tag options support
+- Improve Fenom API
+- Move benchmark to another project
+- Rename `\Fenom\Compiler` to `\Fenom\Tags`
+
+### 1.4.7 (2013-09-21)
 
 - Bug fixes
 - Tests++

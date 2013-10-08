@@ -163,6 +163,23 @@ class FenomTest extends \Fenom\TestCase
         $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} <?php  misterio ?> {/var} world')->fetch(array()));
     }
 
+    /**
+     * @group tag-filter
+     */
+    public function testTagFilter() {
+        $tags = array();
+        $punit = $this;
+        $this->fenom->addTagFilter(function ($text, $tpl) use (&$tags, $punit) {
+            $punit->assertInstanceOf('Fenom\Template', $tpl);
+            $tags[] = $text;
+            return $text;
+        });
+
+        $this->fenom->compileCode('hello {var $a} misterio {/var} world, {$b}!');
+
+        $this->assertSame(array('var $a', '/var', '$b'), $tags);
+    }
+
     public function testAddInlineCompilerSmart() {
         $this->fenom->addCompilerSmart('SayA','TestTags');
         $this->tpl('inline_compiler.tpl', 'I just {SayA}.');
