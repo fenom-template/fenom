@@ -102,5 +102,17 @@ class ProviderTest extends TestCase
             "template2.tpl"
         ), $list);
     }
+
+    public function testRm() {
+        $this->assertTrue(is_dir(FENOM_RESOURCES . '/template/sub'));
+        Provider::rm(FENOM_RESOURCES . '/template/sub');
+        $this->assertFalse(is_dir(FENOM_RESOURCES . '/template/sub'));
+        $this->assertTrue(is_file(FENOM_RESOURCES . '/template/template1.tpl'));
+        Provider::rm(FENOM_RESOURCES . '/template/template1.tpl');
+        $this->assertFalse(is_file(FENOM_RESOURCES . '/template/template1.tpl'));
+        $this->assertTrue(is_file(FENOM_RESOURCES . '/template/template2.tpl'));
+        Provider::clean(FENOM_RESOURCES . '/template/');
+        $this->assertFalse(is_file(FENOM_RESOURCES . '/template/template2.tpl'));
+    }
 }
 

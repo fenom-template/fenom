@@ -91,7 +91,7 @@ class Tokenizer
      * @see http://docs.php.net/manual/en/tokens.php
      * @var array groups of tokens
      */
-    private static $_macros = array(
+    public static $macros = array(
         self::MACRO_STRING => array(
             \T_ABSTRACT => 1, \T_ARRAY => 1, \T_AS => 1, \T_BREAK => 1, \T_BREAK => 1, \T_CASE => 1,
             \T_CATCH => 1, \T_CLASS => 1, \T_CLASS_C => 1, \T_CLONE => 1, \T_CONST => 1, \T_CONTINUE => 1,
@@ -255,7 +255,7 @@ class Tokenizer
                 }
             } else {
 
-                if (isset(self::$_macros[$expect][$token])) {
+                if (isset(self::$macros[$expect][$token])) {
                     return true;
                 }
             }
