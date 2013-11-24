@@ -35,6 +35,7 @@ class Provider implements ProviderInterface
 
     /**
      * @param string $template_dir directory of templates
+     * @param string $compile_dir directory of compiled templates
      * @throws \LogicException if directory doesn't exists
      */
     public function __construct($template_dir, $compile_dir = null)
