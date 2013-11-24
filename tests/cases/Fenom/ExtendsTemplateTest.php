@@ -7,7 +7,7 @@ class ExtendsTemplateTest extends TestCase
 
     public function _testSandbox()
     {
-        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/provider', FENOM_RESOURCES . '/compile');
+        $this->fenom = new Fenom(new Provider(FENOM_RESOURCES . '/provider', FENOM_RESOURCES . '/compile'));
         try {
             print_r($this->fenom->getTemplate('use/child.tpl')->getBody());
         } catch (\Exception $e) {
@@ -145,7 +145,7 @@ class ExtendsTemplateTest extends TestCase
      */
     public function testUse()
     {
-        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/provider', FENOM_RESOURCES . '/compile');
+        $this->fenom = new Fenom(new Provider(FENOM_RESOURCES . '/provider', FENOM_RESOURCES . '/compile'));
         $this->assertSame("<html>\n block 1 blocks \n block 2 child \n</html>", $this->fenom->fetch('use/child.tpl'));
     }
 
