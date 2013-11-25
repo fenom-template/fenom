@@ -733,7 +733,6 @@ class Template extends Render
                     throw new \LogicException("Forbidden to call methods");
                 }
                 $code .= $this->parseArgs($tokens);
-                // Kludge for nesting object calls
                 while($tokens->is(T_OBJECT_OPERATOR))
                 {
                     $tokens->next();
@@ -742,11 +741,10 @@ class Template extends Render
                         throw new \LogicException('Expected function name, but got "'.$tokens->current().'"');
                     }
                     $code .= '->' . $tokens->getAndNext();
-                    if(!$tokens->is("("))
+                    if($tokens->is("("))
                     {
-                        throw new \LogicException('Expected token "(", but got "'.$tokens->current().'"');
+                        $code .= $this->parseArgs($tokens);
                     }
-                    $code .= $this->parseArgs($tokens);
                 }
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 $code .= $tokens->getAndNext();
