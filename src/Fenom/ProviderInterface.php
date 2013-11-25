@@ -48,4 +48,39 @@ interface ProviderInterface
      * @return array|\Iterator
      */
     public function getList();
+
+    /**
+     * Clear provider compiles
+     *
+     * @return mixed
+     */
+    public function clearCompiles();
+
+    /**
+     * Compile and save template
+     *
+     * @param string $tpl
+     * @param bool $store store template on disk
+     * @param int $options
+     * @throws \RuntimeException
+     * @return \Fenom\Template
+     */
+    public function compile($tpl, $store = true, $options = 0);
+
+    /**
+     * Load template from cache or create cache if it doesn't exists.
+     *
+     * @param string $tpl
+     * @param int $opts
+     * @return \Fenom\Render
+     */
+    public function load($tpl, $opts);
+
+    /**
+     * Set Fenom engine
+     *
+     * @param \Fenom $fenom
+     * @return mixed
+     */
+    public function setFenom(\Fenom $fenom);
 }

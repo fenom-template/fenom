@@ -93,12 +93,6 @@ class Fenom
      * @var Fenom\Render[] Templates storage
      */
     protected $_storage = array();
-
-    /**
-     * @var string compile directory
-     */
-    protected $_compile_dir = "/tmp";
-
     /**
      * @var int masked options
      */
@@ -258,12 +252,11 @@ class Fenom
      * Just factory
      *
      * @param string|Fenom\ProviderInterface $source path to templates or custom provider
-     * @param string $compile_dir path to compiled files
      * @param int $options
      * @throws InvalidArgumentException
      * @return Fenom
      */
-    public static function factory($source, $compile_dir = '/tmp', $options = 0)
+    public static function factory($source, $options = 0)
     {
         if (is_string($source)) {
             $provider = new Fenom\Provider($source);
@@ -272,9 +265,8 @@ class Fenom
         } else {
             throw new InvalidArgumentException("Source must be a valid path or provider object");
         }
-        $fenom = new static($provider);
         /* @var Fenom $fenom */
-        $fenom->setCompileDir($compile_dir);
+        $fenom = new static($provider);
         if ($options) {
             $fenom->setOptions($options);
         }
@@ -286,23 +278,8 @@ class Fenom
      */
     public function __construct(Fenom\ProviderInterface $provider)
     {
+        $provider->setFenom($this);
         $this->_provider = $provider;
-    }
-
-    /**
-     * Set compile directory
-     *
-     * @param string $dir directory to store compiled templates in
-     * @throws LogicException
-     * @return Fenom
-     */
-    public function setCompileDir($dir)
-    {
-        if(!is_writable($dir)) {
-            throw new LogicException("Cache directory $dir is not writable");
-        }
-        $this->_compile_dir = $dir;
-        return $this;
     }
 
     /**
@@ -624,6 +601,7 @@ class Fenom
      */
     public function addProvider($scm, \Fenom\ProviderInterface $provider)
     {
+        $provider->setFenom($this);
         $this->_providers[$scm] = $provider;
         return $this;
     }
@@ -735,14 +713,29 @@ class Fenom
             /** @var Fenom\Template $tpl */
             $tpl = $this->_storage[$key];
             if (($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
-                return $this->_storage[$key] = $this->compile($template, true, $options);
+                return $this->_storage[$key] = $this->getProviderByTemplate($template)->compile($template, true, $options);
             } else {
                 return $tpl;
             }
         } elseif ($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
+            return $this->getProviderByTemplate($template)->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
         } else {
-            return $this->_storage[$key] = $this->_load($template, $options);
+            return $this->_storage[$key] = $this->getProviderByTemplate($template)->load($template, $options);
+        }
+    }
+
+    /**
+     * @param $template
+     * @return ProviderInterface
+     */
+    public function getProviderByTemplate($template)
+    {
+        if ($provider = strstr($template, ":", true)) {
+            if(isset($this->_providers[$provider])) {
+                return $this->_providers[$provider];
+            }
+        } else {
+            return $this->_provider;
         }
     }
 
@@ -754,77 +747,12 @@ class Fenom
     public function templateExists($template)
     {
         if ($provider = strstr($template, ":", true)) {
-            if (isset($this->_providers[$provider])) {
+            if(isset($this->_providers[$provider])) {
                 return $this->_providers[$provider]->templateExists(substr($template, strlen($provider) + 1));
             }
         } else {
             return $this->_provider->templateExists($template);
         }
-        return false;
-    }
-
-    /**
-     * Load template from cache or create cache if it doesn't exists.
-     *
-     * @param string $tpl
-     * @param int $opts
-     * @return Fenom\Render
-     */
-    protected function _load($tpl, $opts)
-    {
-        $file_name = $this->_getCacheName($tpl, $opts);
-        if (is_file($this->_compile_dir . "/" . $file_name)) {
-            $fenom = $this; // used in template
-            $_tpl = include($this->_compile_dir . "/" . $file_name);
-            /* @var Fenom\Render $_tpl */
-            if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
-                return $_tpl;
-            }
-        }
-        return $this->compile($tpl, true, $opts);
-    }
-
-    /**
-     * Generate unique name of compiled template
-     *
-     * @param string $tpl
-     * @param int $options
-     * @return string
-     */
-    private function _getCacheName($tpl, $options)
-    {
-        $hash = $tpl . ":" . $options;
-        return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
-    }
-
-    /**
-     * Compile and save template
-     *
-     * @param string $tpl
-     * @param bool $store store template on disk
-     * @param int $options
-     * @throws RuntimeException
-     * @return \Fenom\Template
-     */
-    public function compile($tpl, $store = true, $options = 0)
-    {
-        $options = $this->_options | $options;
-        $template = $this->getRawTemplate()->load($tpl);
-        if ($store) {
-            $cache = $this->_getCacheName($tpl, $options);
-            $tpl_tmp = tempnam($this->_compile_dir, $cache);
-            $tpl_fp = fopen($tpl_tmp, "w");
-            if (!$tpl_fp) {
-                throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory " . $this->_compile_dir . " is writable?");
-            }
-            fwrite($tpl_fp, $template->getTemplateCode());
-            fclose($tpl_fp);
-            $file_name = $this->_compile_dir . "/" . $cache;
-            if (!rename($tpl_tmp, $file_name)) {
-                throw new \RuntimeException("Can't to move $tpl_tmp to $file_name");
-            }
-        }
-        return $template;
     }
 
     /**
@@ -840,7 +768,25 @@ class Fenom
      */
     public function clearAllCompiles()
     {
-        \Fenom\Provider::clean($this->_compile_dir);
+        $this->_provider->clearCompiles();
+        foreach($this->_providers as $provider)
+        {
+            $provider->clearCompiles();
+        }
+    }
+
+    /**
+     * Compile and save template
+     *
+     * @param string $tpl
+     * @param bool $store store template on disk
+     * @param int $options
+     * @throws \RuntimeException
+     * @return \Fenom\Template
+     */
+    public function compile($tpl, $store = true, $options = 0)
+    {
+        return $this->getProviderByTemplate($tpl)->compile($tpl, $store, $options);
     }
 
     /**

@@ -733,6 +733,19 @@ class Template extends Render
                     throw new \LogicException("Forbidden to call methods");
                 }
                 $code .= $this->parseArgs($tokens);
+                while($tokens->is(T_OBJECT_OPERATOR))
+                {
+                    $tokens->next();
+                    if(!$tokens->is(T_STRING))
+                    {
+                        throw new \LogicException('Expected function name, but got "'.$tokens->current().'"');
+                    }
+                    $code .= '->' . $tokens->getAndNext();
+                    if($tokens->is("("))
+                    {
+                        $code .= $this->parseArgs($tokens);
+                    }
+                }
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 $code .= $tokens->getAndNext();
             } else {
