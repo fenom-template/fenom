@@ -736,18 +736,16 @@ class Template extends Render
                 // Kludge for nesting object calls
                 while($tokens->is(T_OBJECT_OPERATOR))
                 {
-                    if(!$tokens->isNext(T_STRING))
-                    {
-                        throw new \LogicException('Expected function name, but got "'.$tokens->next()->current().'"');
-                    }
-                    $code .= '->';
                     $tokens->next();
-                    $code .= $tokens->current();
-                    if(!$tokens->isNext("("))
+                    if(!$tokens->is(T_STRING))
                     {
-                        throw new \LogicException('Expected token "(", but got "'.$tokens->next()->current().'"');
+                        throw new \LogicException('Expected function name, but got "'.$tokens->current().'"');
                     }
-                    $tokens->next();
+                    $code .= '->' . $tokens->getAndNext();
+                    if(!$tokens->is("("))
+                    {
+                        throw new \LogicException('Expected token "(", but got "'.$tokens->current().'"');
+                    }
                     $code .= $this->parseArgs($tokens);
                 }
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
