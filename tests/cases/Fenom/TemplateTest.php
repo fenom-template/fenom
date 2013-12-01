@@ -34,7 +34,18 @@ class TemplateTest extends TestCase
         $obj->name = "Object";
         $obj->list = $a;
         $obj->c = "c";
-        $b = array("b" => array("c" => "Username", "c_char" => "c", "mcp" => "Master", 'm{$c}p' => "Unknown", 'obj' => $obj), "c" => "c");
+//        $world = new
+        $b = array(
+            "b" => array(
+                "c" => "Username",
+                "c_char" => "c",
+                "mcp" => "Master",
+                'm{$c}p' => "Unknown",
+                'obj' => $obj
+            ),
+            "c" => "c",
+            "world" => new Helper('world')
+        );
         $c = array_replace_recursive($b, array("b" => array(3 => $b["b"], 4 => "Mister")));
         return array(
             array('hello, {$a}!', $a, 'hello, World!'),
@@ -83,6 +94,7 @@ class TemplateTest extends TestCase
                 $b, 'hello, Username!'),
             array('hello, {"World"}!', $a, 'hello, World!'),
             array('hello, {"W{$a}d"}!', $a, 'hello, WWorldd!'),
+            array('hello, {$world->chunk(1)->self->chunk("new")}!', $b, 'hello, world!'),
         );
     }
 
