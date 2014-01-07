@@ -12,6 +12,11 @@ Changelog
 - Move benchmark to another project
 - Rename `\Fenom\Compiler` to `\Fenom\Tags`
 
+### 1.4.8 (2013-12-01)
+
+- Fix #52
+- Tests++
+
 ### 1.4.7 (2013-09-21)
 
 - Bug fixes

@@ -732,7 +732,14 @@ class Template extends Render
                 if ($this->_options & Fenom::DENY_METHODS) {
                     throw new \LogicException("Forbidden to call methods");
                 }
-                $code .= $this->parseArgs($tokens);
+                do { // parse call-chunks: $var->func()->func()->prop->func()->...
+                    if($tokens->is('(')) {
+                        $code .= $this->parseArgs($tokens);
+                    }
+                    if($tokens->is(T_OBJECT_OPERATOR) && $tokens->isNext(T_STRING)) {
+                        $code .= '->'.$tokens->next()->getAndNext();
+                    }
+                } while($tokens->is('(', T_OBJECT_OPERATOR));
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 $code .= $tokens->getAndNext();
             } else {

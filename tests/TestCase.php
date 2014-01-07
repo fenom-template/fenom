@@ -274,3 +274,21 @@ class TestCase extends \PHPUnit_Framework_TestCase
         );
     }
 }
+
+class Helper {
+
+    public $word = 'helper';
+
+    public function __construct($word) {
+        $this->word = $word;
+        $this->self = $this;
+    }
+
+    public function chunk() {
+        return $this;
+    }
+
+    public function __toString() {
+        return $this->word;
+    }
+}
