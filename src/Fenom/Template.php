@@ -1350,9 +1350,6 @@ class Template extends Render
                 $static = stripslashes(substr($str, 1, -1));
                 return $str;
             }
-        } elseif ($tokens->is(Tokenizer::MACRO_STRING)) {
-            $static = $tokens->getAndNext();
-            return '"' . addslashes($static) . '"';
         } else {
             return $this->parseExpr($tokens);
         }

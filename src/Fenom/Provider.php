@@ -84,7 +84,7 @@ class Provider implements ProviderInterface
     public function getSource($tpl, &$time)
     {
         $tpl = $this->_getTemplatePath($tpl);
-        clearstatcache(null, $tpl);
+        clearstatcache(true, $tpl);
         $time = filemtime($tpl);
         return file_get_contents($tpl);
     }
@@ -96,7 +96,7 @@ class Provider implements ProviderInterface
      */
     public function getLastModified($tpl)
     {
-        clearstatcache(null, $tpl = $this->_getTemplatePath($tpl));
+        clearstatcache(true, $tpl = $this->_getTemplatePath($tpl));
         return filemtime($tpl);
     }
 
@@ -132,6 +132,7 @@ class Provider implements ProviderInterface
      */
     protected function _getTemplatePath($tpl)
     {
+
         if (($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0) {
             return $path;
         } else {
@@ -145,7 +146,8 @@ class Provider implements ProviderInterface
      */
     public function templateExists($tpl)
     {
-        return file_exists($this->_path . "/" . $tpl);
+        return ($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0;
+//        return file_exists($this->_path . "/" . $tpl);
     }
 
     /**
@@ -157,7 +159,7 @@ class Provider implements ProviderInterface
     public function verify(array $templates)
     {
         foreach ($templates as $template => $mtime) {
-            clearstatcache(null, $template = $this->_path . '/' . $template);
+            clearstatcache(true, $template = $this->_path . '/' . $template);
             if (@filemtime($template) !== $mtime) {
                 return false;
             }

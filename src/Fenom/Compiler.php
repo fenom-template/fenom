@@ -27,7 +27,7 @@ class Compiler
      * @static
      * @param Tokenizer $tokens
      * @param Template $tpl
-     * @throws InvalidUsageException
+     * @throws \LogicException
      * @return string
      */
     public static function tagInclude(Tokenizer $tokens, Template $tpl)
@@ -35,24 +35,24 @@ class Compiler
         $name = false;
         $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
-        if ($p) { // if we have additionally variables
-            if ($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) {
+        if ($name) {
+            if($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE) {
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 $var = $tpl->tmpVar();
-                return $var.' = (array)$tpl; $tpl->exchangeArray(' . self::toArray($p) . '+'.$var.'); ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
-            } else {
-                return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . '+(array)$tpl);';
+                if($p) {
+                    return $var.' = (array)$tpl; $tpl->exchangeArray(' . self::toArray($p) . '+'.$var.'); ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
+                } else {
+                    return $var.' = (array)$tpl; ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
+                }
+            } elseif(!$tpl->getStorage()->templateExists($name)) {
+                throw new \LogicException("Template $name not found");
             }
+        }
+        if($p) {
+            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . '+(array)$tpl);';
         } else {
-            if ($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) {
-                $inc = $tpl->getStorage()->compile($name, false);
-                $tpl->addDepend($inc);
-                $var = $tpl->tmpVar();
-                return $var.' = (array)$tpl; ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
-            } else {
-                return '$tpl->getStorage()->getTemplate(' . $cname . ')->display((array)$tpl);';
-            }
+            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display((array)$tpl);';
         }
     }
 

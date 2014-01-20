@@ -264,7 +264,8 @@ class TemplateTest extends TestCase
     {
         return array(
             array('Include {include} template', 'Fenom\Error\CompileException', "Unexpected end of expression"),
-            array('Include {include another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Unexpected token '='"),
+            array('Include {include another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Unexpected token 'another'"),
+            array('Include {include "../../TestCase.php"} template', 'Fenom\Error\SecurityException', "Template ../../TestCase.php not found"),
         );
     }
 
@@ -290,7 +291,7 @@ class TemplateTest extends TestCase
     {
         return array(
             array('Include {insert} template', 'Fenom\Error\CompileException', "Unexpected end of expression"),
-            array('Include {insert another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Template another not found"),
+            array('Include {insert another="welcome.tpl"} template', 'Fenom\Error\CompileException', "Unexpected token 'another'"),
             array('Include {insert $tpl} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
             array('Include {insert "$tpl"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
             array('Include {insert "{$tpl}"} template', 'Fenom\Error\CompileException', "Tag {insert} accept only static template name"),
@@ -849,6 +850,7 @@ class TemplateTest extends TestCase
 
     /**
      * @dataProvider providerIncludeInvalid
+     * @group testIncludeInvalid
      */
     public function testIncludeInvalid($code, $exception, $message, $options = 0)
     {
