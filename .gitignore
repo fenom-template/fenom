@@ -8,6 +8,8 @@ tests/resources/compile/*
 !.gitkeep
 tests/resources/template/*
 !.gitkeep
+sandbox/compiled/*
+!.gitkeep
 benchmark/compile/*
 benchmark/templates/inheritance/smarty
 benchmark/templates/inheritance/twig
