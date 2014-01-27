@@ -17,7 +17,7 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '1.4';
+    const VERSION = '1.5';
 
     /* Actions */
     const INLINE_COMPILER = 1;

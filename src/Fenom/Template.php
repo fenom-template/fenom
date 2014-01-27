@@ -312,7 +312,7 @@ class Template extends Render
      */
     public function tmpVar()
     {
-        return sprintf('$t%u_%d', $this->_crc, $this->i++);
+        return sprintf('$t%x_%x', $this->_crc, $this->i++);
     }
 
     /**
@@ -411,7 +411,7 @@ class Template extends Render
             $macros = array();
             foreach ($this->macros as $m) {
                 if ($m["recursive"]) {
-                    $macros[] = "\t\t'" . $m["name"] . "' => function (\$tpl) {\n?>" . $m["body"] . "<?php\n}";
+                    $macros[] = "\t\t'" . $m["name"] . "' => function (\$var, \$tpl) {\n?>" . $m["body"] . "<?php\n}";
                 }
             }
             return "array(\n" . implode(",\n", $macros) . ")";
@@ -426,7 +426,7 @@ class Template extends Render
      */
     private function _getClosureSource()
     {
-        return "function (\$tpl) {\n?>{$this->_body}<?php\n}";
+        return "function (\$var, \$tpl) {\n?>{$this->_body}<?php\n}";
     }
 
     /**
@@ -440,8 +440,11 @@ class Template extends Render
     {
         if (!$this->_code) {
             // evaluate template's code
+//            $code = ("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
+//            file_put_contents('/tmp/last.tpl', $code);
             eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
+//                exit;
                 throw new CompileException("Fatal error while creating the template");
             }
         }
@@ -798,14 +801,14 @@ class Template extends Render
     public function parseVariable(Tokenizer $tokens, $var = null)
     {
         if(!$var) {
-            $var = '$tpl["' . substr( $tokens->get(T_VARIABLE), 1) . '"]';
+            $var = '$var["' . substr( $tokens->get(T_VARIABLE), 1) . '"]';
             $tokens->next();
         }
         while ($t = $tokens->key()) {
             if ($t === ".") {
                 $tokens->next();
                 if ($tokens->is(T_VARIABLE)) {
-                    $key = '[ $tpl["' . substr($tokens->getAndNext(), 1) . '"] ]';
+                    $key = '[ $var["' . substr($tokens->getAndNext(), 1) . '"] ]';
                 } elseif ($tokens->is(Tokenizer::MACRO_STRING)) {
                     $key = '["' . $tokens->getAndNext() . '"]';
                 } elseif ($tokens->is(Tokenizer::MACRO_SCALAR)) {
@@ -1121,7 +1124,7 @@ class Template extends Render
                     } else {
                         $_str = "";
                     }
-                    $_str .= '$tpl["' . substr($tokens->current(), 1) . '"]';
+                    $_str .= '$var["' . substr($tokens->current(), 1) . '"]';
                     $tokens->next();
                     if ($tokens->is($stop)) {
                         $tokens->skip();
@@ -1285,14 +1288,16 @@ class Template extends Render
                 throw new InvalidUsageException("Macro '$name' require '$arg' argument");
             }
         }
-        $n = sprintf('%u_%d', crc32($this->_name), $this->i++);
+//        $n = sprintf('%x_%x', crc32($this->_name), $this->i++);
         if ($recursive) {
             $recursive['recursive'] = true;
-            $body = '$tpl->getMacro("' . $name . '")->__invoke($tpl);';
+            return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
         } else {
-            $body = '?>' . $macro["body"] . '<?php';
+//            $body = '? >' . $macro["body"] . '<?php';
+            $vars = $this->tmpVar();
+            return  $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
+            $macro["body"] . '<?php' . PHP_EOL . '$var = '.$vars.'; unset(' . $vars . ');';
         }
-        return '$_tpl' . $n . ' = $tpl->exchangeArray(' . Compiler::toArray($args) . ');' . PHP_EOL . $body . PHP_EOL . '$tpl->exchangeArray($_tpl' . $n . '); /* X */ unset($_tpl' . $n . ');';
     }
 
     /**

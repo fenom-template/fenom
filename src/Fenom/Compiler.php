@@ -41,18 +41,18 @@ class Compiler
                 $tpl->addDepend($inc);
                 $var = $tpl->tmpVar();
                 if($p) {
-                    return $var.' = (array)$tpl; $tpl->exchangeArray(' . self::toArray($p) . '+'.$var.'); ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
+                    return $var.' = $var; $var = ' . self::toArray($p) . ' + $var; ?>' . $inc->getBody() . '<?php $var = '.$var.'; unset('.$var.');';
                 } else {
-                    return $var.' = (array)$tpl; ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
+                    return $var.' = $var; ?>' . $inc->getBody() . '<?php $var = '.$var.'; unset('.$var.');';
                 }
             } elseif(!$tpl->getStorage()->templateExists($name)) {
                 throw new \LogicException("Template $name not found");
             }
         }
         if($p) {
-            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . '+(array)$tpl);';
+            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . ' + $var);';
         } else {
-            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display((array)$tpl);';
+            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display($var);';
         }
     }
 

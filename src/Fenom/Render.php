@@ -9,7 +9,6 @@
  */
 namespace Fenom;
 use Fenom;
-use Symfony\Component\Yaml\Exception\RuntimeException;
 
 /**
  * Primitive template
@@ -195,12 +194,13 @@ class Render extends \ArrayObject
     /**
      * Get internal macro
      * @param $name
+     * @throws \RuntimeException
      * @return mixed
      */
     public function getMacro($name)
     {
         if (empty($this->_macros[$name])) {
-            throw new RuntimeException('macro not found');
+            throw new \RuntimeException('macro not found');
         }
         return $this->_macros[$name];
     }
@@ -212,9 +212,9 @@ class Render extends \ArrayObject
      */
     public function display(array $values)
     {
-        $this->exchangeArray($values);
-        $this->_code->__invoke($this);
-        return $this->exchangeArray(array());
+//        $this->exchangeArray($values);
+        $this->_code->__invoke($values, $this);
+        return $values;
     }
 
     /**
