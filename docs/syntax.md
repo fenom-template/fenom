@@ -77,8 +77,18 @@ See all [operators](./operators.md)
 {$object->item->method($y->name, 'named')|upper} {* apply modifier to method result*}
 ```
 
-You may disable call methods in template, see [security options](./settings.md)
+You may disable call methods in template, see in [security options](./settings.md) option `deny_method`
 
+### Static method support
+
+```smarty
+{Lib\Math::multiple x=3 y=4} static method as tag
+{Lib\Math::multiple(3,4)}  inline static method
+{12 + Lib\Math::multiple(3,4)}
+{12 + 3|Lib\Math::multiple:4}  static method as modifier
+```
+
+You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
 
 ### Set variable
 

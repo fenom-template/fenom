@@ -9,7 +9,7 @@ Tag {macro} [RU]
 Обявление макроса происходит при помощи блочного тега `{macro}`
 
 ```smarty
-{macro plus(x, y, z=0)}
+{macro plus($x, $y, $z=0)}
     x + y + z = {$x + $y + $z}
 {/macro}
 ```
