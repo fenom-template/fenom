@@ -780,12 +780,39 @@ class TemplateTest extends TestCase
         );
     }
 
+    public function providerStatic() {
+        return array(
+            array('{Fenom\TemplateTest::multi x=3 y=4}', '12'),
+            array('{Fenom\TemplateTest::multi(3,4)}', '12'),
+            array('{12 + Fenom\TemplateTest::multi(3,4)}', '24'),
+            array('{12 + 3|Fenom\TemplateTest::multi:4}', '24'),
+        );
+    }
+
+    public function providerStaticInvalid() {
+        return array(
+            array('{Fenom\TemplateTest::multi x=3 y=4}', 'Fenom\Error\SecurityException', "Static methods are disabled", Fenom::DENY_STATICS),
+            array('{Fenom\TemplateTest::multi(3,4)}', 'Fenom\Error\SecurityException', "Static methods are disabled", Fenom::DENY_STATICS),
+            array('{12 + Fenom\TemplateTest::multi(3,4)}', 'Fenom\Error\SecurityException', "Static methods are disabled", Fenom::DENY_STATICS),
+            array('{12 + 3|Fenom\TemplateTest::multi:4}', 'Fenom\Error\SecurityException', "Static methods are disabled", Fenom::DENY_STATICS),
+
+            array('{Fenom\TemplateTest::multi_invalid x=3 y=4}', 'Fenom\Error\CompileException', 'Method Fenom\TemplateTest::multi_invalid doesn\'t exist'),
+            array('{Fenom\TemplateTest::multi_invalid(3,4)}', 'Fenom\Error\CompileException', 'Method Fenom\TemplateTest::multi_invalid doesn\'t exist'),
+            array('{12 + Fenom\TemplateTest::multi_invalid(3,4)}', 'Fenom\Error\CompileException', 'Method Fenom\TemplateTest::multi_invalid doesn\'t exist'),
+            array('{12 + 3|Fenom\TemplateTest::multi_invalid:4}', 'Fenom\Error\CompileException', 'Method Fenom\TemplateTest::multi_invalid doesn\'t exist'),
+        );
+    }
+
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->setOptions(Fenom::FORCE_VERIFY)->addFilter(function ($txt) {return $txt;})->compileCode('- {$a} -')->fetch(array('a' => 1)));
+            var_dump($this->fenom->compileCode('{Fenom\TemplateTest::multi(3,4)}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
+            while($e->getPrevious()) {
+                $e = $e->getPrevious();
+                print_r("\n\n".$e->getMessage() . "\n" . $e->getTraceAsString());
+            }
         }
         exit;
     }
@@ -1036,6 +1063,28 @@ class TemplateTest extends TestCase
     public function testAccessor($code, $result)
     {
         $this->exec($code, self::getVars(), $result);
+    }
+
+    /**
+     * @group static
+     * @dataProvider providerStatic
+     */
+    public function testStatic($code, $result)
+    {
+        $this->exec($code, self::getVars(), $result, true);
+    }
+
+    public static function multi($x, $y = 42) {
+        return $x * $y;
+    }
+
+    /**
+     * @group static-invalid
+     * @dataProvider providerStaticInvalid
+     */
+    public function testStaticInvalid($code, $exception, $message, $options = 0)
+    {
+        $this->execError($code, $exception, $message, $options);
     }
 }
 

@@ -617,4 +617,16 @@ class Tokenizer
     {
         return $this->curr ? $this->curr[2] : false;
     }
+
+    /**
+     * Seek to custom element
+     * @param int $p
+     * @return $this
+     */
+    public function seek($p)
+    {
+        $this->p = $p;
+        unset($this->prev, $this->curr, $this->next);
+        return $this;
+    }
 }

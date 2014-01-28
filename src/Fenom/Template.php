@@ -23,7 +23,8 @@ use Fenom\Error\TokenizeException;
  */
 class Template extends Render
 {
-
+    const VAR_NAME = '$var';
+    const TPL_NAME = '$tpl';
     /**
      * Disable array parser.
      */
@@ -440,11 +441,8 @@ class Template extends Render
     {
         if (!$this->_code) {
             // evaluate template's code
-//            $code = ("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
-//            file_put_contents('/tmp/last.tpl', $code);
             eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
-//                exit;
                 throw new CompileException("Fatal error while creating the template");
             }
         }
@@ -552,7 +550,8 @@ class Template extends Render
      * @static
      * @param Tokenizer $tokens
      * @throws \LogicException
-     * @throws TokenizeException
+     * @throws \RuntimeException
+     * @throws Error\TokenizeException
      * @return string
      */
     public function parseAct(Tokenizer $tokens)
@@ -573,6 +572,15 @@ class Template extends Render
                 $name = $action . "." . $name;
             }
             return $this->parseMacroCall($tokens, $name);
+        } elseif($tokens->is(T_DOUBLE_COLON, T_NS_SEPARATOR)) { // static method call
+            $tokens->back();
+            $p = $tokens->p;
+            $static = $this->parseStatic($tokens);
+            if($tokens->is("(")) {
+                return $this->out($this->parseExpr($tokens->seek($p)));
+            } else {
+                return $this->out(Compiler::smartFuncParser($static, $tokens, $this));
+            }
         }
 
         if ($tag = $this->_fenom->getTag($action, $this)) { // call some function
@@ -766,6 +774,10 @@ class Template extends Render
                     throw new \Exception("Function " . $tokens->getAndNext() . " not found");
                 }
                 $code = $unary . $func . $this->parseArgs($tokens->next());
+            } elseif($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
+                $method = $this->parseStatic($tokens);
+                $args = $this->parseArgs($tokens);
+                $code = $unary . $method . $args;
             } else {
                 return false;
             }
@@ -1179,13 +1191,18 @@ class Template extends Render
     public function parseModifier(Tokenizer $tokens, $value)
     {
         while ($tokens->is("|")) {
-            $mods = $this->_fenom->getModifier($tokens->getNext(Tokenizer::MACRO_STRING), $this);
-            if (!$mods) {
-                throw new \Exception("Modifier " . $tokens->current() . " not found");
+            $modifier = $tokens->getNext(Tokenizer::MACRO_STRING);
+            if($tokens->isNext(T_DOUBLE_COLON, T_NS_SEPARATOR)) {
+                $mods = $this->parseStatic($tokens);
+            } else {
+                $mods = $this->_fenom->getModifier($modifier, $this);
+                if (!$mods) {
+                    throw new \Exception("Modifier " . $tokens->current() . " not found");
+                }
+                $tokens->next();
             }
-            $tokens->next();
-            $args = array();
 
+            $args = array();
             while ($tokens->is(":")) {
                 if (!$args[] = $this->parseTerm($tokens->next())) {
                     throw new UnexpectedTokenException($tokens);
@@ -1288,12 +1305,10 @@ class Template extends Render
                 throw new InvalidUsageException("Macro '$name' require '$arg' argument");
             }
         }
-//        $n = sprintf('%x_%x', crc32($this->_name), $this->i++);
         if ($recursive) {
             $recursive['recursive'] = true;
             return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
         } else {
-//            $body = '? >' . $macro["body"] . '<?php';
             $vars = $this->tmpVar();
             return  $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
             $macro["body"] . '<?php' . PHP_EOL . '$var = '.$vars.'; unset(' . $vars . ');';
@@ -1301,10 +1316,37 @@ class Template extends Render
     }
 
     /**
+     * @param Tokenizer $tokens
+     * @throws \LogicException
+     * @throws \RuntimeException
+     * @return string
+     */
+    public function parseStatic(Tokenizer $tokens)
+    {
+        if($this->_options & Fenom::DENY_STATICS) {
+            throw new \LogicException("Static methods are disabled");
+        }
+        $tokens->skipIf(T_NS_SEPARATOR);
+        $name = "";
+        if ($tokens->is(T_STRING)) {
+            $name .= $tokens->getAndNext();
+            while ($tokens->is(T_NS_SEPARATOR)) {
+                $name .= '\\' . $tokens->next()->get(T_STRING);
+                $tokens->next();
+            }
+        }
+        $tokens->need(T_DOUBLE_COLON)->next()->need(T_STRING);
+        $static = $name . "::" . $tokens->getAndNext();
+        if(!is_callable($static)) {
+            throw new \RuntimeException("Method $static doesn't exist");
+        }
+        return $static;
+    }
+
+    /**
      * Parse argument list
      * (1 + 2.3, 'string', $var, [2,4])
      *
-     * @static
      * @param Tokenizer $tokens
      * @throws TokenizeException
      * @return string
