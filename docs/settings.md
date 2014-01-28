@@ -18,13 +18,13 @@ $fenom = Fenom::factory($tpl_dir, $compile_dir, $options);
 $fenom->setOptions($options);
 ```
 
-Параметры могут быть массивом `'option_name' => true` (если ключ не указан автоматически задаётся false) или битовой маской.
+Options may by associative array like `'option_name' => true` or bitwise mask.
 
 | Code                   | Constant                  | Description  | Affect  |
 | ---------------------- | ------------------------- | ------------ | ------- |
 | *disable_methods*      | `Fenom::DENY_METHODS`     | disable calling methods of objects in templates.  | |
 | *disable_native_funcs* | `Fenom::DENY_INLINE_FUNCS`| disable calling native function in templates, except allowed. | |
-| *auto_reload*          | `Fenom::AUTO_RELOAD`      | reload template if source will be changed | decreases the performance |
+| *auto_reload*          | `Fenom::AUTO_RELOAD`      | reload template if source will be changed | decreases performance |
 | *force_compile*        | `Fenom::FORCE_COMPILE`    | recompile template every time when the template renders | greatly decreases performance |
 | *disable_cache*        | `Fenom::DISABLE_CACHE`    | disable compile cache | greatly decreases performance |
 | *force_include*        | `Fenom::FORCE_INCLUDE`    | paste template body instead of include-tag | increases performance, increases cache size |
@@ -43,6 +43,4 @@ $fenom->setOptions(Fenom::AUTO_RELOAD | Fenom::FORCE_INCLUDE);
 ```
 
 **By default all options disabled**
-
-### Tag options
 
