@@ -1,5 +1,5 @@
-Modifier unescape [RU]
-======================
+Modifier unescape
+=================
 
-Модификатор, обратный модификатору [escape](./escape.md)
+`Unescape` is used to decode entity, html, js and URI. See [escape](./escape.md)
 

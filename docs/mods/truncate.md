@@ -1,16 +1,16 @@
-Modifier truncate [RU]
-=======================
+Modifier truncate
+=================
 
-Обрезает строку до указанной длины. Может обрезать как ровно по символу так и завершивемогуся слову, где итоговоя строка не привыет указанной длины.
+Modifier truncates a variable to a character length.
 
 ```smarty
 {$long_string|truncate:$length:$etc:$by_words:$middle}
 ```
 
-* `$length` обязательный параметр, указывающий максимальную длину выводимой сроки
-* `$etc`, по умолчанию `...`, содержащий строку которой будет заменены "лишние" символы.
-* `$by_word`, по умолчанию **FALSE**. Флаг указывает модификатору не разбивать слово, а найти ближайший (в меньшую строну) пробельный символ, после которого строка буде обрезана
-* `$middle`, по умочанию **FALSE**. Включенный флаг, который указывает, что "лишние" данные нужно вырезать из середины строки, а не из конца.
+* `$length`, required. Parameter determines how many characters to truncate to.
+* `$etc`, by default `...`. This is a text string that replaces the truncated text.
+* `$by_word`, by default **FALSE**. This determines whether or not to truncate at a word boundary with TRUE, or at the exact character with FALSE.
+* `$middle`, by default **FALSE**. This determines whether the truncation happens at the end of the string with FALSE, or in the middle of the string with TRUE.
 
 ```smarty
 {var $str = "very very long string"}
@@ -19,4 +19,4 @@ Modifier truncate [RU]
 {$str|truncate:5:" ... ":true:true} output: very ... string
 ```
 
-Модификатор работает отлично с UTF8 и не требует расширения `mbstring`
+Modifier do not use `mbstring` when works with UTF8.

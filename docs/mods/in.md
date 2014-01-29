@@ -1,10 +1,10 @@
-Modifier in [RU]
-================
+Modifier in
+===========
 
-Булевый модификатор, позволяющий проверить наличие значения переменной в массиве:
+The modifier is implementation of `in` operator (performs containment test).
 
 ```smarty
-{if $number|in:[1, 3, 55]}
+{if $number|in:[1, 3, 42]}
 ...
 {/if}
 ```
