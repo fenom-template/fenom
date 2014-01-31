@@ -1307,10 +1307,10 @@ class Template extends Render
         }
         if ($recursive) {
             $recursive['recursive'] = true;
-            return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
+            return '$tpl->getMacro("' . $name . '")->__invoke(' . var_export($args, true) . ', $tpl);';
         } else {
             $vars = $this->tmpVar();
-            return  $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
+            return  $vars . ' = $var; $var = ' . var_export($args, true) . ';' . PHP_EOL . '?>' .
             $macro["body"] . '<?php' . PHP_EOL . '$var = '.$vars.'; unset(' . $vars . ');';
         }
     }
