@@ -1285,7 +1285,7 @@ class Template extends Render
         } else {
             $body = '?>' . $macro["body"] . '<?php';
         }
-        return '$_tpl' . $n . ' = $tpl->exchangeArray(' . Compiler::toArray($args) . ');' . PHP_EOL . $body . PHP_EOL . '$tpl->exchangeArray($_tpl' . $n . '); /* X */ unset($_tpl' . $n . ');';
+        return '$_tpl' . $n . ' = $tpl->exchangeArray(' . var_export($args, true) . ');' . PHP_EOL . $body . PHP_EOL . '$tpl->exchangeArray($_tpl' . $n . '); /* X */ unset($_tpl' . $n . ');';
     }
 
     /**
