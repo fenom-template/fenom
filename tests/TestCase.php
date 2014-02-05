@@ -50,10 +50,11 @@ class TestCase extends \PHPUnit_Framework_TestCase
         if (!file_exists(FENOM_RESOURCES . '/compile')) {
             mkdir(FENOM_RESOURCES . '/compile', 0777, true);
         } else {
-            FS::clean(FENOM_RESOURCES . '/compile/');
+//            FS::clean(FENOM_RESOURCES . '/compile/');
         }
 
-        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/template', FENOM_RESOURCES . '/compile');
+        $this->fenom = new Fenom(new Provider(FENOM_RESOURCES . '/template', FENOM_RESOURCES . '/compile'));
+        $this->fenom->getProvider()->clearCompiles();
         $this->fenom->addModifier('dots', __CLASS__ . '::dots');
         $this->fenom->addModifier('concat', __CLASS__ . '::concat');
         $this->fenom->addModifier('append', __CLASS__ . '::append');
@@ -92,7 +93,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         if (!file_exists(FENOM_RESOURCES . '/template')) {
             mkdir(FENOM_RESOURCES . '/template', 0777, true);
         } else {
-            FS::clean(FENOM_RESOURCES . '/template/');
+//            FS::clean(FENOM_RESOURCES . '/template/');
         }
     }
 
