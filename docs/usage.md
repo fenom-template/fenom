@@ -3,31 +3,31 @@ Basic usage
 
 ### Initialize Fenom
 
-Use factory method
+Creating an object via factory method
 ```php
 $fenom = Fenom::factory('/path/to/templates', '/path/to/compiled/template', $options);
 ```
 
-Use `new` operator
+Creating an object via `new` operator
 ```php
 $fenom = new Fenom(new Provider('/path/to/templates'));
 $fenom->setCompileDir('/path/to/template/cache');
 $fenom->setOptions($options);
 ```
 
-### Render template
+### Rendering template
 
 Output template
 ```php
 $fenom->display("template/name.tpl", $vars);
 ```
 
-Get template into the variable
+Get the result of rendering the template
 ```php
 $result = $fenom->fetch("template/name.tpl", $vars);
 ```
 
-Create pipe-line into callback
+Create the pipeline of rendering into callback
 ```php
 $fenom->pipe(
     "template/sitemap.tpl",
