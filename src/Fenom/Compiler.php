@@ -549,33 +549,13 @@ class Compiler
     public static function tagUse(Tokenizer $tokens, Template $tpl)
     {
         if ($tpl->getStackSize()) {
-            throw new InvalidUsageException("Tags {use} can not be nested");
+            throw new InvalidUsageException("Tag {use} can not be nested");
         }
-        $cname = $tpl->parsePlainArg($tokens, $name);
+        $tpl->parsePlainArg($tokens, $name);
         if ($name) {
-            $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
-            $donor->_extended = true;
-            $donor->_extends = $tpl;
-            $donor->_compatible = & $tpl->_compatible;
-            //$donor->blocks = &$tpl->blocks;
-            $donor->compile();
-            $blocks = $donor->blocks;
-            foreach ($blocks as $name => $code) {
-                if (isset($tpl->blocks[$name])) {
-                    $tpl->blocks[$name] = $code;
-                    unset($blocks[$name]);
-                }
-            }
-            $tpl->uses = $blocks + $tpl->uses;
-            $tpl->addDepend($donor);
-            return '?>' . $donor->getBody() . '<?php ';
+            $tpl->importBlocks($name);
         } else {
             throw new InvalidUsageException('template name must be given explicitly yet');
-            // under construction
-//            $tpl->_compatible = true;
-//            return '$donor = $tpl->getStorage()->getTemplate(' . $cname . ', \Fenom\Template::EXTENDED);' . PHP_EOL .
-//            '$donor->fetch((array)$tpl);' . PHP_EOL .
-//            '$tpl->b += (array)$donor->b';
         }
     }
 
@@ -583,8 +563,8 @@ class Compiler
      * Tag {block ...}
      * @param Tokenizer $tokens
      * @param Scope $scope
+     * @throws \RuntimeException
      * @return string
-     * @throws InvalidUsageException
      */
     public static function tagBlockOpen(Tokenizer $tokens, Scope $scope)
     {
@@ -592,77 +572,58 @@ class Compiler
             $scope->tpl->_compatible = true;
         }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
+        if(!$name) {
+            throw new \RuntimeException("Only static names for blocks allowed");
+        }
         $scope["name"] = $name;
+        $scope["use_parent"] = false;
     }
 
     /**
-     * Close tag {/block}
+     * @param Tokenizer $tokens
+     * @param Scope $scope
+     */
+    public static function tagBlockClose($tokens, Scope $scope)
+    {
+        $tpl = $scope->tpl;
+        $name = $scope["name"];
+        if(isset($tpl->blocks[$name])) { // block defined
+            $block = &$tpl->blocks[$name];
+            if($block['use_parent']) {
+                $parent = $scope->getContent();
+
+                $block['block'] = str_replace($block['use_parent']." ?>", "?>".$parent, $block['block']);
+            }
+            if(!$block["import"]) {  // not from {use} - redefine block
+                $scope->replaceContent($block["block"]);
+                return;
+            } elseif($block["import"] != $tpl->getName()) { // tag {use} was in another template
+                $tpl->blocks[$scope["name"]]["import"] = false;
+                $scope->replaceContent($block["block"]);
+            }
+        }
+        $tpl->blocks[$scope["name"]] = [
+            "from"        => $tpl->getName(),
+            "import"      => false,
+            "use_parent"  => $scope["use_parent"],
+            "block"       => $scope->getContent()
+        ];
+    }
+
+    /**
+     * Tag {parent}
+     *
      * @param Tokenizer $tokens
      * @param Scope $scope
      * @return string
      */
-    public static function tagBlockClose($tokens, Scope $scope)
-    {
-
-        $tpl = $scope->tpl;
-        if (isset($tpl->_extends)) { // is child
-            if ($scope["name"]) { // is scalar name
-                if ($tpl->_compatible) { // is compatible mode
-                    $scope->replaceContent(
-                        '<?php /* 1) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(empty($tpl->b[' . $scope["cname"] . '])) { ' .
-                        '$tpl->b[' . $scope["cname"] . '] = function($tpl) { ?>' . PHP_EOL .
-                        $scope->getContent() .
-                        "<?php };" .
-                        "} ?>" . PHP_EOL
-                    );
-                } elseif (!isset($tpl->blocks[$scope["name"]])) { // is block not registered
-                    $tpl->blocks[$scope["name"]] = $scope->getContent();
-                    $scope->replaceContent(
-                        '<?php /* 2) Block ' . $tpl . ': ' . $scope["cname"] . ' ' . $tpl->_compatible . ' */' . PHP_EOL . ' $tpl->b[' . $scope["cname"] . '] = function($tpl) { ?>' . PHP_EOL .
-                        $scope->getContent() .
-                        "<?php }; ?>" . PHP_EOL
-                    );
-                }
-            } else { // dynamic name
-                $tpl->_compatible = true; // enable compatible mode
-                $scope->replaceContent(
-                    '<?php /* 3) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(empty($tpl->b[' . $scope["cname"] . '])) { ' .
-                    '$tpl->b[' . $scope["cname"] . '] = function($tpl) { ?>' . PHP_EOL .
-                    $scope->getContent() .
-                    "<?php };" .
-                    "} ?>" . PHP_EOL
-                );
-            }
-        } else { // is parent
-            if (isset($tpl->blocks[$scope["name"]])) { // has block
-                if ($tpl->_compatible) { // compatible mode enabled
-                    $scope->replaceContent(
-                        '<?php /* 4) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(isset($tpl->b[' . $scope["cname"] . '])) { echo $tpl->b[' . $scope["cname"] . ']->__invoke($tpl); } else {?>' . PHP_EOL .
-                        $tpl->blocks[$scope["name"]] .
-                        '<?php } ?>' . PHP_EOL
-                    );
-
-                } else {
-                    $scope->replaceContent($tpl->blocks[$scope["name"]]);
-                }
-//            } elseif(isset($tpl->_extended) || !empty($tpl->_compatible)) {
-            } elseif (isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
-                $scope->replaceContent(
-                    '<?php /* 5) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(isset($tpl->b[' . $scope["cname"] . '])) { echo $tpl->b[' . $scope["cname"] . ']->__invoke($tpl); } else {?>' . PHP_EOL .
-                    $scope->getContent() .
-                    '<?php } ?>' . PHP_EOL
-                );
-            }
-        }
-        return '';
-
-    }
-
     public static function tagParent($tokens, Scope $scope)
     {
-        if (empty($scope->tpl->_extends)) {
-            throw new InvalidUsageException("Tag {parent} may be declared in children");
+        $block_scope = $scope->tpl->getParentScope('block');
+        if(!$block_scope['use_parent']) {
+            $block_scope['use_parent'] = "/* %%parent#".mt_rand(0, 1e6)."%% */";
         }
+        return $block_scope['use_parent'];
     }
 
     /**

@@ -100,6 +100,11 @@ class Fenom
     protected $_compile_dir = "/tmp";
 
     /**
+     * @var string[] compile directory for custom provider
+     */
+    protected $_compiles = array();
+
+    /**
      * @var int masked options
      */
     protected $_options = 0;
@@ -213,8 +218,7 @@ class Fenom
             'type' => self::BLOCK_COMPILER,
             'open' => 'Fenom\Compiler::tagBlockOpen',
             'close' => 'Fenom\Compiler::tagBlockClose',
-            'tags' => array(//                'parent' => 'Fenom\Compiler::tagParent' // not implemented yet
-            ),
+            'tags' => array('parent' => 'Fenom\Compiler::tagParent'),
             'float_tags' => array('parent' => 1)
         ),
         'extends' => array( // {extends ...}
@@ -355,7 +359,7 @@ class Fenom
     }
 
     /**
-     * @param callable $cbcd
+     * @param callable $cb
      * @return self
      */
     public function addTagFilter($cb)
@@ -620,11 +624,15 @@ class Fenom
      *
      * @param string $scm scheme name
      * @param Fenom\ProviderInterface $provider provider object
+     * @param string $compile_path
      * @return $this
      */
-    public function addProvider($scm, \Fenom\ProviderInterface $provider)
+    public function addProvider($scm, \Fenom\ProviderInterface $provider, $compile_path = null)
     {
         $this->_providers[$scm] = $provider;
+        if($compile_path) {
+            $this->_compiles[$scm] = $compile_path;
+        }
         return $this;
     }
 
@@ -730,7 +738,11 @@ class Fenom
     public function getTemplate($template, $options = 0)
     {
         $options |= $this->_options;
-        $key = dechex($options) . "@" . $template;
+        if(is_array($template)) {
+            $key = dechex($options) . "@" . implode(",", $template);
+        } else {
+            $key = dechex($options) . "@" . $template;
+        }
         if (isset($this->_storage[$key])) {
             /** @var Fenom\Template $tpl */
             $tpl = $this->_storage[$key];
@@ -766,13 +778,13 @@ class Fenom
     /**
      * Load template from cache or create cache if it doesn't exists.
      *
-     * @param string $tpl
+     * @param string $template
      * @param int $opts
      * @return Fenom\Render
      */
-    protected function _load($tpl, $opts)
+    protected function _load($template, $opts)
     {
-        $file_name = $this->_getCacheName($tpl, $opts);
+        $file_name = $this->_getCacheName($template, $opts);
         if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this; // used in template
             $_tpl = include($this->_compile_dir . "/" . $file_name);
@@ -781,7 +793,7 @@ class Fenom
                 return $_tpl;
             }
         }
-        return $this->compile($tpl, true, $opts);
+        return $this->compile($template, true, $opts);
     }
 
     /**
@@ -793,14 +805,22 @@ class Fenom
      */
     private function _getCacheName($tpl, $options)
     {
-        $hash = $tpl . ":" . $options;
-        return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+        if(is_array($tpl)) {
+            $hash = implode(".", $tpl) . ":" . $options;
+            foreach($tpl as &$t) {
+                $t = str_replace(":", "_", basename($t));
+            }
+            return implode("~", $tpl).".".sprintf("%x.%x.php", crc32($hash), strlen($hash));
+        } else {
+            $hash = $tpl . ":" . $options;
+            return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+        }
     }
 
     /**
      * Compile and save template
      *
-     * @param string $tpl
+     * @param string|array $tpl
      * @param bool $store store template on disk
      * @param int $options
      * @throws RuntimeException
@@ -809,7 +829,15 @@ class Fenom
     public function compile($tpl, $store = true, $options = 0)
     {
         $options = $this->_options | $options;
-        $template = $this->getRawTemplate()->load($tpl);
+        if(is_string($tpl)) {
+            $template = $this->getRawTemplate()->load($tpl);
+        } else {
+            $template = $this->getRawTemplate()->load($tpl[0], false);
+            unset($tpl[0]);
+            foreach($tpl as $t) {
+                $template->extend($t);
+            }
+        }
         if ($store) {
             $cache = $this->_getCacheName($tpl, $options);
             $tpl_tmp = tempnam($this->_compile_dir, $cache);

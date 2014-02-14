@@ -1,0 +1,1 @@
+{block 'body'}Child 1 {parent}{/block}

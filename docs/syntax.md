@@ -25,7 +25,7 @@ Fenom implement [Smarty](http://www.smarty.net/) syntax with some improvements
 
 ### System variable
 
-Unnamed system variable starts with `$.` and allow access to global variables and system info:
+Unnamed system variable starts with `$.` and allow access to global variables and system info (fix doc):
 
 * `$.get` is `$_GET`.
 * `$.post` is `$_POST`.
@@ -135,7 +135,7 @@ See also [{var}](./tags/var.md) documentation.
 ### Strings
 
 When the string in double quotation marks, all the expressions in the string will be run.
-The result of the expression will be inserted into the string instead it.
+The result of expressions will be inserted into the string instead it.
 
 ```smarty
 {var $foo="Username"}
@@ -168,9 +168,9 @@ but if use single quote any template expressions will be on display as it is
 
 ### Modifiers
 
-* Модификаторы позволяют изменить значение переменной перед выводом или использованием в выражении
-* To apply a modifier, specify the value followed by a | (pipe) and the modifier name.
-* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a : (colon).
+* Modifiers allows change some value before output or using.
+* To apply a modifier, specify the value followed by a `|` (pipe) and the modifier name.
+* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a `:` (colon).
 
 ```smarty
 {var $foo="User"}
@@ -187,12 +187,13 @@ but if use single quote any template expressions will be on display as it is
 
 ### Tags
 
-Каждый тэг шаблонизатора либо выводит переменную, либо вызывает какую-либо функцию. (переписать)
-Тег вызова функции начинается с названия функции и содержит список аргументов:
+Basically, tag seems like
 
 ```smarty
 {FUNCNAME attr1 = "val1" attr2 = $val2}
 ```
+
+Tags starts with name and may have attributes
 
 Это общий формат функций, но могут быть исключения, например функция [{var}](./tags/var.md), использованная выше.
 

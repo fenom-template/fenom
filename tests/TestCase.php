@@ -4,6 +4,7 @@ use Fenom, Fenom\Provider as FS;
 
 class TestCase extends \PHPUnit_Framework_TestCase
 {
+    public $template_path = 'template';
     /**
      * @var Fenom
      */
@@ -53,7 +54,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
             FS::clean(FENOM_RESOURCES . '/compile/');
         }
 
-        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/template', FENOM_RESOURCES . '/compile');
+        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/' . $this->template_path, FENOM_RESOURCES . '/compile');
         $this->fenom->addModifier('dots', __CLASS__ . '::dots');
         $this->fenom->addModifier('concat', __CLASS__ . '::concat');
         $this->fenom->addModifier('append', __CLASS__ . '::append');

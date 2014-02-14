@@ -156,6 +156,21 @@ class Template extends Render
     }
 
     /**
+     * @param string $tag
+     * @return bool|\Fenom\Scope
+     */
+    public function getParentScope($tag)
+    {
+        for($i = count($this->_stack) - 1; $i>=0; $i--) {
+            if($this->_stack[$i]->name == $tag) {
+                return $this->_stack[$i];
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Load source from provider
      * @param string $name
      * @param bool $compile
@@ -443,6 +458,7 @@ class Template extends Render
             // evaluate template's code
             eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
+                var_dump($this->getBody());exit;
                 throw new CompileException("Fatal error while creating the template");
             }
         }
@@ -472,6 +488,36 @@ class Template extends Render
         } else {
             return "echo $data;";
         }
+    }
+
+    /**
+     * Import block from another template
+     * @param string $tpl
+     */
+    public function importBlocks($tpl) {
+        $donor = $this->_fenom->compile($tpl, false);
+        foreach($donor->blocks as $name => $block) {
+            if(!isset($this->blocks[ $name ])) {
+                $block['import'] = $this->getName();
+                $this->blocks[ $name ] = $block;
+            }
+        }
+        $this->addDepend($donor);
+    }
+
+    /**
+     * Extends the template
+     * @param string $tpl
+     */
+    public function extend($tpl) {
+        $this->compile();
+        $parent = $this->_fenom->getRawTemplate()->load($tpl, false);
+        $parent->blocks = &$this->blocks;
+        $parent->_options = $this->_options;
+        $parent->compile();
+        $this->_body = $parent->_body;
+        $this->_src  = $parent->_src;
+        $this->addDepend($parent);
     }
 
     /**
