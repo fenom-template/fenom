@@ -1173,6 +1173,7 @@ class Template extends Render
             if (!$mods) {
                 throw new \Exception("Modifier " . $tokens->current() . " not found");
             }
+            $modifier = $tokens->current();
             $tokens->next();
             $args = array();
 
@@ -1183,7 +1184,7 @@ class Template extends Render
             }
 
             if (!is_string($mods)) { // dynamic modifier
-                $mods = 'call_user_func($tpl->getStorage()->getModifier("' . $mods . '"), ';
+                $mods = 'call_user_func($tpl->getStorage()->getModifier("' . $modifier . '"), ';
             } else {
                 $mods .= "(";
             }
