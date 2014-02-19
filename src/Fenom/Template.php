@@ -492,11 +492,11 @@ class Template extends Render
                 return $this->out($this->parseExpr($tokens), $tokens);
             }
         } catch (InvalidUsageException $e) {
-            throw new CompileException($e->getMessage() . " in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
-            throw new SecurityException($e->getMessage() . " in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
-            throw new CompileException($e->getMessage() . " in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         }
     }
 
@@ -1173,6 +1173,7 @@ class Template extends Render
             if (!$mods) {
                 throw new \Exception("Modifier " . $tokens->current() . " not found");
             }
+            $modifier = $tokens->current();
             $tokens->next();
             $args = array();
 
@@ -1183,7 +1184,7 @@ class Template extends Render
             }
 
             if (!is_string($mods)) { // dynamic modifier
-                $mods = 'call_user_func($tpl->getStorage()->getModifier("' . $mods . '"), ';
+                $mods = 'call_user_func($tpl->getStorage()->getModifier("' . $modifier . '"), ';
             } else {
                 $mods .= "(";
             }
