@@ -10,7 +10,7 @@ class ExtendsTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->getTemplate("extends/static/nested/child.1.tpl")->fetch([]));
+//            var_dump($this->fenom->getTemplate("extends/static/nested/child.1.tpl")->fetch([]));
 //            var_dump($this->fenom->getTemplate("extends/dynamic/child.2.tpl")->getBody());
 //            var_dump($this->fenom->compileCode('{block "main"}a {parent} b{/block}')->getBody());
 //            $child = $this->fenom->getRawTemplate()->load('autoextends/child.1.tpl', false);
@@ -47,12 +47,12 @@ Before body
 Child 3 content
 Before footer
 Footer from use";
-        $this->assertSame($result, $this->fenom->fetch([
+        $this->assertSame($result, $this->fenom->fetch(array(
             'extends/auto/child.3.tpl',
             'extends/auto/child.2.tpl',
             'extends/auto/child.1.tpl',
             'extends/auto/parent.tpl',
-        ], array()));
+        ), array()));
     }
 
     public function testStaticExtendLevel1() {
