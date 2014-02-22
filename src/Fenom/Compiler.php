@@ -575,12 +575,12 @@ class Compiler
             }
         }
 
-        $tpl->blocks[$scope["name"]] = [
+        $tpl->blocks[$scope["name"]] = array(
             "from"        => $tpl->getName(),
             "import"      => false,
             "use_parent"  => $scope["use_parent"],
             "block"       => $scope->getContent()
-        ];
+        );
     }
 
     /**
