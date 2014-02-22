@@ -144,17 +144,17 @@ class FenomTest extends \Fenom\TestCase
     public function testFilter()
     {
         $punit = $this;
-        $this->fenom->addPreFilter(function ($src, $tpl) use ($punit) {
+        $this->fenom->addPreFilter(function ($tpl, $src) use ($punit) {
             $punit->assertInstanceOf('Fenom\Template', $tpl);
             return "== $src ==";
         });
 
-        $this->fenom->addPostFilter(function ($code, $tpl) use ($punit) {
+        $this->fenom->addPostFilter(function ($tpl, $code) use ($punit) {
             $punit->assertInstanceOf('Fenom\Template', $tpl);
             return "+++ $code +++";
         });
 
-        $this->fenom->addFilter(function ($text, $tpl) use ($punit) {
+        $this->fenom->addFilter(function ($tpl, $text) use ($punit) {
             $punit->assertInstanceOf('Fenom\Template', $tpl);
             return "|--- $text ---|";
         });

@@ -84,6 +84,7 @@ class Tokenizer
     public $tokens;
     public $p = 0;
     public $quotes = 0;
+    public $options;
     private $_max = 0;
     private $_last_no = 0;
 

@@ -2,7 +2,7 @@
 namespace Fenom;
 use Fenom, Fenom\TestCase;
 
-class ExtendsTemplateTest extends TestCase
+class ExtendsTemplateTest_ extends TestCase
 {
 
     public function _testSandbox()

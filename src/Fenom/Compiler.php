@@ -466,75 +466,46 @@ class Compiler
      * Dispatch {extends} tag
      * @param Tokenizer $tokens
      * @param Template $tpl
-     * @throws InvalidUsageException
+     * @throws \RuntimeException
+     * @throws Error\InvalidUsageException
      * @return string
      */
     public static function tagExtends(Tokenizer $tokens, Template $tpl)
     {
-        if (!empty($tpl->_extends)) {
+        if ($tpl->extends) {
             throw new InvalidUsageException("Only one {extends} allowed");
         } elseif ($tpl->getStackSize()) {
             throw new InvalidUsageException("Tags {extends} can not be nested");
         }
-        $tpl_name = $tpl->parsePlainArg($tokens, $name);
-        if (empty($tpl->_extended)) {
+        $cname = $tpl->parsePlainArg($tokens, $name);
+        if($name) {
+            $tpl->extends = $name;
+        } else {
+            $tpl->dynamic_extends = $cname;
+        }
+        if(!$tpl->extended) {
             $tpl->addPostCompile(__CLASS__ . "::extendBody");
-        }
-        if ($tpl->getOptions() & Template::DYNAMIC_EXTEND) {
-            $tpl->_compatible = true;
-        }
-        if ($name) { // static extends
-            $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
-            if (!isset($tpl->_compatible)) {
-                $tpl->_compatible = & $tpl->_extends->_compatible;
-            }
-            $tpl->addDepend($tpl->_extends);
-            return "";
-        } else { // dynamic extends
-            if (!isset($tpl->_compatible)) {
-                $tpl->_compatible = true;
-            }
-            $tpl->_extends = $tpl_name;
-            return '$parent = $tpl->getStorage()->getTemplate(' . $tpl_name . ', \Fenom\Template::EXTENDED);';
         }
     }
 
     /**
      * Post compile action for {extends ...} tag
-     * @param string $body
      * @param Template $tpl
+     * @param string $body
      */
-    public static function extendBody(&$body, $tpl)
+    public static function extendBody($tpl, &$body)
     {
-        $t = $tpl;
-        if ($tpl->uses) {
-            $tpl->blocks += $tpl->uses;
-        }
-        while (isset($t->_extends)) {
-            $t = $t->_extends;
-            if (is_object($t)) {
-                /* @var \Fenom\Template $t */
-                $t->_extended = true;
-                $tpl->addDepend($t);
-                $t->_compatible = & $tpl->_compatible;
-                $t->blocks = & $tpl->blocks;
-                $t->compile();
-                if ($t->uses) {
-                    $tpl->blocks += $t->uses;
-                }
-                if (!isset($t->_extends)) { // last item => parent
-                    if (empty($tpl->_compatible)) {
-                        $body = $t->getBody();
-                    } else {
-                        $body = '<?php ob_start(); ?>' . $body . '<?php ob_end_clean(); ?>' . $t->getBody();
-                    }
-                    return;
-                } else {
-                    $body .= $t->getBody();
-                }
-            } else {
-                $body = '<?php ob_start(); ?>' . $body . '<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
-                return;
+        if($tpl->dynamic_extends) {
+            $body = "";
+            foreach($tpl->blocks as $name => $block) {
+                $body .= '<?php $tpl->blocks["'.$name.'"] = function ($var, $tpl) { ?>'.PHP_EOL.$block['block'].'<?php } ?>'.PHP_EOL.PHP_EOL;
+            }
+            $body .= '<?php $tpl->getStorage()->getTemplate('.$tpl->dynamic_extends.', \Fenom\Template::DYNAMIC_EXTEND)->display($var); ?>';
+        } else {
+            $child = $tpl;
+            while($child && $child->extends) {
+                $parent = $tpl->extend($child->extends);
+                $child = $parent->extends ? $parent : false;
             }
         }
     }
@@ -587,6 +558,7 @@ class Compiler
     {
         $tpl = $scope->tpl;
         $name = $scope["name"];
+
         if(isset($tpl->blocks[$name])) { // block defined
             $block = &$tpl->blocks[$name];
             if($block['use_parent']) {
@@ -602,6 +574,7 @@ class Compiler
                 $scope->replaceContent($block["block"]);
             }
         }
+
         $tpl->blocks[$scope["name"]] = [
             "from"        => $tpl->getName(),
             "import"      => false,

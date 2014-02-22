@@ -55,9 +55,9 @@ class Template extends Render
      */
     public $blocks = array();
 
-    public $uses = array();
+//    public $uses = array();
 
-    public $parents = array();
+//    public $parents = array();
 
     /**
      * Escape outputs value
@@ -65,9 +65,16 @@ class Template extends Render
      */
     public $escape = false;
 
-    public $_extends;
-    public $_extended = false;
-    public $_compatible;
+    /**
+     * @var string|null
+     */
+    public $extends;
+
+    /**
+     * @var string|null
+     */
+    public $extended;
+//    public $_compatible;
 
     /**
      * Template PHP code
@@ -221,7 +228,7 @@ class Template extends Render
         $end = $pos = 0;
         $this->escape = $this->_options & Fenom::AUTO_ESCAPE;
         foreach ($this->_fenom->getPreFilters() as $filter) {
-            $this->_src = call_user_func($filter, $this->_src, $this);
+            $this->_src = call_user_func($filter, $this, $this->_src);
         }
 
         while (($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
@@ -303,12 +310,12 @@ class Template extends Render
         $this->_src = ""; // cleanup
         if ($this->_post) {
             foreach ($this->_post as $cb) {
-                call_user_func_array($cb, array(&$this->_body, $this));
+                call_user_func_array($cb, array($this, &$this->_body));
             }
         }
         $this->addDepend($this); // for 'verify' performance
         foreach ($this->_fenom->getPostFilters() as $filter) {
-            $this->_body = call_user_func($filter, $this->_body, $this);
+            $this->_body = call_user_func($filter, $this, $this->_body);
         }
     }
 
@@ -342,7 +349,7 @@ class Template extends Render
         if ($this->_filters) {
             if (strpos($text, "<?") === false) {
                 foreach ($this->_filters as $filter) {
-                    $text = call_user_func($filter, $text, $this);
+                    $text = call_user_func($filter, $this, $text);
                 }
                 $this->_body .= $text;
             } else {
@@ -350,7 +357,7 @@ class Template extends Render
                 foreach ($fragments as &$fragment) {
                     if ($fragment) {
                         foreach ($this->_filters as $filter) {
-                            $fragment = call_user_func($filter, $fragment, $this);
+                            $fragment = call_user_func($filter, $this, $fragment);
                         }
                     }
                 }
@@ -508,16 +515,21 @@ class Template extends Render
     /**
      * Extends the template
      * @param string $tpl
+     * @return \Fenom\Template parent
      */
     public function extend($tpl) {
-        $this->compile();
+        if(!$this->_body) {
+            $this->compile();
+        }
         $parent = $this->_fenom->getRawTemplate()->load($tpl, false);
         $parent->blocks = &$this->blocks;
+        $parent->extended = $this->getName();
         $parent->_options = $this->_options;
         $parent->compile();
         $this->_body = $parent->_body;
         $this->_src  = $parent->_src;
         $this->addDepend($parent);
+        return $parent;
     }
 
     /**

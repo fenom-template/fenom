@@ -253,10 +253,13 @@ Tags starts with name and may have attributes
 		e.innerHTML = text;
 		document.body.appendChild(e);
 	})('test');
-</ignore>
+</script>
+{if:ignore $js_enabled}
+
+{/if}
 ```
 
-Выведет
+Outputs
 
 ```html
 <style>
@@ -277,9 +280,11 @@ Tags starts with name and may have attributes
 
 ```smarty
 {include 'control.tpl'
-    options = $list
-    name    = $cp.name
-    type    = 'select'
+    $options = $list
+    $name    = $cp.name
+    $type    = 'select'
+    isolate  = true
+    disable_static = true
 }
 
 {foreach [
@@ -291,4 +296,19 @@ Tags starts with name and may have attributes
     {$key}: {$val}
 
 {/foreach}
+```
+
+### Tag's compile options
+
+|    name | code | type  | description  |
+| ------- | ---- | ----- | ------------ |
+|   strip |    s | block |              |
+|   atrim |    a | any   |              |
+|     raw |    r | any   |              |
+|   btrim |    b | any   |              |
+|  ignore |    i | block |              |
+|    trim |    t | any   |              |
+
+```smarty
+{script:s:a:r:b:i:t} ... {/script}
 ```
