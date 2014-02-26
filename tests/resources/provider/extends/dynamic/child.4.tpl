@@ -1,0 +1,1 @@
+{extends "extends/dynamic/child.{$a = 3}.tpl"}

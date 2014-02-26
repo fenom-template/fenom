@@ -74,7 +74,14 @@ class Template extends Render
      * @var string|null
      */
     public $extended;
-//    public $_compatible;
+
+    /**
+     * Stack of extended templates
+     * @var array
+     */
+    public $ext_stack = array();
+
+    public $extend_body = false;
 
     /**
      * Template PHP code
@@ -465,7 +472,6 @@ class Template extends Render
             // evaluate template's code
             eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
-                var_dump($this->getBody());exit;
                 throw new CompileException("Fatal error while creating the template");
             }
         }
@@ -501,7 +507,8 @@ class Template extends Render
      * Import block from another template
      * @param string $tpl
      */
-    public function importBlocks($tpl) {
+    public function importBlocks($tpl)
+    {
         $donor = $this->_fenom->compile($tpl, false);
         foreach($donor->blocks as $name => $block) {
             if(!isset($this->blocks[ $name ])) {
@@ -517,14 +524,20 @@ class Template extends Render
      * @param string $tpl
      * @return \Fenom\Template parent
      */
-    public function extend($tpl) {
+    public function extend($tpl)
+    {
         if(!$this->_body) {
             $this->compile();
         }
         $parent = $this->_fenom->getRawTemplate()->load($tpl, false);
         $parent->blocks = &$this->blocks;
         $parent->extended = $this->getName();
+        if(!$this->ext_stack) {
+            $this->ext_stack[] = $this->getName();
+        }
+        $this->ext_stack[] = $parent->getName();
         $parent->_options = $this->_options;
+        $parent->ext_stack = $this->ext_stack;
         $parent->compile();
         $this->_body = $parent->_body;
         $this->_src  = $parent->_src;

@@ -483,8 +483,9 @@ class Compiler
         } else {
             $tpl->dynamic_extends = $cname;
         }
-        if(!$tpl->extended) {
+        if(!$tpl->extend_body) {
             $tpl->addPostCompile(__CLASS__ . "::extendBody");
+            $tpl->extend_body = true;
         }
     }
 
@@ -496,18 +497,23 @@ class Compiler
     public static function extendBody($tpl, &$body)
     {
         if($tpl->dynamic_extends) {
-            $body = "";
-            foreach($tpl->blocks as $name => $block) {
-                $body .= '<?php $tpl->blocks["'.$name.'"] = function ($var, $tpl) { ?>'.PHP_EOL.$block['block'].'<?php } ?>'.PHP_EOL.PHP_EOL;
+            if(!$tpl->ext_stack) {
+                $tpl->ext_stack[] = $tpl->getName();
             }
-            $body .= '<?php $tpl->getStorage()->getTemplate('.$tpl->dynamic_extends.', \Fenom\Template::DYNAMIC_EXTEND)->display($var); ?>';
+            foreach($tpl->ext_stack as &$t) {
+                $stack[] = "'$t'";
+            }
+            $stack[] = $tpl->dynamic_extends;
+            $body = '<?php $tpl->getStorage()->display(array('.implode(', ', $stack).'), $var); ?>';
         } else {
             $child = $tpl;
             while($child && $child->extends) {
                 $parent = $tpl->extend($child->extends);
                 $child = $parent->extends ? $parent : false;
             }
+            $tpl->extends = false;
         }
+        $tpl->extend_body = false;
     }
 
     /**

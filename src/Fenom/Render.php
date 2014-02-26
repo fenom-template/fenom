@@ -89,6 +89,7 @@ class Render extends \ArrayObject
         $this->_time = $props["time"];
         $this->_depends = $props["depends"];
         $this->_macros = $props["macros"];
+//        $this->_blocks = $props["blocks"];
         $this->_code = $code;
     }
 
