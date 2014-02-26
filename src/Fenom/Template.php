@@ -607,15 +607,6 @@ class Template extends Render
     }
 
     /**
-     * Get current scope
-     * @return Scope
-     */
-    public function getLastScope()
-    {
-        return end($this->_stack);
-    }
-
-    /**
      * Parse action {action ...} or {action(...) ...}
      *
      * @static

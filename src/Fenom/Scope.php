@@ -151,9 +151,4 @@ class Scope extends \ArrayObject
         $this->cutContent();
         $this->_body .= $new_content;
     }
-
-    public function unEscapeContent()
-    {
-
-    }
 }
