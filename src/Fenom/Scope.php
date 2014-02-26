@@ -27,7 +27,7 @@ class Scope extends \ArrayObject
     public $is_compiler = true;
     public $is_closed = false;
     public $escape = false;
-    public $options = [];
+    public $options = array();
     private $_action;
     private $_body;
     private $_offset;
