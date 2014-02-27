@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+
 use Fenom, Fenom\Provider as FS;
 
 class TestCase extends \PHPUnit_Framework_TestCase
@@ -124,7 +125,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         if ($dump) {
             echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody() . "\n========= DUMP END =============\n";
         }
-        $this->assertSame(Modifier::strip($result), Modifier::strip($tpl->fetch($vars), true), "Test $code");
+        $this->assertSame(Modifier::strip($result, true), Modifier::strip($tpl->fetch($vars), true), "Test $code");
         return $tpl;
     }
 
@@ -276,20 +277,24 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 }
 
-class Helper {
+class Helper
+{
 
     public $word = 'helper';
 
-    public function __construct($word) {
+    public function __construct($word)
+    {
         $this->word = $word;
         $this->self = $this;
     }
 
-    public function chunk() {
+    public function chunk()
+    {
         return $this;
     }
 
-    public function __toString() {
+    public function __toString()
+    {
         return $this->word;
     }
 }

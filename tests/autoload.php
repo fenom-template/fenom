@@ -2,7 +2,7 @@
 
 $loader = include(__DIR__ . "/../vendor/autoload.php");
 /* @var Composer\Autoload\ClassLoader $loader */
-$loader->add('Fenom', __DIR__.'/cases');
+$loader->add('Fenom', __DIR__ . '/cases');
 
 
 define('FENOM_RESOURCES', __DIR__ . "/resources");

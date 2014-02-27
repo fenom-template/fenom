@@ -30,7 +30,7 @@ For example,
     It is new or current item
 {case 'current'}
     It is current item
-{case 'new', $.const.NEW_STATUS}
+{case 'new', 'newer'}
     It is new item, again
 {default}
     I don't know the type {$type}

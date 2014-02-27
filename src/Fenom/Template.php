@@ -8,6 +8,7 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
+
 use Fenom;
 use Fenom\Error\UnexpectedTokenException;
 use Fenom\Error\CompileException;
@@ -154,9 +155,9 @@ class Template extends Render
      */
     public function __construct(Fenom $fenom, $options)
     {
-        $this->_fenom       = $fenom;
-        $this->_options     = $options;
-        $this->_filters     = $this->_fenom->getFilters();
+        $this->_fenom = $fenom;
+        $this->_options = $options;
+        $this->_filters = $this->_fenom->getFilters();
         $this->_tag_filters = $this->_fenom->getTagFilters();
     }
 
@@ -175,8 +176,8 @@ class Template extends Render
      */
     public function getParentScope($tag)
     {
-        for($i = count($this->_stack) - 1; $i>=0; $i--) {
-            if($this->_stack[$i]->name == $tag) {
+        for ($i = count($this->_stack) - 1; $i >= 0; $i--) {
+            if ($this->_stack[$i]->name == $tag) {
                 return $this->_stack[$i];
             }
         }
@@ -279,8 +280,8 @@ class Template extends Render
                                 $this->_appendText($tag);
                             }
                         } else {
-                            if($this->_tag_filters) {
-                                foreach($this->_tag_filters as $filter) {
+                            if ($this->_tag_filters) {
+                                foreach ($this->_tag_filters as $filter) {
                                     $_tag = call_user_func($filter, $_tag, $this);
                                 }
                             }
@@ -510,10 +511,10 @@ class Template extends Render
     public function importBlocks($tpl)
     {
         $donor = $this->_fenom->compile($tpl, false);
-        foreach($donor->blocks as $name => $block) {
-            if(!isset($this->blocks[ $name ])) {
+        foreach ($donor->blocks as $name => $block) {
+            if (!isset($this->blocks[$name])) {
                 $block['import'] = $this->getName();
-                $this->blocks[ $name ] = $block;
+                $this->blocks[$name] = $block;
             }
         }
         $this->addDepend($donor);
@@ -526,13 +527,13 @@ class Template extends Render
      */
     public function extend($tpl)
     {
-        if(!$this->_body) {
+        if (!$this->_body) {
             $this->compile();
         }
         $parent = $this->_fenom->getRawTemplate()->load($tpl, false);
-        $parent->blocks = &$this->blocks;
+        $parent->blocks = & $this->blocks;
         $parent->extended = $this->getName();
-        if(!$this->ext_stack) {
+        if (!$this->ext_stack) {
             $this->ext_stack[] = $this->getName();
         }
         $this->ext_stack[] = $parent->getName();
@@ -540,7 +541,7 @@ class Template extends Render
         $parent->ext_stack = $this->ext_stack;
         $parent->compile();
         $this->_body = $parent->_body;
-        $this->_src  = $parent->_src;
+        $this->_src = $parent->_src;
         $this->addDepend($parent);
         return $parent;
     }
@@ -634,11 +635,11 @@ class Template extends Render
                 $name = $action . "." . $name;
             }
             return $this->parseMacroCall($tokens, $name);
-        } elseif($tokens->is(T_DOUBLE_COLON, T_NS_SEPARATOR)) { // static method call
+        } elseif ($tokens->is(T_DOUBLE_COLON, T_NS_SEPARATOR)) { // static method call
             $tokens->back();
             $p = $tokens->p;
             $static = $this->parseStatic($tokens);
-            if($tokens->is("(")) {
+            if ($tokens->is("(")) {
                 return $this->out($this->parseExpr($tokens->seek($p)));
             } else {
                 return $this->out(Compiler::smartFuncParser($static, $tokens, $this));
@@ -678,7 +679,7 @@ class Template extends Render
         if ($tags = $this->_fenom->getTagOwners($action)) { // unknown template tag
             throw new TokenizeException("Unexpected tag '$action' (this tag can be used with '" . implode("', '", $tags) . "')");
         } else {
-            throw new TokenizeException("Unexpected tag $action");
+            throw new TokenizeException("Unexpected tag '$action'");
         }
     }
 
@@ -699,8 +700,8 @@ class Template extends Render
             // parse term
             $term = $this->parseTerm($tokens, $var); // term of the expression
             if ($term !== false) {
-                if($this->_options & Fenom::FORCE_VERIFY) {
-                    $term = '(isset('.$term.') ? '.$term.' : null)';
+                if ($this->_options & Fenom::FORCE_VERIFY) {
+                    $term = '(isset(' . $term . ') ? ' . $term . ' : null)';
                     $var = false;
                 }
                 if ($tokens->is('|')) {
@@ -806,13 +807,13 @@ class Template extends Render
                     throw new \LogicException("Forbidden to call methods");
                 }
                 do { // parse call-chunks: $var->func()->func()->prop->func()->...
-                    if($tokens->is('(')) {
+                    if ($tokens->is('(')) {
                         $code .= $this->parseArgs($tokens);
                     }
-                    if($tokens->is(T_OBJECT_OPERATOR) && $tokens->isNext(T_STRING)) {
-                        $code .= '->'.$tokens->next()->getAndNext();
+                    if ($tokens->is(T_OBJECT_OPERATOR) && $tokens->isNext(T_STRING)) {
+                        $code .= '->' . $tokens->next()->getAndNext();
                     }
-                } while($tokens->is('(', T_OBJECT_OPERATOR));
+                } while ($tokens->is('(', T_OBJECT_OPERATOR));
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 $code .= $tokens->getAndNext();
             } else {
@@ -836,7 +837,7 @@ class Template extends Render
                     throw new \Exception("Function " . $tokens->getAndNext() . " not found");
                 }
                 $code = $unary . $func . $this->parseArgs($tokens->next());
-            } elseif($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
+            } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
                 $method = $this->parseStatic($tokens);
                 $args = $this->parseArgs($tokens);
                 $code = $unary . $method . $args;
@@ -874,8 +875,8 @@ class Template extends Render
      */
     public function parseVariable(Tokenizer $tokens, $var = null)
     {
-        if(!$var) {
-            $var = '$var["' . substr( $tokens->get(T_VARIABLE), 1) . '"]';
+        if (!$var) {
+            $var = '$var["' . substr($tokens->get(T_VARIABLE), 1) . '"]';
             $tokens->next();
         }
         while ($t = $tokens->key()) {
@@ -952,14 +953,14 @@ class Template extends Render
                 $tokens->need('.')->next();
                 $var = $this->parseName($tokens);
                 if (!defined($var)) {
-                    $var = 'constant(' . var_export($var, true) . ')';
+                    $var = '@constant(' . var_export($var, true) . ')';
                 }
                 break;
             case 'version':
                 $var = '\Fenom::VERSION';
                 break;
             default:
-                throw new UnexpectedTokenException($tokens);
+                throw new UnexpectedTokenException($tokens->back());
         }
 
         return $var;
@@ -981,13 +982,13 @@ class Template extends Render
         if ($tokens->is(":")) {
             $tokens->next();
             if ($empty) {
-                if($is_var) {
+                if ($is_var) {
                     return '(empty(' . $var . ') ? (' . $this->parseExpr($tokens) . ') : ' . $var . ')';
                 } else {
-                    return '(' . $var . ' ?: (' . $this->parseExpr($tokens) . ')';
+                    return '(' . $var . ' ?: (' . $this->parseExpr($tokens) . '))';
                 }
             } else {
-                if($is_var) {
+                if ($is_var) {
                     return '(isset(' . $var . ') ? ' . $var . ' : (' . $this->parseExpr($tokens) . '))';
                 } else {
                     return '((' . $var . ' !== null) ? ' . $var . ' : (' . $this->parseExpr($tokens) . '))';
@@ -995,13 +996,13 @@ class Template extends Render
             }
         } elseif ($tokens->is(Tokenizer::MACRO_BINARY, Tokenizer::MACRO_BOOLEAN, Tokenizer::MACRO_MATH) || !$tokens->valid()) {
             if ($empty) {
-                if($is_var) {
+                if ($is_var) {
                     return '!empty(' . $var . ')';
                 } else {
                     return '(' . $var . ')';
                 }
             } else {
-                if($is_var) {
+                if ($is_var) {
                     return 'isset(' . $var . ')';
                 } else {
                     return '(' . $var . ' !== null)';
@@ -1012,13 +1013,13 @@ class Template extends Render
             $tokens->need(':')->skip();
             $expr2 = $this->parseExpr($tokens);
             if ($empty) {
-                if($is_var) {
+                if ($is_var) {
                     return '(empty(' . $var . ') ? ' . $expr2 . ' : ' . $expr1 . ')';
                 } else {
                     return '(' . $var . ' ? ' . $expr1 . ' : ' . $expr2 . ')';
                 }
             } else {
-                if($is_var) {
+                if ($is_var) {
                     return '(isset(' . $var . ') ? ' . $expr1 . ' : ' . $expr2 . ')';
                 } else {
                     return '((' . $var . ' !== null) ? ' . $expr1 . ' : ' . $expr2 . ')';
@@ -1169,7 +1170,7 @@ class Template extends Render
                 break;
             case '$':
                 $tokens->next()->need('.')->next()->need(T_CONST)->next();
-                return 'constant('.$this->parseName($tokens).')';
+                return @constant($this->parseName($tokens));
             default:
                 throw new UnexpectedTokenException($tokens);
         }
@@ -1254,7 +1255,7 @@ class Template extends Render
     {
         while ($tokens->is("|")) {
             $modifier = $tokens->getNext(Tokenizer::MACRO_STRING);
-            if($tokens->isNext(T_DOUBLE_COLON, T_NS_SEPARATOR)) {
+            if ($tokens->isNext(T_DOUBLE_COLON, T_NS_SEPARATOR)) {
                 $mods = $this->parseStatic($tokens);
             } else {
                 $mods = $this->_fenom->getModifier($modifier, $this);
@@ -1369,11 +1370,11 @@ class Template extends Render
         }
         if ($recursive) {
             $recursive['recursive'] = true;
-            return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
+            return '$tpl->getMacro("' . $name . '")->__invoke(' . Compiler::toArray($args) . ', $tpl);';
         } else {
             $vars = $this->tmpVar();
-            return  $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
-            $macro["body"] . '<?php' . PHP_EOL . '$var = '.$vars.'; unset(' . $vars . ');';
+            return $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
+            $macro["body"] . '<?php' . PHP_EOL . '$var = ' . $vars . '; unset(' . $vars . ');';
         }
     }
 
@@ -1385,7 +1386,7 @@ class Template extends Render
      */
     public function parseStatic(Tokenizer $tokens)
     {
-        if($this->_options & Fenom::DENY_STATICS) {
+        if ($this->_options & Fenom::DENY_STATICS) {
             throw new \LogicException("Static methods are disabled");
         }
         $tokens->skipIf(T_NS_SEPARATOR);
@@ -1399,7 +1400,7 @@ class Template extends Render
         }
         $tokens->need(T_DOUBLE_COLON)->next()->need(T_STRING);
         $static = $name . "::" . $tokens->getAndNext();
-        if(!is_callable($static)) {
+        if (!is_callable($static)) {
             throw new \RuntimeException("Method $static doesn't exist");
         }
         return $static;

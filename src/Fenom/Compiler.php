@@ -8,6 +8,7 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
+
 use Fenom\Error\InvalidUsageException;
 use Fenom\Error\UnexpectedTokenException;
 use Fenom\Tokenizer;
@@ -36,20 +37,20 @@ class Compiler
         $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
         if ($name) {
-            if($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE) {
+            if ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE) {
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 $var = $tpl->tmpVar();
-                if($p) {
-                    return $var.' = $var; $var = ' . self::toArray($p) . ' + $var; ?>' . $inc->getBody() . '<?php $var = '.$var.'; unset('.$var.');';
+                if ($p) {
+                    return $var . ' = $var; $var = ' . self::toArray($p) . ' + $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
                 } else {
-                    return $var.' = $var; ?>' . $inc->getBody() . '<?php $var = '.$var.'; unset('.$var.');';
+                    return $var . ' = $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
                 }
-            } elseif(!$tpl->getStorage()->templateExists($name)) {
+            } elseif (!$tpl->getStorage()->templateExists($name)) {
                 throw new \LogicException("Template $name not found");
             }
         }
-        if($p) {
+        if ($p) {
             return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . ' + $var);';
         } else {
             return '$tpl->getStorage()->getTemplate(' . $cname . ')->display($var);';
@@ -339,7 +340,7 @@ class Compiler
         $scope["last"] = array();
         $scope["default"] = '';
         $scope["var"] = $scope->tpl->tmpVar();
-        $scope["expr"] = $scope["var"].' = strval('.$expr.')';
+        $scope["expr"] = $scope["var"] . ' = strval(' . $expr . ')';
         // lazy init
         return '';
     }
@@ -414,15 +415,15 @@ class Compiler
     {
         self::_caseResort($scope);
         $expr = $scope["var"];
-        $code = $scope["expr"].";\n";
+        $code = $scope["expr"] . ";\n";
         $default = $scope["default"];
         foreach ($scope["case"] as $case => $content) {
-            if(is_numeric($case)) {
+            if (is_numeric($case)) {
                 $case = "'$case'";
             }
             $code .= "if($expr == $case) {\n?>$content<?php\n} else";
         }
-        $code .= " {\n?>$default<?php\n}\nunset(".$scope["var"].")";
+        $code .= " {\n?>$default<?php\n}\nunset(" . $scope["var"] . ")";
         return $code;
     }
 
@@ -478,12 +479,12 @@ class Compiler
             throw new InvalidUsageException("Tags {extends} can not be nested");
         }
         $cname = $tpl->parsePlainArg($tokens, $name);
-        if($name) {
+        if ($name) {
             $tpl->extends = $name;
         } else {
             $tpl->dynamic_extends = $cname;
         }
-        if(!$tpl->extend_body) {
+        if (!$tpl->extend_body) {
             $tpl->addPostCompile(__CLASS__ . "::extendBody");
             $tpl->extend_body = true;
         }
@@ -496,18 +497,18 @@ class Compiler
      */
     public static function extendBody($tpl, &$body)
     {
-        if($tpl->dynamic_extends) {
-            if(!$tpl->ext_stack) {
+        if ($tpl->dynamic_extends) {
+            if (!$tpl->ext_stack) {
                 $tpl->ext_stack[] = $tpl->getName();
             }
-            foreach($tpl->ext_stack as &$t) {
+            foreach ($tpl->ext_stack as &$t) {
                 $stack[] = "'$t'";
             }
             $stack[] = $tpl->dynamic_extends;
-            $body = '<?php $tpl->getStorage()->display(array('.implode(', ', $stack).'), $var); ?>';
+            $body = '<?php $tpl->getStorage()->display(array(' . implode(', ', $stack) . '), $var); ?>';
         } else {
             $child = $tpl;
-            while($child && $child->extends) {
+            while ($child && $child->extends) {
                 $parent = $tpl->extend($child->extends);
                 $child = $parent->extends ? $parent : false;
             }
@@ -549,7 +550,7 @@ class Compiler
             $scope->tpl->_compatible = true;
         }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
-        if(!$name) {
+        if (!$name) {
             throw new \RuntimeException("Only static names for blocks allowed");
         }
         $scope["name"] = $name;
@@ -565,27 +566,27 @@ class Compiler
         $tpl = $scope->tpl;
         $name = $scope["name"];
 
-        if(isset($tpl->blocks[$name])) { // block defined
-            $block = &$tpl->blocks[$name];
-            if($block['use_parent']) {
+        if (isset($tpl->blocks[$name])) { // block defined
+            $block = & $tpl->blocks[$name];
+            if ($block['use_parent']) {
                 $parent = $scope->getContent();
 
-                $block['block'] = str_replace($block['use_parent']." ?>", "?>".$parent, $block['block']);
+                $block['block'] = str_replace($block['use_parent'] . " ?>", "?>" . $parent, $block['block']);
             }
-            if(!$block["import"]) {  // not from {use} - redefine block
+            if (!$block["import"]) { // not from {use} - redefine block
                 $scope->replaceContent($block["block"]);
                 return;
-            } elseif($block["import"] != $tpl->getName()) { // tag {use} was in another template
+            } elseif ($block["import"] != $tpl->getName()) { // tag {use} was in another template
                 $tpl->blocks[$scope["name"]]["import"] = false;
                 $scope->replaceContent($block["block"]);
             }
         }
 
         $tpl->blocks[$scope["name"]] = array(
-            "from"        => $tpl->getName(),
-            "import"      => false,
-            "use_parent"  => $scope["use_parent"],
-            "block"       => $scope->getContent()
+            "from" => $tpl->getName(),
+            "import" => false,
+            "use_parent" => $scope["use_parent"],
+            "block" => $scope->getContent()
         );
     }
 
@@ -599,8 +600,8 @@ class Compiler
     public static function tagParent($tokens, Scope $scope)
     {
         $block_scope = $scope->tpl->getParentScope('block');
-        if(!$block_scope['use_parent']) {
-            $block_scope['use_parent'] = "/* %%parent#".mt_rand(0, 1e6)."%% */";
+        if (!$block_scope['use_parent']) {
+            $block_scope['use_parent'] = "/* %%parent#" . mt_rand(0, 1e6) . "%% */";
         }
         return $block_scope['use_parent'];
     }

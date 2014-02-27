@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+
 use Fenom, Fenom\TestCase;
 
 class ExtendsTest extends TestCase
@@ -34,7 +35,8 @@ Content of the footer";
     /**
      * @group testAutoExtends
      */
-    public function testAutoExtends() {
+    public function testAutoExtends()
+    {
         $result = "Before header
 Child 2 header
 Before body
@@ -49,7 +51,8 @@ Footer from use";
         ), array()));
     }
 
-    public function testStaticExtendLevel1() {
+    public function testStaticExtendLevel1()
+    {
         $result = "Before header
 Content of the header
 Before body
@@ -59,7 +62,8 @@ Content of the footer";
         $this->assertSame($result, $this->fenom->fetch('extends/static/child.1.tpl', array()));
     }
 
-    public function testStaticExtendLevel3() {
+    public function testStaticExtendLevel3()
+    {
         $result = "Before header
 Child 2 header
 Before body
@@ -69,7 +73,8 @@ Footer from use";
         $this->assertSame($result, $this->fenom->fetch('extends/static/child.3.tpl', array()));
     }
 
-    public function testAutoAndStaticExtend() {
+    public function testAutoAndStaticExtend()
+    {
         $result = "Before header
 Child 2 header
 Before body
@@ -83,7 +88,8 @@ Footer from use";
         ), array()));
     }
 
-    public function testStaticExtendNested() {
+    public function testStaticExtendNested()
+    {
         $result = "Before body
 
     Before header
@@ -94,7 +100,8 @@ Footer from use";
         $this->assertSame($result, $this->fenom->fetch('extends/static/nested/child.1.tpl', array()));
     }
 
-    public function testDynamicExtendLevel2() {
+    public function testDynamicExtendLevel2()
+    {
         $result = "Before header
 Child 2 header
 Before body
@@ -104,7 +111,8 @@ Footer from use";
         $this->assertSame($result, $this->fenom->fetch('extends/dynamic/child.2.tpl', array()));
     }
 
-    public function testDynamicExtendLevel3() {
+    public function testDynamicExtendLevel3()
+    {
         $result = "Before header
 Child 2 header
 Before body
@@ -114,7 +122,8 @@ Footer from use";
         $this->assertSame($result, $this->fenom->fetch('extends/dynamic/child.3.tpl', array()));
     }
 
-    public function testDynamicExtendLevel4() {
+    public function testDynamicExtendLevel4()
+    {
         $result = "Before header
 Child 2 header
 Before body

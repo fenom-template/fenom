@@ -8,6 +8,7 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
+
 use Fenom;
 
 /**

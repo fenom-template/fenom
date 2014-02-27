@@ -20,7 +20,8 @@ class FenomTest extends \Fenom\TestCase
         );
     }
 
-    public function testCreating() {
+    public function testCreating()
+    {
         $time = $this->tpl('temp.tpl', 'Template 1 a');
         $fenom = new Fenom($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'));
         $fenom->setCompileDir(FENOM_RESOURCES . '/compile');
@@ -32,7 +33,8 @@ class FenomTest extends \Fenom\TestCase
         $fenom->clearAllCompiles();
     }
 
-    public function testFactory() {
+    public function testFactory()
+    {
         $time = $this->tpl('temp.tpl', 'Template 1 a');
         $fenom = Fenom::factory($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'), FENOM_RESOURCES . '/compile', Fenom::AUTO_ESCAPE);
         $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
@@ -166,7 +168,8 @@ class FenomTest extends \Fenom\TestCase
     /**
      * @group tag-filter
      */
-    public function testTagFilter() {
+    public function testTagFilter()
+    {
         $tags = array();
         $punit = $this;
         $this->fenom->addTagFilter(function ($text, $tpl) use (&$tags, $punit) {
@@ -180,20 +183,23 @@ class FenomTest extends \Fenom\TestCase
         $this->assertSame(array('var $a', '/var', '$b'), $tags);
     }
 
-    public function testAddInlineCompilerSmart() {
-        $this->fenom->addCompilerSmart('SayA','TestTags');
+    public function testAddInlineCompilerSmart()
+    {
+        $this->fenom->addCompilerSmart('SayA', 'TestTags');
         $this->tpl('inline_compiler.tpl', 'I just {SayA}.');
         $this->assertSame('I just Say A.', $this->fenom->fetch('inline_compiler.tpl', array()));
     }
 
-    public function testAddBlockCompilerSmart() {
+    public function testAddBlockCompilerSmart()
+    {
         $this->fenom->addBlockCompilerSmart('SayBlock', 'TestTags', array('SaySomething'), array('SaySomething'));
         $this->tpl('block_compiler.tpl', '{SayBlock} and {SaySomething}. It is all, {/SayBlock}');
         $this->assertSame('Start saying and say blah-blah-blah. It is all, Stop saying',
             $this->fenom->fetch('block_compiler.tpl', array()));
     }
 
-    public function testAddFunctions() {
+    public function testAddFunctions()
+    {
         $this->fenom->setOptions(Fenom::DENY_NATIVE_FUNCS);
         $this->assertFalse($this->fenom->isAllowedFunction('substr'));
         $this->fenom->addAllowedFunctions(array('substr'));
@@ -202,22 +208,26 @@ class FenomTest extends \Fenom\TestCase
 }
 
 
+class TestTags
+{
 
-class TestTags {
-
-    public static function tagSayA() {
+    public static function tagSayA()
+    {
         return 'echo "Say A"';
     }
 
-    public static function SayBlockOpen() {
+    public static function SayBlockOpen()
+    {
         return 'echo "Start saying"';
     }
 
-    public static function tagSaySomething() {
+    public static function tagSaySomething()
+    {
         return 'echo "say blah-blah-blah"';
     }
 
-    public static function SayBlockClose() {
+    public static function SayBlockClose()
+    {
         return 'echo "Stop saying"';
     }
 }

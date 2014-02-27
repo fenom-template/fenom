@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+
 use Fenom;
 use Fenom\TestCase;
 
@@ -103,7 +104,8 @@ class ProviderTest extends TestCase
         ), $list);
     }
 
-    public function testRm() {
+    public function testRm()
+    {
         $this->assertTrue(is_dir(FENOM_RESOURCES . '/template/sub'));
         Provider::rm(FENOM_RESOURCES . '/template/sub');
         $this->assertFalse(is_dir(FENOM_RESOURCES . '/template/sub'));

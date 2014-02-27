@@ -302,7 +302,7 @@ class Fenom
      */
     public function setCompileDir($dir)
     {
-        if(!is_writable($dir)) {
+        if (!is_writable($dir)) {
             throw new LogicException("Cache directory $dir is not writable");
         }
         $this->_compile_dir = $dir;
@@ -630,7 +630,7 @@ class Fenom
     public function addProvider($scm, \Fenom\ProviderInterface $provider, $compile_path = null)
     {
         $this->_providers[$scm] = $provider;
-        if($compile_path) {
+        if ($compile_path) {
             $this->_compiles[$scm] = $compile_path;
         }
         return $this;
@@ -738,7 +738,7 @@ class Fenom
     public function getTemplate($template, $options = 0)
     {
         $options |= $this->_options;
-        if(is_array($template)) {
+        if (is_array($template)) {
             $key = dechex($options) . "@" . implode(",", $template);
         } else {
             $key = dechex($options) . "@" . $template;
@@ -805,12 +805,12 @@ class Fenom
      */
     private function _getCacheName($tpl, $options)
     {
-        if(is_array($tpl)) {
+        if (is_array($tpl)) {
             $hash = implode(".", $tpl) . ":" . $options;
-            foreach($tpl as &$t) {
+            foreach ($tpl as &$t) {
                 $t = str_replace(":", "_", basename($t));
             }
-            return implode("~", $tpl).".".sprintf("%x.%x.php", crc32($hash), strlen($hash));
+            return implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
         } else {
             $hash = $tpl . ":" . $options;
             return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
@@ -829,12 +829,12 @@ class Fenom
     public function compile($tpl, $store = true, $options = 0)
     {
         $options = $this->_options | $options;
-        if(is_string($tpl)) {
+        if (is_string($tpl)) {
             $template = $this->getRawTemplate()->load($tpl);
         } else {
             $template = $this->getRawTemplate()->load($tpl[0], false);
             unset($tpl[0]);
-            foreach($tpl as $t) {
+            foreach ($tpl as $t) {
                 $template->extend($t);
             }
         }

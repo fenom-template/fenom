@@ -1,10 +1,19 @@
 <?php
 namespace Fenom;
+
 use Fenom\Error\UnexpectedTokenException;
 use Fenom\Tokenizer;
 
 class TokenizerTest extends \PHPUnit_Framework_TestCase
 {
+
+    public function testGetName()
+    {
+        $this->assertSame('T_DOUBLE_COLON', Tokenizer::getName(T_DOUBLE_COLON));
+        $this->assertSame('++', Tokenizer::getName('++'));
+        $this->assertSame('T_STRING', Tokenizer::getName(array(308, 'all', "", 1, "T_STRING")));
+        $this->assertNull(Tokenizer::getName(false));
+    }
 
     public function testTokens()
     {
@@ -66,6 +75,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($code, $tokens->getSnippetAsString(-100, 100));
         $this->assertSame('+', $tokens->getSnippetAsString(100, -100));
         $this->assertSame('sin($x)+tan($x*$t)', $tokens->getSnippetAsString(-4, 6));
+        $this->assertSame('}', $tokens->end()->current());
     }
 
     public function testSkip()

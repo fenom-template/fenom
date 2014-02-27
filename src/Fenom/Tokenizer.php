@@ -594,6 +594,8 @@ class Tokenizer
     public function end()
     {
         $this->p = $this->_max;
+        unset($this->prev, $this->curr, $this->next);
+        return $this;
     }
 
     /**

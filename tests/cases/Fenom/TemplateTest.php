@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+
 use Fenom\Template,
     Fenom,
     Fenom\Render;
@@ -74,8 +75,10 @@ class TemplateTest extends TestCase
             array('hello, {$b.3[$b.c_char]}!', $c, 'hello, Username!'),
             array('hello, {$b[3].c}!', $c, 'hello, Username!'),
             array('hello, {$b[2+1].c}!', $c, 'hello, Username!'),
+            array('hello, {$b[(2+1)].c}!', $c, 'hello, Username!'),
             array('hello, {$b[9/3].c}!', $c, 'hello, Username!'),
             array('hello, {$b[3].$c}!', $c, 'hello, Username!'),
+            array('hello, {$b[(3)].$c}!', $c, 'hello, Username!'),
             array('hello, {$b[3][$b.c_char]}!', $c, 'hello, Username!'),
             array('hello, {$b[ "m{$b.c_char}p" ]} and {$b.3[$b.c_char]}!',
                 $c, 'hello, Master and Username!'),
@@ -90,6 +93,7 @@ class TemplateTest extends TestCase
             array('hello, {$b.obj->list.a|upper}!',
                 $c, 'hello, WORLD!'),
             array('hello, {$b[ $b.obj->c ]}!', $b, 'hello, Username!'),
+            array('hello, {$b[ ( $b.obj->c ) ]}!', $b, 'hello, Username!'),
             array('hello, {$b[ "{$b.obj->c}" ]}!',
                 $b, 'hello, Username!'),
             array('hello, {"World"}!', $a, 'hello, World!'),
@@ -222,6 +226,7 @@ class TemplateTest extends TestCase
             array('If: {$a + (*6)} end', 'Fenom\Error\CompileException', "Unexpected token '*'"),
             array('If: {$a + ( 6} end', 'Fenom\Error\CompileException', "Unexpected end of expression, expect ')'"),
             array('If: {$a end', 'Fenom\Error\CompileException', "Unclosed tag in line"),
+            array('If: {!!$a}', 'Fenom\Error\CompileException', "Unexpected token '!'"),
         );
     }
 
@@ -429,6 +434,8 @@ class TemplateTest extends TestCase
         return array(
             // ?
             array('{if $a?} right {/if}', $a),
+            array('{if 1?} right {/if}', $a),
+            array('{if 0?} no way {else} right {/if}', $a),
             array('{if $unexists?} no way {else} right {/if}', $a),
             array('{if $empty.array?} no way {else} right {/if}', $a),
             array('{if $empty.int?} no way {else} right {/if}', $a),
@@ -450,11 +457,17 @@ class TemplateTest extends TestCase
             array('{$empty.double?:"empty"}', $a, "empty"),
             array('{$empty.bool?:"empty"}', $a, "empty"),
             array('{$empty.unexist?:"empty"}', $a, "empty"),
+            array('{0?:"empty"}', $a, "empty"),
             // ? ... : ....
             array('{$unexists ? "no way" : "right"}', $a),
+            array('{0 ? "no way" : "right"}', $a),
             array('{$a ? "right" : "no way"}', $a),
+            array('{1 ? "right" : "no way"}', $a),
             // !
             array('{if $a!} right {/if}', $a),
+            array('{if 1!} right {/if}', $a),
+            array('{if 0!} right {/if}', $a),
+            array('{if null!} no way {else} right  {/if}', $a),
             array('{if $unexists!} no way {else} right {/if}', $a),
             array('{if $empty.array!} right {/if}', $a),
             array('{if $empty.int!} right {/if}', $a),
@@ -470,9 +483,11 @@ class TemplateTest extends TestCase
             // ! ... : ...
             array('{$unexists ! "no way" : "right"}', $a),
             array('{$a ! "right" : "no way"}', $a),
+            array('{1 ! "right" : "no way"}', $a),
             // !: ...
             array('{$unexists !: "right"}', $a),
             array('{$a !: "right"}', $a, '1'),
+            array('{1 !: "right"}', $a, '1'),
         );
     }
 
@@ -646,6 +661,7 @@ class TemplateTest extends TestCase
         return array(
             array('Layers: {foreach $list as $e} block1 {if 1} {foreachelse} {/if} {/foreach} end', 'Fenom\Error\CompileException', "Unexpected tag 'foreachelse' (this tag can be used with 'foreach')"),
             array('Layers: {foreach $list as $e} block1 {if 1}  {/foreach} {/if} end', 'Fenom\Error\CompileException', "Unexpected closing of the tag 'foreach'"),
+            array('Layers: {blah} end', 'Fenom\Error\CompileException', "Unexpected tag 'blah'"),
             array('Layers: {for $a=4 to=6} block1 {if 1} {forelse} {/if} {/for} end', 'Fenom\Error\CompileException', "Unexpected tag 'forelse' (this tag can be used with 'for')"),
             array('Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end', 'Fenom\Error\CompileException', "Unexpected closing of the tag 'for'"),
             array('Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end', 'Fenom\Error\CompileException', "Unexpected tag 'case' (this tag can be used with 'switch')"),
@@ -679,6 +695,7 @@ class TemplateTest extends TestCase
             array('{if $one is not 1} block1 {else} block2 {/if}', 'block2'),
             array('{if $one is not 2} block1 {else} block2 {/if}', 'block1'),
             array('{if $one is $one} block1 {else} block2 {/if}', 'block1'),
+            array('{if $bool is true} block1 {else} block2 {/if}', 'block1'),
             array('{if $float is float} block1 {else} block2 {/if}', 'block1'),
             array('{if $float is not float} block1 {else} block2 {/if}', 'block2'),
             array('{if $obj is object} block1 {else} block2 {/if}', 'block1'),
@@ -744,7 +761,19 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerConcat() {
+    public static function providerInOperatorInvalid()
+    {
+        return array(
+            array('{$one not all 3}', 'Fenom\Error\CompileException', "Unexpected token 'not'"),
+            array('{$one in all}', 'Fenom\Error\CompileException', "Unexpected token 'all'"),
+            array('{$one in string [1,2,3]}', 'Fenom\Error\CompileException', "Can not use string operation for array"),
+            array('{$one in list "blah"}', 'Fenom\Error\CompileException', "Can not use array operation for string"),
+            array('{$one in true}', 'Fenom\Error\CompileException', "Unexpected token 'true'"),
+        );
+    }
+
+    public static function providerConcat()
+    {
         return array(
             array('{"string" ~ $one ~ up("end")}', "string1END"),
             array('{"string" ~ $one++ ~ "end"}', "string1end"),
@@ -754,7 +783,8 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerAccessor() {
+    public static function providerAccessor()
+    {
         return array(
             array('{$.get.one}', 'get1'),
             array('{$.post.one}', 'post1'),
@@ -765,6 +795,7 @@ class TemplateTest extends TestCase
             array('{$.cookie.one}', 'cookie1'),
             array('{$.server.one}', 'server1'),
             array('{$.const.PHP_EOL}', PHP_EOL),
+            array('{$.const.MY}', ''),
             array('{$.version}', Fenom::VERSION),
             array('{"string"|append:"_":$.get.one}', 'string_get1'),
 
@@ -780,7 +811,16 @@ class TemplateTest extends TestCase
         );
     }
 
-    public function providerStatic() {
+    public static function providerAccessorInvalid()
+    {
+        return array(
+            array('{$.nope.one}', 'Fenom\Error\CompileException', "Unexpected token 'nope'"),
+            array('{$.get.one}', 'Fenom\Error\SecurityException', 'Accessor are disabled', Fenom::DENY_ACCESSOR),
+        );
+    }
+
+    public function providerStatic()
+    {
         return array(
             array('{Fenom\TemplateTest::multi x=3 y=4}', '12'),
             array('{Fenom\TemplateTest::multi(3,4)}', '12'),
@@ -789,7 +829,8 @@ class TemplateTest extends TestCase
         );
     }
 
-    public function providerStaticInvalid() {
+    public function providerStaticInvalid()
+    {
         return array(
             array('{Fenom\TemplateTest::multi x=3 y=4}', 'Fenom\Error\SecurityException', "Static methods are disabled", Fenom::DENY_STATICS),
             array('{Fenom\TemplateTest::multi(3,4)}', 'Fenom\Error\SecurityException', "Static methods are disabled", Fenom::DENY_STATICS),
@@ -809,12 +850,20 @@ class TemplateTest extends TestCase
             var_dump($this->fenom->compileCode('{Fenom\TemplateTest::multi(3,4)}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
-            while($e->getPrevious()) {
+            while ($e->getPrevious()) {
                 $e = $e->getPrevious();
-                print_r("\n\n".$e->getMessage() . "\n" . $e->getTraceAsString());
+                print_r("\n\n" . $e->getMessage() . "\n" . $e->getTraceAsString());
             }
         }
         exit;
+    }
+
+    /**
+     * @dataProvider providerScalars
+     */
+    public function testScalars($code, $result)
+    {
+        $this->exec("{" . $code . "}", $this->values, $result);
     }
 
     /**
@@ -1049,6 +1098,15 @@ class TemplateTest extends TestCase
     }
 
     /**
+     * @group in_operator_invalid
+     * @dataProvider providerInOperatorInvalid
+     */
+    public function testInOperatorInvalid($code, $exception, $message, $options = 0)
+    {
+        $this->execError($code, $exception, $message, $options);
+    }
+
+    /**
      * @dataProvider providerConcat
      */
     public function testConcat($code, $result)
@@ -1066,6 +1124,15 @@ class TemplateTest extends TestCase
     }
 
     /**
+     * @group accessor
+     * @dataProvider providerAccessorInvalid
+     */
+    public function testAccessorInvalid($code, $exception, $message, $options = 0)
+    {
+        $this->execError($code, $exception, $message, $options);
+    }
+
+    /**
      * @group static
      * @dataProvider providerStatic
      */
@@ -1074,7 +1141,8 @@ class TemplateTest extends TestCase
         $this->exec($code, self::getVars(), $result, true);
     }
 
-    public static function multi($x, $y = 42) {
+    public static function multi($x, $y = 42)
+    {
         return $x * $y;
     }
 
