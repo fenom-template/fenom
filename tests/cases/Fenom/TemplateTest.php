@@ -1141,6 +1141,12 @@ class TemplateTest extends TestCase
         $this->exec($code, self::getVars(), $result, true);
     }
 
+    /**
+     * Helper
+     * @param $x
+     * @param int $y
+     * @return mixed
+     */
     public static function multi($x, $y = 42)
     {
         return $x * $y;

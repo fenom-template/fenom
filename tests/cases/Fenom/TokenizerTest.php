@@ -11,7 +11,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertSame('T_DOUBLE_COLON', Tokenizer::getName(T_DOUBLE_COLON));
         $this->assertSame('++', Tokenizer::getName('++'));
-        $this->assertSame('T_STRING', Tokenizer::getName(array(308, 'all', "", 1, "T_STRING")));
+        $this->assertSame('T_STRING', Tokenizer::getName(array(T_STRING, 'all', "", 1, "T_STRING")));
         $this->assertNull(Tokenizer::getName(false));
     }
 
