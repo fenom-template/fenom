@@ -741,6 +741,7 @@ class Fenom
     public function getTemplate($template, $options = 0)
     {
         $options |= $this->_options;
+//        var_dump($this->_options & self::FORCE_COMPILE);
         if (is_array($template)) {
             $key = dechex($options) . "@" . implode(",", $template);
         } else {
@@ -755,6 +756,7 @@ class Fenom
                 return $tpl;
             }
         } elseif ($this->_options & self::FORCE_COMPILE) {
+
             return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
         } else {
             return $this->_storage[$key] = $this->_load($template, $options);

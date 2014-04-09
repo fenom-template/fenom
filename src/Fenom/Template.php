@@ -471,6 +471,7 @@ class Template extends Render
     {
         if (!$this->_code) {
             // evaluate template's code
+            var_dump($this->_getClosureSource(), $this->_getMacrosArray());
             eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
                 throw new CompileException("Fatal error while creating the template");
@@ -532,6 +533,7 @@ class Template extends Render
         }
         $parent = $this->_fenom->getRawTemplate()->load($tpl, false);
         $parent->blocks = & $this->blocks;
+        $parent->macros = & $this->macros;
         $parent->extended = $this->getName();
         if (!$this->ext_stack) {
             $this->ext_stack[] = $this->getName();
@@ -1379,10 +1381,10 @@ class Template extends Render
             }
         }
         if ($recursive) {
-            $body = '$tpl->getMacro("' . $name . '")->__invoke($tpl);';
             if($recursive instanceof Scope) {
                 $recursive['recursive'] = true;
             }
+            return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
         } else {
             $vars = $this->tmpVar();
             return $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
