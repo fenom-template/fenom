@@ -1,7 +1,7 @@
 Changelog
 =========
 
-## 1.5.0
+## 2.0.0
 
 - Add tag filter
 - Redesign `extends` algorithm
@@ -11,6 +11,11 @@ Changelog
 - Improve Fenom API
 - Move benchmark to another project
 - Rename `\Fenom\Compiler` to `\Fenom\Tags`
+
+### 1.4.9 (2013-04-09)
+
+- Fix #75
+- Docs++
 
 ### 1.4.8 (2013-12-01)
 

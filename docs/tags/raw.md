@@ -22,7 +22,7 @@ For functions use tag with prefix `raw:`:
 {autoescape true}
     ...
     {my_func page=5} {* escape *}
-    {raw:my_func page=5} {* unescape *}
+    {my_func:raw page=5} {* unescape *}
     ...
 {/autoescate}
 ```

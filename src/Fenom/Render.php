@@ -214,7 +214,6 @@ class Render extends \ArrayObject
      */
     public function display(array $values)
     {
-//        $this->exchangeArray($values);
         $this->_code->__invoke($values, $this);
         return $values;
     }

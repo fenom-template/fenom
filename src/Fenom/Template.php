@@ -571,11 +571,11 @@ class Template extends Render
                 return $this->out($this->parseExpr($tokens), $tokens);
             }
         } catch (InvalidUsageException $e) {
-            throw new CompileException($e->getMessage() . " in {$this} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
-            throw new SecurityException($e->getMessage() . " in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
-            throw new CompileException($e->getMessage() . " in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         }
     }
 
@@ -1282,7 +1282,7 @@ class Template extends Render
             }
 
             if (!is_string($mods)) { // dynamic modifier
-                $mods = 'call_user_func($tpl->getStorage()->getModifier("' . $mods . '"), ';
+                $mods = 'call_user_func($tpl->getStorage()->getModifier("' . $modifier . '"), ';
             } else {
                 $mods .= "(";
             }
@@ -1353,6 +1353,7 @@ class Template extends Render
         $macro = false;
         if (isset($this->macros[$name])) {
             $macro = $this->macros[$name];
+            $recursive = $macro['recursive'];
         } else {
             foreach ($this->_stack as $scope) {
                 if ($scope->name == 'macro' && $scope['name'] == $name) { // invoke recursive
@@ -1378,8 +1379,10 @@ class Template extends Render
             }
         }
         if ($recursive) {
-            $recursive['recursive'] = true;
-            return '$tpl->getMacro("' . $name . '")->__invoke(' . Compiler::toArray($args) . ', $tpl);';
+            $body = '$tpl->getMacro("' . $name . '")->__invoke($tpl);';
+            if($recursive instanceof Scope) {
+                $recursive['recursive'] = true;
+            }
         } else {
             $vars = $this->tmpVar();
             return $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .
