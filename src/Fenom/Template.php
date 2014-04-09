@@ -274,7 +274,7 @@ class Template extends Render
                         $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
 
                         if ($this->_ignore) { // check ignore
-                            if ($_tag === '/ignore') { // turn off ignore
+                            if ($_tag === '/' . $this->_ignore) { // turn off ignore
                                 $this->_ignore = false;
                             } else { // still ignore
                                 $this->_appendText($tag);
@@ -559,7 +559,7 @@ class Template extends Render
         try {
             if ($tokens->is(Tokenizer::MACRO_STRING)) {
                 if ($tokens->current() === "ignore") {
-                    $this->_ignore = true;
+                    $this->_ignore = "ignore";
                     $tokens->next();
                     return '';
                 } else {
@@ -596,7 +596,7 @@ class Template extends Render
         /** @var Scope $scope */
         $scope = array_pop($this->_stack);
         if ($scope->name !== $name) {
-            throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$scope->name}, opened on line {$scope->line})");
+            throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$scope->name}, opened in line {$scope->line})");
         }
         if ($scope->is_compiler) {
             return $scope->close($tokens);
@@ -644,12 +644,20 @@ class Template extends Render
             } else {
                 return $this->out(Compiler::smartFuncParser($static, $tokens, $this));
             }
+        } elseif($tokens->is(':')) { // parse tag options
+            do {
+                $tokens->options[ $tokens->next()->need(T_STRING)->getAndNext() ] = true;
+            } while($tokens->is(':'));
         }
 
-        if ($tag = $this->_fenom->getTag($action, $this)) { // call some function
+        if ($tag = $this->_fenom->getTag($action, $this)) {
+            if(isset($tokens->options['ignore']) && ($tag["type"] & Fenom::BLOCK_COMPILER)) {
+                $this->_ignore = $action;
+            }
             switch ($tag["type"]) {
                 case Fenom::BLOCK_COMPILER:
                     $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
+                    $scope->options = &$tokens->options;
                     $code = $scope->open($tokens);
                     if (!$scope->is_closed) {
                         array_push($this->_stack, $scope);
@@ -661,6 +669,7 @@ class Template extends Render
                     return $this->out(call_user_func($tag["parser"], $tag["function"], $tokens, $this));
                 case Fenom::BLOCK_FUNCTION:
                     $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
+                    $scope->options = &$tokens->options;
                     $scope->setFuncName($tag["function"]);
                     array_push($this->_stack, $scope);
                     $scope->escape = $this->escape;

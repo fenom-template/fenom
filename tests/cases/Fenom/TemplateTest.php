@@ -651,6 +651,7 @@ class TemplateTest extends TestCase
             array('For: {for first=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'first'"),
             array('For: {for last=$i $a=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'last'"),
             array('For: {for $a=4 to=6 unk=4} block1 {/for} end', 'Fenom\Error\CompileException', "Unknown parameter 'unk'"),
+            array('For: {for $a=4 to=6 step=0} block1 {/for} end', 'Fenom\Error\CompileException', "Invalid step value"),
             array('For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end', 'Fenom\Error\CompileException', "Improper usage of the tag {break}"),
             array('For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end', 'Fenom\Error\CompileException', "Improper usage of the tag {continue}"),
         );
@@ -847,7 +848,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{Fenom\TemplateTest::multi(3,4)}')->getBody());
+            var_dump($this->fenom->compileCode('{var:ignore $a} value {/var}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
             while ($e->getPrevious()) {

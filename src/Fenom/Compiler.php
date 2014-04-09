@@ -256,7 +256,7 @@ class Compiler
                 $condition = "$var >= {$p['to']}";
                 if ($p["last"]) $c = "($var + {$p['step']}) < {$p['to']}";
             } else {
-                throw new InvalidUsageException("Invalid step value if {for}");
+                throw new InvalidUsageException("Invalid step value");
             }
         } else {
             $condition = "({$p['step']} > 0 && $var <= {$p['to']} || {$p['step']} < 0 && $var >= {$p['to']})";
@@ -533,7 +533,7 @@ class Compiler
         if ($name) {
             $tpl->importBlocks($name);
         } else {
-            throw new InvalidUsageException('template name must be given explicitly yet');
+            throw new InvalidUsageException('Invalid template name for tag {use}');
         }
     }
 
@@ -551,7 +551,7 @@ class Compiler
         }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
         if (!$name) {
-            throw new \RuntimeException("Only static names for blocks allowed");
+            throw new \RuntimeException("Invalid block name");
         }
         $scope["name"] = $name;
         $scope["use_parent"] = false;
@@ -837,7 +837,7 @@ class Compiler
 
         $tpl->parsePlainArg($tokens, $name);
         if (!$name) {
-            throw new InvalidUsageException("Invalid usage tag {import}");
+            throw new InvalidUsageException("Invalid template name");
         }
         if ($tokens->is(T_AS)) {
             $alias = $tokens->next()->get(Tokenizer::MACRO_STRING);

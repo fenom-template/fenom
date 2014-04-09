@@ -298,17 +298,18 @@ Outputs
 {/foreach}
 ```
 
-### Tag's compile options
+### Tag options
 
 |    name | code | type  | description  |
 | ------- | ---- | ----- | ------------ |
 |   strip |    s | block |              |
-|   atrim |    a | any   |              |
-|     raw |    r | any   |              |
-|   btrim |    b | any   |              |
-|  ignore |    i | block |              |
+|   ltrim |    l | any   |              |
+|   rtrim |    r | any   |              |
 |    trim |    t | any   |              |
+|     raw |    a | any   |              |
+|  escape |    e | any   |              |
+|  ignore |    i | block |              |
 
 ```smarty
-{script:s:a:r:b:i:t} ... {/script}
+{script:ignore} ... {/script}
 ```

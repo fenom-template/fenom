@@ -1,7 +1,7 @@
 Fenom - Template Engine for PHP
 ===============================
 
-> Composer package: `{"fenom/fenom": "1.*"}`. See on [Packagist.org](https://packagist.org/packages/fenom/fenom)
+> Composer package: `{"fenom/fenom": "2.*"}`. See on [Packagist.org](https://packagist.org/packages/fenom/fenom)
 
 [![Latest Stable Version](https://poser.pugx.org/fenom/fenom/v/stable.png)](https://packagist.org/packages/fenom/fenom)
 [![Build Status](https://travis-ci.org/bzick/fenom.png?branch=master)](https://travis-ci.org/bzick/fenom)
@@ -12,7 +12,6 @@ Fenom - Template Engine for PHP
 * Simple [syntax](./docs/syntax.md)
 * [Fast](./docs/benchmark.md)
 * [Secure](./docs/settings.md)
-* Simple
 * [Flexible](./docs/ext/extensions.md)
 * [Lightweight](./docs/benchmark.md#stats)
 * [Powerful](./docs/readme.md)

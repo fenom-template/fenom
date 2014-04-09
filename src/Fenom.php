@@ -37,7 +37,8 @@ class Fenom
     const DISABLE_CACHE = 0x400;
     const FORCE_VERIFY = 0x800;
     const AUTO_TRIM = 0x1000; // reserved
-    const DENY_STATICS = 0x2000; // reserved
+    const DENY_STATICS = 0x2000;
+    const AUTO_STRIP = 0x4000; // reserved
 
     /* @deprecated */
     const DENY_INLINE_FUNCS = 0x20;
@@ -556,6 +557,7 @@ class Fenom
     }
 
     /**
+     * Modifier autoloader
      * @param string $modifier
      * @param Fenom\Template $template
      * @return bool
@@ -582,7 +584,8 @@ class Fenom
     }
 
     /**
-     * @param $tag
+     * Tags autoloader
+     * @param string $tag
      * @param Fenom\Template $template
      * @return bool
      */
