@@ -1254,6 +1254,7 @@ class Template extends Render
         $macro = false;
         if (isset($this->macros[$name])) {
             $macro = $this->macros[$name];
+            $recursive = $macro['recursive'];
         } else {
             foreach ($this->_stack as $scope) {
                 if ($scope->name == 'macro' && $scope['name'] == $name) { // invoke recursive
@@ -1280,8 +1281,10 @@ class Template extends Render
         }
         $n = sprintf('%u_%d', crc32($this->_name), $this->i++);
         if ($recursive) {
-            $recursive['recursive'] = true;
             $body = '$tpl->getMacro("' . $name . '")->__invoke($tpl);';
+            if($recursive instanceof Scope) {
+                $recursive['recursive'] = true;
+            }
         } else {
             $body = '?>' . $macro["body"] . '<?php';
         }

@@ -517,6 +517,7 @@ class Compiler
                 $t->_extended = true;
                 $tpl->addDepend($t);
                 $t->_compatible = & $tpl->_compatible;
+                $t->macros = & $tpl->macros;
                 $t->blocks = & $tpl->blocks;
                 $t->compile();
                 if ($t->uses) {
