@@ -36,13 +36,6 @@ class Template extends Render
     const DENY_MODS = 2;
 
     /**
-     * Template was extended
-     */
-    const DYNAMIC_EXTEND = 0x1000;
-    const EXTENDED = 0x2000;
-    const DYNAMIC_BLOCK = 0x4000;
-
-    /**
      * @var int shared counter
      */
     public $i = 1;
@@ -55,10 +48,6 @@ class Template extends Render
      * @var array of blocks
      */
     public $blocks = array();
-
-//    public $uses = array();
-
-//    public $parents = array();
 
     /**
      * Escape outputs value
@@ -471,7 +460,6 @@ class Template extends Render
     {
         if (!$this->_code) {
             // evaluate template's code
-            var_dump($this->_getClosureSource(), $this->_getMacrosArray());
             eval("\$this->_code = " . $this->_getClosureSource() . ";\n\$this->_macros = " . $this->_getMacrosArray() . ';');
             if (!$this->_code) {
                 throw new CompileException("Fatal error while creating the template");
