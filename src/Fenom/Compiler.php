@@ -476,7 +476,7 @@ class Compiler
         if ($tpl->extends) {
             throw new InvalidUsageException("Only one {extends} allowed");
         } elseif ($tpl->getStackSize()) {
-            throw new InvalidUsageException("Tags {extends} can not be nested");
+            throw new InvalidUsageException("Tag {extends} can not be nested");
         }
         $cname = $tpl->parsePlainArg($tokens, $name);
         if ($name) {
