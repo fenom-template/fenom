@@ -31,7 +31,7 @@ class MacrosTest extends TestCase
         ');
 
         $this->tpl("import_custom.tpl", '
-        {macro minus(x, y)}
+        {macro minus($x, $y)}
             new minus macros
         {/macro}
         {import [plus, minus] from "math.tpl" as math}
@@ -88,6 +88,9 @@ class MacrosTest extends TestCase
         $this->assertSame('Imp: x + y = 3 , x - y - z = 3', Modifier::strip($tpl->fetch(array()), true));
     }
 
+    /**
+     * @group importCustom
+     */
     public function testImportCustom()
     {
         $tpl = $this->fenom->compile('import_custom.tpl');

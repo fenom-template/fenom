@@ -889,7 +889,12 @@ class Compiler
             return;
         }
         while ($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
-            $args[] = $param = $tokens->getAndNext();
+            $param = $tokens->current();
+            if($tokens->is(T_VARIABLE)) {
+                $param = ltrim($param, '$');
+            }
+            $tokens->next();
+            $args[] = $param;
             if ($tokens->is('=')) {
                 $tokens->next();
                 if ($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
