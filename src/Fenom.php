@@ -260,6 +260,39 @@ class Fenom
     );
 
     /**
+     * List of tests
+     * @see https://github.com/bzick/fenom/blob/develop/docs/operators.md#test-operator
+     * @var array
+     */
+    protected $_tests = array(
+        'integer' => 'is_int(%s)',
+        'int' => 'is_int(%s)',
+        'float' => 'is_float(%s)',
+        'double' => 'is_float(%s)',
+        'decimal' => 'is_float(%s)',
+        'string' => 'is_string(%s)',
+        'bool' => 'is_bool(%s)',
+        'boolean' => 'is_bool(%s)',
+        'number' => 'is_numeric(%s)',
+        'numeric' => 'is_numeric(%s)',
+        'scalar' => 'is_scalar(%s)',
+        'object' => 'is_object(%s)',
+        'callable' => 'is_callable(%s)',
+        'callback' => 'is_callable(%s)',
+        'array' => 'is_array(%s)',
+        'iterable' => '\Fenom\Modifier::isIterable(%s)',
+        'const' => 'defined(%s)',
+        'template' => '$tpl->getStorage()->templateExists(%s)',
+        'empty' => 'empty(%s)',
+        'set' => 'isset(%s)',
+        '_empty' => '!%s', // for none variable
+        '_set' => '(%s !== null)', // for none variable
+        'odd' => '(%s & 1)',
+        'even' => '!(%s %% 2)',
+        'third' => '!(%s %% 3)'
+    );
+
+    /**
      * Just factory
      *
      * @param string|Fenom\ProviderInterface $source path to templates or custom provider
@@ -536,6 +569,24 @@ class Fenom
     {
         $this->_allowed_funcs = $this->_allowed_funcs + array_flip($funcs);
         return $this;
+    }
+
+    /**
+     * Add custom test
+     * @param string $name test name
+     * @param string $code test PHP code. Code may contains placeholder %s, which will be replaced by test-value. For example: is_callable(%s)
+     */
+    public function addTest($name, $code) {
+        $this->_tests[$name] = $code;
+    }
+
+    /**
+     * Get test code by name
+     * @param string $name
+     * @return string|bool
+     */
+    public function getTest($name) {
+        return isset($this->_tests[$name]) ? $this->_tests[$name] : false;
     }
 
     /**

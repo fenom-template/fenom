@@ -109,34 +109,6 @@ class Template extends Render
      */
     private $_crc = 0;
 
-    protected static $_tests = array(
-        'integer' => 'is_int(%s)',
-        'int' => 'is_int(%s)',
-        'float' => 'is_float(%s)',
-        'double' => 'is_float(%s)',
-        'decimal' => 'is_float(%s)',
-        'string' => 'is_string(%s)',
-        'bool' => 'is_bool(%s)',
-        'boolean' => 'is_bool(%s)',
-        'number' => 'is_numeric(%s)',
-        'numeric' => 'is_numeric(%s)',
-        'scalar' => 'is_scalar(%s)',
-        'object' => 'is_object(%s)',
-        'callable' => 'is_callable(%s)',
-        'callback' => 'is_callable(%s)',
-        'array' => 'is_array(%s)',
-        'iterable' => '\Fenom\Modifier::isIterable(%s)',
-        'const' => 'defined(%s)',
-        'template' => '$tpl->getStorage()->templateExists(%s)',
-        'empty' => 'empty(%s)',
-        'set' => 'isset(%s)',
-        '_empty' => '!%s', // for none variable
-        '_set' => '(%s !== null)', // for none variable
-        'odd' => '(%s & 1)',
-        'even' => '!(%s %% 2)',
-        'third' => '!(%s %% 3)'
-    );
-
     /**
      * @param Fenom $fenom Template storage
      * @param int $options
@@ -609,6 +581,7 @@ class Template extends Render
      */
     public function parseAct(Tokenizer $tokens)
     {
+        $options = array();
         if ($tokens->is(Tokenizer::MACRO_STRING)) {
             $action = $tokens->getAndNext();
         } else {
@@ -632,38 +605,35 @@ class Template extends Render
             if ($tokens->is("(")) {
                 return $this->out($this->parseExpr($tokens->seek($p)));
             } else {
-                return $this->out(Compiler::smartFuncParser($static, $tokens, $this));
+                return $this->out(Compiler::smartFuncParser($static, $tokens, new Tag($static, $this)));
             }
         } elseif($tokens->is(':')) { // parse tag options
             do {
-                $tokens->options[ $tokens->next()->need(T_STRING)->getAndNext() ] = true;
+                $options[ $tokens->next()->need(T_STRING)->getAndNext() ] = true;
             } while($tokens->is(':'));
         }
 
         if ($tag = $this->_fenom->getTag($action, $this)) {
-            if(isset($tokens->options['ignore']) && ($tag["type"] & Fenom::BLOCK_COMPILER)) {
-                $this->_ignore = $action;
+            if($tag["type"] == Fenom::BLOCK_COMPILER || $tag["type"] == Fenom::BLOCK_FUNCTION) {
+                $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
+            } else {
+                $scope = new Tag($action, $this);
             }
+            $scope->options = $options;
             switch ($tag["type"]) {
                 case Fenom::BLOCK_COMPILER:
-                    $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
-                    $scope->options = &$tokens->options;
                     $code = $scope->open($tokens);
                     if (!$scope->is_closed) {
                         array_push($this->_stack, $scope);
                     }
                     return $code;
                 case Fenom::INLINE_COMPILER:
-                    return call_user_func($tag["parser"], $tokens, $this);
+                    return call_user_func($tag["parser"], $tokens, $scope);
                 case Fenom::INLINE_FUNCTION:
-                    return $this->out(call_user_func($tag["parser"], $tag["function"], $tokens, $this));
+                    return $this->out(call_user_func($tag["parser"], $tag["function"], $tokens, $scope));
                 case Fenom::BLOCK_FUNCTION:
-                    $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
-                    $scope->options = &$tokens->options;
                     $scope->setFuncName($tag["function"]);
                     array_push($this->_stack, $scope);
-                    $scope->escape = $this->escape;
-                    $this->escape = false;
                     return $scope->open($tokens);
                 default:
                     throw new \LogicException("Unknown function type");
@@ -1052,10 +1022,10 @@ class Template extends Render
             if (!$variable && ($action == "set" || $action == "empty")) {
                 $action = "_$action";
                 $tokens->next();
-                return $invert . sprintf(self::$_tests[$action], $value);
-            } elseif (isset(self::$_tests[$action])) {
+                return $invert . sprintf($this->_fenom->getTest($action), $value);
+            } elseif ($test = $this->_fenom->getTest($action)) {
                 $tokens->next();
-                return $invert . sprintf(self::$_tests[$action], $value);
+                return $invert . sprintf($test, $value);
             } elseif ($tokens->isSpecialVal()) {
                 $tokens->next();
                 return '(' . $value . ' ' . $equal . '= ' . $action . ')';

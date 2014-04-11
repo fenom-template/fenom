@@ -15,15 +15,16 @@ function myBlockFunc($params, $content)
     return "Block:" . $params["name"] . ':' . trim($content) . ':Block';
 }
 
-function myCompiler(Fenom\Tokenizer $tokenizer, Fenom\Template $tpl)
+function myCompiler(Fenom\Tokenizer $tokenizer, Fenom\Tag $tag)
 {
-    $p = $tpl->parseParams($tokenizer);
+    $p = $tag->tpl->parseParams($tokenizer);
     return 'echo "PHP_VERSION: ".PHP_VERSION." (for ".' . $p["name"] . '.")";';
 }
 
 function myBlockCompilerOpen(Fenom\Tokenizer $tokenizer, Fenom\Scope $scope)
 {
-    return myCompiler($tokenizer, $scope->tpl);
+    $p = $scope->tpl->parseParams($tokenizer);
+    return 'echo "PHP_VERSION: ".PHP_VERSION." (for ".' . $p["name"] . '.")";';
 }
 
 function myBlockCompilerClose(Fenom\Tokenizer $tokenizer, Fenom\Scope $scope)

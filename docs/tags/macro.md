@@ -23,9 +23,9 @@ Tag {macro} [RU]
 Во время рекурсивного вызова используйте суффикс macro что бы обратиться к текущему макросу:
 
 ```smarty
-{macro plus(x, y, z=0)}
+{macro plus($x, $y, $z=0)}
     ...
-    {macro.plus x=2 y=4}
+    {macro.plus x=2 y=$y}
     ...
 {/macro}
 ```

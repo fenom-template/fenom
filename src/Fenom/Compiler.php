@@ -27,12 +27,13 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
      * @throws \LogicException
      * @return string
      */
-    public static function tagInclude(Tokenizer $tokens, Template $tpl)
+    public static function tagInclude(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         $name = false;
         $cname = $tpl->parsePlainArg($tokens, $name);
         $p = $tpl->parseParams($tokens);
@@ -60,12 +61,13 @@ class Compiler
     /**
      * Tag {insert ...}
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @return string
+     * @param Tag $tag
      * @throws Error\InvalidUsageException
+     * @return string
      */
-    public static function tagInsert(Tokenizer $tokens, Template $tpl)
+    public static function tagInsert(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         $tpl->parsePlainArg($tokens, $name);
         if (!$name) {
             throw new InvalidUsageException("Tag {insert} accept only static template name");
@@ -466,13 +468,13 @@ class Compiler
     /**
      * Dispatch {extends} tag
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws \RuntimeException
+     * @param Tag $tag
      * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function tagExtends(Tokenizer $tokens, Template $tpl)
+    public static function tagExtends(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         if ($tpl->extends) {
             throw new InvalidUsageException("Only one {extends} allowed");
         } elseif ($tpl->getStackSize()) {
@@ -520,12 +522,13 @@ class Compiler
     /**
      * Tag {use ...}
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws InvalidUsageException
+     * @param Tag $tag
+     * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function tagUse(Tokenizer $tokens, Template $tpl)
+    public static function tagUse(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         if ($tpl->getStackSize()) {
             throw new InvalidUsageException("Tag {use} can not be nested");
         }
@@ -623,24 +626,24 @@ class Compiler
      * @static
      * @param mixed $function
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
      * @return string
      */
-    public static function stdFuncParser($function, Tokenizer $tokens, Template $tpl)
+    public static function stdFuncParser($function, Tokenizer $tokens, Tag $tag)
     {
-        return "$function(" . self::toArray($tpl->parseParams($tokens)) . ', $tpl)';
+        return "$function(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)';
     }
 
     /**
      * Smart function parser
      *
      * @static
-     * @param                    $function
+     * @param string $function
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
      * @return string
      */
-    public static function smartFuncParser($function, Tokenizer $tokens, Template $tpl)
+    public static function smartFuncParser($function, Tokenizer $tokens, Tag $tag)
     {
         if (strpos($function, "::")) {
             list($class, $method) = explode("::", $function, 2);
@@ -649,7 +652,7 @@ class Compiler
             $ref = new \ReflectionFunction($function);
         }
         $args = array();
-        $params = $tpl->parseParams($tokens);
+        $params = $tag->tpl->parseParams($tokens);
         foreach ($ref->getParameters() as $param) {
             if (isset($params[$param->getName()])) {
                 $args[] = $params[$param->getName()];
@@ -767,12 +770,13 @@ class Compiler
      * Tag {cycle}
      *
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
+     * @throws Error\InvalidUsageException
      * @return string
-     * @throws InvalidUsageException
      */
-    public static function tagCycle(Tokenizer $tokens, Template $tpl)
+    public static function tagCycle(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         if ($tokens->is("[")) {
             $exp = $tpl->parseArray($tokens);
         } else {
@@ -806,13 +810,14 @@ class Compiler
      * Import macros from templates
      *
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws UnexpectedTokenException
-     * @throws InvalidUsageException
+     * @param Tag $tag
+     * @throws Error\UnexpectedTokenException
+     * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function tagImport(Tokenizer $tokens, Template $tpl)
+    public static function tagImport(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         $import = array();
         if ($tokens->is('[')) {
             $tokens->next();
@@ -933,29 +938,15 @@ class Compiler
      * Output value as is, without escaping
      *
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws InvalidUsageException
+     * @param Tag $tag
      * @return string
      */
-    public static function tagRaw(Tokenizer $tokens, Template $tpl)
+    public static function tagRaw(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         $escape = (bool)$tpl->escape;
         $tpl->escape = false;
-        if ($tokens->is(':')) {
-            $func = $tokens->getNext(Tokenizer::MACRO_STRING);
-            $tag = $tpl->getStorage()->getTag($func, $tpl);
-            if ($tag["type"] == \Fenom::INLINE_FUNCTION) {
-                $code = $tpl->parseAct($tokens);
-//            } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
-//                $code = $tpl->parseAct($tokens);
-//                $tpl->getLastScope()->escape = false;
-//                return $code;
-            } else {
-                throw new InvalidUsageException("Raw mode allow for expressions or functions");
-            }
-        } else {
-            $code = $tpl->out($tpl->parseExpr($tokens));
-        }
+        $code = $tpl->out($tpl->parseExpr($tokens));
         $tpl->escape = $escape;
         return $code;
     }
