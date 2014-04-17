@@ -5,7 +5,7 @@ For installation use [composer](http://getcomposer.org). Add in your `composer.j
 ```json
 {
     "require": {
-        "fenom/fenom": "1.*"
+        "fenom/fenom": "2.*"
     }
 }
 ```
