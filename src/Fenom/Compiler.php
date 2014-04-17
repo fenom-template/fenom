@@ -83,10 +83,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function ifOpen(Tokenizer $tokens, Scope $scope)
+    public static function ifOpen(Tokenizer $tokens, Tag $scope)
     {
         $scope["else"] = false;
         return 'if(' . $scope->tpl->parseExpr($tokens) . ') {';
@@ -97,11 +97,11 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      * @return string
      */
-    public static function tagElseIf(Tokenizer $tokens, Scope $scope)
+    public static function tagElseIf(Tokenizer $tokens, Tag $scope)
     {
         if ($scope["else"]) {
             throw new InvalidUsageException('Incorrect use of the tag {elseif}');
@@ -113,12 +113,10 @@ class Compiler
      * Tag {else}
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
-     * @internal param $
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function tagElse(Tokenizer $tokens, Scope $scope)
+    public static function tagElse(Tokenizer $tokens, Tag $scope)
     {
         $scope["else"] = true;
         return '} else {';
@@ -129,12 +127,12 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws UnexpectedTokenException
      * @throws InvalidUsageException
      * @return string
      */
-    public static function foreachOpen(Tokenizer $tokens, Scope $scope)
+    public static function foreachOpen(Tokenizer $tokens, Tag $scope)
     {
         $p = array("index" => false, "first" => false, "last" => false);
         $key = null;
@@ -201,10 +199,10 @@ class Compiler
      * Tag {foreachelse}
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function foreachElse($tokens, Scope $scope)
+    public static function foreachElse($tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = $scope["else"] = true;
         return " {$scope['after']} } } else {";
@@ -215,10 +213,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function foreachClose($tokens, Scope $scope)
+    public static function foreachClose($tokens, Tag $scope)
     {
         if ($scope["else"]) {
             return '}';
@@ -230,12 +228,12 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws Error\UnexpectedTokenException
      * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function forOpen(Tokenizer $tokens, Scope $scope)
+    public static function forOpen(Tokenizer $tokens, Tag $scope)
     {
         $p = array("index" => false, "first" => false, "last" => false, "step" => 1, "to" => false, "max" => false, "min" => false);
         $scope["after"] = $before = $body = array();
@@ -291,10 +289,10 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function forElse(Tokenizer $tokens, Scope $scope)
+    public static function forElse(Tokenizer $tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = true;
         $scope["else"] = true;
@@ -304,10 +302,10 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function forClose($tokens, Scope $scope)
+    public static function forClose($tokens, Tag $scope)
     {
         if ($scope["else"]) {
             return '}';
@@ -319,10 +317,10 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function whileOpen(Tokenizer $tokens, Scope $scope)
+    public static function whileOpen(Tokenizer $tokens, Tag $scope)
     {
         return 'while(' . $scope->tpl->parseExpr($tokens) . ') {';
     }
@@ -332,10 +330,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function switchOpen(Tokenizer $tokens, Scope $scope)
+    public static function switchOpen(Tokenizer $tokens, Tag $scope)
     {
         $expr = $scope->tpl->parseExpr($tokens);
         $scope["case"] = array();
@@ -349,9 +347,9 @@ class Compiler
 
     /**
      * Resort cases for {switch}
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    private static function _caseResort(Scope $scope)
+    private static function _caseResort(Tag $scope)
     {
         $content = $scope->cutContent();
         if ($scope["last"] === false) {
@@ -372,10 +370,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function tagCase(Tokenizer $tokens, Scope $scope)
+    public static function tagCase(Tokenizer $tokens, Tag $scope)
     {
         self::_caseResort($scope);
         do {
@@ -395,10 +393,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function tagDefault($tokens, Scope $scope)
+    public static function tagDefault($tokens, Tag $scope)
     {
         self::_caseResort($scope);
         $scope["last"] = false;
@@ -410,10 +408,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function switchClose(Tokenizer $tokens, Scope $scope)
+    public static function switchClose(Tokenizer $tokens, Tag $scope)
     {
         self::_caseResort($scope);
         $expr = $scope["var"];
@@ -434,11 +432,11 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      * @return string
      */
-    public static function tagContinue($tokens, Scope $scope)
+    public static function tagContinue($tokens, Tag $scope)
     {
         if (empty($scope["no-continue"])) {
             return 'continue;';
@@ -452,11 +450,11 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      * @return string
      */
-    public static function tagBreak($tokens, Scope $scope)
+    public static function tagBreak($tokens, Tag $scope)
     {
         if (empty($scope["no-break"])) {
             return 'break;';
@@ -543,11 +541,11 @@ class Compiler
     /**
      * Tag {block ...}
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws \RuntimeException
      * @return string
      */
-    public static function tagBlockOpen(Tokenizer $tokens, Scope $scope)
+    public static function tagBlockOpen(Tokenizer $tokens, Tag $scope)
     {
         if ($scope->level > 0) {
             $scope->tpl->_compatible = true;
@@ -562,9 +560,9 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    public static function tagBlockClose($tokens, Scope $scope)
+    public static function tagBlockClose($tokens, Tag $scope)
     {
         $tpl = $scope->tpl;
         $name = $scope["name"];
@@ -597,10 +595,10 @@ class Compiler
      * Tag {parent}
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function tagParent($tokens, Scope $scope)
+    public static function tagParent($tokens, Tag $scope)
     {
         $block_scope = $scope->tpl->getParentScope('block');
         if (!$block_scope['use_parent']) {
@@ -624,32 +622,30 @@ class Compiler
      * Standard function parser
      *
      * @static
-     * @param mixed $function
      * @param Tokenizer $tokens
      * @param Tag $tag
      * @return string
      */
-    public static function stdFuncParser($function, Tokenizer $tokens, Tag $tag)
+    public static function stdFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        return "$function(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)';
+        return $tag->escape($tag->callback."(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
     }
 
     /**
      * Smart function parser
      *
      * @static
-     * @param string $function
      * @param Tokenizer $tokens
      * @param Tag $tag
      * @return string
      */
-    public static function smartFuncParser($function, Tokenizer $tokens, Tag $tag)
+    public static function smartFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        if (strpos($function, "::")) {
-            list($class, $method) = explode("::", $function, 2);
+        if (strpos($tag->callback, "::")) {
+            list($class, $method) = explode("::", $tag->callback, 2);
             $ref = new \ReflectionMethod($class, $method);
         } else {
-            $ref = new \ReflectionFunction($function);
+            $ref = new \ReflectionFunction($tag->callback);
         }
         $args = array();
         $params = $tag->tpl->parseParams($tokens);
@@ -662,7 +658,7 @@ class Compiler
                 $args[] = var_export($param->getDefaultValue(), true);
             }
         }
-        return "$function(" . implode(", ", $args) . ')';
+        return $tag->escape($tag->callback."(" . implode(", ", $args) . ')');
     }
 
     /**
@@ -670,12 +666,12 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      * @return string
      */
-    public static function stdFuncOpen(Tokenizer $tokens, Scope $scope)
+    public static function stdFuncOpen(Tokenizer $tokens, Tag $tag)
     {
-        $scope["params"] = self::toArray($scope->tpl->parseParams($tokens));
+        $tag["params"] = self::toArray($tag->tpl->parseParams($tokens));
         return 'ob_start();';
     }
 
@@ -684,12 +680,12 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      * @return string
      */
-    public static function stdFuncClose($tokens, Scope $scope)
+    public static function stdFuncClose($tokens, Tag $tag)
     {
-        return $scope["function"] . '(' . $scope["params"] . ', ob_get_clean(), $tpl)';
+        return $tag->escape($tag->callback . '(' . $tag["params"] . ', ob_get_clean(), $tpl)');
     }
 
     /**
@@ -709,14 +705,14 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function varOpen(Tokenizer $tokens, Scope $scope)
+    public static function varOpen(Tokenizer $tokens, Tag $scope)
     {
         $var = $scope->tpl->parseVariable($tokens);
         if ($tokens->is('=')) { // inline tag {var ...}
-            $scope->is_closed = true;
+            $scope->close();
             $tokens->next();
             if ($tokens->is("[")) {
                 return $var . '=' . $scope->tpl->parseArray($tokens);
@@ -736,10 +732,10 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function varClose(Tokenizer $tokens, Scope $scope)
+    public static function varClose(Tokenizer $tokens, Tag $scope)
     {
         return $scope["name"] . '=' . $scope["value"] . ';';
     }
@@ -747,10 +743,10 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function filterOpen(Tokenizer $tokens, Scope $scope)
+    public static function filterOpen(Tokenizer $tokens, Tag $scope)
     {
         $scope["filter"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
         return "ob_start();";
@@ -758,10 +754,10 @@ class Compiler
 
     /**
      * @param $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function filterClose($tokens, Scope $scope)
+    public static function filterClose($tokens, Tag $scope)
     {
         return "echo " . $scope["filter"] . ";";
     }
@@ -877,10 +873,10 @@ class Compiler
      * Define macro
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      */
-    public static function macroOpen(Tokenizer $tokens, Scope $scope)
+    public static function macroOpen(Tokenizer $tokens, Tag $scope)
     {
         $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
         $scope["recursive"] = false;
@@ -923,9 +919,9 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    public static function macroClose(Tokenizer $tokens, Scope $scope)
+    public static function macroClose(Tokenizer $tokens, Tag $scope)
     {
         if ($scope["recursive"]) {
             $scope["macro"]["recursive"] = true;
@@ -943,19 +939,14 @@ class Compiler
      */
     public static function tagRaw(Tokenizer $tokens, Tag $tag)
     {
-        $tpl = $tag->tpl;
-        $escape = (bool)$tpl->escape;
-        $tpl->escape = false;
-        $code = $tpl->out($tpl->parseExpr($tokens));
-        $tpl->escape = $escape;
-        return $code;
+        return 'echo '.$tag->tpl->parseExpr($tokens);
     }
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    public static function autoescapeOpen(Tokenizer $tokens, Scope $scope)
+    public static function autoescapeOpen(Tokenizer $tokens, Tag $scope)
     {
         $boolean = ($tokens->get(T_STRING) == "true" ? true : false);
         $scope["escape"] = $scope->tpl->escape;
@@ -965,9 +956,9 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    public static function autoescapeClose(Tokenizer $tokens, Scope $scope)
+    public static function autoescapeClose(Tokenizer $tokens, Tag $scope)
     {
         $scope->tpl->escape = $scope["escape"];
     }

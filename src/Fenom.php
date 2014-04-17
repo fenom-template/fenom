@@ -17,14 +17,12 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '1.5';
-
+    const VERSION = '2.0';
     /* Actions */
     const INLINE_COMPILER = 1;
-    const BLOCK_COMPILER = 2;
-    const INLINE_FUNCTION = 3;
-    const BLOCK_FUNCTION = 4;
-    const MODIFIER = 5;
+    const BLOCK_COMPILER = 5;
+    const INLINE_FUNCTION = 2;
+    const BLOCK_FUNCTION = 7;
 
     /* Options */
     const DENY_ACCESSOR = 0x8;

@@ -65,8 +65,12 @@ class MacrosTest extends TestCase
 //            $this->fenom->compile("macro_recursive.tpl")->display([]);
 //            $this->fenom->flush();
 //            var_dump($this->fenom->fetch("macro_recursive.tpl", []));
-            var_dump($this->fenom->compile("macro_recursive_import.tpl")->display(array()));
-            var_dump($this->fenom->display("macro_recursive_import.tpl", array()));
+            var_dump($this->fenom->compileCode('{macro factorial(num)}
+            {if $num}
+                {$num} {macro.factorial num=$num-1} {$num}
+            {/if}
+        {/macro}')->getBody());
+//            var_dump($this->fenom->display("macro_recursive_import.tpl", array()));
         } catch (\Exception $e) {
             var_dump($e->getMessage() . ": " . $e->getTraceAsString());
         }
@@ -109,6 +113,9 @@ class MacrosTest extends TestCase
         $this->assertSame('a: x + y = 3 , x - y - z = 3 , new minus macros .', Modifier::strip($tpl->fetch(array()), true));
     }
 
+    /**
+     * @group macro-recursive
+     */
     public function testRecursive()
     {
         $this->fenom->compile('macro_recursive.tpl');

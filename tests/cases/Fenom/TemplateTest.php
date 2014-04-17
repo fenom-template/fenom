@@ -823,7 +823,7 @@ class TemplateTest extends TestCase
     public function providerStatic()
     {
         return array(
-            array('{Fenom\TemplateTest::multi x=3 y=4}', '12'),
+//            array('{Fenom\TemplateTest::multi x=3 y=4}', '12'),
             array('{Fenom\TemplateTest::multi(3,4)}', '12'),
             array('{12 + Fenom\TemplateTest::multi(3,4)}', '24'),
             array('{12 + 3|Fenom\TemplateTest::multi:4}', '24'),
@@ -848,7 +848,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{var:ignore $a} value {/var}')->getBody());
+            var_dump($this->fenom->compileCode('{$a}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
             while ($e->getPrevious()) {

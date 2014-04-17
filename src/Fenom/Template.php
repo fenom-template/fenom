@@ -34,7 +34,6 @@ class Template extends Render
      * Disable modifier parser.
      */
     const DENY_MODS = 2;
-
     /**
      * @var int shared counter
      */
@@ -81,7 +80,7 @@ class Template extends Render
 
     /**
      * Call stack
-     * @var Scope[]
+     * @var Tag[]
      */
     private $_stack = array();
 
@@ -442,7 +441,7 @@ class Template extends Render
     }
 
     /**
-     * Add depends from template
+     * Add depends
      * @param Render $tpl
      */
     public function addDepend(Render $tpl)
@@ -530,7 +529,7 @@ class Template extends Render
             } elseif ($tokens->is('/')) {
                 return $this->parseEndTag($tokens);
             } else {
-                return $this->out($this->parseExpr($tokens), $tokens);
+                return $this->out($this->parseExpr($tokens));
             }
         } catch (InvalidUsageException $e) {
             throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
@@ -555,18 +554,12 @@ class Template extends Render
         if (!$this->_stack) {
             throw new TokenizeException("Unexpected closing of the tag '$name', the tag hasn't been opened");
         }
-        /** @var Scope $scope */
-        $scope = array_pop($this->_stack);
-        if ($scope->name !== $name) {
-            throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$scope->name}, opened in line {$scope->line})");
+        /** @var Tag $tag */
+        $tag = array_pop($this->_stack);
+        if ($tag->name !== $name) {
+            throw new TokenizeException("Unexpected closing of the tag '$name' (expecting closing of the tag {$tag->name}, opened in line {$tag->line})");
         }
-        if ($scope->is_compiler) {
-            return $scope->close($tokens);
-        } else {
-            $code = $this->out($scope->close($tokens));
-            $scope->tpl->escape = $scope->escape; // restore escape option
-            return $code;
-        }
+        return $tag->end($tokens);
     }
 
     /**
@@ -581,63 +574,30 @@ class Template extends Render
      */
     public function parseAct(Tokenizer $tokens)
     {
-        $options = array();
-        if ($tokens->is(Tokenizer::MACRO_STRING)) {
-            $action = $tokens->getAndNext();
-        } else {
-            return $this->out($this->parseExpr($tokens)); // may be math and/or boolean expression
-        }
-        if ($tokens->is("(", T_NAMESPACE, T_DOUBLE_COLON) && !$tokens->isWhiteSpaced()) { // just invoke function or static method
+        $action = $tokens->get(Tokenizer::MACRO_STRING);
+        $tokens->next();
+        if ($tokens->is("(", T_DOUBLE_COLON, T_NS_SEPARATOR) && !$tokens->isWhiteSpaced()) { // just invoke function or static method
             $tokens->back();
             return $this->out($this->parseExpr($tokens));
-        }
-
-        if ($tokens->is('.')) {
+        } elseif ($tokens->is('.')) {
             $name = $tokens->skip()->get(Tokenizer::MACRO_STRING);
             if ($action !== "macro") {
                 $name = $action . "." . $name;
             }
             return $this->parseMacroCall($tokens, $name);
-        } elseif ($tokens->is(T_DOUBLE_COLON, T_NS_SEPARATOR)) { // static method call
-            $tokens->back();
-            $p = $tokens->p;
-            $static = $this->parseStatic($tokens);
-            if ($tokens->is("(")) {
-                return $this->out($this->parseExpr($tokens->seek($p)));
-            } else {
-                return $this->out(Compiler::smartFuncParser($static, $tokens, new Tag($static, $this)));
-            }
-        } elseif($tokens->is(':')) { // parse tag options
-            do {
-                $options[ $tokens->next()->need(T_STRING)->getAndNext() ] = true;
-            } while($tokens->is(':'));
         }
-
-        if ($tag = $this->_fenom->getTag($action, $this)) {
-            if($tag["type"] == Fenom::BLOCK_COMPILER || $tag["type"] == Fenom::BLOCK_FUNCTION) {
-                $scope = new Scope($action, $this, $this->_line, $tag, count($this->_stack), $this->_body);
-            } else {
-                $scope = new Tag($action, $this);
+        if ($info = $this->_fenom->getTag($action, $this)) {
+            $tag = new Tag($action, $this, $info, $this->_body);
+            if($tokens->is(':')) { // parse tag options
+                do {
+                    $tag->setOption($tokens->next()->need(T_STRING)->getAndNext());
+                } while($tokens->is(':'));
             }
-            $scope->options = $options;
-            switch ($tag["type"]) {
-                case Fenom::BLOCK_COMPILER:
-                    $code = $scope->open($tokens);
-                    if (!$scope->is_closed) {
-                        array_push($this->_stack, $scope);
-                    }
-                    return $code;
-                case Fenom::INLINE_COMPILER:
-                    return call_user_func($tag["parser"], $tokens, $scope);
-                case Fenom::INLINE_FUNCTION:
-                    return $this->out(call_user_func($tag["parser"], $tag["function"], $tokens, $scope));
-                case Fenom::BLOCK_FUNCTION:
-                    $scope->setFuncName($tag["function"]);
-                    array_push($this->_stack, $scope);
-                    return $scope->open($tokens);
-                default:
-                    throw new \LogicException("Unknown function type");
+            $code = $tag->start($tokens);
+            if (!$tag->isClosed()) {
+                array_push($this->_stack, $tag);
             }
+            return $code;
         }
 
         for ($j = $i = count($this->_stack) - 1; $i >= 0; $i--) { // call function's internal tag
@@ -650,6 +610,14 @@ class Template extends Render
         } else {
             throw new TokenizeException("Unexpected tag '$action'");
         }
+    }
+
+    /**
+     * Get current template line
+     * @return int
+     */
+    public function getLine() {
+        return $this->_line;
     }
 
     /**
@@ -836,7 +804,7 @@ class Template extends Render
     }
 
     /**
-     * Parse variable name: $a, $a.b, $a.b[c]
+     * Parse variable name: $a, $a.b, $a.b['c']
      * @param Tokenizer $tokens
      * @param $var
      * @return string
@@ -1339,7 +1307,7 @@ class Template extends Render
             }
         }
         if ($recursive) {
-            if($recursive instanceof Scope) {
+            if($recursive instanceof Tag) {
                 $recursive['recursive'] = true;
             }
             return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
