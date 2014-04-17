@@ -148,7 +148,7 @@ class Tag extends \ArrayObject
         if ($this->_close) {
             return call_user_func($this->_close, $tokenizer, $this);
         } else {
-            throw new \LogicException("Сan not use a inline tag {$this->name} as a block");
+            throw new \LogicException("Can not use a inline tag {$this->name} as a block");
         }
     }
 
