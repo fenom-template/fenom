@@ -588,10 +588,10 @@ class Template extends Render
         }
         if ($info = $this->_fenom->getTag($action, $this)) {
             $tag = new Tag($action, $this, $info, $this->_body);
-            if($tokens->is(':')) { // parse tag options
+            if ($tokens->is(':')) { // parse tag options
                 do {
                     $tag->setOption($tokens->next()->need(T_STRING)->getAndNext());
-                } while($tokens->is(':'));
+                } while ($tokens->is(':'));
             }
             $code = $tag->start($tokens);
             if (!$tag->isClosed()) {
@@ -616,7 +616,8 @@ class Template extends Render
      * Get current template line
      * @return int
      */
-    public function getLine() {
+    public function getLine()
+    {
         return $this->_line;
     }
 
@@ -1307,10 +1308,10 @@ class Template extends Render
             }
         }
         if ($recursive) {
-            if($recursive instanceof Tag) {
+            if ($recursive instanceof Tag) {
                 $recursive['recursive'] = true;
             }
-            return '$tpl->getMacro("' . $name . '")->__invoke('.Compiler::toArray($args).', $tpl);';
+            return '$tpl->getMacro("' . $name . '")->__invoke(' . Compiler::toArray($args) . ', $tpl);';
         } else {
             $vars = $this->tmpVar();
             return $vars . ' = $var; $var = ' . Compiler::toArray($args) . ';' . PHP_EOL . '?>' .

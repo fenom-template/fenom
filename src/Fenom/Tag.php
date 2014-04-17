@@ -10,10 +10,11 @@
 namespace Fenom;
 
 
-class Tag extends \ArrayObject {
+class Tag extends \ArrayObject
+{
     const COMPILER = 1;
-    const FUNC     = 2;
-    const BLOCK    = 4;
+    const FUNC = 2;
+    const BLOCK = 4;
 
     /**
      * @var Template
@@ -34,36 +35,53 @@ class Tag extends \ArrayObject {
     private $_tags = array();
     private $_floats = array();
 
+    /**
+     * Create tag entity
+     * @param string $name the tag name
+     * @param Template $tpl current template
+     * @param string $info tag's information
+     * @param string $body template's code
+     */
     public function __construct($name, Template $tpl, $info, &$body)
     {
         $this->tpl = $tpl;
         $this->name = $name;
         $this->line = $tpl->getLine();
         $this->level = $tpl->getStackSize();
-        $this->_body = &$body;
+        $this->_body = & $body;
         $this->_offset = strlen($body);
         $this->_type = $info["type"];
 
-        if($this->_type & self::BLOCK) {
+        if ($this->_type & self::BLOCK) {
             $this->_open = $info["open"];
             $this->_close = $info["close"];
             $this->_tags = isset($info["tags"]) ? $info["tags"] : array();
             $this->_floats = isset($info["float_tags"]) ? $info["float_tags"] : array();
             $this->_closed = false;
-        } else  {
+        } else {
             $this->_open = $info["parser"];
         }
 
-        if($this->_type & self::FUNC) {
+        if ($this->_type & self::FUNC) {
             $this->callback = $info["function"];
         }
     }
 
-    public function setOption($option) {
+    /**
+     * Set tag option
+     * @param string $option
+     */
+    public function setOption($option)
+    {
 
     }
 
-    public function isClosed() {
+    /**
+     * Check, if the tag closed
+     * @return bool
+     */
+    public function isClosed()
+    {
         return $this->_closed;
     }
 
@@ -124,17 +142,21 @@ class Tag extends \ArrayObject {
      */
     public function end($tokenizer)
     {
-        if($this->_closed) {
+        if ($this->_closed) {
             throw new \LogicException("Tag {$this->name} already closed");
         }
-        if($this->_close) {
+        if ($this->_close) {
             return call_user_func($this->_close, $tokenizer, $this);
         } else {
             throw new \LogicException("Сan not use a inline tag {$this->name} as a block");
         }
     }
 
-    public function close() {
+    /**
+     * Forcefully close the tag
+     */
+    public function close()
+    {
         $this->_closed = true;
     }
 
@@ -173,28 +195,33 @@ class Tag extends \ArrayObject {
         $this->_body .= $new_content;
     }
 
-    public function escape($code) {
-
+    public function escape($code)
+    {
         return $this->tpl->out($code);
     }
 
-    public function optLtrim() {
+    public function optLtrim()
+    {
 
     }
 
-    public function optRtrim() {
+    public function optRtrim()
+    {
 
     }
 
-    public function optTrim() {
+    public function optTrim()
+    {
 
     }
 
-    public function optRaw() {
+    public function optRaw()
+    {
 
     }
 
-    public function optEscape() {
+    public function optEscape()
+    {
 
     }
 }

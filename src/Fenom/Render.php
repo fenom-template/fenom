@@ -202,7 +202,7 @@ class Render extends \ArrayObject
     public function getMacro($name)
     {
         if (empty($this->_macros[$name])) {
-            throw new \RuntimeException('macro '.$name.' not found');
+            throw new \RuntimeException('macro ' . $name . ' not found');
         }
         return $this->_macros[$name];
     }

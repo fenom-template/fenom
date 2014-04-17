@@ -574,7 +574,8 @@ class Fenom
      * @param string $name test name
      * @param string $code test PHP code. Code may contains placeholder %s, which will be replaced by test-value. For example: is_callable(%s)
      */
-    public function addTest($name, $code) {
+    public function addTest($name, $code)
+    {
         $this->_tests[$name] = $code;
     }
 
@@ -583,7 +584,8 @@ class Fenom
      * @param string $name
      * @return string|bool
      */
-    public function getTest($name) {
+    public function getTest($name)
+    {
         return isset($this->_tests[$name]) ? $this->_tests[$name] : false;
     }
 

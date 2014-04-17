@@ -628,7 +628,7 @@ class Compiler
      */
     public static function stdFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        return $tag->escape($tag->callback."(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
+        return $tag->escape($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
     }
 
     /**
@@ -658,7 +658,7 @@ class Compiler
                 $args[] = var_export($param->getDefaultValue(), true);
             }
         }
-        return $tag->escape($tag->callback."(" . implode(", ", $args) . ')');
+        return $tag->escape($tag->callback . "(" . implode(", ", $args) . ')');
     }
 
     /**
@@ -891,7 +891,7 @@ class Compiler
         }
         while ($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
             $param = $tokens->current();
-            if($tokens->is(T_VARIABLE)) {
+            if ($tokens->is(T_VARIABLE)) {
                 $param = ltrim($param, '$');
             }
             $tokens->next();
@@ -939,7 +939,7 @@ class Compiler
      */
     public static function tagRaw(Tokenizer $tokens, Tag $tag)
     {
-        return 'echo '.$tag->tpl->parseExpr($tokens);
+        return 'echo ' . $tag->tpl->parseExpr($tokens);
     }
 
     /**
