@@ -302,14 +302,15 @@ Outputs
 
 |    name | code | type  | description  |
 | ------- | ---- | ----- | ------------ |
-|   strip |    s | block |              |
-|   ltrim |    l | any   |              |
-|   rtrim |    r | any   |              |
-|    trim |    t | any   |              |
-|     raw |    a | any   |              |
-|  escape |    e | any   |              |
-|  ignore |    i | block |              |
+|   strip |    s | block | remove any multi-whitespaces |
+|   ltrim |    l | any   | remove spaces left of the tag  |
+|   rtrim |    r | any   | remove spaces right of the tag |
+|    trim |    t | any   | remove spaces near tag |
+|     raw |    a | any   | ignore escape option |
+|  escape |    e | any   | force escape |
+|  ignore |    i | block | ignore Fenom syntax |
 
 ```smarty
 {script:ignore} ... {/script}
+{foreach:ignore:strip ...} ... {/foreach}
 ```
