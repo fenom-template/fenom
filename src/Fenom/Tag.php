@@ -16,15 +16,20 @@ class Tag extends \ArrayObject
     const FUNC = 2;
     const BLOCK = 4;
 
+
+    const LTRIM = 1;
+    const RTRIM = 2;
+
     /**
      * @var Template
      */
     public $tpl;
     public $name;
-    public $options;
+    public $options = array();
     public $line = 0;
     public $level = 0;
     public $callback;
+    public $escape;
 
     private $_offset = 0;
     private $_closed = true;
@@ -34,6 +39,7 @@ class Tag extends \ArrayObject
     private $_close;
     private $_tags = array();
     private $_floats = array();
+    private $_changed = array();
 
     /**
      * Create tag entity
@@ -51,6 +57,7 @@ class Tag extends \ArrayObject
         $this->_body = & $body;
         $this->_offset = strlen($body);
         $this->_type = $info["type"];
+        $this->escape = $tpl->getOptions() & \Fenom::AUTO_ESCAPE;
 
         if ($this->_type & self::BLOCK) {
             $this->_open = $info["open"];
@@ -70,10 +77,48 @@ class Tag extends \ArrayObject
     /**
      * Set tag option
      * @param string $option
+     * @throws \RuntimeException
      */
-    public function setOption($option)
+    public function tagOption($option)
     {
+        if(method_exists($this, 'opt'.$option)) {
+            $this->options[] = $option;
+        } else {
+            throw new \RuntimeException("Unknown tag option $option");
+        }
+    }
 
+    /**
+     * Rewrite template option for tag. When tag will be closed option will be reverted.
+     * @param int $option option constant
+     * @param bool $value true — add option, false — remove option
+     */
+    public function setOption($option, $value) {
+        $actual = (bool)($this->tpl->getOptions() & $option);
+        if($actual != $value) {
+            $this->_changed[$option] = $actual;
+            $this->tpl->setOption(\Fenom::AUTO_ESCAPE, $value);
+        }
+    }
+
+    /**
+     * Restore the option
+     * @param int $option
+     */
+    public function restore($option)
+    {
+        if(isset($this->_changed[$option])) {
+            $this->tpl->setOption($option, $this->_changed[$option]);
+            unset($this->_changed[$option]);
+        }
+    }
+
+    public function restoreAll()
+    {
+        foreach($this->_changed as $option => $value) {
+            $this->tpl->setOption($option, $this->_changed[$option]);
+            unset($this->_changed[$option]);
+        }
     }
 
     /**
@@ -93,6 +138,10 @@ class Tag extends \ArrayObject
      */
     public function start($tokenizer)
     {
+        foreach($this->options as $option) {
+            $option = 'opt'.$option;
+            $this->$option();
+        }
         return call_user_func($this->_open, $tokenizer, $this);
     }
 
@@ -146,7 +195,15 @@ class Tag extends \ArrayObject
             throw new \LogicException("Tag {$this->name} already closed");
         }
         if ($this->_close) {
-            return call_user_func($this->_close, $tokenizer, $this);
+            foreach($this->options as $option) {
+                $option = 'opt'.$option.'end';
+                if(method_exists($this, $option)) {
+                    $this->$option();
+                }
+            }
+            $code = call_user_func($this->_close, $tokenizer, $this);
+            $this->restoreAll();
+            return $code;
         } else {
             throw new \LogicException("Can not use a inline tag {$this->name} as a block");
         }
@@ -195,33 +252,23 @@ class Tag extends \ArrayObject
         $this->_body .= $new_content;
     }
 
-    public function escape($code)
+    /**
+     * Generate output code
+     * @param string $code
+     * @return string
+     */
+    public function out($code)
     {
-        return $this->tpl->out($code);
-    }
-
-    public function optLtrim()
-    {
-
-    }
-
-    public function optRtrim()
-    {
-
-    }
-
-    public function optTrim()
-    {
-
-    }
-
-    public function optRaw()
-    {
-
+        return $this->tpl->out($code, $this->escape);
     }
 
     public function optEscape()
     {
+        $this->escape = true;
+    }
 
+    public function optRaw()
+    {
+        $this->escape = false;
     }
 }

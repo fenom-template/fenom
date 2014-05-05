@@ -848,7 +848,7 @@ class TemplateTest extends TestCase
     public function _testSandbox()
     {
         try {
-            var_dump($this->fenom->compileCode('{$a}')->getBody());
+            var_dump($this->fenom->setOptions(0)->compileCode("{autoescape true}{test_block_function:raw}{\$html}{/test_block_function}{/autoescape}")->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
             while ($e->getPrevious()) {

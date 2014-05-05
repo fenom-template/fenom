@@ -628,7 +628,7 @@ class Compiler
      */
     public static function stdFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        return $tag->escape($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
+        return $tag->out($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
     }
 
     /**
@@ -658,7 +658,7 @@ class Compiler
                 $args[] = var_export($param->getDefaultValue(), true);
             }
         }
-        return $tag->escape($tag->callback . "(" . implode(", ", $args) . ')');
+        return $tag->out($tag->callback . "(" . implode(", ", $args) . ')');
     }
 
     /**
@@ -672,6 +672,7 @@ class Compiler
     public static function stdFuncOpen(Tokenizer $tokens, Tag $tag)
     {
         $tag["params"] = self::toArray($tag->tpl->parseParams($tokens));
+        $tag->setOption(\Fenom::AUTO_ESCAPE, false);
         return 'ob_start();';
     }
 
@@ -685,7 +686,8 @@ class Compiler
      */
     public static function stdFuncClose($tokens, Tag $tag)
     {
-        return $tag->escape($tag->callback . '(' . $tag["params"] . ', ob_get_clean(), $tpl)');
+        $tag->restore(\Fenom::AUTO_ESCAPE);
+        return $tag->out($tag->callback . '(' . $tag["params"] . ', ob_get_clean(), $tpl)');
     }
 
     /**
@@ -944,23 +946,19 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Tag $scope
+     * @param Tag $tag
      */
-    public static function autoescapeOpen(Tokenizer $tokens, Tag $scope)
+    public static function autoescapeOpen(Tokenizer $tokens, Tag $tag)
     {
-        $boolean = ($tokens->get(T_STRING) == "true" ? true : false);
-        $scope["escape"] = $scope->tpl->escape;
-        $scope->tpl->escape = $boolean;
+        $expected = ($tokens->get(T_STRING) == "true" ? true : false);
         $tokens->next();
+        $tag->setOption(\Fenom::AUTO_ESCAPE, $expected);
     }
 
     /**
      * @param Tokenizer $tokens
-     * @param Tag $scope
+     * @param Tag $tag
      */
-    public static function autoescapeClose(Tokenizer $tokens, Tag $scope)
-    {
-        $scope->tpl->escape = $scope["escape"];
-    }
+    public static function autoescapeClose(Tokenizer $tokens, Tag $tag) { }
 
 }

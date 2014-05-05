@@ -26,6 +26,7 @@ class Template extends Render
 {
     const VAR_NAME = '$var';
     const TPL_NAME = '$tpl';
+
     /**
      * Disable array parser.
      */
@@ -288,6 +289,19 @@ class Template extends Render
     }
 
     /**
+     * Set or unset the option
+     * @param int $option
+     * @param bool $value
+     */
+    public function setOption($option, $value) {
+        if($value) {
+            $this->_options |= $option;
+        } else {
+            $this->_options &= ~$option;
+        }
+    }
+
+    /**
      * Execute some code at loading cache
      * @param $code
      * @return void
@@ -452,12 +466,16 @@ class Template extends Render
     /**
      * Output the value
      *
-     * @param $data
+     * @param string $data
+     * @param null|bool $escape
      * @return string
      */
-    public function out($data)
+    public function out($data, $escape = null)
     {
-        if ($this->escape) {
+        if($escape === null) {
+            $escape = $this->_options & Fenom::AUTO_ESCAPE;
+        }
+        if ($escape) {
             return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8');";
         } else {
             return "echo $data;";
@@ -590,11 +608,13 @@ class Template extends Render
             $tag = new Tag($action, $this, $info, $this->_body);
             if ($tokens->is(':')) { // parse tag options
                 do {
-                    $tag->setOption($tokens->next()->need(T_STRING)->getAndNext());
+                    $tag->tagOption($tokens->next()->need(T_STRING)->getAndNext());
                 } while ($tokens->is(':'));
             }
             $code = $tag->start($tokens);
-            if (!$tag->isClosed()) {
+            if ($tag->isClosed()) {
+                $tag->restoreAll();
+            } else {
                 array_push($this->_stack, $tag);
             }
             return $code;
