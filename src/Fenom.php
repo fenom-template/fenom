@@ -790,6 +790,7 @@ class Fenom
 
     /**
      * Creates pipe-line of template's data to callback
+     * @note Method not works correctly in old PHP 5.3.*
      * @param string $template name of the template
      * @param callable $callback template's data handler
      * @param array $vars
