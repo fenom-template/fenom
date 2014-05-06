@@ -35,3 +35,7 @@ function dumpt()
     $e = new Exception();
     echo "-------\nDump trace: \n" . $e->getTraceAsString() . "\n";
 }
+
+if(PHP_VERSION_ID > 50400) {
+    function php_gte_54() {}
+}

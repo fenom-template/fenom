@@ -261,7 +261,7 @@ class FenomTest extends \Fenom\TestCase
     }
 
     /**
-     * @requires PHP >=5.4
+     * @requires function php_gte_54
      * @group pipe
      */
     public function testPipe()
