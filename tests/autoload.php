@@ -1,9 +1,7 @@
 <?php
 
-$loader = include(__DIR__ . "/../vendor/autoload.php");
-/* @var Composer\Autoload\ClassLoader $loader */
-$loader->add('Fenom', __DIR__ . '/cases');
-
+require(__DIR__ . "/../src/Fenom.php");
+Fenom::registerAutoload();
 
 define('FENOM_RESOURCES', __DIR__ . "/resources");
 
