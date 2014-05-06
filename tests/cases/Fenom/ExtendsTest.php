@@ -21,9 +21,21 @@ class ExtendsTest extends TestCase
     public static function providerExtendsInvalid()
     {
         return array(
-            array('{extends "extends/dynamic/child.3.tpl"} {extends "extends/dynamic/child.3.tpl"}', 'Fenom\Error\CompileException', "Only one {extends} allowed"),
-            array('{if true}{extends "extends/dynamic/child.3.tpl"}{/if}', 'Fenom\Error\CompileException', "Tag {extends} can not be nested"),
-            array('{if true}{use "extends/dynamic/use.tpl"}{/if}', 'Fenom\Error\CompileException', "Tag {use} can not be nested"),
+            array(
+                '{extends "extends/dynamic/child.3.tpl"} {extends "extends/dynamic/child.3.tpl"}',
+                'Fenom\Error\CompileException',
+                "Only one {extends} allowed"
+            ),
+            array(
+                '{if true}{extends "extends/dynamic/child.3.tpl"}{/if}',
+                'Fenom\Error\CompileException',
+                "Tag {extends} can not be nested"
+            ),
+            array(
+                '{if true}{use "extends/dynamic/use.tpl"}{/if}',
+                'Fenom\Error\CompileException',
+                "Tag {use} can not be nested"
+            ),
             array('{use $use_this}', 'Fenom\Error\CompileException', "Invalid template name for tag {use}"),
             array('{block $use_this}{/block}', 'Fenom\Error\CompileException', "Invalid block name"),
         );
@@ -54,12 +66,18 @@ Before body
 Child 3 content
 Before footer
 Footer from use";
-        $this->assertSame($result, $this->fenom->fetch(array(
-            'extends/auto/child.3.tpl',
-            'extends/auto/child.2.tpl',
-            'extends/auto/child.1.tpl',
-            'extends/auto/parent.tpl',
-        ), array()));
+        $this->assertSame(
+            $result,
+            $this->fenom->fetch(
+                array(
+                    'extends/auto/child.3.tpl',
+                    'extends/auto/child.2.tpl',
+                    'extends/auto/child.1.tpl',
+                    'extends/auto/parent.tpl',
+                ),
+                array()
+            )
+        );
     }
 
     public function testStaticExtendLevel1()
@@ -92,11 +110,17 @@ Before body
 Child 3 content
 Before footer
 Footer from use";
-        $this->assertSame($result, $this->fenom->fetch(array(
-            'extends/auto/child.3.tpl',
-            'extends/auto/child.2.tpl',
-            'extends/auto/static/child.1.tpl'
-        ), array()));
+        $this->assertSame(
+            $result,
+            $this->fenom->fetch(
+                array(
+                    'extends/auto/child.3.tpl',
+                    'extends/auto/child.2.tpl',
+                    'extends/auto/static/child.1.tpl'
+                ),
+                array()
+            )
+        );
     }
 
     public function testStaticExtendNested()

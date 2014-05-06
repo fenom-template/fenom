@@ -108,7 +108,7 @@ class Provider implements ProviderInterface
      */
     public function getList($extension = "tpl")
     {
-        $list = array();
+        $list     = array();
         $iterator = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator($this->_path,
                 \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS),

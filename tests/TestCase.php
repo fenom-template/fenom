@@ -12,38 +12,38 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public $fenom;
 
     public $values = array(
-        "zero" => 0,
-        "one" => 1,
-        "two" => 2,
+        "zero"  => 0,
+        "one"   => 1,
+        "two"   => 2,
         "three" => 3,
         "float" => 4.5,
-        "bool" => true,
-        0 => "empty value",
-        1 => "one value",
-        2 => "two value",
-        3 => "three value",
+        "bool"  => true,
+        0       => "empty value",
+        1       => "one value",
+        2       => "two value",
+        3       => "three value",
     );
 
     public static function getVars()
     {
         return array(
-            "zero" => 0,
-            "one" => 1,
-            "two" => 2,
+            "zero"  => 0,
+            "one"   => 1,
+            "two"   => 2,
             "three" => 3,
             "float" => 4.5,
-            "bool" => true,
-            "obj" => new \StdClass,
-            "list" => array(
-                "a" => 1,
+            "bool"  => true,
+            "obj"   => new \StdClass,
+            "list"  => array(
+                "a"   => 1,
                 "one" => 1,
-                "b" => 2,
+                "b"   => 2,
                 "two" => 2
             ),
-            0 => "empty value",
-            1 => "one value",
-            2 => "two value",
-            3 => "three value",
+            0       => "empty value",
+            1       => "one value",
+            2       => "two value",
+            3       => "three value",
         );
     }
 
@@ -56,6 +56,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         }
 
         $this->fenom = Fenom::factory(FENOM_RESOURCES . '/' . $this->template_path, FENOM_RESOURCES . '/compile');
+        $this->fenom->addProvider('persist', new Provider(FENOM_RESOURCES . '/provider'));
         $this->fenom->addModifier('dots', __CLASS__ . '::dots');
         $this->fenom->addModifier('concat', __CLASS__ . '::concat');
         $this->fenom->addModifier('append', __CLASS__ . '::append');
@@ -123,7 +124,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->fenom->setOptions($options);
         $tpl = $this->fenom->compileCode($code, "runtime.tpl");
         if ($dump) {
-            echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody() . "\n========= DUMP END =============\n";
+            echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody(
+                ) . "\n========= DUMP END =============\n";
         }
         $this->assertSame(Modifier::strip($result, true), Modifier::strip($tpl->fetch($vars), true), "Test $code");
         return $tpl;
@@ -134,7 +136,8 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->tpl($name, $code);
         $tpl = $this->fenom->getTemplate($name);
         if ($dump) {
-            echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody() . "\n========= DUMP END =============\n";
+            echo "\n========= DUMP BEGIN ===========\n" . $code . "\n--- to ---\n" . $tpl->getBody(
+                ) . "\n========= DUMP END =============\n";
         }
         $this->assertSame(Modifier::strip($result, true), Modifier::strip($tpl->fetch($vars), true), "Test tpl $name");
     }
@@ -234,7 +237,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
     public static function providerArrays()
     {
         $scalars = array();
-        $data = array(
+        $data    = array(
             array('[]', array()),
             array('[[],[]]', array(array(), array())),
         );

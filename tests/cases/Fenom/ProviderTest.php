@@ -88,7 +88,7 @@ class ProviderTest extends TestCase
         clearstatcache();
         $templates = array(
             "template1.tpl" => filemtime(FENOM_RESOURCES . '/template/template1.tpl'),
-            "unexists.tpl" => 1234567890
+            "unexists.tpl"  => 1234567890
         );
         $this->assertFalse($this->provider->verify($templates));
     }
@@ -97,11 +97,14 @@ class ProviderTest extends TestCase
     {
         $list = $this->provider->getList();
         sort($list);
-        $this->assertSame(array(
-            "sub/template3.tpl",
-            "template1.tpl",
-            "template2.tpl"
-        ), $list);
+        $this->assertSame(
+            array(
+                "sub/template3.tpl",
+                "template1.tpl",
+                "template2.tpl"
+            ),
+            $list
+        );
     }
 
     public function testRm()

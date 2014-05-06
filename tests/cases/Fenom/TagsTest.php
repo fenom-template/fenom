@@ -37,7 +37,10 @@ class TagsTest extends TestCase
      */
     public function testVarBlockModified($tpl_val, $val)
     {
-        $this->assertRender("{var \$a|low|dots}before {{$tpl_val}} after{/var}\nVar: {\$a}", "Var: " . strtolower("before " . $val . " after") . "...");
+        $this->assertRender(
+            "{var \$a|low|dots}before {{$tpl_val}} after{/var}\nVar: {\$a}",
+            "Var: " . strtolower("before " . $val . " after") . "..."
+        );
     }
 
     public function testCycle()
@@ -50,7 +53,10 @@ class TagsTest extends TestCase
      */
     public function testCycleIndex()
     {
-        $this->assertRender('{var $a=["one", "two"]}{for $i=1 to=5}{cycle $a index=$i}, {/for}', "two, one, two, one, two, ");
+        $this->assertRender(
+            '{var $a=["one", "two"]}{for $i=1 to=5}{cycle $a index=$i}, {/for}',
+            "two, one, two, one, two, "
+        );
     }
 
     /**

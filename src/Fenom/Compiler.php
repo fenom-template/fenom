@@ -33,10 +33,10 @@ class Compiler
      */
     public static function tagInclude(Tokenizer $tokens, Tag $tag)
     {
-        $tpl = $tag->tpl;
-        $name = false;
+        $tpl   = $tag->tpl;
+        $name  = false;
         $cname = $tpl->parsePlainArg($tokens, $name);
-        $p = $tpl->parseParams($tokens);
+        $p     = $tpl->parseParams($tokens);
         if ($name) {
             if ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE) {
                 $inc = $tpl->getStorage()->compile($name, false);
@@ -134,17 +134,17 @@ class Compiler
      */
     public static function foreachOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p = array("index" => false, "first" => false, "last" => false);
-        $key = null;
+        $p      = array("index" => false, "first" => false, "last" => false);
+        $key    = null;
         $before = $body = array();
         if ($tokens->is(T_VARIABLE)) {
-            $from = $scope->tpl->parseTerm($tokens);
+            $from    = $scope->tpl->parseTerm($tokens);
             $prepend = "";
         } elseif ($tokens->is('[')) {
-            $from = $scope->tpl->parseArray($tokens);
-            $uid = '$v' . $scope->tpl->i++;
+            $from    = $scope->tpl->parseArray($tokens);
+            $uid     = '$v' . $scope->tpl->i++;
             $prepend = $uid . ' = ' . $from . ';';
-            $from = $uid;
+            $from    = $uid;
         } else {
             throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
         }
@@ -153,12 +153,12 @@ class Compiler
         $value = $scope->tpl->parseVariable($tokens);
         if ($tokens->is(T_DOUBLE_ARROW)) {
             $tokens->next();
-            $key = $value;
+            $key   = $value;
             $value = $scope->tpl->parseVariable($tokens);
         }
 
         $scope["after"] = array();
-        $scope["else"] = false;
+        $scope["else"]  = false;
 
         while ($token = $tokens->key()) {
             $param = $tokens->get(T_STRING);
@@ -171,22 +171,22 @@ class Compiler
         }
 
         if ($p["index"]) {
-            $before[] = $p["index"] . ' = 0';
+            $before[]         = $p["index"] . ' = 0';
             $scope["after"][] = $p["index"] . '++';
         }
         if ($p["first"]) {
-            $before[] = $p["first"] . ' = true';
+            $before[]         = $p["first"] . ' = true';
             $scope["after"][] = $p["first"] . ' && (' . $p["first"] . ' = false )';
         }
         if ($p["last"]) {
-            $before[] = $p["last"] . ' = false';
+            $before[]     = $p["last"] . ' = false';
             $scope["uid"] = "v" . $scope->tpl->i++;
-            $before[] = '$' . $scope["uid"] . " = count($from)";
-            $body[] = 'if(!--$' . $scope["uid"] . ') ' . $p["last"] . ' = true';
+            $before[]     = '$' . $scope["uid"] . " = count($from)";
+            $body[]       = 'if(!--$' . $scope["uid"] . ') ' . $p["last"] . ' = true';
         }
 
-        $before = $before ? implode("; ", $before) . ";" : "";
-        $body = $body ? implode("; ", $body) . ";" : "";
+        $before         = $before ? implode("; ", $before) . ";" : "";
+        $body           = $body ? implode("; ", $body) . ";" : "";
         $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
         if ($key) {
             return "$prepend if($from) { $before foreach($from as $key => $value) { $body";
@@ -235,41 +235,55 @@ class Compiler
      */
     public static function forOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p = array("index" => false, "first" => false, "last" => false, "step" => 1, "to" => false, "max" => false, "min" => false);
+        $p              = array(
+            "index" => false,
+            "first" => false,
+            "last"  => false,
+            "step"  => 1,
+            "to"    => false,
+            "max"   => false,
+            "min"   => false
+        );
         $scope["after"] = $before = $body = array();
-        $i = array('', '');
-        $c = "";
-        $var = $scope->tpl->parseTerm($tokens, $is_var);
+        $i              = array('', '');
+        $c              = "";
+        $var            = $scope->tpl->parseTerm($tokens, $is_var);
         if (!$is_var) {
             throw new UnexpectedTokenException($tokens);
         }
         $tokens->get("=");
         $tokens->next();
         $val = $scope->tpl->parseExpr($tokens);
-        $p = $scope->tpl->parseParams($tokens, $p);
+        $p   = $scope->tpl->parseParams($tokens, $p);
 
         if (is_numeric($p["step"])) {
             if ($p["step"] > 0) {
                 $condition = "$var <= {$p['to']}";
-                if ($p["last"]) $c = "($var + {$p['step']}) > {$p['to']}";
+                if ($p["last"]) {
+                    $c = "($var + {$p['step']}) > {$p['to']}";
+                }
             } elseif ($p["step"] < 0) {
                 $condition = "$var >= {$p['to']}";
-                if ($p["last"]) $c = "($var + {$p['step']}) < {$p['to']}";
+                if ($p["last"]) {
+                    $c = "($var + {$p['step']}) < {$p['to']}";
+                }
             } else {
                 throw new InvalidUsageException("Invalid step value");
             }
         } else {
             $condition = "({$p['step']} > 0 && $var <= {$p['to']} || {$p['step']} < 0 && $var >= {$p['to']})";
-            if ($p["last"]) $c = "({$p['step']} > 0 && ($var + {$p['step']}) <= {$p['to']} || {$p['step']} < 0 && ($var + {$p['step']}) >= {$p['to']})";
+            if ($p["last"]) {
+                $c = "({$p['step']} > 0 && ($var + {$p['step']}) <= {$p['to']} || {$p['step']} < 0 && ($var + {$p['step']}) >= {$p['to']})";
+            }
         }
 
         if ($p["first"]) {
-            $before[] = $p["first"] . ' = true';
+            $before[]         = $p["first"] . ' = true';
             $scope["after"][] = $p["first"] . ' && (' . $p["first"] . ' = false )';
         }
         if ($p["last"]) {
             $before[] = $p["last"] . ' = false';
-            $body[] = "if($c) {$p['last']} = true";
+            $body[]   = "if($c) {$p['last']} = true";
         }
 
         if ($p["index"]) {
@@ -277,11 +291,11 @@ class Compiler
             $i[1] .= $p["index"] . '++,';
         }
 
-        $scope["else"] = false;
+        $scope["else"]      = false;
         $scope["else_cond"] = "$var==$val";
-        $before = $before ? implode("; ", $before) . ";" : "";
-        $body = $body ? implode("; ", $body) . ";" : "";
-        $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
+        $before             = $before ? implode("; ", $before) . ";" : "";
+        $body               = $body ? implode("; ", $body) . ";" : "";
+        $scope["after"]     = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
 
         return "$before for({$i[0]} $var=$val; $condition;{$i[1]} $var+={$p['step']}) { $body";
     }
@@ -295,7 +309,7 @@ class Compiler
     public static function forElse(Tokenizer $tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = true;
-        $scope["else"] = true;
+        $scope["else"]     = true;
         return " } if({$scope['else_cond']}) {";
     }
 
@@ -335,12 +349,12 @@ class Compiler
      */
     public static function switchOpen(Tokenizer $tokens, Tag $scope)
     {
-        $expr = $scope->tpl->parseExpr($tokens);
-        $scope["case"] = array();
-        $scope["last"] = array();
+        $expr             = $scope->tpl->parseExpr($tokens);
+        $scope["case"]    = array();
+        $scope["last"]    = array();
         $scope["default"] = '';
-        $scope["var"] = $scope->tpl->tmpVar();
-        $scope["expr"] = $scope["var"] . ' = strval(' . $expr . ')';
+        $scope["var"]     = $scope->tpl->tmpVar();
+        $scope["expr"]    = $scope["var"] . ' = strval(' . $expr . ')';
         // lazy init
         return '';
     }
@@ -414,8 +428,8 @@ class Compiler
     public static function switchClose(Tokenizer $tokens, Tag $scope)
     {
         self::_caseResort($scope);
-        $expr = $scope["var"];
-        $code = $scope["expr"] . ";\n";
+        $expr    = $scope["var"];
+        $code    = $scope["expr"] . ";\n";
         $default = $scope["default"];
         foreach ($scope["case"] as $case => $content) {
             if (is_numeric($case)) {
@@ -505,12 +519,12 @@ class Compiler
                 $stack[] = "'$t'";
             }
             $stack[] = $tpl->dynamic_extends;
-            $body = '<?php $tpl->getStorage()->display(array(' . implode(', ', $stack) . '), $var); ?>';
+            $body    = '<?php $tpl->getStorage()->display(array(' . implode(', ', $stack) . '), $var); ?>';
         } else {
             $child = $tpl;
             while ($child && $child->extends) {
                 $parent = $tpl->extend($child->extends);
-                $child = $parent->extends ? $parent : false;
+                $child  = $parent->extends ? $parent : false;
             }
             $tpl->extends = false;
         }
@@ -554,7 +568,7 @@ class Compiler
         if (!$name) {
             throw new \RuntimeException("Invalid block name");
         }
-        $scope["name"] = $name;
+        $scope["name"]       = $name;
         $scope["use_parent"] = false;
     }
 
@@ -564,7 +578,7 @@ class Compiler
      */
     public static function tagBlockClose($tokens, Tag $scope)
     {
-        $tpl = $scope->tpl;
+        $tpl  = $scope->tpl;
         $name = $scope["name"];
 
         if (isset($tpl->blocks[$name])) { // block defined
@@ -584,10 +598,10 @@ class Compiler
         }
 
         $tpl->blocks[$scope["name"]] = array(
-            "from" => $tpl->getName(),
-            "import" => false,
+            "from"       => $tpl->getName(),
+            "import"     => false,
             "use_parent" => $scope["use_parent"],
-            "block" => $scope->getContent()
+            "block"      => $scope->getContent()
         );
     }
 
@@ -647,7 +661,7 @@ class Compiler
         } else {
             $ref = new \ReflectionFunction($tag->callback);
         }
-        $args = array();
+        $args   = array();
         $params = $tag->tpl->parseParams($tokens);
         foreach ($ref->getParameters() as $param) {
             if (isset($params[$param->getName()])) {
@@ -815,7 +829,7 @@ class Compiler
      */
     public static function tagImport(Tokenizer $tokens, Tag $tag)
     {
-        $tpl = $tag->tpl;
+        $tpl    = $tag->tpl;
         $import = array();
         if ($tokens->is('[')) {
             $tokens->next();
@@ -880,10 +894,10 @@ class Compiler
      */
     public static function macroOpen(Tokenizer $tokens, Tag $scope)
     {
-        $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
+        $scope["name"]      = $tokens->get(Tokenizer::MACRO_STRING);
         $scope["recursive"] = false;
-        $args = array();
-        $defaults = array();
+        $args               = array();
+        $defaults           = array();
         if (!$tokens->valid()) {
             return;
         }
@@ -910,10 +924,10 @@ class Compiler
         }
         $tokens->skipIf(')');
         $scope["macro"] = array(
-            "name" => $scope["name"],
-            "args" => $args,
-            "defaults" => $defaults,
-            "body" => "",
+            "name"      => $scope["name"],
+            "args"      => $args,
+            "defaults"  => $defaults,
+            "body"      => "",
             "recursive" => false
         );
         return;
@@ -928,7 +942,7 @@ class Compiler
         if ($scope["recursive"]) {
             $scope["macro"]["recursive"] = true;
         }
-        $scope["macro"]["body"] = $scope->cutContent();
+        $scope["macro"]["body"]             = $scope->cutContent();
         $scope->tpl->macros[$scope["name"]] = $scope["macro"];
     }
 
@@ -959,6 +973,8 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $tag
      */
-    public static function autoescapeClose(Tokenizer $tokens, Tag $tag) { }
+    public static function autoescapeClose(Tokenizer $tokens, Tag $tag)
+    {
+    }
 
 }

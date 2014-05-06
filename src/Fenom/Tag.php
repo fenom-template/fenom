@@ -13,8 +13,8 @@ namespace Fenom;
 class Tag extends \ArrayObject
 {
     const COMPILER = 1;
-    const FUNC = 2;
-    const BLOCK = 4;
+    const FUNC     = 2;
+    const BLOCK    = 4;
 
 
     const LTRIM = 1;
@@ -50,19 +50,19 @@ class Tag extends \ArrayObject
      */
     public function __construct($name, Template $tpl, $info, &$body)
     {
-        $this->tpl = $tpl;
-        $this->name = $name;
-        $this->line = $tpl->getLine();
-        $this->level = $tpl->getStackSize();
-        $this->_body = & $body;
+        $this->tpl     = $tpl;
+        $this->name    = $name;
+        $this->line    = $tpl->getLine();
+        $this->level   = $tpl->getStackSize();
+        $this->_body   = & $body;
         $this->_offset = strlen($body);
-        $this->_type = $info["type"];
-        $this->escape = $tpl->getOptions() & \Fenom::AUTO_ESCAPE;
+        $this->_type   = $info["type"];
+        $this->escape  = $tpl->getOptions() & \Fenom::AUTO_ESCAPE;
 
         if ($this->_type & self::BLOCK) {
-            $this->_open = $info["open"];
-            $this->_close = $info["close"];
-            $this->_tags = isset($info["tags"]) ? $info["tags"] : array();
+            $this->_open   = $info["open"];
+            $this->_close  = $info["close"];
+            $this->_tags   = isset($info["tags"]) ? $info["tags"] : array();
             $this->_floats = isset($info["float_tags"]) ? $info["float_tags"] : array();
             $this->_closed = false;
         } else {
@@ -81,7 +81,7 @@ class Tag extends \ArrayObject
      */
     public function tagOption($option)
     {
-        if(method_exists($this, 'opt'.$option)) {
+        if (method_exists($this, 'opt' . $option)) {
             $this->options[] = $option;
         } else {
             throw new \RuntimeException("Unknown tag option $option");
@@ -93,9 +93,10 @@ class Tag extends \ArrayObject
      * @param int $option option constant
      * @param bool $value true — add option, false — remove option
      */
-    public function setOption($option, $value) {
+    public function setOption($option, $value)
+    {
         $actual = (bool)($this->tpl->getOptions() & $option);
-        if($actual != $value) {
+        if ($actual != $value) {
             $this->_changed[$option] = $actual;
             $this->tpl->setOption(\Fenom::AUTO_ESCAPE, $value);
         }
@@ -107,7 +108,7 @@ class Tag extends \ArrayObject
      */
     public function restore($option)
     {
-        if(isset($this->_changed[$option])) {
+        if (isset($this->_changed[$option])) {
             $this->tpl->setOption($option, $this->_changed[$option]);
             unset($this->_changed[$option]);
         }
@@ -115,7 +116,7 @@ class Tag extends \ArrayObject
 
     public function restoreAll()
     {
-        foreach($this->_changed as $option => $value) {
+        foreach ($this->_changed as $option => $value) {
             $this->tpl->setOption($option, $this->_changed[$option]);
             unset($this->_changed[$option]);
         }
@@ -138,8 +139,8 @@ class Tag extends \ArrayObject
      */
     public function start($tokenizer)
     {
-        foreach($this->options as $option) {
-            $option = 'opt'.$option;
+        foreach ($this->options as $option) {
+            $option = 'opt' . $option;
             $this->$option();
         }
         return call_user_func($this->_open, $tokenizer, $this);
@@ -195,9 +196,9 @@ class Tag extends \ArrayObject
             throw new \LogicException("Tag {$this->name} already closed");
         }
         if ($this->_close) {
-            foreach($this->options as $option) {
-                $option = 'opt'.$option.'end';
-                if(method_exists($this, $option)) {
+            foreach ($this->options as $option) {
+                $option = 'opt' . $option . 'end';
+                if (method_exists($this, $option)) {
                     $this->$option();
                 }
             }
@@ -236,7 +237,7 @@ class Tag extends \ArrayObject
      */
     public function cutContent()
     {
-        $content = substr($this->_body, $this->_offset + 1);
+        $content     = substr($this->_body, $this->_offset + 1);
         $this->_body = substr($this->_body, 0, $this->_offset);
         return $content;
     }

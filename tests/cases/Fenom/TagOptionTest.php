@@ -3,10 +3,12 @@
 namespace Fenom;
 
 
-class TagOptionTest extends TestCase {
+class TagOptionTest extends TestCase
+{
 
 
-    public function testTrim() {
+    public function testTrim()
+    {
 
     }
 } 

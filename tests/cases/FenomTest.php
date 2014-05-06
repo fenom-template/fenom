@@ -1,8 +1,5 @@
 <?php
 
-use Fenom\Render,
-    Fenom\Provider as FS;
-
 class FenomTest extends \Fenom\TestCase
 {
 
@@ -20,9 +17,10 @@ class FenomTest extends \Fenom\TestCase
         );
     }
 
+
     public function testCreating()
     {
-        $time = $this->tpl('temp.tpl', 'Template 1 a');
+        $time  = $this->tpl('temp.tpl', 'Template 1 a');
         $fenom = new Fenom($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'));
         $fenom->setCompileDir(FENOM_RESOURCES . '/compile');
         $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
@@ -35,14 +33,37 @@ class FenomTest extends \Fenom\TestCase
 
     public function testFactory()
     {
-        $time = $this->tpl('temp.tpl', 'Template 1 a');
-        $fenom = Fenom::factory($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'), FENOM_RESOURCES . '/compile', Fenom::AUTO_ESCAPE);
+        $time  = $this->tpl('temp.tpl', 'Template 1 a');
+        $fenom = Fenom::factory(
+            $provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'),
+            FENOM_RESOURCES . '/compile',
+            Fenom::AUTO_ESCAPE
+        );
         $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
         $this->assertSame($provider, $tpl->getProvider());
         $this->assertSame('temp.tpl', $tpl->getBaseName());
         $this->assertSame('temp.tpl', $tpl->getName());
         $this->assertSame($time, $tpl->getTime());
         $fenom->clearAllCompiles();
+    }
+
+
+    /**
+     * @expectedException LogicException
+     * @expectedExceptionMessage Cache directory /invalid/path is not writable
+     */
+    public function testFactoryInvalid()
+    {
+        Fenom::factory(FENOM_RESOURCES . '/template', '/invalid/path');
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Source must be a valid path or provider object
+     */
+    public function testFactoryInvalid2()
+    {
+        Fenom::factory(new StdClass);
     }
 
     public function testCompileFile()
@@ -97,7 +118,10 @@ class FenomTest extends \Fenom\TestCase
     {
         $this->fenom->addModifier("mymod", "myMod");
         $this->tpl('custom.tpl', 'Custom modifier {$a|mymod}');
-        $this->assertSame("Custom modifier (myMod)Custom(/myMod)", $this->fenom->fetch('custom.tpl', array("a" => "Custom")));
+        $this->assertSame(
+            "Custom modifier (myMod)Custom(/myMod)",
+            $this->fenom->fetch('custom.tpl', array("a" => "Custom"))
+        );
     }
 
     /**
@@ -118,13 +142,27 @@ class FenomTest extends \Fenom\TestCase
     {
         $this->fenom->setOptions(Fenom::FORCE_COMPILE);
         $this->fenom->addCompiler("mycompiler", 'myCompiler');
-        $this->fenom->addBlockCompiler("myblockcompiler", 'myBlockCompilerOpen', 'myBlockCompilerClose', array(
-            'tag' => 'myBlockCompilerTag'
-        ));
+        $this->fenom->addBlockCompiler(
+            "myblockcompiler",
+            'myBlockCompilerOpen',
+            'myBlockCompilerClose',
+            array(
+                'tag' => 'myBlockCompilerTag'
+            )
+        );
         $this->tpl('custom.tpl', 'Custom compiler {mycompiler name="bar"}');
-        $this->assertSame("Custom compiler PHP_VERSION: " . PHP_VERSION . " (for bar)", $this->fenom->fetch('custom.tpl', array()));
-        $this->tpl('custom.tpl', 'Custom compiler {myblockcompiler name="bar"} block1 {tag name="baz"} block2 {/myblockcompiler}');
-        $this->assertSame("Custom compiler PHP_VERSION: " . PHP_VERSION . " (for bar) block1 Tag baz of compiler block2 End of compiler", $this->fenom->fetch('custom.tpl', array()));
+        $this->assertSame(
+            "Custom compiler PHP_VERSION: " . PHP_VERSION . " (for bar)",
+            $this->fenom->fetch('custom.tpl', array())
+        );
+        $this->tpl(
+            'custom.tpl',
+            'Custom compiler {myblockcompiler name="bar"} block1 {tag name="baz"} block2 {/myblockcompiler}'
+        );
+        $this->assertSame(
+            "Custom compiler PHP_VERSION: " . PHP_VERSION . " (for bar) block1 Tag baz of compiler block2 End of compiler",
+            $this->fenom->fetch('custom.tpl', array())
+        );
     }
 
     /**
@@ -146,23 +184,35 @@ class FenomTest extends \Fenom\TestCase
     public function testFilter()
     {
         $punit = $this;
-        $this->fenom->addPreFilter(function ($tpl, $src) use ($punit) {
-            $punit->assertInstanceOf('Fenom\Template', $tpl);
-            return "== $src ==";
-        });
+        $this->fenom->addPreFilter(
+            function ($tpl, $src) use ($punit) {
+                $punit->assertInstanceOf('Fenom\Template', $tpl);
+                return "== $src ==";
+            }
+        );
 
-        $this->fenom->addPostFilter(function ($tpl, $code) use ($punit) {
-            $punit->assertInstanceOf('Fenom\Template', $tpl);
-            return "+++ $code +++";
-        });
+        $this->fenom->addPostFilter(
+            function ($tpl, $code) use ($punit) {
+                $punit->assertInstanceOf('Fenom\Template', $tpl);
+                return "+++ $code +++";
+            }
+        );
 
-        $this->fenom->addFilter(function ($tpl, $text) use ($punit) {
-            $punit->assertInstanceOf('Fenom\Template', $tpl);
-            return "|--- $text ---|";
-        });
+        $this->fenom->addFilter(
+            function ($tpl, $text) use ($punit) {
+                $punit->assertInstanceOf('Fenom\Template', $tpl);
+                return "|--- $text ---|";
+            }
+        );
 
-        $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} misterio {/var} world')->fetch(array()));
-        $this->assertSame('+++ |--- == hello  ---||---  world == ---| +++', $this->fenom->compileCode('hello {var $user} <?php  misterio ?> {/var} world')->fetch(array()));
+        $this->assertSame(
+            '+++ |--- == hello  ---||---  world == ---| +++',
+            $this->fenom->compileCode('hello {var $user} misterio {/var} world')->fetch(array())
+        );
+        $this->assertSame(
+            '+++ |--- == hello  ---||---  world == ---| +++',
+            $this->fenom->compileCode('hello {var $user} <?php  misterio ?> {/var} world')->fetch(array())
+        );
     }
 
     /**
@@ -170,13 +220,15 @@ class FenomTest extends \Fenom\TestCase
      */
     public function testTagFilter()
     {
-        $tags = array();
+        $tags  = array();
         $punit = $this;
-        $this->fenom->addTagFilter(function ($text, $tpl) use (&$tags, $punit) {
-            $punit->assertInstanceOf('Fenom\Template', $tpl);
-            $tags[] = $text;
-            return $text;
-        });
+        $this->fenom->addTagFilter(
+            function ($text, $tpl) use (&$tags, $punit) {
+                $punit->assertInstanceOf('Fenom\Template', $tpl);
+                $tags[] = $text;
+                return $text;
+            }
+        );
 
         $this->fenom->compileCode('hello {var $a} misterio {/var} world, {$b}!');
 
@@ -194,8 +246,10 @@ class FenomTest extends \Fenom\TestCase
     {
         $this->fenom->addBlockCompilerSmart('SayBlock', 'TestTags', array('SaySomething'), array('SaySomething'));
         $this->tpl('block_compiler.tpl', '{SayBlock} and {SaySomething}. It is all, {/SayBlock}');
-        $this->assertSame('Start saying and say blah-blah-blah. It is all, Stop saying',
-            $this->fenom->fetch('block_compiler.tpl', array()));
+        $this->assertSame(
+            'Start saying and say blah-blah-blah. It is all, Stop saying',
+            $this->fenom->fetch('block_compiler.tpl', array())
+        );
     }
 
     public function testAddFunctions()
@@ -204,6 +258,35 @@ class FenomTest extends \Fenom\TestCase
         $this->assertFalse($this->fenom->isAllowedFunction('substr'));
         $this->fenom->addAllowedFunctions(array('substr'));
         $this->assertTrue($this->fenom->isAllowedFunction('substr'));
+    }
+
+    /**
+     * @group pipe
+     */
+    public function testPipe()
+    {
+        $iteration = 0;
+        $test      = $this; // for PHP 5.3
+        $this->fenom->pipe(
+            "persist:pipe.tpl",
+            function ($chunk) use (&$iteration, $test) {
+                if (!$chunk) {
+                    return;
+                }
+                $iteration++;
+//                error_log(var_export($chunk, 1));
+                $test->assertSame("key$iteration:value$iteration", $chunk);
+            },
+            array(
+                "items" => array(
+                    "key1" => "value1",
+                    "key2" => "value2",
+                    "key3" => "value3",
+                )
+            ),
+            11 // strlen(key1) + strlen(:) +  strlen(value1)
+        );
+        $this->assertSame(3, $iteration);
     }
 }
 

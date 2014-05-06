@@ -18,12 +18,12 @@ use Fenom;
 class Render extends \ArrayObject
 {
     private static $_props = array(
-        "name" => "runtime",
+        "name"      => "runtime",
         "base_name" => "",
-        "scm" => false,
-        "time" => 0,
-        "depends" => array(),
-        "macros" => array()
+        "scm"       => false,
+        "time"      => 0,
+        "depends"   => array(),
+        "macros"    => array()
     );
     /**
      * @var \Closure
@@ -84,12 +84,12 @@ class Render extends \ArrayObject
     {
         $this->_fenom = $fenom;
         $props += self::$_props;
-        $this->_name = $props["name"];
+        $this->_name      = $props["name"];
         $this->_base_name = $props["base_name"];
-        $this->_scm = $props["scm"];
-        $this->_time = $props["time"];
-        $this->_depends = $props["depends"];
-        $this->_macros = $props["macros"];
+        $this->_scm       = $props["scm"];
+        $this->_time      = $props["time"];
+        $this->_depends   = $props["depends"];
+        $this->_macros    = $props["macros"];
 //        $this->_blocks = $props["blocks"];
         $this->_code = $code;
     }
@@ -251,9 +251,9 @@ class Render extends \ArrayObject
     {
         if ($name == 'info') {
             return array(
-                'name' => $this->_name,
+                'name'   => $this->_name,
                 'schema' => $this->_scm,
-                'time' => $this->_time
+                'time'   => $this->_time
             );
         } else {
             return null;

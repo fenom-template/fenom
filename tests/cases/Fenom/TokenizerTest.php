@@ -17,7 +17,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
     public function testTokens()
     {
-        $code = 'hello, please  resolve this example: sin($x)+tan($x*$t) = {U|[0,1]}';
+        $code   = 'hello, please  resolve this example: sin($x)+tan($x*$t) = {U|[0,1]}';
         $tokens = new Tokenizer($code);
         $this->assertSame(27, $tokens->count());
         $this->assertSame($tokens, $tokens->back());
@@ -38,13 +38,16 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(",", $tokens->getNext());
         $this->assertSame(",", $tokens->key());
         $this->assertSame("please", $tokens->getNext(T_STRING));
-        $this->assertSame(array(
-            T_STRING,
-            'please',
-            '  ',
-            1,
-            'T_STRING'
-        ), $tokens->curr);
+        $this->assertSame(
+            array(
+                T_STRING,
+                'please',
+                '  ',
+                1,
+                'T_STRING'
+            ),
+            $tokens->curr
+        );
         $this->assertSame("resolve", $tokens->getNext($tokens::MACRO_UNARY, T_STRING));
 
         $tokens->next();
@@ -80,7 +83,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
 
     public function testSkip()
     {
-        $text = "1 foo: bar ( 3 + double ) ";
+        $text   = "1 foo: bar ( 3 + double ) ";
         $tokens = new Tokenizer($text);
 
         $tokens->skip()->skip(T_STRING)->skip(':');
