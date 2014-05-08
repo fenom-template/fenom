@@ -962,7 +962,7 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $tag
      */
-    public static function autoescapeOpen(Tokenizer $tokens, Tag $tag)
+    public static function escapeOpen(Tokenizer $tokens, Tag $tag)
     {
         $expected = ($tokens->get(T_STRING) == "true" ? true : false);
         $tokens->next();
@@ -970,11 +970,20 @@ class Compiler
     }
 
     /**
-     * @param Tokenizer $tokens
-     * @param Tag $tag
+     * Do nothing
      */
-    public static function autoescapeClose(Tokenizer $tokens, Tag $tag)
+    public static function nope()
     {
     }
 
+    /**
+     * @param Tokenizer $tokens
+     * @param Tag $tag
+     */
+    public static function stripOpen(Tokenizer $tokens, Tag $tag)
+    {
+        $expected = ($tokens->get(T_STRING) == "true" ? true : false);
+        $tokens->next();
+        $tag->setOption(\Fenom::AUTO_STRIP, $expected);
+    }
 }

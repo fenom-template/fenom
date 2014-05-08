@@ -35,11 +35,8 @@ class Fenom
     const DISABLE_CACHE     = 0x400;
     const FORCE_VERIFY      = 0x800;
     const AUTO_TRIM         = 0x1000; // reserved
-    const DENY_STATICS = 0x2000;
-    const AUTO_STRIP   = 0x4000;
-
-    /* @deprecated */
-    const DENY_INLINE_FUNCS = 0x20;
+    const DENY_STATICS      = 0x2000;
+    const AUTO_STRIP        = 0x4000;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -66,6 +63,7 @@ class Fenom
         "force_verify"         => self::FORCE_VERIFY,
         "auto_trim"            => self::AUTO_TRIM,
         "disable_statics"      => self::DENY_STATICS,
+        "strip"                => self::AUTO_STRIP,
     );
 
     /**
@@ -265,10 +263,20 @@ class Fenom
             'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagRaw'
         ),
-        'autoescape' => array(
+        'autoescape' => array( // deprecated
             'type'  => self::BLOCK_COMPILER,
-            'open'  => 'Fenom\Compiler::autoescapeOpen',
-            'close' => 'Fenom\Compiler::autoescapeClose'
+            'open'  => 'Fenom\Compiler::escapeOpen',
+            'close' => 'Fenom\Compiler::nope'
+        ),
+        'escape' => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::escapeOpen',
+            'close' => 'Fenom\Compiler::nope'
+        ),
+        'strip' => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::stripOpen',
+            'close' => 'Fenom\Compiler::nope'
         )
     );
 
@@ -988,7 +996,7 @@ class Fenom
     }
 
     /**
-     * Register PSR-0 autoload for Fenom
+     * Register PSR-0 autoload
      * @param string $dir custom directory for autoloading, if NULL — autoload itself
      * @return bool
      */

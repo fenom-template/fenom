@@ -140,7 +140,7 @@ class Modifier
     {
         $str = trim($str);
         if ($to_line) {
-            return preg_replace('#[\s]+#ms', ' ', $str);
+            return preg_replace('#\s+#ms', ' ', $str);
         } else {
             return preg_replace('#[ \t]{2,}#', ' ', $str);
         }
@@ -158,7 +158,7 @@ class Modifier
         } elseif (is_array($item)) {
             return count($item);
         } elseif ($item instanceof \Countable) {
-            return count($item);
+            return $item->count();
         } else {
             return 0;
         }

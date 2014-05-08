@@ -11,18 +11,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
      */
     public $fenom;
 
-    public $values = array(
-        "zero"  => 0,
-        "one"   => 1,
-        "two"   => 2,
-        "three" => 3,
-        "float" => 4.5,
-        "bool"  => true,
-        0       => "empty value",
-        1       => "one value",
-        2       => "two value",
-        3       => "three value",
-    );
+    public $values;
 
     public static function getVars()
     {
@@ -39,6 +28,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 "one" => 1,
                 "b"   => 2,
                 "two" => 2
+            ),
+            "num"  => array(
+                1 => "one",
+                2 => "two",
+                3 => "three",
+                4 => "four"
             ),
             0       => "empty value",
             1       => "one value",
@@ -62,6 +57,7 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->fenom->addModifier('append', __CLASS__ . '::append');
         $this->fenom->addFunction('test_function', __CLASS__ . '::inlineFunction');
         $this->fenom->addBlockFunction('test_block_function', __CLASS__ . '::blockFunction');
+        $this->values = $this->getVars();
     }
 
     public static function dots($value)

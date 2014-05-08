@@ -344,7 +344,6 @@ class Template extends Render
                 foreach ($this->_filters as $filter) {
                     $text = call_user_func($filter, $this, $text);
                 }
-                $this->_body .= $text;
             } else {
                 $fragments = explode("<?", $text);
                 foreach ($fragments as &$fragment) {
@@ -354,11 +353,16 @@ class Template extends Render
                         }
                     }
                 }
-                $this->_body .= implode('<?php echo "<?"; ?>', $fragments);
+                $text = implode('<?php echo "<?"; ?>', $fragments);
             }
         } else {
-            $this->_body .= str_replace("<?", '<?php echo "<?"; ?>' . PHP_EOL, $text);
+            $text = str_replace("<?", '<?php echo "<?"; ?>' . PHP_EOL, $text);
         }
+        if($this->_options & Fenom::AUTO_STRIP) {
+            $text = preg_replace('/\s+/uS', ' ', $text);
+            $text = preg_replace('/\s*([\pP\pS]+)\s*/uS', '$1', $text);
+        }
+        $this->_body .= $text;
     }
 
     /**

@@ -1,11 +1,61 @@
-Syntax [RU]
-===========
+Syntax
+======
 
-Fenom implement [Smarty](http://www.smarty.net/) syntax with some improvements
+Fenom implements [Smarty](http://www.smarty.net/) syntax with some improvements.
+All Fenom tags enclosed in the delimiters `{` and `}`, for example `{var $five = 5}`.
+If you wanna leave delimiters as is in the template use [special statements or tags](#ignoring-delimiters).
+
+*Note*
+Fenom implements [Smarty](http://www.smarty.net/) syntax but not implements Smarty tags, however, some tags very similar.
+But not so bad, Fenom has the [extras](https://github.com/bzick/fenom-extra) that make Fenom like Smarty.
 
 ## Variable
 
-### Use variables
+Variables in Fenom can be either displayed directly or used as arguments for functions, attributes and modifiers,
+inside conditional expressions, etc.
+
+### Example variables
+
+Next example uses simple variables `$user_id` ans `$user_name`
+```smarty
+<div class="user">Hello, <a href="/users/{$user_id}">{$user_name}</a>.</div>
+```
+
+Example outputs next HTML code:
+```html
+<div class="user">Hello, <a href="/users/17">Bzick</a>.</div>
+```
+
+Переменные могут быть массивом. В этом случае обращение по ключу происходит через опертор `.` или, как в PHP, через операторы `[` и `]`
+```smarty
+<div class="user">Hello, <a href="/users/{$user.id}">{$user.name}</a>.</div>
+```
+
+`{$user.id}` and `{$user['id']}` are same.
+
+```smarty
+<div class="user">Hello, <a href="/users/{$user->id}">{$user->name}</a>.</div>
+```
+
+```smarty
+<div class="user">Hello, <a href="/users/{$user->getId()}">{$user->getName()}</a>.</div>
+```
+
+*Note*
+Be careful, Fenom do not checks existence of the method before invoke.
+To avoid the problem class of the object have to define method `__call`, which throws an exception etc.
+Also you may disable invoke method in [settings](./docs/settings.md).
+
+Multidimensional value support
+
+```smarty
+{$foo.bar.baz}
+{$foo.$bar.$baz}
+{$foo[4].baz}
+{$foo[4].$baz}
+{$foo.bar.baz[4]}
+{$foo[ $bar.baz ]}
+```
 
 ```smarty
 {$foo}
@@ -25,7 +75,7 @@ Fenom implement [Smarty](http://www.smarty.net/) syntax with some improvements
 
 ### System variable
 
-Unnamed system variable starts with `$.` and allow access to global variables and system info (fix doc):
+Unnamed system variable starts with `$.` and allows access to global variables and system info (fix doc):
 
 * `$.get` is `$_GET`.
 * `$.post` is `$_POST`.
@@ -45,17 +95,6 @@ Unnamed system variable starts with `$.` and allow access to global variables an
 {if $.get.debug? && $.const.DEBUG}
    ...
 {/if}
-```
-
-### Multidimensional value support
-
-```smarty
-{$foo.bar.baz}
-{$foo.$bar.$baz}
-{$foo[4].baz}
-{$foo[4].$baz}
-{$foo.bar.baz[4]}
-{$foo[ $bar.baz ]}
 ```
 
 ### Math operations

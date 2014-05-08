@@ -263,13 +263,27 @@ class Tag extends \ArrayObject
         return $this->tpl->out($code, $this->escape);
     }
 
+    /**
+     * Enable escape option for the tag
+     */
     public function optEscape()
     {
         $this->escape = true;
     }
 
+    /**
+     * Disable escape option for the tag
+     */
     public function optRaw()
     {
         $this->escape = false;
+    }
+
+    /**
+     * Enable strip spaces option for the tag
+     */
+    public function optStrip()
+    {
+        $this->setOption(\Fenom::AUTO_STRIP, true);
     }
 }

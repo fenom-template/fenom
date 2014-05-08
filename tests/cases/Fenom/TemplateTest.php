@@ -185,7 +185,7 @@ class TemplateTest extends TestCase
                 'Mod: {$lorem|str_rot13}!',
                 'Fenom\Error\CompileException',
                 "Modifier str_rot13 not found",
-                Fenom::DENY_INLINE_FUNCS
+                Fenom::DENY_NATIVE_FUNCS
             ),
             array('Mod: {$lorem|my_encode}!', 'Fenom\Error\CompileException', "Modifier my_encode not found"),
             array('Mod: {$lorem|truncate:}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),

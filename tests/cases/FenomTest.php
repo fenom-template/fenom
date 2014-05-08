@@ -13,7 +13,8 @@ class FenomTest extends \Fenom\TestCase
             array("auto_reload", Fenom::AUTO_RELOAD),
             array("force_include", Fenom::FORCE_INCLUDE),
             array("auto_escape", Fenom::AUTO_ESCAPE),
-            array("force_verify", Fenom::FORCE_VERIFY)
+            array("force_verify", Fenom::FORCE_VERIFY),
+            array("strip", Fenom::AUTO_STRIP),
         );
     }
 
@@ -288,6 +289,19 @@ class FenomTest extends \Fenom\TestCase
             11 // strlen(key1) + strlen(:) +  strlen(value1)
         );
         $this->assertSame(3, $iteration);
+    }
+
+    /**
+     * @group strip
+     */
+    public function testStrip() {
+        $this->fenom->setOptions(Fenom::AUTO_STRIP);
+        $tpl = <<<TPL
+<div class="item   item-one">
+    <a href="/item/{\$one}">number  {\$num.1}</a>
+</div>
+TPL;
+        $this->assertRender($tpl, '<div class="item item-one"><a href="/item/1">number one</a></div>');
     }
 }
 

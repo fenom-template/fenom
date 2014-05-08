@@ -1,13 +1,18 @@
 Fenom - Template Engine for PHP
 ===============================
 
-> Composer package: `{"fenom/fenom": "2.*"}`. See on [Packagist.org](https://packagist.org/packages/fenom/fenom)
+> Composer [package](https://packagist.org/packages/fenom/fenom): `{"fenom/fenom": "2.*"}`.
+> For old version: `{"fenom/fenom": "1.*"}`. List of incompatibilities between 1.* and 2.* versions.
 
 [![Latest Stable Version](https://poser.pugx.org/fenom/fenom/v/stable.png)](https://packagist.org/packages/fenom/fenom)
 [![Build Status](https://travis-ci.org/bzick/fenom.svg?branch=develop)](https://travis-ci.org/bzick/fenom)
 [![Coverage Status](https://coveralls.io/repos/bzick/fenom/badge.png?branch=develop)](https://coveralls.io/r/bzick/fenom?branch=master)
 [![Total Downloads](https://poser.pugx.org/fenom/fenom/downloads.png)](https://packagist.org/packages/fenom/fenom)
 ## [Usage](./docs/usage.md) :: [Documentation](./docs/readme.md) :: [Benchmark](./docs/benchmark.md) :: [Articles](./docs/articles.md)
+
+## What is it
+
+*Fenom* (from "fenomenal") — шаблонизатор на PHP с большими возможностями и синтаксисом Smarty.
 
 * Simple [syntax](./docs/syntax.md)
 * [Fast](./docs/benchmark.md)
