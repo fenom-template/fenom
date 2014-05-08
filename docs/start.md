@@ -20,10 +20,7 @@ and update project's dependencies: `composer update`.
 Clone Fenom to any directory: `git clone https://github.com/bzick/fenom.git`. Recommended use latest tag.
 Fenom use [psr-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md#autoloading-standard) autoloading standard. Therefore you can
 * use `psr-0` format in your project loader for loading Fenom's classes
-* or register Fenom's autoloader: ```php
-Fenom::registerAutoload();
-```
-For loading itself.
+* or register Fenom's autoloader: `Fenom::registerAutoload();` for loading itself.
 
 Also you can use this autoloader for loading any library with `psr-0` file naming:
 ```php
