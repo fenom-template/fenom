@@ -62,6 +62,7 @@ class TemplateTest extends TestCase
             array('hello, {$b."$c"}!', $b, 'hello, Username!'),
             array('hello, {$b."{$c}"}!', $b, 'hello, Username!'),
             array('hello, {$b[ "{$c}" ]}!', $b, 'hello, Username!'),
+            array('hello, {$b[ ("{$c}") ]}!', $b, 'hello, Username!'),
             array('hello, {$b[ "mcp" ]}!', $b, 'hello, Master!'),
             array('hello, {$b[ "m{$c}p" ]}!', $b, 'hello, Master!'),
             array('hello, {$b."m{$c}p"}!', $b, 'hello, Master!'),
@@ -850,7 +851,8 @@ class TemplateTest extends TestCase
                 $a,
                 'literal: { $a} end'
             ),
-            array('{if 0}none{/if}literal: function () { return 1; } end', $a, 'literal: function () { return 1; } end')
+            array('{if 0}none{/if}literal: function () { return 1; } end', $a, 'literal: function () { return 1; } end'),
+            array('{if:ignore 1}literal: {$a} end{/if}', $a, 'literal: {$a} end'),
         );
     }
 
@@ -1454,6 +1456,7 @@ class TemplateTest extends TestCase
     }
 
     /**
+     * @group testIgnores
      * @dataProvider providerIgnores
      */
     public function testIgnores($code, $vars, $result)

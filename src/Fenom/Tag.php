@@ -286,4 +286,14 @@ class Tag extends \ArrayObject
     {
         $this->setOption(\Fenom::AUTO_STRIP, true);
     }
+
+    /**
+     * Enable ignore for body of the tag
+     */
+    public function optIgnore()
+    {
+        if(!$this->isClosed()) {
+            $this->tpl->ignore($this->name);
+        }
+    }
 }

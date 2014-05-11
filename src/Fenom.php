@@ -277,6 +277,11 @@ class Fenom
             'type'  => self::BLOCK_COMPILER,
             'open'  => 'Fenom\Compiler::stripOpen',
             'close' => 'Fenom\Compiler::nope'
+        ),
+        'ignore' => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::ignoreOpen',
+            'close' => 'Fenom\Compiler::nope'
         )
     );
 

@@ -96,7 +96,7 @@ class Template extends Render
     private $_line = 1;
     private $_post = array();
     /**
-     * @var bool
+     * @var bool|string
      */
     private $_ignore = false;
 
@@ -243,24 +243,22 @@ class Template extends Render
                                 $this->_ignore = false;
                             } else { // still ignore
                                 $this->_appendText($tag);
+                                continue;
                             }
+                        }
+
+                        if ($this->_tag_filters) {
+                            foreach ($this->_tag_filters as $filter) {
+                                $_tag = call_user_func($filter, $_tag, $this);
+                            }
+                        }
+                        $tokens = new Tokenizer($_tag); // tokenize the tag
+                        if ($tokens->isIncomplete()) { // all strings finished?
+                            $need_more = true;
                         } else {
-                            if ($this->_tag_filters) {
-                                foreach ($this->_tag_filters as $filter) {
-                                    $_tag = call_user_func($filter, $_tag, $this);
-                                }
-                            }
-                            $tokens = new Tokenizer($_tag); // tokenize the tag
-                            if ($tokens->isIncomplete()) { // all strings finished?
-                                $need_more = true;
-                            } else {
-                                $this->_appendCode($this->parseTag($tokens), $tag); // start the tag lexer
-                                if ($tokens->key()) { // if tokenizer have tokens - throws exceptions
-                                    throw new CompileException("Unexpected token '" . $tokens->current() . "' in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(
-                                            0,
-                                            0
-                                        ) . "' <- there", 0, E_ERROR, $this->_name, $this->_line);
-                                }
+                            $this->_appendCode($this->parseTag($tokens), $tag); // start the tag lexer
+                            if ($tokens->key()) { // if tokenizer have tokens - throws exceptions
+                                throw new CompileException("Unexpected token '" . $tokens->current() . "' in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line);
                             }
                         }
                     } while ($need_more);
@@ -379,6 +377,10 @@ class Template extends Render
             $this->_line += substr_count($source, "\n");
             $this->_body .= "<?php\n/* {$this->_name}:{$this->_line}: {$source} */\n $code ?>";
         }
+    }
+
+    public function ignore($tag_name) {
+        $this->_ignore = $tag_name;
     }
 
     /**
@@ -552,13 +554,7 @@ class Template extends Render
     {
         try {
             if ($tokens->is(Tokenizer::MACRO_STRING)) {
-                if ($tokens->current() === "ignore") {
-                    $this->_ignore = "ignore";
-                    $tokens->next();
-                    return '';
-                } else {
-                    return $this->parseAct($tokens);
-                }
+                return $this->parseAct($tokens);
             } elseif ($tokens->is('/')) {
                 return $this->parseEndTag($tokens);
             } else {
@@ -567,15 +563,9 @@ class Template extends Render
         } catch (InvalidUsageException $e) {
             throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
-            throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(
-                    0,
-                    0
-                ) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
-            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(
-                    0,
-                    0
-                ) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         }
     }
 
@@ -934,10 +924,7 @@ class Template extends Render
         switch ($key) {
             case 'const':
                 $tokens->need('.')->next();
-                $var = $this->parseName($tokens);
-                if (!defined($var)) {
-                    $var = '@constant(' . var_export($var, true) . ')';
-                }
+                $var = '@constant(' . var_export($this->parseName($tokens), true) . ')';
                 break;
             case 'version':
                 $var = '\Fenom::VERSION';
@@ -1156,9 +1143,6 @@ class Template extends Render
             case '"':
                 return $this->parseQuote($tokens);
                 break;
-            case '$':
-                $tokens->next()->need('.')->next()->need(T_CONST)->next();
-                return @constant($this->parseName($tokens));
             default:
                 throw new UnexpectedTokenException($tokens);
         }

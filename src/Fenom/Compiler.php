@@ -986,4 +986,14 @@ class Compiler
         $tokens->next();
         $tag->setOption(\Fenom::AUTO_STRIP, $expected);
     }
+
+    /**
+     * Tag {ignore}
+     * @param Tokenizer $tokens
+     * @param Tag $tag
+     */
+    public static function ignoreOpen(Tokenizer $tokens, Tag $tag)
+    {
+        $tag->tpl->ignore('ignore');
+    }
 }
