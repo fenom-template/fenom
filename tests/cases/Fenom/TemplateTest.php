@@ -861,7 +861,7 @@ class TemplateTest extends TestCase
         $code1 = 'Switch: {switch $a}
         {case 1, "one"} one
         {case 2, "two"} two
-        {case "string"} str
+        {case "string", default} str
         {default} def
         {/switch} end';
 
@@ -881,6 +881,7 @@ class TemplateTest extends TestCase
             array($code1, array("a" => 2), 'Switch: two end'),
             array($code1, array("a" => 'two'), 'Switch: two end'),
             array($code1, array("a" => "string"), 'Switch: str end'),
+            array($code1, array("a" => "unk"), 'Switch: str def end'),
             array($code2, array("a" => "unk"), 'Switch: end'),
             array($code3, array("a" => 1), 'Switch: one end'),
             array($code3, array("a" => 'one'), 'Switch: one end'),

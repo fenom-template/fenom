@@ -15,7 +15,7 @@ Tag `{switch}` accepts any expression. But `{case}` accepts only static scalar v
     ...
 {case <value3>}
     ...
-{default case <value1>}
+{case default, <value1>}
     ...
 {/switch}
 ```
@@ -32,7 +32,7 @@ For example,
     It is current item
 {case 'new', 'newer'}
     It is new item, again
-{default}
+{case default}
     I don't know the type {$type}
 {/switch}
 ```

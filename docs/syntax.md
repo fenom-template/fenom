@@ -5,7 +5,7 @@ Fenom implements [Smarty](http://www.smarty.net/) syntax with some improvements.
 All Fenom tags enclosed in the delimiters `{` and `}`, for example `{var $five = 5}`.
 If you wanna leave delimiters as is in the template use [special statements or tags](#ignoring-delimiters).
 
-*Note*
+**Note**
 Fenom implements [Smarty](http://www.smarty.net/) syntax but not implements Smarty tags, however, some tags very similar.
 But not so bad, Fenom has the [extras](https://github.com/bzick/fenom-extra) that make Fenom like Smarty.
 
@@ -14,7 +14,7 @@ But not so bad, Fenom has the [extras](https://github.com/bzick/fenom-extra) tha
 Variables in Fenom can be either displayed directly or used as arguments for functions, attributes and modifiers,
 inside conditional expressions, etc.
 
-### Example variables
+### Use variables
 
 Next example uses simple variables `$user_id` ans `$user_name`
 ```smarty
@@ -30,38 +30,37 @@ Example outputs next HTML code:
 ```smarty
 <div class="user">Hello, <a href="/users/{$user.id}">{$user.name}</a>.</div>
 ```
+`{$user.id}` and `{$user['id']}` are same:
+```smarty
+<div class="user">Hello, <a href="/users/{$user['id']}">{$user.['name']}</a>.</div>
+```
 
-`{$user.id}` and `{$user['id']}` are same.
-
+В случае объекта, доступ к его свойствам осущесвляется так как и в PHP — через оператор `->`:
 ```smarty
 <div class="user">Hello, <a href="/users/{$user->id}">{$user->name}</a>.</div>
 ```
 
+Методы, как и свойства можно вызвать через оператор `->`, передав в метод любые рагументы:
 ```smarty
 <div class="user">Hello, <a href="/users/{$user->getId()}">{$user->getName()}</a>.</div>
 ```
 
 *Note*
 Be careful, Fenom do not checks existence of the method before invoke.
-To avoid the problem class of the object have to define method `__call`, which throws an exception etc.
-Also you may disable invoke method in [settings](./docs/settings.md).
+To avoid the problem class of the object have to define method `__call`, which throws an exception, etc.
+Also you can prohibit method call in [settings](./docs/configuration.md).
 
-Multidimensional value support
+Можно комбинировать различные варианты вызовов:
 
 ```smarty
 {$foo.bar.baz}
 {$foo.$bar.$baz}
-{$foo[4].baz}
-{$foo[4].$baz}
+{$foo[5].baz}
+{$foo[5].$baz}
 {$foo.bar.baz[4]}
 {$foo[ $bar.baz ]}
-```
-
-```smarty
-{$foo}
-{$bar}
-{$foo[4]}
-{$foo.4}
+{$foo[5]}
+{$foo.5}
 {$foo.bar}
 {$foo.'bar'}
 {$foo."bar"}
@@ -71,6 +70,8 @@ Multidimensional value support
 {$foo[$bar]}
 {$foo->bar}
 {$foo->bar.buz}
+{$foo->bar.buz[ $bar->getId("user") ]}
+{$foo->bar(5)->buz(5.5)}
 ```
 
 ### System variable
@@ -107,16 +108,6 @@ Unnamed system variable starts with `$.` and allows access to global variables a
 
 See all [operators](./operators.md)
 
-### Object support
-
-```smarty
-{$object->item}
-{$object->item|upper} {* apply modifier *}
-{$object->item->method($y, 'named')}
-{$object->item->method($y->name, 'named')|upper} {* apply modifier to method result*}
-```
-
-You may disable call methods in template, see in [security options](./settings.md) option `deny_method`
 
 ### Static method support
 
@@ -196,7 +187,7 @@ but if use single quote any template expressions will be on display as it is
 {'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
 ```
 
-## Numbers
+### Numbers
 
 ```smarty
 {2|pow:10}
@@ -205,7 +196,7 @@ but if use single quote any template expressions will be on display as it is
 {1e-6|round}
 ```
 
-### Modifiers
+## Modifiers
 
 * Modifiers allows change some value before output or using.
 * To apply a modifier, specify the value followed by a `|` (pipe) and the modifier name.
@@ -224,7 +215,7 @@ but if use single quote any template expressions will be on display as it is
 
 [List of modifiers](./main.md#modifiers)
 
-### Tags
+## Tags
 
 Basically, tag seems like
 
@@ -273,12 +264,13 @@ Tags starts with name and may have attributes
 ### Ignoring template code
 
 В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
-Если требуется вывести текст, содержащий фигурные скобки, помните о следующих возможностях:
+Если требуется вывести текст, содержащий фигурные скобки, то есть следующие варианты это сделать:
 
 1. Использование блочного тега `{ignore}{/ignore}`. Текст внутри этого тега текст не компилируется шаблонизатором и выводится как есть.
 2. Если после открывающей фигурной скобки есть пробельный символ (пробел или `\t`) или перенос строки (`\r` или `\n`), то она не воспринимается как разделитель кода Fenom и код после неё выводится как есть.
+3. Установить опцию `:ignore` у блочного тега. Все Fenom теги внутри блока будут проигнорированны
 
-Пример:
+Example:
 
 ```smarty
 {ignore}
@@ -292,10 +284,10 @@ Tags starts with name and may have attributes
 		e.innerHTML = text;
 		document.body.appendChild(e);
 	})('test');
-</script>
-{if:ignore $js_enabled}
-
+{if:ignore $cdn.yandex}
+    var item = {cdn: "//yandex.st/"};
 {/if}
+</script>
 ```
 
 Outputs
@@ -310,6 +302,7 @@ Outputs
 		e.innerHTML = text;
 		document.body.appendChild(e);
 	})('test');
+	var item = {cdn: "//yandex.st/"};
 </script>
 ```
 
@@ -341,10 +334,7 @@ Outputs
 
 |    name | code | type  | description  |
 | ------- | ---- | ----- | ------------ |
-|   strip |    s | block | remove any multi-whitespaces |
-|   ltrim |    l | any   | remove spaces left of the tag  |
-|   rtrim |    r | any   | remove spaces right of the tag |
-|    trim |    t | any   | remove spaces near tag |
+|   strip |    s | block | enable `strip` option for a block of the template |
 |     raw |    a | any   | ignore escape option |
 |  escape |    e | any   | force escape |
 |  ignore |    i | block | ignore Fenom syntax |

@@ -366,10 +366,10 @@ class Compiler
     private static function _caseResort(Tag $scope)
     {
         $content = $scope->cutContent();
-        if ($scope["last"] === false) {
-            $scope["default"] .= $content;
-        } else {
-            foreach ($scope["last"] as $case) {
+        foreach ($scope["last"] as $case) {
+            if($case === false) {
+                $scope["default"] .= $content;
+            } else {
                 if (!isset($scope["case"][$case])) {
                     $scope["case"][$case] = "";
                 }
@@ -384,14 +384,19 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Tag $scope
+     * @param Tag $tag
      * @return string
      */
-    public static function tagCase(Tokenizer $tokens, Tag $scope)
+    public static function tagCase(Tokenizer $tokens, Tag $tag)
     {
-        self::_caseResort($scope);
+        self::_caseResort($tag);
         do {
-            $scope["last"][] = $scope->tpl->parseScalar($tokens, false);
+            if($tokens->is(T_DEFAULT)) {
+                $tag["last"][] = false;
+                $tokens->next();
+            } else {
+                $tag["last"][] = $tag->tpl->parseScalar($tokens, false);
+            }
             if ($tokens->is(',')) {
                 $tokens->next();
             } else {
@@ -413,7 +418,7 @@ class Compiler
     public static function tagDefault($tokens, Tag $scope)
     {
         self::_caseResort($scope);
-        $scope["last"] = false;
+        $scope["last"][] = false;
         return '';
     }
 
