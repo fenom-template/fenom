@@ -27,7 +27,3 @@ It mean:
 * Easy to [use](./start.md).
 * Maximum [protection](./configuration.md#configure).
 
-### Why is it
-
-Why not?
-
