@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+
 use Fenom,
     Fenom\Render;
 

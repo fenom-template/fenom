@@ -17,37 +17,33 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '1.4';
-
+    const VERSION = '2.0';
     /* Actions */
     const INLINE_COMPILER = 1;
-    const BLOCK_COMPILER = 2;
-    const INLINE_FUNCTION = 3;
-    const BLOCK_FUNCTION = 4;
-    const MODIFIER = 5;
+    const BLOCK_COMPILER  = 5;
+    const INLINE_FUNCTION = 2;
+    const BLOCK_FUNCTION  = 7;
 
     /* Options */
-    const DENY_ACCESSOR = 0x8;
-    const DENY_METHODS = 0x10;
+    const DENY_ACCESSOR     = 0x8;
+    const DENY_METHODS      = 0x10;
     const DENY_NATIVE_FUNCS = 0x20;
-    const FORCE_INCLUDE = 0x40;
-    const AUTO_RELOAD = 0x80;
-    const FORCE_COMPILE = 0x100;
-    const AUTO_ESCAPE = 0x200;
-    const DISABLE_CACHE = 0x400;
-    const FORCE_VERIFY = 0x800;
-    const AUTO_TRIM = 0x1000; // reserved
-    const DENY_STATICS = 0x2000; // reserved
-
-    /* @deprecated */
-    const DENY_INLINE_FUNCS = 0x20;
+    const FORCE_INCLUDE     = 0x40;
+    const AUTO_RELOAD       = 0x80;
+    const FORCE_COMPILE     = 0x100;
+    const AUTO_ESCAPE       = 0x200;
+    const DISABLE_CACHE     = 0x400;
+    const FORCE_VERIFY      = 0x800;
+    const AUTO_TRIM         = 0x1000; // reserved
+    const DENY_STATICS      = 0x2000;
+    const AUTO_STRIP        = 0x4000;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
-    const DEFAULT_FUNC_PARSER = 'Fenom\Compiler::stdFuncParser';
-    const DEFAULT_FUNC_OPEN = 'Fenom\Compiler::stdFuncOpen';
-    const DEFAULT_FUNC_CLOSE = 'Fenom\Compiler::stdFuncClose';
-    const SMART_FUNC_PARSER = 'Fenom\Compiler::smartFuncParser';
+    const DEFAULT_FUNC_PARSER    = 'Fenom\Compiler::stdFuncParser';
+    const DEFAULT_FUNC_OPEN      = 'Fenom\Compiler::stdFuncOpen';
+    const DEFAULT_FUNC_CLOSE     = 'Fenom\Compiler::stdFuncClose';
+    const SMART_FUNC_PARSER      = 'Fenom\Compiler::smartFuncParser';
 
     const MAX_MACRO_RECURSIVE = 32;
 
@@ -56,17 +52,18 @@ class Fenom
      * @see setOptions
      */
     private static $_options_list = array(
-        "disable_accessor" => self::DENY_ACCESSOR,
-        "disable_methods" => self::DENY_METHODS,
+        "disable_accessor"     => self::DENY_ACCESSOR,
+        "disable_methods"      => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_NATIVE_FUNCS,
-        "disable_cache" => self::DISABLE_CACHE,
-        "force_compile" => self::FORCE_COMPILE,
-        "auto_reload" => self::AUTO_RELOAD,
-        "force_include" => self::FORCE_INCLUDE,
-        "auto_escape" => self::AUTO_ESCAPE,
-        "force_verify" => self::FORCE_VERIFY,
-        "auto_trim" => self::AUTO_TRIM,
-        "disable_statics" => self::DENY_STATICS,
+        "disable_cache"        => self::DISABLE_CACHE,
+        "force_compile"        => self::FORCE_COMPILE,
+        "auto_reload"          => self::AUTO_RELOAD,
+        "force_include"        => self::FORCE_INCLUDE,
+        "auto_escape"          => self::AUTO_ESCAPE,
+        "force_verify"         => self::FORCE_VERIFY,
+        "auto_trim"            => self::AUTO_TRIM,
+        "disable_statics"      => self::DENY_STATICS,
+        "strip"                => self::AUTO_STRIP,
     );
 
     /**
@@ -82,6 +79,11 @@ class Fenom
     /**
      * @var callable[]
      */
+    public $tag_filters = array();
+
+    /**
+     * @var callable[]
+     */
     public $post_filters = array();
 
     /**
@@ -93,6 +95,11 @@ class Fenom
      * @var string compile directory
      */
     protected $_compile_dir = "/tmp";
+
+    /**
+     * @var string[] compile directory for custom provider
+     */
+    protected $_compiles = array();
 
     /**
      * @var int masked options
@@ -112,141 +119,203 @@ class Fenom
      * @var string[] list of modifiers [modifier_name => callable]
      */
     protected $_modifiers = array(
-        "upper" => 'strtoupper',
-        "up" => 'strtoupper',
-        "lower" => 'strtolower',
-        "low" => 'strtolower',
+        "upper"       => 'strtoupper',
+        "up"          => 'strtoupper',
+        "lower"       => 'strtolower',
+        "low"         => 'strtolower',
         "date_format" => 'Fenom\Modifier::dateFormat',
-        "date" => 'Fenom\Modifier::date',
-        "truncate" => 'Fenom\Modifier::truncate',
-        "escape" => 'Fenom\Modifier::escape',
-        "e" => 'Fenom\Modifier::escape', // alias of escape
-        "unescape" => 'Fenom\Modifier::unescape',
-        "strip" => 'Fenom\Modifier::strip',
-        "length" => 'Fenom\Modifier::length',
-        "iterable" => 'Fenom\Modifier::isIterable'
+        "date"        => 'Fenom\Modifier::date',
+        "truncate"    => 'Fenom\Modifier::truncate',
+        "escape"      => 'Fenom\Modifier::escape',
+        "e"           => 'Fenom\Modifier::escape', // alias of escape
+        "unescape"    => 'Fenom\Modifier::unescape',
+        "strip"       => 'Fenom\Modifier::strip',
+        "length"      => 'Fenom\Modifier::length',
+        "iterable"    => 'Fenom\Modifier::isIterable'
     );
 
     /**
      * @var array of allowed PHP functions
      */
     protected $_allowed_funcs = array(
-        "count" => 1, "is_string" => 1, "is_array" => 1, "is_numeric" => 1, "is_int" => 1, 'constant' => 1,
-        "is_object" => 1, "strtotime" => 1, "gettype" => 1, "is_double" => 1, "json_encode" => 1, "json_decode" => 1,
-        "ip2long" => 1, "long2ip" => 1, "strip_tags" => 1, "nl2br" => 1, "explode" => 1, "implode" => 1
+        "count"       => 1,
+        "is_string"   => 1,
+        "is_array"    => 1,
+        "is_numeric"  => 1,
+        "is_int"      => 1,
+        'constant'    => 1,
+        "is_object"   => 1,
+        "strtotime"   => 1,
+        "gettype"     => 1,
+        "is_double"   => 1,
+        "json_encode" => 1,
+        "json_decode" => 1,
+        "ip2long"     => 1,
+        "long2ip"     => 1,
+        "strip_tags"  => 1,
+        "nl2br"       => 1,
+        "explode"     => 1,
+        "implode"     => 1
     );
 
     /**
      * @var array[] of compilers and functions
      */
     protected $_actions = array(
-        'foreach' => array( // {foreach ...} {break} {continue} {foreachelse} {/foreach}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::foreachOpen',
-            'close' => 'Fenom\Compiler::foreachClose',
-            'tags' => array(
+        'foreach'    => array( // {foreach ...} {break} {continue} {foreachelse} {/foreach}
+            'type'       => self::BLOCK_COMPILER,
+            'open'       => 'Fenom\Compiler::foreachOpen',
+            'close'      => 'Fenom\Compiler::foreachClose',
+            'tags'       => array(
                 'foreachelse' => 'Fenom\Compiler::foreachElse',
-                'break' => 'Fenom\Compiler::tagBreak',
-                'continue' => 'Fenom\Compiler::tagContinue',
+                'break'       => 'Fenom\Compiler::tagBreak',
+                'continue'    => 'Fenom\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
-        'if' => array( // {if ...} {elseif ...} {else} {/if}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::ifOpen',
+        'if'         => array( // {if ...} {elseif ...} {else} {/if}
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::ifOpen',
             'close' => 'Fenom\Compiler::stdClose',
-            'tags' => array(
+            'tags'  => array(
                 'elseif' => 'Fenom\Compiler::tagElseIf',
-                'else' => 'Fenom\Compiler::tagElse'
+                'else'   => 'Fenom\Compiler::tagElse'
             )
         ),
-        'switch' => array( // {switch ...} {case ..., ...}  {default} {/switch}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::switchOpen',
-            'close' => 'Fenom\Compiler::switchClose',
-            'tags' => array(
-                'case' => 'Fenom\Compiler::tagCase',
+        'switch'     => array( // {switch ...} {case ..., ...}  {default} {/switch}
+            'type'       => self::BLOCK_COMPILER,
+            'open'       => 'Fenom\Compiler::switchOpen',
+            'close'      => 'Fenom\Compiler::switchClose',
+            'tags'       => array(
+                'case'    => 'Fenom\Compiler::tagCase',
                 'default' => 'Fenom\Compiler::tagDefault'
             ),
             'float_tags' => array('break' => 1)
         ),
-        'for' => array( // {for ...} {break} {continue} {/for}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::forOpen',
-            'close' => 'Fenom\Compiler::forClose',
-            'tags' => array(
-                'forelse' => 'Fenom\Compiler::forElse',
-                'break' => 'Fenom\Compiler::tagBreak',
+        'for'        => array( // {for ...} {break} {continue} {/for}
+            'type'       => self::BLOCK_COMPILER,
+            'open'       => 'Fenom\Compiler::forOpen',
+            'close'      => 'Fenom\Compiler::forClose',
+            'tags'       => array(
+                'forelse'  => 'Fenom\Compiler::forElse',
+                'break'    => 'Fenom\Compiler::tagBreak',
                 'continue' => 'Fenom\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
-        'while' => array( // {while ...} {break} {continue} {/while}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::whileOpen',
-            'close' => 'Fenom\Compiler::stdClose',
-            'tags' => array(
-                'break' => 'Fenom\Compiler::tagBreak',
+        'while'      => array( // {while ...} {break} {continue} {/while}
+            'type'       => self::BLOCK_COMPILER,
+            'open'       => 'Fenom\Compiler::whileOpen',
+            'close'      => 'Fenom\Compiler::stdClose',
+            'tags'       => array(
+                'break'    => 'Fenom\Compiler::tagBreak',
                 'continue' => 'Fenom\Compiler::tagContinue',
             ),
             'float_tags' => array('break' => 1, 'continue' => 1)
         ),
-        'include' => array( // {include ...}
-            'type' => self::INLINE_COMPILER,
+        'include'    => array( // {include ...}
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagInclude'
         ),
-        'insert' => array( // {include ...}
-            'type' => self::INLINE_COMPILER,
+        'insert'     => array( // {include ...}
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagInsert'
         ),
-        'var' => array( // {var ...}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::varOpen',
+        'var'        => array( // {var ...}
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::varOpen',
             'close' => 'Fenom\Compiler::varClose'
         ),
-        'block' => array( // {block ...} {parent} {/block}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::tagBlockOpen',
-            'close' => 'Fenom\Compiler::tagBlockClose',
-            'tags' => array(//                'parent' => 'Fenom\Compiler::tagParent' // not implemented yet
-            ),
+        'block'      => array( // {block ...} {parent} {/block}
+            'type'       => self::BLOCK_COMPILER,
+            'open'       => 'Fenom\Compiler::tagBlockOpen',
+            'close'      => 'Fenom\Compiler::tagBlockClose',
+            'tags'       => array('parent' => 'Fenom\Compiler::tagParent'),
             'float_tags' => array('parent' => 1)
         ),
-        'extends' => array( // {extends ...}
-            'type' => self::INLINE_COMPILER,
+        'extends'    => array( // {extends ...}
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagExtends'
         ),
-        'use' => array( // {use}
-            'type' => self::INLINE_COMPILER,
+        'use'        => array( // {use}
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagUse'
         ),
-        'filter' => array( // {filter} ... {/filter}
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::filterOpen',
+        'filter'     => array( // {filter} ... {/filter}
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::filterOpen',
             'close' => 'Fenom\Compiler::filterClose'
         ),
-        'macro' => array(
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::macroOpen',
+        'macro'      => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::macroOpen',
             'close' => 'Fenom\Compiler::macroClose'
         ),
-        'import' => array(
-            'type' => self::INLINE_COMPILER,
+        'import'     => array(
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagImport'
         ),
-        'cycle' => array(
-            'type' => self::INLINE_COMPILER,
+        'cycle'      => array(
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagCycle'
         ),
-        'raw' => array(
-            'type' => self::INLINE_COMPILER,
+        'raw'        => array(
+            'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagRaw'
         ),
-        'autoescape' => array(
-            'type' => self::BLOCK_COMPILER,
-            'open' => 'Fenom\Compiler::autoescapeOpen',
-            'close' => 'Fenom\Compiler::autoescapeClose'
+        'autoescape' => array( // deprecated
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::escapeOpen',
+            'close' => 'Fenom\Compiler::nope'
+        ),
+        'escape' => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::escapeOpen',
+            'close' => 'Fenom\Compiler::nope'
+        ),
+        'strip' => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::stripOpen',
+            'close' => 'Fenom\Compiler::nope'
+        ),
+        'ignore' => array(
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::ignoreOpen',
+            'close' => 'Fenom\Compiler::nope'
         )
+    );
+
+    /**
+     * List of tests
+     * @see https://github.com/bzick/fenom/blob/develop/docs/operators.md#test-operator
+     * @var array
+     */
+    protected $_tests = array(
+        'integer'  => 'is_int(%s)',
+        'int'      => 'is_int(%s)',
+        'float'    => 'is_float(%s)',
+        'double'   => 'is_float(%s)',
+        'decimal'  => 'is_float(%s)',
+        'string'   => 'is_string(%s)',
+        'bool'     => 'is_bool(%s)',
+        'boolean'  => 'is_bool(%s)',
+        'number'   => 'is_numeric(%s)',
+        'numeric'  => 'is_numeric(%s)',
+        'scalar'   => 'is_scalar(%s)',
+        'object'   => 'is_object(%s)',
+        'callable' => 'is_callable(%s)',
+        'callback' => 'is_callable(%s)',
+        'array'    => 'is_array(%s)',
+        'iterable' => '\Fenom\Modifier::isIterable(%s)',
+        'const'    => 'defined(%s)',
+        'template' => '$tpl->getStorage()->templateExists(%s)',
+        'empty'    => 'empty(%s)',
+        'set'      => 'isset(%s)',
+        '_empty'   => '!%s', // for none variable
+        '_set'     => '(%s !== null)', // for none variable
+        'odd'      => '(%s & 1)',
+        'even'     => '!(%s %% 2)',
+        'third'    => '!(%s %% 3)'
     );
 
     /**
@@ -293,7 +362,7 @@ class Fenom
      */
     public function setCompileDir($dir)
     {
-        if(!is_writable($dir)) {
+        if (!is_writable($dir)) {
             throw new LogicException("Cache directory $dir is not writable");
         }
         $this->_compile_dir = $dir;
@@ -350,6 +419,22 @@ class Fenom
     }
 
     /**
+     * @param callable $cb
+     * @return self
+     */
+    public function addTagFilter($cb)
+    {
+        $this->tag_filters[] = $cb;
+        return $this;
+    }
+
+
+    public function getTagFilters()
+    {
+        return $this->tag_filters;
+    }
+
+    /**
      * Add modifier
      *
      * @param string $modifier the modifier name
@@ -372,7 +457,7 @@ class Fenom
     public function addCompiler($compiler, $parser)
     {
         $this->_actions[$compiler] = array(
-            'type' => self::INLINE_COMPILER,
+            'type'   => self::INLINE_COMPILER,
             'parser' => $parser
         );
         return $this;
@@ -387,7 +472,7 @@ class Fenom
     {
         if (method_exists($storage, "tag" . $compiler)) {
             $this->_actions[$compiler] = array(
-                'type' => self::INLINE_COMPILER,
+                'type'   => self::INLINE_COMPILER,
                 'parser' => array($storage, "tag" . $compiler)
             );
         }
@@ -403,13 +488,17 @@ class Fenom
      * @param array $tags
      * @return Fenom
      */
-    public function addBlockCompiler($compiler, $open_parser, $close_parser = self::DEFAULT_CLOSE_COMPILER, array $tags = array())
-    {
+    public function addBlockCompiler(
+        $compiler,
+        $open_parser,
+        $close_parser = self::DEFAULT_CLOSE_COMPILER,
+        array $tags = array()
+    ) {
         $this->_actions[$compiler] = array(
-            'type' => self::BLOCK_COMPILER,
-            'open' => $open_parser,
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => $open_parser,
             'close' => $close_parser ? : self::DEFAULT_CLOSE_COMPILER,
-            'tags' => $tags,
+            'tags'  => $tags,
         );
         return $this;
     }
@@ -425,8 +514,8 @@ class Fenom
     public function addBlockCompilerSmart($compiler, $storage, array $tags, array $floats = array())
     {
         $c = array(
-            'type' => self::BLOCK_COMPILER,
-            "tags" => array(),
+            'type'       => self::BLOCK_COMPILER,
+            "tags"       => array(),
             "float_tags" => array()
         );
         if (method_exists($storage, $compiler . "Open")) {
@@ -462,8 +551,8 @@ class Fenom
     public function addFunction($function, $callback, $parser = self::DEFAULT_FUNC_PARSER)
     {
         $this->_actions[$function] = array(
-            'type' => self::INLINE_FUNCTION,
-            'parser' => $parser,
+            'type'     => self::INLINE_FUNCTION,
+            'parser'   => $parser,
             'function' => $callback,
         );
         return $this;
@@ -477,8 +566,8 @@ class Fenom
     public function addFunctionSmart($function, $callback)
     {
         $this->_actions[$function] = array(
-            'type' => self::INLINE_FUNCTION,
-            'parser' => self::SMART_FUNC_PARSER,
+            'type'     => self::INLINE_FUNCTION,
+            'parser'   => self::SMART_FUNC_PARSER,
             'function' => $callback,
         );
         return $this;
@@ -491,12 +580,16 @@ class Fenom
      * @param callable|string $parser_close
      * @return Fenom
      */
-    public function addBlockFunction($function, $callback, $parser_open = self::DEFAULT_FUNC_OPEN, $parser_close = self::DEFAULT_FUNC_CLOSE)
-    {
+    public function addBlockFunction(
+        $function,
+        $callback,
+        $parser_open = self::DEFAULT_FUNC_OPEN,
+        $parser_close = self::DEFAULT_FUNC_CLOSE
+    ) {
         $this->_actions[$function] = array(
-            'type' => self::BLOCK_FUNCTION,
-            'open' => $parser_open,
-            'close' => $parser_close,
+            'type'     => self::BLOCK_FUNCTION,
+            'open'     => $parser_open,
+            'close'    => $parser_close,
             'function' => $callback,
         );
         return $this;
@@ -510,6 +603,26 @@ class Fenom
     {
         $this->_allowed_funcs = $this->_allowed_funcs + array_flip($funcs);
         return $this;
+    }
+
+    /**
+     * Add custom test
+     * @param string $name test name
+     * @param string $code test PHP code. Code may contains placeholder %s, which will be replaced by test-value. For example: is_callable(%s)
+     */
+    public function addTest($name, $code)
+    {
+        $this->_tests[$name] = $code;
+    }
+
+    /**
+     * Get test code by name
+     * @param string $name
+     * @return string|bool
+     */
+    public function getTest($name)
+    {
+        return isset($this->_tests[$name]) ? $this->_tests[$name] : false;
     }
 
     /**
@@ -531,6 +644,7 @@ class Fenom
     }
 
     /**
+     * Modifier autoloader
      * @param string $modifier
      * @param Fenom\Template $template
      * @return bool
@@ -557,7 +671,8 @@ class Fenom
     }
 
     /**
-     * @param $tag
+     * Tags autoloader
+     * @param string $tag
      * @param Fenom\Template $template
      * @return bool
      */
@@ -599,11 +714,15 @@ class Fenom
      *
      * @param string $scm scheme name
      * @param Fenom\ProviderInterface $provider provider object
+     * @param string $compile_path
      * @return $this
      */
-    public function addProvider($scm, \Fenom\ProviderInterface $provider)
+    public function addProvider($scm, \Fenom\ProviderInterface $provider, $compile_path = null)
     {
         $this->_providers[$scm] = $provider;
+        if ($compile_path) {
+            $this->_compiles[$scm] = $compile_path;
+        }
         return $this;
     }
 
@@ -683,17 +802,17 @@ class Fenom
     }
 
     /**
-     *
-     *
-     * @param string $template name of template
+     * Creates pipe-line of template's data to callback
+     * @note Method not works correctly in old PHP 5.3.*
+     * @param string $template name of the template
+     * @param callable $callback template's data handler
      * @param array $vars
-     * @param callable $callback
-     * @param float $chunk
+     * @param float $chunk amount of bytes of chunk
      * @return array
      */
     public function pipe($template, $callback, array $vars = array(), $chunk = 1e6)
     {
-        ob_start($callback, $chunk, true);
+        ob_start($callback, $chunk, PHP_OUTPUT_HANDLER_STDFLAGS);
         $data = $this->getTemplate($template)->display($vars);
         ob_end_flush();
         return $data;
@@ -709,7 +828,11 @@ class Fenom
     public function getTemplate($template, $options = 0)
     {
         $options |= $this->_options;
-        $key = dechex($options) . "@" . $template;
+        if (is_array($template)) {
+            $key = dechex($options) . "@" . implode(",", $template);
+        } else {
+            $key = dechex($options) . "@" . $template;
+        }
         if (isset($this->_storage[$key])) {
             /** @var Fenom\Template $tpl */
             $tpl = $this->_storage[$key];
@@ -719,6 +842,7 @@ class Fenom
                 return $tpl;
             }
         } elseif ($this->_options & self::FORCE_COMPILE) {
+
             return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
         } else {
             return $this->_storage[$key] = $this->_load($template, $options);
@@ -745,22 +869,22 @@ class Fenom
     /**
      * Load template from cache or create cache if it doesn't exists.
      *
-     * @param string $tpl
+     * @param string $template
      * @param int $opts
      * @return Fenom\Render
      */
-    protected function _load($tpl, $opts)
+    protected function _load($template, $opts)
     {
-        $file_name = $this->_getCacheName($tpl, $opts);
+        $file_name = $this->_getCacheName($template, $opts);
         if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this; // used in template
-            $_tpl = include($this->_compile_dir . "/" . $file_name);
+            $_tpl  = include($this->_compile_dir . "/" . $file_name);
             /* @var Fenom\Render $_tpl */
             if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
                 return $_tpl;
             }
         }
-        return $this->compile($tpl, true, $opts);
+        return $this->compile($template, true, $opts);
     }
 
     /**
@@ -772,14 +896,22 @@ class Fenom
      */
     private function _getCacheName($tpl, $options)
     {
-        $hash = $tpl . ":" . $options;
-        return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+        if (is_array($tpl)) {
+            $hash = implode(".", $tpl) . ":" . $options;
+            foreach ($tpl as &$t) {
+                $t = str_replace(":", "_", basename($t));
+            }
+            return implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
+        } else {
+            $hash = $tpl . ":" . $options;
+            return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+        }
     }
 
     /**
      * Compile and save template
      *
-     * @param string $tpl
+     * @param string|array $tpl
      * @param bool $store store template on disk
      * @param int $options
      * @throws RuntimeException
@@ -788,11 +920,19 @@ class Fenom
     public function compile($tpl, $store = true, $options = 0)
     {
         $options = $this->_options | $options;
-        $template = $this->getRawTemplate()->load($tpl);
+        if (is_string($tpl)) {
+            $template = $this->getRawTemplate()->load($tpl);
+        } else {
+            $template = $this->getRawTemplate()->load($tpl[0], false);
+            unset($tpl[0]);
+            foreach ($tpl as $t) {
+                $template->extend($t);
+            }
+        }
         if ($store) {
-            $cache = $this->_getCacheName($tpl, $options);
+            $cache   = $this->_getCacheName($tpl, $options);
             $tpl_tmp = tempnam($this->_compile_dir, $cache);
-            $tpl_fp = fopen($tpl_tmp, "w");
+            $tpl_fp  = fopen($tpl_tmp, "w");
             if (!$tpl_fp) {
                 throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory " . $this->_compile_dir . " is writable?");
             }
@@ -858,5 +998,25 @@ class Fenom
             }
         }
         return $mask;
+    }
+
+    /**
+     * Register PSR-0 autoload
+     * @param string $dir custom directory for autoloading, if NULL — autoload itself
+     * @return bool
+     */
+    public static function registerAutoload($dir = null)
+    {
+        if (!$dir) {
+            $dir = __DIR__;
+        }
+        return spl_autoload_register(
+            function ($classname) use ($dir) {
+                $file = $dir . DIRECTORY_SEPARATOR . str_replace('\\', DIRECTORY_SEPARATOR, $classname) . '.php';
+                if (is_file($file)) {
+                    require_once $file;
+                }
+            }
+        );
     }
 }

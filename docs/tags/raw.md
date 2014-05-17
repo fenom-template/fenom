@@ -1,7 +1,8 @@
-Tag {raw} [RU]
-==================
+Tag {raw}
+=========
 
-Тег `{raw <expression>}` позволяет выводить результат выражения или функций без экранирования, игнорируя глобальную настройку `auto_escape`.
+Tag `{raw <expression>}` allow outputs render results without escaping.
+This tag rewrite global option `auto_escape` for specified code.
 
 ```smarty
 {autoescape true}
@@ -15,15 +16,15 @@ Tag {raw} [RU]
 {/autoescate}
 ```
 
-Для результатов функций то же может быть отключено экранирование:
+For functions use tag with prefix `raw:`:
 
 ```smarty
 {autoescape true}
     ...
     {my_func page=5} {* escape *}
-    {raw:my_func page=5} {* unescape *}
+    {my_func:raw page=5} {* unescape *}
     ...
 {/autoescate}
 ```
 
-На компиляторы свойство raw не распространяется.
+Tag can not be applied to compilers as `foreach`, `if` and other.

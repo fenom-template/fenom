@@ -1,15 +1,20 @@
-Modifier escape [RU]
-====================
+Modifier escape
+===============
 
-Используется для кодирования / экранирования спецсимволов по алгоритмам экранирования HTML, URL'ов. По умолчанию активирован режим экранирования HTML.
+The modifier escapes a string for safe insertion into the output.
+It supports different escaping strategies depending on the template context.
+By default, it uses the HTML escaping strategy:
 
 ```smarty
-{$html_data|escape:'HTML'}
+{$post.title|escape:'html'}
 ```
 
-Возможные режимы экранирования
+The modifier supports the following escaping strategies:
 
-* HTML
-* URL
+* html: escapes a string for the HTML body context.
+* url: escapes a string for the URI or parameter contexts.
+* js: escapes a string for the JavaScript context.
 
-для простоты, модификатор обладает коротким псевдонимом `|e`
+For convenience, the `e` modifier is defined as an alias of `escape` modifier.
+
+Second parameter is charset.

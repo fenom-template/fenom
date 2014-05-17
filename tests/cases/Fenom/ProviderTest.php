@@ -1,5 +1,6 @@
 <?php
 namespace Fenom;
+
 use Fenom;
 use Fenom\TestCase;
 
@@ -87,7 +88,7 @@ class ProviderTest extends TestCase
         clearstatcache();
         $templates = array(
             "template1.tpl" => filemtime(FENOM_RESOURCES . '/template/template1.tpl'),
-            "unexists.tpl" => 1234567890
+            "unexists.tpl"  => 1234567890
         );
         $this->assertFalse($this->provider->verify($templates));
     }
@@ -96,14 +97,18 @@ class ProviderTest extends TestCase
     {
         $list = $this->provider->getList();
         sort($list);
-        $this->assertSame(array(
-            "sub/template3.tpl",
-            "template1.tpl",
-            "template2.tpl"
-        ), $list);
+        $this->assertSame(
+            array(
+                "sub/template3.tpl",
+                "template1.tpl",
+                "template2.tpl"
+            ),
+            $list
+        );
     }
 
-    public function testRm() {
+    public function testRm()
+    {
         $this->assertTrue(is_dir(FENOM_RESOURCES . '/template/sub'));
         Provider::rm(FENOM_RESOURCES . '/template/sub');
         $this->assertFalse(is_dir(FENOM_RESOURCES . '/template/sub'));

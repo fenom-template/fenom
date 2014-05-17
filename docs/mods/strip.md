@@ -1,13 +1,13 @@
-Modifier strip [RU]
-===================
+Modifier strip
+==============
 
-Для удаления символы пробелов при использовании переменной используйте можификатор `|strip`
+This replaces all repeated spaces and tabs with a single space, or with the supplied string.
 
 ```smarty
 {"   one    two   "|strip} => 'one two'
 ```
 
-Что бы убрать переносы строк укажите **TRUE** первым аргументом модификатора
+Optional boolean parameter tell to the modifier strip also newline
 
 ```smarty
 {"    multi

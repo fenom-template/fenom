@@ -1,9 +1,7 @@
 <?php
 
-$loader = include(__DIR__ . "/../vendor/autoload.php");
-/* @var Composer\Autoload\ClassLoader $loader */
-$loader->add('Fenom', __DIR__.'/cases');
-
+require(__DIR__ . "/../src/Fenom.php");
+Fenom::registerAutoload();
 
 define('FENOM_RESOURCES', __DIR__ . "/resources");
 
@@ -26,4 +24,18 @@ function dump()
         fwrite(STDERR, "DUMP: " . call_user_func("print_r", $arg, true) . "\n");
 
     }
+}
+
+function dumpt()
+{
+    foreach (func_get_args() as $arg) {
+        fwrite(STDERR, "DUMP: " . call_user_func("print_r", $arg, true) . "\n");
+
+    }
+    $e = new Exception();
+    echo "-------\nDump trace: \n" . $e->getTraceAsString() . "\n";
+}
+
+if(PHP_VERSION_ID > 50400) {
+    function php_gte_54() {}
 }

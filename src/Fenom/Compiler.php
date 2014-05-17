@@ -8,6 +8,7 @@
  * file that was distributed with this source code.
  */
 namespace Fenom;
+
 use Fenom\Error\InvalidUsageException;
 use Fenom\Error\UnexpectedTokenException;
 use Fenom\Tokenizer;
@@ -26,45 +27,47 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws InvalidUsageException
+     * @param Tag $tag
+     * @throws \LogicException
      * @return string
      */
-    public static function tagInclude(Tokenizer $tokens, Template $tpl)
+    public static function tagInclude(Tokenizer $tokens, Tag $tag)
     {
-        $name = false;
+        $tpl   = $tag->tpl;
+        $name  = false;
         $cname = $tpl->parsePlainArg($tokens, $name);
-        $p = $tpl->parseParams($tokens);
-        if ($p) { // if we have additionally variables
-            if ($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) {
+        $p     = $tpl->parseParams($tokens);
+        if ($name) {
+            if ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE) {
                 $inc = $tpl->getStorage()->compile($name, false);
                 $tpl->addDepend($inc);
                 $var = $tpl->tmpVar();
-                return $var.' = (array)$tpl; $tpl->exchangeArray(' . self::toArray($p) . '+'.$var.'); ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
-            } else {
-                return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . '+(array)$tpl);';
+                if ($p) {
+                    return $var . ' = $var; $var = ' . self::toArray($p) . ' + $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
+                } else {
+                    return $var . ' = $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
+                }
+            } elseif (!$tpl->getStorage()->templateExists($name)) {
+                throw new \LogicException("Template $name not found");
             }
+        }
+        if ($p) {
+            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display(' . self::toArray($p) . ' + $var);';
         } else {
-            if ($name && ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE)) {
-                $inc = $tpl->getStorage()->compile($name, false);
-                $tpl->addDepend($inc);
-                $var = $tpl->tmpVar();
-                return $var.' = (array)$tpl; ?>' . $inc->getBody() . '<?php $tpl->exchangeArray('.$var.'); unset('.$var.');';
-            } else {
-                return '$tpl->getStorage()->getTemplate(' . $cname . ')->display((array)$tpl);';
-            }
+            return '$tpl->getStorage()->getTemplate(' . $cname . ')->display($var);';
         }
     }
 
     /**
      * Tag {insert ...}
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @return string
+     * @param Tag $tag
      * @throws Error\InvalidUsageException
+     * @return string
      */
-    public static function tagInsert(Tokenizer $tokens, Template $tpl)
+    public static function tagInsert(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         $tpl->parsePlainArg($tokens, $name);
         if (!$name) {
             throw new InvalidUsageException("Tag {insert} accept only static template name");
@@ -80,10 +83,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function ifOpen(Tokenizer $tokens, Scope $scope)
+    public static function ifOpen(Tokenizer $tokens, Tag $scope)
     {
         $scope["else"] = false;
         return 'if(' . $scope->tpl->parseExpr($tokens) . ') {';
@@ -94,11 +97,11 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      * @return string
      */
-    public static function tagElseIf(Tokenizer $tokens, Scope $scope)
+    public static function tagElseIf(Tokenizer $tokens, Tag $scope)
     {
         if ($scope["else"]) {
             throw new InvalidUsageException('Incorrect use of the tag {elseif}');
@@ -110,12 +113,10 @@ class Compiler
      * Tag {else}
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
-     * @internal param $
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function tagElse(Tokenizer $tokens, Scope $scope)
+    public static function tagElse(Tokenizer $tokens, Tag $scope)
     {
         $scope["else"] = true;
         return '} else {';
@@ -126,24 +127,24 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws UnexpectedTokenException
      * @throws InvalidUsageException
      * @return string
      */
-    public static function foreachOpen(Tokenizer $tokens, Scope $scope)
+    public static function foreachOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p = array("index" => false, "first" => false, "last" => false);
-        $key = null;
+        $p      = array("index" => false, "first" => false, "last" => false);
+        $key    = null;
         $before = $body = array();
         if ($tokens->is(T_VARIABLE)) {
-            $from = $scope->tpl->parseTerm($tokens);
+            $from    = $scope->tpl->parseTerm($tokens);
             $prepend = "";
         } elseif ($tokens->is('[')) {
-            $from = $scope->tpl->parseArray($tokens);
-            $uid = '$v' . $scope->tpl->i++;
+            $from    = $scope->tpl->parseArray($tokens);
+            $uid     = '$v' . $scope->tpl->i++;
             $prepend = $uid . ' = ' . $from . ';';
-            $from = $uid;
+            $from    = $uid;
         } else {
             throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
         }
@@ -152,12 +153,12 @@ class Compiler
         $value = $scope->tpl->parseVariable($tokens);
         if ($tokens->is(T_DOUBLE_ARROW)) {
             $tokens->next();
-            $key = $value;
+            $key   = $value;
             $value = $scope->tpl->parseVariable($tokens);
         }
 
         $scope["after"] = array();
-        $scope["else"] = false;
+        $scope["else"]  = false;
 
         while ($token = $tokens->key()) {
             $param = $tokens->get(T_STRING);
@@ -170,22 +171,22 @@ class Compiler
         }
 
         if ($p["index"]) {
-            $before[] = $p["index"] . ' = 0';
+            $before[]         = $p["index"] . ' = 0';
             $scope["after"][] = $p["index"] . '++';
         }
         if ($p["first"]) {
-            $before[] = $p["first"] . ' = true';
+            $before[]         = $p["first"] . ' = true';
             $scope["after"][] = $p["first"] . ' && (' . $p["first"] . ' = false )';
         }
         if ($p["last"]) {
-            $before[] = $p["last"] . ' = false';
+            $before[]     = $p["last"] . ' = false';
             $scope["uid"] = "v" . $scope->tpl->i++;
-            $before[] = '$' . $scope["uid"] . " = count($from)";
-            $body[] = 'if(!--$' . $scope["uid"] . ') ' . $p["last"] . ' = true';
+            $before[]     = '$' . $scope["uid"] . " = count($from)";
+            $body[]       = 'if(!--$' . $scope["uid"] . ') ' . $p["last"] . ' = true';
         }
 
-        $before = $before ? implode("; ", $before) . ";" : "";
-        $body = $body ? implode("; ", $body) . ";" : "";
+        $before         = $before ? implode("; ", $before) . ";" : "";
+        $body           = $body ? implode("; ", $body) . ";" : "";
         $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
         if ($key) {
             return "$prepend if($from) { $before foreach($from as $key => $value) { $body";
@@ -198,10 +199,10 @@ class Compiler
      * Tag {foreachelse}
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function foreachElse($tokens, Scope $scope)
+    public static function foreachElse($tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = $scope["else"] = true;
         return " {$scope['after']} } } else {";
@@ -212,10 +213,10 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function foreachClose($tokens, Scope $scope)
+    public static function foreachClose($tokens, Tag $scope)
     {
         if ($scope["else"]) {
             return '}';
@@ -227,48 +228,62 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws Error\UnexpectedTokenException
      * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function forOpen(Tokenizer $tokens, Scope $scope)
+    public static function forOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p = array("index" => false, "first" => false, "last" => false, "step" => 1, "to" => false, "max" => false, "min" => false);
+        $p              = array(
+            "index" => false,
+            "first" => false,
+            "last"  => false,
+            "step"  => 1,
+            "to"    => false,
+            "max"   => false,
+            "min"   => false
+        );
         $scope["after"] = $before = $body = array();
-        $i = array('', '');
-        $c = "";
-        $var = $scope->tpl->parseTerm($tokens, $is_var);
+        $i              = array('', '');
+        $c              = "";
+        $var            = $scope->tpl->parseTerm($tokens, $is_var);
         if (!$is_var) {
             throw new UnexpectedTokenException($tokens);
         }
         $tokens->get("=");
         $tokens->next();
         $val = $scope->tpl->parseExpr($tokens);
-        $p = $scope->tpl->parseParams($tokens, $p);
+        $p   = $scope->tpl->parseParams($tokens, $p);
 
         if (is_numeric($p["step"])) {
             if ($p["step"] > 0) {
                 $condition = "$var <= {$p['to']}";
-                if ($p["last"]) $c = "($var + {$p['step']}) > {$p['to']}";
+                if ($p["last"]) {
+                    $c = "($var + {$p['step']}) > {$p['to']}";
+                }
             } elseif ($p["step"] < 0) {
                 $condition = "$var >= {$p['to']}";
-                if ($p["last"]) $c = "($var + {$p['step']}) < {$p['to']}";
+                if ($p["last"]) {
+                    $c = "($var + {$p['step']}) < {$p['to']}";
+                }
             } else {
-                throw new InvalidUsageException("Invalid step value if {for}");
+                throw new InvalidUsageException("Invalid step value");
             }
         } else {
             $condition = "({$p['step']} > 0 && $var <= {$p['to']} || {$p['step']} < 0 && $var >= {$p['to']})";
-            if ($p["last"]) $c = "({$p['step']} > 0 && ($var + {$p['step']}) <= {$p['to']} || {$p['step']} < 0 && ($var + {$p['step']}) >= {$p['to']})";
+            if ($p["last"]) {
+                $c = "({$p['step']} > 0 && ($var + {$p['step']}) <= {$p['to']} || {$p['step']} < 0 && ($var + {$p['step']}) >= {$p['to']})";
+            }
         }
 
         if ($p["first"]) {
-            $before[] = $p["first"] . ' = true';
+            $before[]         = $p["first"] . ' = true';
             $scope["after"][] = $p["first"] . ' && (' . $p["first"] . ' = false )';
         }
         if ($p["last"]) {
             $before[] = $p["last"] . ' = false';
-            $body[] = "if($c) {$p['last']} = true";
+            $body[]   = "if($c) {$p['last']} = true";
         }
 
         if ($p["index"]) {
@@ -276,11 +291,11 @@ class Compiler
             $i[1] .= $p["index"] . '++,';
         }
 
-        $scope["else"] = false;
+        $scope["else"]      = false;
         $scope["else_cond"] = "$var==$val";
-        $before = $before ? implode("; ", $before) . ";" : "";
-        $body = $body ? implode("; ", $body) . ";" : "";
-        $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
+        $before             = $before ? implode("; ", $before) . ";" : "";
+        $body               = $body ? implode("; ", $body) . ";" : "";
+        $scope["after"]     = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
 
         return "$before for({$i[0]} $var=$val; $condition;{$i[1]} $var+={$p['step']}) { $body";
     }
@@ -288,23 +303,23 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function forElse(Tokenizer $tokens, Scope $scope)
+    public static function forElse(Tokenizer $tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = true;
-        $scope["else"] = true;
+        $scope["else"]     = true;
         return " } if({$scope['else_cond']}) {";
     }
 
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function forClose($tokens, Scope $scope)
+    public static function forClose($tokens, Tag $scope)
     {
         if ($scope["else"]) {
             return '}';
@@ -316,10 +331,10 @@ class Compiler
     /**
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function whileOpen(Tokenizer $tokens, Scope $scope)
+    public static function whileOpen(Tokenizer $tokens, Tag $scope)
     {
         return 'while(' . $scope->tpl->parseExpr($tokens) . ') {';
     }
@@ -329,32 +344,32 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function switchOpen(Tokenizer $tokens, Scope $scope)
+    public static function switchOpen(Tokenizer $tokens, Tag $scope)
     {
-        $expr = $scope->tpl->parseExpr($tokens);
-        $scope["case"] = array();
-        $scope["last"] = array();
+        $expr             = $scope->tpl->parseExpr($tokens);
+        $scope["case"]    = array();
+        $scope["last"]    = array();
         $scope["default"] = '';
-        $scope["var"] = $scope->tpl->tmpVar();
-        $scope["expr"] = $scope["var"].' = strval('.$expr.')';
+        $scope["var"]     = $scope->tpl->tmpVar();
+        $scope["expr"]    = $scope["var"] . ' = strval(' . $expr . ')';
         // lazy init
         return '';
     }
 
     /**
      * Resort cases for {switch}
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    private static function _caseResort(Scope $scope)
+    private static function _caseResort(Tag $scope)
     {
         $content = $scope->cutContent();
-        if ($scope["last"] === false) {
-            $scope["default"] .= $content;
-        } else {
-            foreach ($scope["last"] as $case) {
+        foreach ($scope["last"] as $case) {
+            if($case === false) {
+                $scope["default"] .= $content;
+            } else {
                 if (!isset($scope["case"][$case])) {
                     $scope["case"][$case] = "";
                 }
@@ -369,14 +384,19 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      * @return string
      */
-    public static function tagCase(Tokenizer $tokens, Scope $scope)
+    public static function tagCase(Tokenizer $tokens, Tag $tag)
     {
-        self::_caseResort($scope);
+        self::_caseResort($tag);
         do {
-            $scope["last"][] = $scope->tpl->parseScalar($tokens, false);
+            if($tokens->is(T_DEFAULT)) {
+                $tag["last"][] = false;
+                $tokens->next();
+            } else {
+                $tag["last"][] = $tag->tpl->parseScalar($tokens, false);
+            }
             if ($tokens->is(',')) {
                 $tokens->next();
             } else {
@@ -392,13 +412,13 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function tagDefault($tokens, Scope $scope)
+    public static function tagDefault($tokens, Tag $scope)
     {
         self::_caseResort($scope);
-        $scope["last"] = false;
+        $scope["last"][] = false;
         return '';
     }
 
@@ -407,22 +427,22 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function switchClose(Tokenizer $tokens, Scope $scope)
+    public static function switchClose(Tokenizer $tokens, Tag $scope)
     {
         self::_caseResort($scope);
-        $expr = $scope["var"];
-        $code = $scope["expr"].";\n";
+        $expr    = $scope["var"];
+        $code    = $scope["expr"] . ";\n";
         $default = $scope["default"];
         foreach ($scope["case"] as $case => $content) {
-            if(is_numeric($case)) {
+            if (is_numeric($case)) {
                 $case = "'$case'";
             }
             $code .= "if($expr == $case) {\n?>$content<?php\n} else";
         }
-        $code .= " {\n?>$default<?php\n}\nunset(".$scope["var"].")";
+        $code .= " {\n?>$default<?php\n}\nunset(" . $scope["var"] . ")";
         return $code;
     }
 
@@ -431,11 +451,11 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      * @return string
      */
-    public static function tagContinue($tokens, Scope $scope)
+    public static function tagContinue($tokens, Tag $scope)
     {
         if (empty($scope["no-continue"])) {
             return 'continue;';
@@ -449,11 +469,11 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      * @return string
      */
-    public static function tagBreak($tokens, Scope $scope)
+    public static function tagBreak($tokens, Tag $scope)
     {
         if (empty($scope["no-break"])) {
             return 'break;';
@@ -465,205 +485,145 @@ class Compiler
     /**
      * Dispatch {extends} tag
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws InvalidUsageException
+     * @param Tag $tag
+     * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function tagExtends(Tokenizer $tokens, Template $tpl)
+    public static function tagExtends(Tokenizer $tokens, Tag $tag)
     {
-        if (!empty($tpl->_extends)) {
+        $tpl = $tag->tpl;
+        if ($tpl->extends) {
             throw new InvalidUsageException("Only one {extends} allowed");
         } elseif ($tpl->getStackSize()) {
-            throw new InvalidUsageException("Tags {extends} can not be nested");
+            throw new InvalidUsageException("Tag {extends} can not be nested");
         }
-        $tpl_name = $tpl->parsePlainArg($tokens, $name);
-        if (empty($tpl->_extended)) {
+        $cname = $tpl->parsePlainArg($tokens, $name);
+        if ($name) {
+            $tpl->extends = $name;
+        } else {
+            $tpl->dynamic_extends = $cname;
+        }
+        if (!$tpl->extend_body) {
             $tpl->addPostCompile(__CLASS__ . "::extendBody");
-        }
-        if ($tpl->getOptions() & Template::DYNAMIC_EXTEND) {
-            $tpl->_compatible = true;
-        }
-        if ($name) { // static extends
-            $tpl->_extends = $tpl->getStorage()->getRawTemplate()->load($name, false);
-            if (!isset($tpl->_compatible)) {
-                $tpl->_compatible = & $tpl->_extends->_compatible;
-            }
-            $tpl->addDepend($tpl->_extends);
-            return "";
-        } else { // dynamic extends
-            if (!isset($tpl->_compatible)) {
-                $tpl->_compatible = true;
-            }
-            $tpl->_extends = $tpl_name;
-            return '$parent = $tpl->getStorage()->getTemplate(' . $tpl_name . ', \Fenom\Template::EXTENDED);';
+            $tpl->extend_body = true;
         }
     }
 
     /**
      * Post compile action for {extends ...} tag
-     * @param string $body
      * @param Template $tpl
+     * @param string $body
      */
-    public static function extendBody(&$body, $tpl)
+    public static function extendBody($tpl, &$body)
     {
-        $t = $tpl;
-        if ($tpl->uses) {
-            $tpl->blocks += $tpl->uses;
-        }
-        while (isset($t->_extends)) {
-            $t = $t->_extends;
-            if (is_object($t)) {
-                /* @var \Fenom\Template $t */
-                $t->_extended = true;
-                $tpl->addDepend($t);
-                $t->_compatible = & $tpl->_compatible;
-                $t->macros = & $tpl->macros;
-                $t->blocks = & $tpl->blocks;
-                $t->compile();
-                if ($t->uses) {
-                    $tpl->blocks += $t->uses;
-                }
-                if (!isset($t->_extends)) { // last item => parent
-                    if (empty($tpl->_compatible)) {
-                        $body = $t->getBody();
-                    } else {
-                        $body = '<?php ob_start(); ?>' . $body . '<?php ob_end_clean(); ?>' . $t->getBody();
-                    }
-                    return;
-                } else {
-                    $body .= $t->getBody();
-                }
-            } else {
-                $body = '<?php ob_start(); ?>' . $body . '<?php ob_end_clean(); $parent->b = &$tpl->b; $parent->display((array)$tpl); unset($tpl->b, $parent->b); ?>';
-                return;
+        if ($tpl->dynamic_extends) {
+            if (!$tpl->ext_stack) {
+                $tpl->ext_stack[] = $tpl->getName();
             }
+            foreach ($tpl->ext_stack as &$t) {
+                $stack[] = "'$t'";
+            }
+            $stack[] = $tpl->dynamic_extends;
+            $body    = '<?php $tpl->getStorage()->display(array(' . implode(', ', $stack) . '), $var); ?>';
+        } else {
+            $child = $tpl;
+            while ($child && $child->extends) {
+                $parent = $tpl->extend($child->extends);
+                $child  = $parent->extends ? $parent : false;
+            }
+            $tpl->extends = false;
         }
+        $tpl->extend_body = false;
     }
 
     /**
      * Tag {use ...}
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws InvalidUsageException
+     * @param Tag $tag
+     * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function tagUse(Tokenizer $tokens, Template $tpl)
+    public static function tagUse(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         if ($tpl->getStackSize()) {
-            throw new InvalidUsageException("Tags {use} can not be nested");
+            throw new InvalidUsageException("Tag {use} can not be nested");
         }
-        $cname = $tpl->parsePlainArg($tokens, $name);
+        $tpl->parsePlainArg($tokens, $name);
         if ($name) {
-            $donor = $tpl->getStorage()->getRawTemplate()->load($name, false);
-            $donor->_extended = true;
-            $donor->_extends = $tpl;
-            $donor->_compatible = & $tpl->_compatible;
-            //$donor->blocks = &$tpl->blocks;
-            $donor->compile();
-            $blocks = $donor->blocks;
-            foreach ($blocks as $name => $code) {
-                if (isset($tpl->blocks[$name])) {
-                    $tpl->blocks[$name] = $code;
-                    unset($blocks[$name]);
-                }
-            }
-            $tpl->uses = $blocks + $tpl->uses;
-            $tpl->addDepend($donor);
-            return '?>' . $donor->getBody() . '<?php ';
+            $tpl->importBlocks($name);
         } else {
-            throw new InvalidUsageException('template name must be given explicitly yet');
-            // under construction
-//            $tpl->_compatible = true;
-//            return '$donor = $tpl->getStorage()->getTemplate(' . $cname . ', \Fenom\Template::EXTENDED);' . PHP_EOL .
-//            '$donor->fetch((array)$tpl);' . PHP_EOL .
-//            '$tpl->b += (array)$donor->b';
+            throw new InvalidUsageException('Invalid template name for tag {use}');
         }
     }
 
     /**
      * Tag {block ...}
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
+     * @throws \RuntimeException
      * @return string
-     * @throws InvalidUsageException
      */
-    public static function tagBlockOpen(Tokenizer $tokens, Scope $scope)
+    public static function tagBlockOpen(Tokenizer $tokens, Tag $scope)
     {
         if ($scope->level > 0) {
             $scope->tpl->_compatible = true;
         }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
-        $scope["name"] = $name;
+        if (!$name) {
+            throw new \RuntimeException("Invalid block name");
+        }
+        $scope["name"]       = $name;
+        $scope["use_parent"] = false;
     }
 
     /**
-     * Close tag {/block}
      * @param Tokenizer $tokens
-     * @param Scope $scope
-     * @return string
+     * @param Tag $scope
      */
-    public static function tagBlockClose($tokens, Scope $scope)
+    public static function tagBlockClose($tokens, Tag $scope)
     {
+        $tpl  = $scope->tpl;
+        $name = $scope["name"];
 
-        $tpl = $scope->tpl;
-        if (isset($tpl->_extends)) { // is child
-            if ($scope["name"]) { // is scalar name
-                if ($tpl->_compatible) { // is compatible mode
-                    $scope->replaceContent(
-                        '<?php /* 1) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(empty($tpl->b[' . $scope["cname"] . '])) { ' .
-                        '$tpl->b[' . $scope["cname"] . '] = function($tpl) { ?>' . PHP_EOL .
-                        $scope->getContent() .
-                        "<?php };" .
-                        "} ?>" . PHP_EOL
-                    );
-                } elseif (!isset($tpl->blocks[$scope["name"]])) { // is block not registered
-                    $tpl->blocks[$scope["name"]] = $scope->getContent();
-                    $scope->replaceContent(
-                        '<?php /* 2) Block ' . $tpl . ': ' . $scope["cname"] . ' ' . $tpl->_compatible . ' */' . PHP_EOL . ' $tpl->b[' . $scope["cname"] . '] = function($tpl) { ?>' . PHP_EOL .
-                        $scope->getContent() .
-                        "<?php }; ?>" . PHP_EOL
-                    );
-                }
-            } else { // dynamic name
-                $tpl->_compatible = true; // enable compatible mode
-                $scope->replaceContent(
-                    '<?php /* 3) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(empty($tpl->b[' . $scope["cname"] . '])) { ' .
-                    '$tpl->b[' . $scope["cname"] . '] = function($tpl) { ?>' . PHP_EOL .
-                    $scope->getContent() .
-                    "<?php };" .
-                    "} ?>" . PHP_EOL
-                );
+        if (isset($tpl->blocks[$name])) { // block defined
+            $block = & $tpl->blocks[$name];
+            if ($block['use_parent']) {
+                $parent = $scope->getContent();
+
+                $block['block'] = str_replace($block['use_parent'] . " ?>", "?>" . $parent, $block['block']);
             }
-        } else { // is parent
-            if (isset($tpl->blocks[$scope["name"]])) { // has block
-                if ($tpl->_compatible) { // compatible mode enabled
-                    $scope->replaceContent(
-                        '<?php /* 4) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(isset($tpl->b[' . $scope["cname"] . '])) { echo $tpl->b[' . $scope["cname"] . ']->__invoke($tpl); } else {?>' . PHP_EOL .
-                        $tpl->blocks[$scope["name"]] .
-                        '<?php } ?>' . PHP_EOL
-                    );
-
-                } else {
-                    $scope->replaceContent($tpl->blocks[$scope["name"]]);
-                }
-//            } elseif(isset($tpl->_extended) || !empty($tpl->_compatible)) {
-            } elseif (isset($tpl->_extended) && $tpl->_compatible || empty($tpl->_extended)) {
-                $scope->replaceContent(
-                    '<?php /* 5) Block ' . $tpl . ': ' . $scope["cname"] . ' */' . PHP_EOL . ' if(isset($tpl->b[' . $scope["cname"] . '])) { echo $tpl->b[' . $scope["cname"] . ']->__invoke($tpl); } else {?>' . PHP_EOL .
-                    $scope->getContent() .
-                    '<?php } ?>' . PHP_EOL
-                );
+            if (!$block["import"]) { // not from {use} - redefine block
+                $scope->replaceContent($block["block"]);
+                return;
+            } elseif ($block["import"] != $tpl->getName()) { // tag {use} was in another template
+                $tpl->blocks[$scope["name"]]["import"] = false;
+                $scope->replaceContent($block["block"]);
             }
         }
-        return '';
 
+        $tpl->blocks[$scope["name"]] = array(
+            "from"       => $tpl->getName(),
+            "import"     => false,
+            "use_parent" => $scope["use_parent"],
+            "block"      => $scope->getContent()
+        );
     }
 
-    public static function tagParent($tokens, Scope $scope)
+    /**
+     * Tag {parent}
+     *
+     * @param Tokenizer $tokens
+     * @param Tag $scope
+     * @return string
+     */
+    public static function tagParent($tokens, Tag $scope)
     {
-        if (empty($scope->tpl->_extends)) {
-            throw new InvalidUsageException("Tag {parent} may be declared in children");
+        $block_scope = $scope->tpl->getParentScope('block');
+        if (!$block_scope['use_parent']) {
+            $block_scope['use_parent'] = "/* %%parent#" . mt_rand(0, 1e6) . "%% */";
         }
+        return $block_scope['use_parent'];
     }
 
     /**
@@ -681,35 +641,33 @@ class Compiler
      * Standard function parser
      *
      * @static
-     * @param mixed $function
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
      * @return string
      */
-    public static function stdFuncParser($function, Tokenizer $tokens, Template $tpl)
+    public static function stdFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        return "$function(" . self::toArray($tpl->parseParams($tokens)) . ', $tpl)';
+        return $tag->out($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
     }
 
     /**
      * Smart function parser
      *
      * @static
-     * @param                    $function
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
      * @return string
      */
-    public static function smartFuncParser($function, Tokenizer $tokens, Template $tpl)
+    public static function smartFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        if (strpos($function, "::")) {
-            list($class, $method) = explode("::", $function, 2);
+        if (strpos($tag->callback, "::")) {
+            list($class, $method) = explode("::", $tag->callback, 2);
             $ref = new \ReflectionMethod($class, $method);
         } else {
-            $ref = new \ReflectionFunction($function);
+            $ref = new \ReflectionFunction($tag->callback);
         }
-        $args = array();
-        $params = $tpl->parseParams($tokens);
+        $args   = array();
+        $params = $tag->tpl->parseParams($tokens);
         foreach ($ref->getParameters() as $param) {
             if (isset($params[$param->getName()])) {
                 $args[] = $params[$param->getName()];
@@ -719,7 +677,7 @@ class Compiler
                 $args[] = var_export($param->getDefaultValue(), true);
             }
         }
-        return "$function(" . implode(", ", $args) . ')';
+        return $tag->out($tag->callback . "(" . implode(", ", $args) . ')');
     }
 
     /**
@@ -727,12 +685,13 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      * @return string
      */
-    public static function stdFuncOpen(Tokenizer $tokens, Scope $scope)
+    public static function stdFuncOpen(Tokenizer $tokens, Tag $tag)
     {
-        $scope["params"] = self::toArray($scope->tpl->parseParams($tokens));
+        $tag["params"] = self::toArray($tag->tpl->parseParams($tokens));
+        $tag->setOption(\Fenom::AUTO_ESCAPE, false);
         return 'ob_start();';
     }
 
@@ -741,12 +700,13 @@ class Compiler
      *
      * @static
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      * @return string
      */
-    public static function stdFuncClose($tokens, Scope $scope)
+    public static function stdFuncClose($tokens, Tag $tag)
     {
-        return $scope["function"] . '(' . $scope["params"] . ', ob_get_clean(), $tpl)';
+        $tag->restore(\Fenom::AUTO_ESCAPE);
+        return $tag->out($tag->callback . '(' . $tag["params"] . ', ob_get_clean(), $tpl)');
     }
 
     /**
@@ -766,14 +726,14 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function varOpen(Tokenizer $tokens, Scope $scope)
+    public static function varOpen(Tokenizer $tokens, Tag $scope)
     {
         $var = $scope->tpl->parseVariable($tokens);
         if ($tokens->is('=')) { // inline tag {var ...}
-            $scope->is_closed = true;
+            $scope->close();
             $tokens->next();
             if ($tokens->is("[")) {
                 return $var . '=' . $scope->tpl->parseArray($tokens);
@@ -793,10 +753,10 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function varClose(Tokenizer $tokens, Scope $scope)
+    public static function varClose(Tokenizer $tokens, Tag $scope)
     {
         return $scope["name"] . '=' . $scope["value"] . ';';
     }
@@ -804,10 +764,10 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function filterOpen(Tokenizer $tokens, Scope $scope)
+    public static function filterOpen(Tokenizer $tokens, Tag $scope)
     {
         $scope["filter"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
         return "ob_start();";
@@ -815,10 +775,10 @@ class Compiler
 
     /**
      * @param $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @return string
      */
-    public static function filterClose($tokens, Scope $scope)
+    public static function filterClose($tokens, Tag $scope)
     {
         return "echo " . $scope["filter"] . ";";
     }
@@ -827,12 +787,13 @@ class Compiler
      * Tag {cycle}
      *
      * @param Tokenizer $tokens
-     * @param Template $tpl
+     * @param Tag $tag
+     * @throws Error\InvalidUsageException
      * @return string
-     * @throws InvalidUsageException
      */
-    public static function tagCycle(Tokenizer $tokens, Template $tpl)
+    public static function tagCycle(Tokenizer $tokens, Tag $tag)
     {
+        $tpl = $tag->tpl;
         if ($tokens->is("[")) {
             $exp = $tpl->parseArray($tokens);
         } else {
@@ -866,13 +827,14 @@ class Compiler
      * Import macros from templates
      *
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws UnexpectedTokenException
-     * @throws InvalidUsageException
+     * @param Tag $tag
+     * @throws Error\UnexpectedTokenException
+     * @throws Error\InvalidUsageException
      * @return string
      */
-    public static function tagImport(Tokenizer $tokens, Template $tpl)
+    public static function tagImport(Tokenizer $tokens, Tag $tag)
     {
+        $tpl    = $tag->tpl;
         $import = array();
         if ($tokens->is('[')) {
             $tokens->next();
@@ -897,7 +859,7 @@ class Compiler
 
         $tpl->parsePlainArg($tokens, $name);
         if (!$name) {
-            throw new InvalidUsageException("Invalid usage tag {import}");
+            throw new InvalidUsageException("Invalid template name");
         }
         if ($tokens->is(T_AS)) {
             $alias = $tokens->next()->get(Tokenizer::MACRO_STRING);
@@ -932,15 +894,15 @@ class Compiler
      * Define macro
      *
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      * @throws InvalidUsageException
      */
-    public static function macroOpen(Tokenizer $tokens, Scope $scope)
+    public static function macroOpen(Tokenizer $tokens, Tag $scope)
     {
-        $scope["name"] = $tokens->get(Tokenizer::MACRO_STRING);
+        $scope["name"]      = $tokens->get(Tokenizer::MACRO_STRING);
         $scope["recursive"] = false;
-        $args = array();
-        $defaults = array();
+        $args               = array();
+        $defaults           = array();
         if (!$tokens->valid()) {
             return;
         }
@@ -949,7 +911,12 @@ class Compiler
             return;
         }
         while ($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
-            $args[] = $param = $tokens->getAndNext();
+            $param = $tokens->current();
+            if ($tokens->is(T_VARIABLE)) {
+                $param = ltrim($param, '$');
+            }
+            $tokens->next();
+            $args[] = $param;
             if ($tokens->is('=')) {
                 $tokens->next();
                 if ($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
@@ -962,10 +929,10 @@ class Compiler
         }
         $tokens->skipIf(')');
         $scope["macro"] = array(
-            "name" => $scope["name"],
-            "args" => $args,
-            "defaults" => $defaults,
-            "body" => "",
+            "name"      => $scope["name"],
+            "args"      => $args,
+            "defaults"  => $defaults,
+            "body"      => "",
             "recursive" => false
         );
         return;
@@ -973,14 +940,14 @@ class Compiler
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $scope
      */
-    public static function macroClose(Tokenizer $tokens, Scope $scope)
+    public static function macroClose(Tokenizer $tokens, Tag $scope)
     {
         if ($scope["recursive"]) {
             $scope["macro"]["recursive"] = true;
         }
-        $scope["macro"]["body"] = $scope->cutContent();
+        $scope["macro"]["body"]             = $scope->cutContent();
         $scope->tpl->macros[$scope["name"]] = $scope["macro"];
     }
 
@@ -988,52 +955,50 @@ class Compiler
      * Output value as is, without escaping
      *
      * @param Tokenizer $tokens
-     * @param Template $tpl
-     * @throws InvalidUsageException
+     * @param Tag $tag
      * @return string
      */
-    public static function tagRaw(Tokenizer $tokens, Template $tpl)
+    public static function tagRaw(Tokenizer $tokens, Tag $tag)
     {
-        $escape = (bool)$tpl->escape;
-        $tpl->escape = false;
-        if ($tokens->is(':')) {
-            $func = $tokens->getNext(Tokenizer::MACRO_STRING);
-            $tag = $tpl->getStorage()->getTag($func, $tpl);
-            if ($tag["type"] == \Fenom::INLINE_FUNCTION) {
-                $code = $tpl->parseAct($tokens);
-//            } elseif ($tag["type"] == \Fenom::BLOCK_FUNCTION) {
-//                $code = $tpl->parseAct($tokens);
-//                $tpl->getLastScope()->escape = false;
-//                return $code;
-            } else {
-                throw new InvalidUsageException("Raw mode allow for expressions or functions");
-            }
-        } else {
-            $code = $tpl->out($tpl->parseExpr($tokens));
-        }
-        $tpl->escape = $escape;
-        return $code;
+        return 'echo ' . $tag->tpl->parseExpr($tokens);
     }
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      */
-    public static function autoescapeOpen(Tokenizer $tokens, Scope $scope)
+    public static function escapeOpen(Tokenizer $tokens, Tag $tag)
     {
-        $boolean = ($tokens->get(T_STRING) == "true" ? true : false);
-        $scope["escape"] = $scope->tpl->escape;
-        $scope->tpl->escape = $boolean;
+        $expected = ($tokens->get(T_STRING) == "true" ? true : false);
         $tokens->next();
+        $tag->setOption(\Fenom::AUTO_ESCAPE, $expected);
+    }
+
+    /**
+     * Do nothing
+     */
+    public static function nope()
+    {
     }
 
     /**
      * @param Tokenizer $tokens
-     * @param Scope $scope
+     * @param Tag $tag
      */
-    public static function autoescapeClose(Tokenizer $tokens, Scope $scope)
+    public static function stripOpen(Tokenizer $tokens, Tag $tag)
     {
-        $scope->tpl->escape = $scope["escape"];
+        $expected = ($tokens->get(T_STRING) == "true" ? true : false);
+        $tokens->next();
+        $tag->setOption(\Fenom::AUTO_STRIP, $expected);
     }
 
+    /**
+     * Tag {ignore}
+     * @param Tokenizer $tokens
+     * @param Tag $tag
+     */
+    public static function ignoreOpen(Tokenizer $tokens, Tag $tag)
+    {
+        $tag->tpl->ignore('ignore');
+    }
 }

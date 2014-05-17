@@ -1,17 +1,66 @@
-Syntax [RU]
-===========
+Syntax
+======
 
-Fenom implement [Smarty](http://www.smarty.net/) syntax with some improvements
+Fenom implements [Smarty](http://www.smarty.net/) syntax with some improvements.
+All Fenom tags enclosed in the delimiters `{` and `}`, for example `{var $five = 5}`.
+If you wanna leave delimiters as is in the template use [special statements or tags](#ignoring-delimiters).
+
+**Note**
+Fenom implements [Smarty](http://www.smarty.net/) syntax but not implements Smarty tags, however, some tags very similar.
+But not so bad, Fenom has the [extras](https://github.com/bzick/fenom-extra) that make Fenom like Smarty.
 
 ## Variable
 
+Variables in Fenom can be either displayed directly or used as arguments for functions, attributes and modifiers,
+inside conditional expressions, etc.
+
 ### Use variables
 
+Next example uses simple variables `$user_id` ans `$user_name`
 ```smarty
-{$foo}
-{$bar}
-{$foo[4]}
-{$foo.4}
+<div class="user">Hello, <a href="/users/{$user_id}">{$user_name}</a>.</div>
+```
+
+Example outputs next HTML code:
+```html
+<div class="user">Hello, <a href="/users/17">Bzick</a>.</div>
+```
+
+Переменные могут быть массивом. В этом случае обращение по ключу происходит через опертор `.` или, как в PHP, через операторы `[` и `]`
+```smarty
+<div class="user">Hello, <a href="/users/{$user.id}">{$user.name}</a>.</div>
+```
+`{$user.id}` and `{$user['id']}` are same:
+```smarty
+<div class="user">Hello, <a href="/users/{$user['id']}">{$user.['name']}</a>.</div>
+```
+
+В случае объекта, доступ к его свойствам осущесвляется так как и в PHP — через оператор `->`:
+```smarty
+<div class="user">Hello, <a href="/users/{$user->id}">{$user->name}</a>.</div>
+```
+
+Методы, как и свойства можно вызвать через оператор `->`, передав в метод любые рагументы:
+```smarty
+<div class="user">Hello, <a href="/users/{$user->getId()}">{$user->getName()}</a>.</div>
+```
+
+*Note*
+Be careful, Fenom do not checks existence of the method before invoke.
+To avoid the problem class of the object have to define method `__call`, which throws an exception, etc.
+Also you can prohibit method call in [settings](./docs/configuration.md).
+
+Можно комбинировать различные варианты вызовов:
+
+```smarty
+{$foo.bar.baz}
+{$foo.$bar.$baz}
+{$foo[5].baz}
+{$foo[5].$baz}
+{$foo.bar.baz[4]}
+{$foo[ $bar.baz ]}
+{$foo[5]}
+{$foo.5}
 {$foo.bar}
 {$foo.'bar'}
 {$foo."bar"}
@@ -21,11 +70,13 @@ Fenom implement [Smarty](http://www.smarty.net/) syntax with some improvements
 {$foo[$bar]}
 {$foo->bar}
 {$foo->bar.buz}
+{$foo->bar.buz[ $bar->getId("user") ]}
+{$foo->bar(5)->buz(5.5)}
 ```
 
 ### System variable
 
-Unnamed system variable starts with `$.` and allow access to global variables and system info:
+Unnamed system variable starts with `$.` and allows access to global variables and system info (fix doc):
 
 * `$.get` is `$_GET`.
 * `$.post` is `$_POST`.
@@ -47,17 +98,6 @@ Unnamed system variable starts with `$.` and allow access to global variables an
 {/if}
 ```
 
-### Multidimensional value support
-
-```smarty
-{$foo.bar.baz}
-{$foo.$bar.$baz}
-{$foo[4].baz}
-{$foo[4].$baz}
-{$foo.bar.baz[4]}
-{$foo[ $bar.baz ]}
-```
-
 ### Math operations
 
 ```smarty
@@ -68,17 +108,17 @@ Unnamed system variable starts with `$.` and allow access to global variables an
 
 See all [operators](./operators.md)
 
-### Object support
+
+### Static method support
 
 ```smarty
-{$object->item}
-{$object->item|upper} {* apply modifier *}
-{$object->item->method($y, 'named')}
-{$object->item->method($y->name, 'named')|upper} {* apply modifier to method result*}
+{Lib\Math::multiple x=3 y=4} static method as tag
+{Lib\Math::multiple(3,4)}  inline static method
+{12 + Lib\Math::multiple(3,4)}
+{12 + 3|Lib\Math::multiple:4}  static method as modifier
 ```
 
-You may disable call methods in template, see [security options](./settings.md)
-
+You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
 
 ### Set variable
 
@@ -125,7 +165,7 @@ See also [{var}](./tags/var.md) documentation.
 ### Strings
 
 When the string in double quotation marks, all the expressions in the string will be run.
-The result of the expression will be inserted into the string instead it.
+The result of expressions will be inserted into the string instead it.
 
 ```smarty
 {var $foo="Username"}
@@ -147,7 +187,7 @@ but if use single quote any template expressions will be on display as it is
 {'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
 ```
 
-## Numbers
+### Numbers
 
 ```smarty
 {2|pow:10}
@@ -156,11 +196,11 @@ but if use single quote any template expressions will be on display as it is
 {1e-6|round}
 ```
 
-### Modifiers
+## Modifiers
 
-* Модификаторы позволяют изменить значение переменной перед выводом или использованием в выражении
-* To apply a modifier, specify the value followed by a | (pipe) and the modifier name.
-* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a : (colon).
+* Modifiers allows change some value before output or using.
+* To apply a modifier, specify the value followed by a `|` (pipe) and the modifier name.
+* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a `:` (colon).
 
 ```smarty
 {var $foo="User"}
@@ -175,14 +215,15 @@ but if use single quote any template expressions will be on display as it is
 
 [List of modifiers](./main.md#modifiers)
 
-### Tags
+## Tags
 
-Каждый тэг шаблонизатора либо выводит переменную, либо вызывает какую-либо функцию. (переписать)
-Тег вызова функции начинается с названия функции и содержит список аргументов:
+Basically, tag seems like
 
 ```smarty
 {FUNCNAME attr1 = "val1" attr2 = $val2}
 ```
+
+Tags starts with name and may have attributes
 
 Это общий формат функций, но могут быть исключения, например функция [{var}](./tags/var.md), использованная выше.
 
@@ -223,12 +264,13 @@ but if use single quote any template expressions will be on display as it is
 ### Ignoring template code
 
 В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
-Если требуется вывести текст, содержащий фигурные скобки, помните о следующих возможностях:
+Если требуется вывести текст, содержащий фигурные скобки, то есть следующие варианты это сделать:
 
 1. Использование блочного тега `{ignore}{/ignore}`. Текст внутри этого тега текст не компилируется шаблонизатором и выводится как есть.
 2. Если после открывающей фигурной скобки есть пробельный символ (пробел или `\t`) или перенос строки (`\r` или `\n`), то она не воспринимается как разделитель кода Fenom и код после неё выводится как есть.
+3. Установить опцию `:ignore` у блочного тега. Все Fenom теги внутри блока будут проигнорированны
 
-Пример:
+Example:
 
 ```smarty
 {ignore}
@@ -242,10 +284,13 @@ but if use single quote any template expressions will be on display as it is
 		e.innerHTML = text;
 		document.body.appendChild(e);
 	})('test');
-</ignore>
+{if:ignore $cdn.yandex}
+    var item = {cdn: "//yandex.st/"};
+{/if}
+</script>
 ```
 
-Выведет
+Outputs
 
 ```html
 <style>
@@ -257,6 +302,7 @@ but if use single quote any template expressions will be on display as it is
 		e.innerHTML = text;
 		document.body.appendChild(e);
 	})('test');
+	var item = {cdn: "//yandex.st/"};
 </script>
 ```
 
@@ -266,9 +312,11 @@ but if use single quote any template expressions will be on display as it is
 
 ```smarty
 {include 'control.tpl'
-    options = $list
-    name    = $cp.name
-    type    = 'select'
+    $options = $list
+    $name    = $cp.name
+    $type    = 'select'
+    isolate  = true
+    disable_static = true
 }
 
 {foreach [
@@ -280,4 +328,18 @@ but if use single quote any template expressions will be on display as it is
     {$key}: {$val}
 
 {/foreach}
+```
+
+### Tag options
+
+|    name | code | type  | description  |
+| ------- | ---- | ----- | ------------ |
+|   strip |    s | block | enable `strip` option for a block of the template |
+|     raw |    a | any   | ignore escape option |
+|  escape |    e | any   | force escape |
+|  ignore |    i | block | ignore Fenom syntax |
+
+```smarty
+{script:ignore} ... {/script}
+{foreach:ignore:strip ...} ... {/foreach}
 ```

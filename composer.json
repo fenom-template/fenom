@@ -16,8 +16,6 @@
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.*",
-        "smarty/smarty": "3.*",
-        "twig/twig": "1.*",
         "satooshi/php-coveralls": "dev-master"
     },
     "autoload": {

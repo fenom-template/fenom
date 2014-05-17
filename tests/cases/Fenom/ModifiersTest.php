@@ -8,7 +8,7 @@ class ModifiersTest extends TestCase
     public static function providerTruncate()
     {
         $lorem = 'Lorem ipsum dolor sit amet'; // en
-        $uni = 'Лорем ипсум долор сит амет'; // ru
+        $uni   = 'Лорем ипсум долор сит амет'; // ru
         return array(
             // ascii chars
             array($lorem, 'Lorem ip...', 8),
@@ -38,13 +38,18 @@ class ModifiersTest extends TestCase
     public function testTruncate($in, $out, $count, $delim = '...', $by_words = false, $middle = false)
     {
         $tpl = $this->fenom->compileCode('{$text|truncate:$count:$delim:$by_words:$middle}');
-        $this->assertEquals($out, $tpl->fetch(array(
-            "text" => $in,
-            "count" => $count,
-            "delim" => $delim,
-            "by_words" => $by_words,
-            "middle" => $middle
-        )));
+        $this->assertEquals(
+            $out,
+            $tpl->fetch(
+                array(
+                    "text"     => $in,
+                    "count"    => $count,
+                    "delim"    => $delim,
+                    "by_words" => $by_words,
+                    "middle"   => $middle
+                )
+            )
+        );
     }
 
     public static function providerUpLow()
@@ -71,9 +76,14 @@ class ModifiersTest extends TestCase
     public function testUpLow($modifier, $in, $out)
     {
         $tpl = $this->fenom->compileCode('{$text|' . $modifier . '}');
-        $this->assertEquals($out, $tpl->fetch(array(
-            "text" => $in,
-        )));
+        $this->assertEquals(
+            $out,
+            $tpl->fetch(
+                array(
+                    "text" => $in,
+                )
+            )
+        );
     }
 
     public static function providerLength()
@@ -99,9 +109,14 @@ class ModifiersTest extends TestCase
     public function testLength($in, $out)
     {
         $tpl = $this->fenom->compileCode('{$data|length}');
-        $this->assertEquals($out, $tpl->fetch(array(
-            "data" => $in,
-        )));
+        $this->assertEquals(
+            $out,
+            $tpl->fetch(
+                array(
+                    "data" => $in,
+                )
+            )
+        );
     }
 
 }

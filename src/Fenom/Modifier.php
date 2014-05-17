@@ -27,7 +27,9 @@ class Modifier
     {
         if (!is_numeric($date)) {
             $date = strtotime($date);
-            if (!$date) $date = time();
+            if (!$date) {
+                $date = time();
+            }
         }
         return strftime($format, $date);
     }
@@ -41,7 +43,9 @@ class Modifier
     {
         if (!is_numeric($date)) {
             $date = strtotime($date);
-            if (!$date) $date = time();
+            if (!$date) {
+                $date = time();
+            }
         }
         return date($format, $date);
     }
@@ -51,15 +55,18 @@ class Modifier
      *
      * @param string $text
      * @param string $type
+     * @param string $charset
      * @return string
      */
-    public static function escape($text, $type = 'html')
+    public static function escape($text, $type = 'html', $charset = 'UTF-8')
     {
         switch (strtolower($type)) {
             case "url":
                 return urlencode($text);
             case "html";
-                return htmlspecialchars($text, ENT_COMPAT, 'UTF-8');
+                return htmlspecialchars($text, ENT_COMPAT, $charset);
+            case "js":
+                return json_encode($text, 64 | 256); // JSON_UNESCAPED_SLASHES = 64, JSON_UNESCAPED_UNICODE = 256
             default:
                 return $text;
         }
@@ -100,7 +107,11 @@ class Modifier
             if (preg_match('#^(.{' . $length . '}).*?(.{' . $length . '})?$#usS', $string, $match)) {
                 if (count($match) == 3) {
                     if ($by_words) {
-                        return preg_replace('#\s.*$#usS', "", $match[1]) . $etc . preg_replace('#.*\s#usS', "", $match[2]);
+                        return preg_replace('#\s.*$#usS', "", $match[1]) . $etc . preg_replace(
+                            '#.*\s#usS',
+                            "",
+                            $match[2]
+                        );
                     } else {
                         return $match[1] . $etc . $match[2];
                     }
@@ -129,7 +140,7 @@ class Modifier
     {
         $str = trim($str);
         if ($to_line) {
-            return preg_replace('#[\s]+#ms', ' ', $str);
+            return preg_replace('#\s+#ms', ' ', $str);
         } else {
             return preg_replace('#[ \t]{2,}#', ' ', $str);
         }
@@ -147,7 +158,7 @@ class Modifier
         } elseif (is_array($item)) {
             return count($item);
         } elseif ($item instanceof \Countable) {
-            return count($item);
+            return $item->count();
         } else {
             return 0;
         }

@@ -37,6 +37,9 @@ class FunctionsTest extends TestCase
         $this->tpl('function_array_param_pos.tpl', '{sum [1, 2, 3, 4, 5]}');
     }
 
+    /**
+     * @group sb
+     */
     public function testFunctionWithParams()
     {
         $output = $this->fenom->fetch('function_params_scalar.tpl');

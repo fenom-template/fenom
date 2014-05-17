@@ -9,6 +9,7 @@
  */
 
 namespace Fenom\Error;
+
 use Fenom\Tokenizer;
 
 /**
