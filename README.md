@@ -2,7 +2,7 @@ Fenom - Template Engine for PHP
 ===============================
 
 > Composer [package](https://packagist.org/packages/fenom/fenom): `{"fenom/fenom": "2.*"}`. <br />
-> For old version: `{"fenom/fenom": "1.*"}`. List of incompatibilities between 1.* and 2.* versions.
+> For old version: `{"fenom/fenom": "1.*"}`. [List](https://github.com/bzick/fenom/wiki/Migrate-from-1.*-to-2.*) of incompatibilities between 1.* and 2.* versions.
 
 [![Latest Stable Version](https://poser.pugx.org/fenom/fenom/v/stable.png)](https://packagist.org/packages/fenom/fenom)
 [![Build Status](https://travis-ci.org/bzick/fenom.svg?branch=develop)](https://travis-ci.org/bzick/fenom)
@@ -11,7 +11,23 @@ Fenom - Template Engine for PHP
 ## [Quick start](./docs/start.md) :: [Documentation](./docs/readme.md) :: [Benchmark](./docs/benchmark.md)
 <!-- :: [Articles](./docs/articles.md) -->
 
-## What is it
+### What is it
 
-*Fenom* (from "fenomenal") — lightweight template engine for PHP with with great opportunities and Smarty-like [syntax](./docs/syntax.md). 
+**Fenom** *(from "fenomenal")* — lightweight template engine for PHP.
+
+It mean:
+
+* Known Smarty-like [syntax](./docs/syntax.md) with improvements. 
+* Very [fast](./benchmark.md).
+* [Lightweight](./benchmark.md).
+* Very [flexible](./configuration.md#extends).
+* Progressive parser without regular expressions.
+* High [code coverage](https://coveralls.io/r/bzick/fenom?branch=master).
+* Easy to understand [how it works](./dev.md).
+* Easy to [use](./start.md).
+* Maximum [protection](./configuration.md#configure).
+
+### Why is it
+
+Why not?
 
