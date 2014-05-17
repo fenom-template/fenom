@@ -5,8 +5,8 @@ Fenom - Template Engine for PHP
 > For old version: `{"fenom/fenom": "1.*"}`. [List](https://github.com/bzick/fenom/wiki/Migrate-from-1.*-to-2.*) of incompatibilities between 1.* and 2.* versions.
 
 [![Latest Stable Version](https://poser.pugx.org/fenom/fenom/v/stable.png)](https://packagist.org/packages/fenom/fenom)
-[![Build Status](https://travis-ci.org/bzick/fenom.svg?branch=develop)](https://travis-ci.org/bzick/fenom)
-[![Coverage Status](https://coveralls.io/repos/bzick/fenom/badge.png?branch=develop)](https://coveralls.io/r/bzick/fenom?branch=master)
+[![Build Status](https://travis-ci.org/bzick/fenom.svg?branch=master)](https://travis-ci.org/bzick/fenom)
+[![Coverage Status](https://coveralls.io/repos/bzick/fenom/badge.png?branch=master)](https://coveralls.io/r/bzick/fenom?branch=master)
 [![Total Downloads](https://poser.pugx.org/fenom/fenom/downloads.png)](https://packagist.org/packages/fenom/fenom)
 ## [Quick start](./docs/start.md) :: [Documentation](./docs/readme.md) :: [Benchmark](./docs/benchmark.md)
 <!-- :: [Articles](./docs/articles.md) -->
