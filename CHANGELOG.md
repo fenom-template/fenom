@@ -1,16 +1,19 @@
 Changelog
 =========
 
-## 2.0.0
+## 2.0.0RC1
 
-- Add tag filter
-- Redesign `extends` algorithm
-    - Blocks does not support dynamic names
+- Add tag the {filter}
+- Redesign `extends` algorithm:
+    - Blocks don't support dynamic names
     - Blocks can't be nested
 - Add tag options support
 - Improve Fenom API
 - Move benchmark to another project
-- Rename `\Fenom\Compiler` to `\Fenom\Tags`
+- Internal improvements
+- Add `Fenom::STRIP` option
+- Add tags {escape} and {strip}
+- Method addProvider accept compile path which will saved the template's PHP cache. If compile path is not specified, will be taken global compile path.
 
 ### 1.4.9 (2013-04-09)
 
