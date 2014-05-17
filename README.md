@@ -18,12 +18,12 @@ Fenom - Template Engine for PHP
 It mean:
 
 * Known Smarty-like [syntax](./docs/syntax.md) with improvements. 
-* Very [fast](./benchmark.md).
-* [Lightweight](./benchmark.md).
-* Very [flexible](./configuration.md#extends).
+* Very [fast](./docs/benchmark.md).
+* [Lightweight](./docs/benchmark.md).
+* Very [flexible](./docs/configuration.md#extends).
 * Progressive parser without regular expressions.
 * High [code coverage](https://coveralls.io/r/bzick/fenom?branch=master).
-* Easy to understand [how it works](./dev.md).
-* Easy to [use](./start.md).
-* Maximum [protection](./configuration.md#configure).
+* Easy to understand [how it works](./docs/dev.md).
+* Easy to [use](./docs/start.md).
+* Maximum [protection](./docs/configuration.md#configure).
 
