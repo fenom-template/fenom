@@ -9,7 +9,7 @@ Documentation
 * [Usage](./start.md#install-fenom)
 * [Framework adapters](./adapters.md)
 * [For developers](./dev/readme.md)
-* [Configuration](./settings.md)
+* [Configuration](./configuration.md)
 * [Syntax](./syntax.md)
 * [Operators](./operators.md)
 
