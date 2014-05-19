@@ -2,7 +2,7 @@ Fenom - Template Engine for PHP
 ===============================
 
 > Composer [package](https://packagist.org/packages/fenom/fenom): `{"fenom/fenom": "2.*"}`. <br />
-> For old version: `{"fenom/fenom": "1.*"}`. [List](https://github.com/bzick/fenom/wiki/Migrate-from-1.*-to-2.*) of incompatibilities between 1.* and 2.* versions.
+> For old version: `{"fenom/fenom": "1.*"}`. [List](https://github.com/bzick/fenom/wiki/Migrate-from-1.4.9-to-2.0) of incompatibilities between 1.* and 2.* versions.
 
 [![Latest Stable Version](https://poser.pugx.org/fenom/fenom/v/stable.png)](https://packagist.org/packages/fenom/fenom)
 [![Build Status](https://travis-ci.org/bzick/fenom.svg?branch=master)](https://travis-ci.org/bzick/fenom)
