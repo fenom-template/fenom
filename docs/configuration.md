@@ -34,7 +34,7 @@ Options may by associative array like `'option_name' => true` or bitwise mask.
 | *force_verify*         | `Fenom::FORCE_VERIFY`     | check existence every used variable | decreases performance |
 <!-- | *auto_trim*            | `Fenom::AUTO_TRIM`        | remove space-characters before and after tags | | -->
 | *disable_statics*      | `Fenom::DENY_STATICS`     | disable calling static methods in templates. | |
-| *strip*                | `Fenom::STRIP`            | strip all whitespaces in templates. | decrease cache size |
+| *strip*                | `Fenom::AUTO_STRIP`            | strip all whitespaces in templates. | decrease cache size |
 
 ```php
 $fenom->setOptions(array(
