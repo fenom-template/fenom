@@ -724,16 +724,21 @@ class Template extends Render
                     break;
                 }
             } elseif ($tokens->is('~')) { // string concatenation operator: 'asd' ~ $var
-                $concat = array(array_pop($exp));
-                while ($tokens->is('~')) {
-                    $tokens->next();
-                    if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
-                        $concat[] = "strval(" . $this->parseTerm($tokens) . ")";
-                    } else {
-                        $concat[] = $this->parseTerm($tokens);
+                if($tokens->isNext('=')) { // ~=
+                    $exp[] = ".=";
+                    $tokens->next()->next();
+                } else {
+                    $concat = array(array_pop($exp));
+                    while ($tokens->is('~')) {
+                        $tokens->next();
+                        if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
+                            $concat[] = "strval(" . $this->parseTerm($tokens) . ")";
+                        } else {
+                            $concat[] = $this->parseTerm($tokens);
+                        }
                     }
+                    $exp[] = "(" . implode(".", $concat) . ")";
                 }
-                $exp[] = "(" . implode(".", $concat) . ")";
             } else {
                 break;
             }
