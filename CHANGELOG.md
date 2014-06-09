@@ -1,7 +1,7 @@
 Changelog
 =========
 
-## 2.0.1
+### 2.0.1 (2013-06-09)
 
 - Fix string concatenation. If `~` in the end of expression Fenom generates broken template.
 - Fix `~=` operator. Operator was not working.
