@@ -1,7 +1,14 @@
 Changelog
 =========
 
-## 2.0.0RC1
+## 2.0.1
+
+- Fix string concatenation. If `~` in the end of expression Fenom generates broken template.
+- Fix `~=` operator. Operator was not working.
+- Tests++
+- Docs++
+
+## 2.0.0
 
 - Add tag the {filter}
 - Redesign `extends` algorithm:

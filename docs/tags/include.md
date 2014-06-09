@@ -1,5 +1,5 @@
-Tag {include} [RU]
-==================
+Tag {include}
+=============
 
 `{include}` tags are used for including other templates in the current template. Any variables available in the current template are also available within the included template.
 
@@ -7,20 +7,21 @@ Tag {include} [RU]
 {include "about.tpl"}
 ```
 
-Переменные для подключаемого шаблона можно переопределить, задавая их аргументами тега.
+If you need to set yours variables for template list them in attributes.
 
 ```smarty
 {include "about.tpl" page=$item limit=50}
 ```
 
-Все изменения переменных в подключаемом шаблоне не будут воздействовать на родительский шаблон.
+All variables changed in child template has no affect to variables in parent template.
 
 ### {insert}
 
 The tag insert template code instead self.
 
-* No dynamic name allowed
-* No variables as attribute allowed
+* No dynamic name allowed.
+* No variables as attribute allowed.
+* Increase performance because insert code as is in compilation time.
 
 For example, main.tpl:
 
@@ -36,7 +37,7 @@ b.tpl:
 b: {$b}
 ```
 
-Во время разбора шаблона код шаблона `b.tpl` будет вставлен в код шаблона `main.tpl` как есть:
+Code of `b.tpl` will be inserted into `main.tpl` as is:
 
 ```smarty
 a: {$a}
