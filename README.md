@@ -15,7 +15,7 @@ Fenom - Template Engine for PHP
 
 **Fenom** *(from "fenomenal")* — lightweight template engine for PHP.
 
-It mean:
+It means:
 
 * Known Smarty-like [syntax](./docs/syntax.md) with improvements. 
 * Very [fast](./docs/benchmark.md).
