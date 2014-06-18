@@ -68,7 +68,7 @@ Documentation
 * [Ternary operators](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
 * [Check operators](./operators.md#check-operators) — `$var?`, `$var!`
 * [Test operator](./operators.md#test-operators) — `is`, `is not`
-* [Containment operator](./operators.md#containment-operators) — `in`, `not in`
+* [Containment operator](./operators.md#containment-operator) — `in`, `not in`
 
 ***
 
