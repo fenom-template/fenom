@@ -50,45 +50,11 @@ By default all options disabled
 
 ## Extends
 
-### Template providers [TRANSLATE]
+### Template providers
 
 Бывает так что шаблны не хранятся на файловой сиситеме, а хранятся в некотором хранилище, например, в базе данных MySQL.
 В этом случае шаблонизатору нужно описать как забирать шаблоны из хранилища, как проверять дату изменения шаблона и где хранить кеш шаблонов (опционально).
 Эту задачу берут на себя Providers, это объекты реальзующие интерфейс `Fenom\ProviderInterface`.
-
-### Cache providers [TRANSLATE]
-
-Изначально Fenom не расчитывался на то что кеш скомпиленых шаблонов может располагаться не на файловой системе.
-Однако, в теории, есть возможность реализовать свое кеширование для скомпиленых шаблонов без переопределения шаблонизатора.
-Речь идет о своем протоколе, отличным от `file://`, который [можно определить](http://php.net/manual/en/class.streamwrapper.php) в PHP.
-
-Ваш протол должени иметь класс реализации протокола как указан в документации [Stream Wrapper](http://www.php.net/manual/en/class.streamwrapper.php).
-Класс протокола может иметь не все указанные в документации методы. Вот список методов, необходимых шаблонизатору:
-
-* [CacheStreamWrapper::stream_open](http://www.php.net/manual/en/streamwrapper.stream-open.php)
-* [CacheStreamWrapper::stream_write](http://www.php.net/manual/en/streamwrapper.stream-write.php)
-* [CacheStreamWrapper::stream_close](http://www.php.net/manual/en/streamwrapper.stream-close.php)
-* [CacheStreamWrapper::rename](http://www.php.net/manual/en/streamwrapper.rename.php)
-
-For `include`:
-
-* [CacheStreamWrapper::stream_stat](http://www.php.net/manual/en/streamwrapper.stream-stat.php)
-* [CacheStreamWrapper::stream_read](http://www.php.net/manual/en/streamwrapper.stream-read.php)
-* [CacheStreamWrapper::stream_eof](http://www.php.net/manual/en/streamwrapper.stream-eof.php)
-
-**Note**
-(On 2014-05-13) Zend OpCacher doesn't support custom protocols except `file://` and `phar://`.
-
-For example,
-
-```php
-$this->setCacheDir("redis://hash/compiled/");
-```
-
-* `$cache = fopen("redis://hash/compiled/XnsbfeDnrd.php", "w");`
-* `fwrite($cache, "... <template content> ...");`
-* `fclose($cache);`
-* `rename("redis://hash/compiled/XnsbfeDnrd.php", "redis://hash/compiled/main.php");`
 
 ### Callbacks and filters
 

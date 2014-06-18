@@ -147,7 +147,6 @@ class Provider implements ProviderInterface
     public function templateExists($tpl)
     {
         return ($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0;
-//        return file_exists($this->_path . "/" . $tpl);
     }
 
     /**
