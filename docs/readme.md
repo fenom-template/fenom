@@ -67,7 +67,7 @@ Documentation
 * [String concatenation operator](./operators.md#string-operator) — `$str1 ~ $str2`
 * [Ternary operators](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
 * [Check operators](./operators.md#check-operators) — `$var?`, `$var!`
-* [Test operator](./operators.md#test-operators) — `is`, `is not`
+* [Test operator](./operators.md#test-operator) — `is`, `is not`
 * [Containment operator](./operators.md#containment-operator) — `in`, `not in`
 
 ***
