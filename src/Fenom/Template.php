@@ -1313,7 +1313,7 @@ class Template extends Render
                     $_arr .= $this->parseArray($tokens);
                     $key = false;
                     $val = true;
-                } elseif ($tokens->is(']') && !$key) {
+                } elseif ($tokens->is(']') && (!$key || $tokens->prev[0] === ',')) {
                     $tokens->next();
                     return $_arr . ')';
                 } else {
