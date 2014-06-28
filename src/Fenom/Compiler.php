@@ -1007,4 +1007,19 @@ class Compiler
     {
         $tag->tpl->ignore('ignore');
     }
+
+    /**
+     * Tag {unset ...}
+     * @param Tokenizer $tokens
+     * @param Tag $tag
+     * @return string
+     */
+    public static function tagUnset(Tokenizer $tokens, Tag $tag)
+    {
+        $unset = [];
+        while($tokens->valid()) {
+            $unset[] = $tag->tpl->parseVariable($tokens);
+        }
+        return 'unset('.implode(", ", $unset).')';
+    }
 }

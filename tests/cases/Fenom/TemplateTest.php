@@ -596,6 +596,14 @@ class TemplateTest extends TestCase
         );
     }
 
+    public static function providerUnset() {
+        return array(
+            array('{var $a = 5} {unset $a} {if $a is not set}not set{/if}', 'not set'),
+            array('{var $a = ["b" => 5, "c" => 6]} {unset $a.b} {if $a.b is not set}not set{/if} but c is {$a.c}', 'not set but c is 6'),
+            array('{var $a = ["b" => 5, "c" => 6]} {unset $a.b $a.c} {if $a.b is not set}not set{/if} {if $a.c is not set}not set{/if}', 'not set not set'),
+        );
+    }
+
     public static function providerTernary()
     {
         $a = array(
@@ -1296,12 +1304,12 @@ class TemplateTest extends TestCase
     /**
      * @group sb
      */
-    public function testSandbox()
+    public function _testSandbox()
     {
         try {
             var_dump(
                 $this->fenom->compileCode(
-                    '{foreach $fff as $k}{/foreach}'
+                    '{unset $a $a.c $b}'
                 )->getBody()
             );
         } catch (\Exception $e) {
@@ -1453,6 +1461,15 @@ class TemplateTest extends TestCase
         $v = $this->getVars();
         $v['vars'] = $vars;
         $this->exec($code.'{if $arr === $vars}equal{/if}', $v, 'equal');
+    }
+
+    /**
+     * @dataProvider providerUnset
+     * @group unset
+     */
+    public function testUnset($code, $result)
+    {
+        $this->exec($code, $this->getVars(), $result);
     }
 
     /**
