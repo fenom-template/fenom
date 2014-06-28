@@ -85,7 +85,7 @@ Operators
 
 * `$a ~ $b` - return concatenation of variables `$a` and `$b`
 
-### Ternary operator
+### Ternary operators
 
 * `$a ? $b : $c` - returns `$b` if `$a` is not empty, and `$c` otherwise
 * `$a ! $b : $c` - returns `$b` if `$a` is set, and `$c` otherwise
@@ -99,7 +99,7 @@ Operators
 {$a ? 5 : 10} {* outputs 10 *}
 ```
 
-### Check operator
+### Check operators
 
 * `$a?` - returns `TRUE` if `$a` is not empty
 * `$a!` - returns `TRUE` if `$a` is set

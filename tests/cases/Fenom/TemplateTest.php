@@ -1170,6 +1170,7 @@ class TemplateTest extends TestCase
             array('{"string" ~ ++$one ~ "end"}', "string2end"),
             array('{"string" ~ "one" ~ "end"}', "stringoneend"),
             array('{"string" ~ 1 ~ "end"}', "string1end"),
+            array('{$one ~= "string"} is {$one}', "1string is 1string"),
         );
     }
 
@@ -1539,6 +1540,7 @@ class TemplateTest extends TestCase
 
     /**
      * @dataProvider providerConcat
+     * @group testConcat
      */
     public function testConcat($code, $result)
     {

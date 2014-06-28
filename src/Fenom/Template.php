@@ -379,6 +379,9 @@ class Template extends Render
         }
     }
 
+    /**
+     * @param $tag_name
+     */
     public function ignore($tag_name) {
         $this->_ignore = $tag_name;
     }
@@ -724,16 +727,24 @@ class Template extends Render
                     break;
                 }
             } elseif ($tokens->is('~')) { // string concatenation operator: 'asd' ~ $var
-                $concat = array(array_pop($exp));
-                while ($tokens->is('~')) {
-                    $tokens->next();
-                    if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
-                        $concat[] = "strval(" . $this->parseTerm($tokens) . ")";
-                    } else {
-                        $concat[] = $this->parseTerm($tokens);
+                if($tokens->isNext('=')) { // ~=
+                    $exp[] = ".=";
+                    $tokens->next()->next();
+                } else {
+                    $concat = array(array_pop($exp));
+
+                    while ($tokens->is('~')) {
+                        $tokens->next();
+                        if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
+                            $concat[] = "strval(" . $this->parseTerm($tokens) . ")";
+                        } else {
+                            if(!$concat[] = $this->parseTerm($tokens)) {
+                                throw new UnexpectedTokenException($tokens);
+                            }
+                        }
                     }
+                    $exp[] = "(" . implode(".", $concat) . ")";
                 }
-                $exp[] = "(" . implode(".", $concat) . ")";
             } else {
                 break;
             }
@@ -1294,7 +1305,7 @@ class Template extends Render
                     $_arr .= $this->parseArray($tokens);
                     $key = false;
                     $val = true;
-                } elseif ($tokens->is(']') && !$key) {
+                } elseif ($tokens->is(']') && (!$key || $tokens->prev[0] === ',')) {
                     $tokens->next();
                     return $_arr . ')';
                 } else {

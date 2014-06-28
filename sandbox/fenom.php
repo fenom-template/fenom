@@ -15,11 +15,5 @@ namespace {
 
     $fenom = Fenom::factory(__DIR__.'/templates', __DIR__.'/compiled', Fenom::FORCE_COMPILE);
 
-    $fenom->display("extends/75-child.tpl", array(
-        "user" => array(
-            "name" => "Ivka",
-            'type' => 'new'
-        ),
-        'type' => 'new'
-    ));
+    var_dump($fenom->compile("concat-bug.tpl", false)->getBody());
 }

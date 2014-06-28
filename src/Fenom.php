@@ -323,7 +323,7 @@ class Fenom
      *
      * @param string|Fenom\ProviderInterface $source path to templates or custom provider
      * @param string $compile_dir path to compiled files
-     * @param int $options
+     * @param int|array $options
      * @throws InvalidArgumentException
      * @return Fenom
      */

@@ -32,7 +32,7 @@ Example outputs next HTML code:
 ```
 `{$user.id}` and `{$user['id']}` are same:
 ```smarty
-<div class="user">Hello, <a href="/users/{$user['id']}">{$user.['name']}</a>.</div>
+<div class="user">Hello, <a href="/users/{$user['id']}">{$user['name']}</a>.</div>
 ```
 
 В случае объекта, доступ к его свойствам осущесвляется так как и в PHP — через оператор `->`:
