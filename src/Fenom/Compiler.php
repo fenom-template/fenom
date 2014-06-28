@@ -134,24 +134,23 @@ class Compiler
      */
     public static function foreachOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p      = array("index" => false, "first" => false, "last" => false);
-        $key    = null;
-        $before = $body = array();
+        $p       = array("index" => false, "first" => false, "last" => false);
+        $key     = null;
+        $before  = $body = array();
+        $prepend = "";
         if ($tokens->is(T_VARIABLE)) {
             $from    = $scope->tpl->parseTerm($tokens, $is_var);
             if($is_var) {
                 $check = '!empty('.$from.')';
-                $prepend = "";
             } else {
                 $scope["var"] = $scope->tpl->tmpVar();
                 $prepend = $scope["var"].' = (array)('.$from.')';
                 $from = $check = $scope["var"];
             }
         } elseif ($tokens->is('[')) {
-            $from    = $scope->tpl->parseArray($tokens);
-            $scope["var"] = $scope->tpl->tmpVar();
-            $prepend = $scope["var"].' = (array)('.$from.')';
-            $from = $check = $scope["var"];
+            $count = 0;
+            $from = $scope->tpl->parseArray($tokens, $count);
+            $check = $count;
         } else {
             throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
         }

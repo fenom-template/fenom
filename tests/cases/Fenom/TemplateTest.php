@@ -572,6 +572,30 @@ class TemplateTest extends TestCase
         );
     }
 
+    public static function providerArrays()
+    {
+        return array(
+            array('{var $arr = []}', array()),
+            array('{var $arr = [1]}', array(1)),
+            array('{var $arr = [1,]}', array(1)),
+            array('{var $arr = [1, 2, 3, 5]}', array(1, 2, 3, 5)),
+            array('{var $arr = [1, true, false, null, -1, 1.1, -2.2, 5, "str"]}', array(1, true, false, null, -1, 1.1, -2.2, 5, "str")),
+            array('{var $arr = [5 => 1, "two" => 2, 3]}', array(5 => 1, "two" => 2, 3)),
+            array('{var $arr = [1 + 1, 2 * 2, 3 / 3 + 7,]}', array(1 + 1, 2 * 2, 3 / 3 + 7)),
+            array('{var $arr = [$zero, $two => $one, $num.3 => $.const.PHP_VERSION]}', array(0, 2 => 1, "three" => PHP_VERSION)),
+            array('{var $arr = [5 - 1 => 1, "two"|up => "two"|low, 3 => count([1,2])]}', array(4 => 1, "TWO" => "two", 3 => 2)),
+
+            array('{var $arr = [[1]]}', array(array(1))),
+            array('{var $arr = [[],[]]}', array(array(),array())),
+            array('{var $arr = [1, [2, 3], 5]}', array(1, array(2, 3), 5)),
+            array('{var $arr = [1, [true, false, null, -1, 1.1, -2.2, 5], "str"]}', array(1, array(true, false, null, -1, 1.1, -2.2, 5), "str")),
+            array('{var $arr = [5 => [1, "two" => 2], 3]}', array(5 => array(1, "two" => 2), 3)),
+            array('{var $arr = [1 + 1, [2 * 2, 3 / 3 + 7,],]}', array(1 + 1, array(2 * 2, 3 / 3 + 7))),
+            array('{var $arr = [$zero, [$two => $one, $num.3 => $.const.PHP_VERSION]]}', array(0, array(2 => 1, "three" => PHP_VERSION))),
+            array('{var $arr = [5 - 1 => 1, ["two"|up => ("two"|low ~ "..."), 3 => count([1,2])]]}', array(4 => 1, array("TWO" => "two...", 3 => 2))),
+        );
+    }
+
     public static function providerTernary()
     {
         $a = array(
@@ -683,6 +707,7 @@ class TemplateTest extends TestCase
             ),
             array('Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
             array('Foreach: {foreach [] as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
+            array('Foreach: {foreach $unexists as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
             array(
                 'Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {foreachelse} empty {/foreach} end',
                 $a,
@@ -1276,14 +1301,14 @@ class TemplateTest extends TestCase
         try {
             var_dump(
                 $this->fenom->compileCode(
-                    '{var $a = [3, 5,6]}'
+                    '{foreach $fff as $k}{/foreach}'
                 )->getBody()
             );
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
             while ($e->getPrevious()) {
                 $e = $e->getPrevious();
-                print_r("\n\n" . $e->getMessage() . "\n" . $e->getTraceAsString());
+                print_r("\n\n" . $e->getMessage() . " in {$e->getFile()}:{$e->getLine()}\n" . $e->getTraceAsString());
             }
         }
         exit;
@@ -1418,6 +1443,25 @@ class TemplateTest extends TestCase
     {
         $this->execError($code, $exception, $message, $options);
     }
+
+    /**
+     * @dataProvider providerArrays
+     * @group arrays
+     */
+    public function testArrays($code, $vars)
+    {
+        $v = $this->getVars();
+        $v['vars'] = $vars;
+        $this->exec($code.'{if $arr === $vars}equal{/if}', $v, 'equal');
+    }
+
+    /**
+     * @dataProvider providerCreateVarInvalid
+     */
+//    public function testCreateVarInvalid($code, $exception, $message, $options = 0)
+//    {
+//        $this->execError($code, $exception, $message, $options);
+//    }
 
     /**
      * @group ternary
