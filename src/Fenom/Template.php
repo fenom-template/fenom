@@ -1263,10 +1263,11 @@ class Template extends Render
      * [1, 2.3, 5+7/$var, 'string', "str {$var+3} ing", $var2, []]
      *
      * @param Tokenizer $tokens
-     * @throws UnexpectedTokenException
+     * @param int $count amount of elements
+     * @throws Error\UnexpectedTokenException
      * @return string
      */
-    public function parseArray(Tokenizer $tokens)
+    public function parseArray(Tokenizer $tokens, &$count = 0)
     {
         if ($tokens->is("[")) {
             $_arr = "array(";
@@ -1277,16 +1278,7 @@ class Template extends Render
                     $key = true;
                     $val = false;
                     $_arr .= $tokens->getAndNext() . ' ';
-                } elseif ($tokens->is(
-                        Tokenizer::MACRO_SCALAR,
-                        T_VARIABLE,
-                        T_STRING,
-                        T_EMPTY,
-                        T_ISSET,
-                        "(",
-                        "#"
-                    ) && !$val
-                ) {
+                } elseif ($tokens->is(Tokenizer::MACRO_SCALAR, T_VARIABLE, T_STRING, T_EMPTY, T_ISSET, "(") && !$val) {
                     $_arr .= $this->parseExpr($tokens);
                     $key = false;
                     $val = true;

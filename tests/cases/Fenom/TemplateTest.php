@@ -1267,12 +1267,15 @@ class TemplateTest extends TestCase
         );
     }
 
-    public function _testSandbox()
+    /**
+     * @group sb
+     */
+    public function testSandbox()
     {
         try {
             var_dump(
-                $this->fenom->setOptions(0)->compileCode(
-                    "{autoescape true}{test_block_function:raw}{\$html}{/test_block_function}{/autoescape}"
+                $this->fenom->compileCode(
+                    '{var $a = [3, 5,6]}'
                 )->getBody()
             );
         } catch (\Exception $e) {

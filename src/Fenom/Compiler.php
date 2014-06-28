@@ -138,13 +138,20 @@ class Compiler
         $key    = null;
         $before = $body = array();
         if ($tokens->is(T_VARIABLE)) {
-            $from    = $scope->tpl->parseTerm($tokens);
-            $prepend = "";
+            $from    = $scope->tpl->parseTerm($tokens, $is_var);
+            if($is_var) {
+                $check = '!empty('.$from.')';
+                $prepend = "";
+            } else {
+                $scope["var"] = $scope->tpl->tmpVar();
+                $prepend = $scope["var"].' = (array)('.$from.')';
+                $from = $check = $scope["var"];
+            }
         } elseif ($tokens->is('[')) {
             $from    = $scope->tpl->parseArray($tokens);
-            $uid     = '$v' . $scope->tpl->i++;
-            $prepend = $uid . ' = ' . $from . ';';
-            $from    = $uid;
+            $scope["var"] = $scope->tpl->tmpVar();
+            $prepend = $scope["var"].' = (array)('.$from.')';
+            $from = $check = $scope["var"];
         } else {
             throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
         }
@@ -189,9 +196,9 @@ class Compiler
         $body           = $body ? implode("; ", $body) . ";" : "";
         $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
         if ($key) {
-            return "$prepend if($from) { $before foreach($from as $key => $value) { $body";
+            return "$prepend if($check) { $before foreach($from as $key => $value) { $body";
         } else {
-            return "$prepend if($from) { $before foreach($from as $value) { $body";
+            return "$prepend if($check) { $before foreach($from as $value) { $body";
         }
     }
 
