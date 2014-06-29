@@ -1016,7 +1016,7 @@ class Compiler
      */
     public static function tagUnset(Tokenizer $tokens, Tag $tag)
     {
-        $unset = [];
+        $unset = array();
         while($tokens->valid()) {
             $unset[] = $tag->tpl->parseVariable($tokens);
         }
