@@ -1,12 +1,21 @@
 Changelog
 =========
 
-### 2.0.1 (2013-06-09)
+## 2.1.0 (2014-06-29)
+
+- Check variable before using in {foreach} (#83)
+- Add tag {unset} (#80)
+- Refactory array parser
+- --Bugs
+- ++Tests
+- ++Docs
+
+### 2.0.1 (2014-06-09)
 
 - Fix string concatenation. If `~` in the end of expression Fenom generates broken template.
 - Fix `~=` operator. Operator was not working.
-- Tests++
-- Docs++
+- ++Tests
+- ++Docs
 
 ## 2.0.0
 
