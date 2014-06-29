@@ -282,6 +282,10 @@ class Fenom
             'type'  => self::BLOCK_COMPILER,
             'open'  => 'Fenom\Compiler::ignoreOpen',
             'close' => 'Fenom\Compiler::nope'
+        ),
+        'unset'  => array(
+            'type'   => self::INLINE_COMPILER,
+            'parser' => 'Fenom\Compiler::tagUnset'
         )
     );
 

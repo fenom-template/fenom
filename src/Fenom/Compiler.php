@@ -134,17 +134,23 @@ class Compiler
      */
     public static function foreachOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p      = array("index" => false, "first" => false, "last" => false);
-        $key    = null;
-        $before = $body = array();
+        $p       = array("index" => false, "first" => false, "last" => false);
+        $key     = null;
+        $before  = $body = array();
+        $prepend = "";
         if ($tokens->is(T_VARIABLE)) {
-            $from    = $scope->tpl->parseTerm($tokens);
-            $prepend = "";
+            $from    = $scope->tpl->parseTerm($tokens, $is_var);
+            if($is_var) {
+                $check = '!empty('.$from.')';
+            } else {
+                $scope["var"] = $scope->tpl->tmpVar();
+                $prepend = $scope["var"].' = (array)('.$from.')';
+                $from = $check = $scope["var"];
+            }
         } elseif ($tokens->is('[')) {
-            $from    = $scope->tpl->parseArray($tokens);
-            $uid     = '$v' . $scope->tpl->i++;
-            $prepend = $uid . ' = ' . $from . ';';
-            $from    = $uid;
+            $count = 0;
+            $from = $scope->tpl->parseArray($tokens, $count);
+            $check = $count;
         } else {
             throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
         }
@@ -189,9 +195,9 @@ class Compiler
         $body           = $body ? implode("; ", $body) . ";" : "";
         $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
         if ($key) {
-            return "$prepend if($from) { $before foreach($from as $key => $value) { $body";
+            return "$prepend if($check) { $before foreach($from as $key => $value) { $body";
         } else {
-            return "$prepend if($from) { $before foreach($from as $value) { $body";
+            return "$prepend if($check) { $before foreach($from as $value) { $body";
         }
     }
 
@@ -1000,5 +1006,20 @@ class Compiler
     public static function ignoreOpen(Tokenizer $tokens, Tag $tag)
     {
         $tag->tpl->ignore('ignore');
+    }
+
+    /**
+     * Tag {unset ...}
+     * @param Tokenizer $tokens
+     * @param Tag $tag
+     * @return string
+     */
+    public static function tagUnset(Tokenizer $tokens, Tag $tag)
+    {
+        $unset = array();
+        while($tokens->valid()) {
+            $unset[] = $tag->tpl->parseVariable($tokens);
+        }
+        return 'unset('.implode(", ", $unset).')';
     }
 }

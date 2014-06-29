@@ -133,7 +133,7 @@ class Template extends Render
 
     /**
      * @param string $tag
-     * @return bool|\Fenom\Scope
+     * @return bool|\Fenom\Tag
      */
     public function getParentScope($tag)
     {
@@ -1274,50 +1274,35 @@ class Template extends Render
      * [1, 2.3, 5+7/$var, 'string', "str {$var+3} ing", $var2, []]
      *
      * @param Tokenizer $tokens
-     * @throws UnexpectedTokenException
+     * @param int $count amount of elements
+     * @throws Error\UnexpectedTokenException
      * @return string
      */
-    public function parseArray(Tokenizer $tokens)
+    public function parseArray(Tokenizer $tokens, &$count = 0)
     {
         if ($tokens->is("[")) {
-            $_arr = "array(";
-            $key  = $val = false;
+            $arr = array();
             $tokens->next();
             while ($tokens->valid()) {
-                if ($tokens->is(',') && $val) {
-                    $key = true;
-                    $val = false;
-                    $_arr .= $tokens->getAndNext() . ' ';
-                } elseif ($tokens->is(
-                        Tokenizer::MACRO_SCALAR,
-                        T_VARIABLE,
-                        T_STRING,
-                        T_EMPTY,
-                        T_ISSET,
-                        "(",
-                        "#"
-                    ) && !$val
-                ) {
-                    $_arr .= $this->parseExpr($tokens);
-                    $key = false;
-                    $val = true;
-                } elseif ($tokens->is('"') && !$val) {
-                    $_arr .= $this->parseQuote($tokens);
-                    $key = false;
-                    $val = true;
-                } elseif ($tokens->is(T_DOUBLE_ARROW) && $val) {
-                    $_arr .= ' ' . $tokens->getAndNext() . ' ';
-                    $key = true;
-                    $val = false;
-                } elseif (!$val && $tokens->is('[')) {
-                    $_arr .= $this->parseArray($tokens);
-                    $key = false;
-                    $val = true;
-                } elseif ($tokens->is(']') && (!$key || $tokens->prev[0] === ',')) {
+                if ($tokens->is(']')) {
                     $tokens->next();
-                    return $_arr . ')';
+                    return 'array(' . implode(', ', $arr) . ')';
+                }
+                if ($tokens->is('[')) {
+                    $arr[] = $this->parseArray($tokens);
+                    $count++;
                 } else {
-                    break;
+                    $expr = $this->parseExpr($tokens);
+                    if($tokens->is(T_DOUBLE_ARROW)) {
+                        $tokens->next();
+                        $arr[] = $expr.' => '.$this->parseExpr($tokens);
+                    } else {
+                        $arr[] = $expr;
+                    }
+                    $count++;
+                }
+                if($tokens->is(',')) {
+                    $tokens->next();
                 }
             }
         }

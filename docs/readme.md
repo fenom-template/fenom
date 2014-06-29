@@ -32,6 +32,7 @@ Documentation
 * [macro](./tags/macro.md) and `import` — template functions
 * [autoescape](./tags/autoescape.md) — escape template fragment
 * [raw](./tags/raw.md) — unescape template fragment
+* [unset](./tags/unset.md) — unset a given variables
 * or [add](./ext/extend.md#add-tags) yours
 
 

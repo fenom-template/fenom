@@ -119,6 +119,7 @@ $fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
 ```php
 $fenom->addTest($name, $code);
 ?>
+```
 
 # Add template provider
 
