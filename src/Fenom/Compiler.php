@@ -144,7 +144,7 @@ class Compiler
                 $check = '!empty('.$from.')';
             } else {
                 $scope["var"] = $scope->tpl->tmpVar();
-                $prepend = $scope["var"].' = (array)('.$from.')';
+                $prepend = $scope["var"].' = (array)('.$from.');';
                 $from = $check = $scope["var"];
             }
         } elseif ($tokens->is('[')) {
