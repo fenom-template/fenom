@@ -1,6 +1,10 @@
 Changelog
 =========
 
+### 2.1.1 (2014-06-30)
+
+- Fix bug #86: mismatch semicolon separator when value for foreach got from method  (by nekufa)
+
 ## 2.1.0 (2014-06-29)
 
 - Check variable before using in {foreach} (#83)
