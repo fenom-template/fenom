@@ -146,7 +146,7 @@ class FenomTest extends \Fenom\TestCase
             $test->assertSame(array(
                     "name" => "foo"
                 ), $args);
-            $this->assertSame(' this block1 ', $content);
+            $test->assertSame(' this block1 ', $content);
             return "Block2:" . $args["name"] . ':' . trim($content) . ':Block';
         });
         $this->tpl('custom.tpl', 'Custom function {myfunc name="foo"}');
