@@ -130,13 +130,33 @@ class FenomTest extends \Fenom\TestCase
      */
     public function testSetFunctions()
     {
+        $test = $this;
         $this->fenom->setOptions(Fenom::FORCE_COMPILE);
         $this->fenom->addFunction("myfunc", "myFunc");
+        $this->fenom->addFunction("myfunc2", function ($args, $tpl) use ($test) {
+            $test->assertInstanceOf('Fenom\Render', $tpl);
+            $test->assertSame(array(
+                "name" => "foo"
+            ), $args);
+            return "MyFunc2:".$args['name'];
+        });
         $this->fenom->addBlockFunction("myblockfunc", "myBlockFunc");
+        $this->fenom->addBlockFunction("myblockfunc2", function ($args, $content, $tpl) use ($test) {
+            $test->assertInstanceOf('Fenom\Render', $tpl);
+            $test->assertSame(array(
+                    "name" => "foo"
+                ), $args);
+            $this->assertSame(' this block1 ', $content);
+            return "Block2:" . $args["name"] . ':' . trim($content) . ':Block';
+        });
         $this->tpl('custom.tpl', 'Custom function {myfunc name="foo"}');
         $this->assertSame("Custom function MyFunc:foo", $this->fenom->fetch('custom.tpl', array()));
+        $this->tpl('custom.tpl', 'Custom function {myfunc2 name="foo"}');
+        $this->assertSame("Custom function MyFunc2:foo", $this->fenom->fetch('custom.tpl', array()));
         $this->tpl('custom.tpl', 'Custom function {myblockfunc name="foo"} this block1 {/myblockfunc}');
         $this->assertSame("Custom function Block:foo:this block1:Block", $this->fenom->fetch('custom.tpl', array()));
+        $this->tpl('custom.tpl', 'Custom function {myblockfunc2 name="foo"} this block1 {/myblockfunc2}');
+        $this->assertSame("Custom function Block2:foo:this block1:Block", $this->fenom->fetch('custom.tpl', array()));
     }
 
     public function testSetCompilers()
@@ -253,13 +273,16 @@ class FenomTest extends \Fenom\TestCase
         );
     }
 
-    public function testAddFunctions()
+    public function testAddAllowedFunctions()
     {
         $this->fenom->setOptions(Fenom::DENY_NATIVE_FUNCS);
         $this->assertFalse($this->fenom->isAllowedFunction('substr'));
         $this->fenom->addAllowedFunctions(array('substr'));
         $this->assertTrue($this->fenom->isAllowedFunction('substr'));
     }
+
+
+
 
     /**
      * @requires function php_gte_54
