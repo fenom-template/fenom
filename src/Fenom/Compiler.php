@@ -635,7 +635,6 @@ class Compiler
     /**
      * Standard close tag {/...}
      *
-     * @static
      * @return string
      */
     public static function stdClose()
@@ -646,20 +645,23 @@ class Compiler
     /**
      * Standard function parser
      *
-     * @static
      * @param Tokenizer $tokens
      * @param Tag $tag
      * @return string
      */
     public static function stdFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        return $tag->out($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
+        if(is_string($tag->callback)) {
+            return $tag->out($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
+        } else {
+            return '$info = $tpl->getStorage()->getTag('.var_export($tag->name, true).');'.PHP_EOL.
+            $tag->out('call_user_func($info["function"], '.self::toArray($tag->tpl->parseParams($tokens)).', $tpl)');
+        }
     }
 
     /**
      * Smart function parser
      *
-     * @static
      * @param Tokenizer $tokens
      * @param Tag $tag
      * @return string
@@ -689,7 +691,6 @@ class Compiler
     /**
      * Standard function open tag parser
      *
-     * @static
      * @param Tokenizer $tokens
      * @param Tag $tag
      * @return string
@@ -704,7 +705,6 @@ class Compiler
     /**
      * Standard function close tag parser
      *
-     * @static
      * @param Tokenizer $tokens
      * @param Tag $tag
      * @return string
@@ -712,7 +712,12 @@ class Compiler
     public static function stdFuncClose($tokens, Tag $tag)
     {
         $tag->restore(\Fenom::AUTO_ESCAPE);
-        return $tag->out($tag->callback . '(' . $tag["params"] . ', ob_get_clean(), $tpl)');
+        if(is_string($tag->callback)) {
+            return $tag->out($tag->callback . "(" . $tag["params"] . ', ob_get_clean(), $tpl)');
+        } else {
+            return '$info = $tpl->getStorage()->getTag('.var_export($tag->name, true).');'.PHP_EOL.
+            $tag->out('call_user_func($info["function"], ' . $tag["params"] . ', ob_get_clean(), $tpl)');
+        }
     }
 
     /**
