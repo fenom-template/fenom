@@ -688,7 +688,8 @@ class TemplateTest extends TestCase
     {
         $a = array(
             "list"  => array(1 => "one", 2 => "two", 3 => "three"),
-            "empty" => array()
+            "empty" => array(),
+            "obj"   => new Helper("testing")
         );
         return array(
             array('Foreach: {foreach $list as $e} {$e}, {/foreach} end', $a, 'Foreach: one, two, three, end'),
@@ -715,6 +716,7 @@ class TemplateTest extends TestCase
             ),
             array('Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
             array('Foreach: {foreach [] as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
+            array('Foreach: {foreach $obj->getArray() as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: 0 => 1, 1 => 2, 2 => 3, end'),
             array('Foreach: {foreach $unexists as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
             array(
                 'Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {foreachelse} empty {/foreach} end',

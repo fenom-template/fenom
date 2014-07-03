@@ -296,4 +296,8 @@ class Helper
     {
         return $this->word;
     }
+
+    public function getArray() {
+        return array(1,2,3);
+    }
 }
