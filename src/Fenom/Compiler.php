@@ -668,7 +668,7 @@ class Compiler
      */
     public static function smartFuncParser(Tokenizer $tokens, Tag $tag)
     {
-        if (strpos($tag->callback, "::")) {
+        if (strpos($tag->callback, "::") || is_array($tag->callback)) {
             list($class, $method) = explode("::", $tag->callback, 2);
             $ref = new \ReflectionMethod($class, $method);
         } else {
