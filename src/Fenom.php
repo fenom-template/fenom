@@ -131,7 +131,11 @@ class Fenom
         "unescape"    => 'Fenom\Modifier::unescape',
         "strip"       => 'Fenom\Modifier::strip',
         "length"      => 'Fenom\Modifier::length',
-        "iterable"    => 'Fenom\Modifier::isIterable'
+        "iterable"    => 'Fenom\Modifier::isIterable',
+        "replace"     => 'Fenom\Modifier::replace',
+        "ereplace"    => 'Fenom\Modifier::ereplace',
+        "match"       => 'Fenom\Modifier::match',
+        "ematch"      => 'Fenom\Modifier::ematch',
     );
 
     /**
