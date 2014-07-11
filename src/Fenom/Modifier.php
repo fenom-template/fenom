@@ -255,7 +255,7 @@ class Modifier
      */
     public static function esplit($value, $pattern = '/,\s*/S')
     {
-        if(is_string($pattern)) {
+        if(is_string($value)) {
             return preg_split($pattern, $value);
         } elseif(is_array($value)) {
             return $value;

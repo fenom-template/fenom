@@ -119,4 +119,65 @@ class ModifiersTest extends TestCase
         );
     }
 
+
+    public function testSplit()
+    {
+        $tpl = $this->fenom->compileCode('{if ["a", "b", "c"] === "a,b,c"|split:","}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testSplitArray()
+    {
+        $tpl = $this->fenom->compileCode('{if ["a", "b", "c"] === ["a", "b", "c"]|split:","}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testSplitOther()
+    {
+        $tpl = $this->fenom->compileCode('{if [] === true|split:","}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testESplit()
+    {
+        $tpl = $this->fenom->compileCode('{if ["a", "b", "c"] === "a:b:c"|esplit:"/:/"}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testESplitArray()
+    {
+        $tpl = $this->fenom->compileCode('{if ["a", "b", "c"] === ["a", "b", "c"]|esplit:"/:/"}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testESplitOther()
+    {
+        $tpl = $this->fenom->compileCode('{if [] === true|esplit:"/:/"}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testReplace()
+    {
+        $tpl = $this->fenom->compileCode('{if "a;c" === "a,b,c"|replace:",b,":";"}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testEReplace()
+    {
+        $tpl = $this->fenom->compileCode('{if "a;c" === "a,b,c"|ereplace:"/,b,?/miS":";"}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testMatch()
+    {
+        $tpl = $this->fenom->compileCode('{if "a,b,c"|match:"a,[bd]*c":";"}match{/if}');
+        $this->assertEquals("match", $tpl->fetch(array()));
+    }
+
+    public function testEMatch()
+    {
+        $tpl = $this->fenom->compileCode('{if "a,b,c"|ematch:"/^a,[bd].*?c$/":";"}match{/if}');
+        $this->assertEquals("match", $tpl->fetch(array()));
+    }
+
 }

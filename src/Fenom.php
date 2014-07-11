@@ -136,6 +136,9 @@ class Fenom
         "ereplace"    => 'Fenom\Modifier::ereplace',
         "match"       => 'Fenom\Modifier::match',
         "ematch"      => 'Fenom\Modifier::ematch',
+        "split"       => 'Fenom\Modifier::split',
+        "esplit"      => 'Fenom\Modifier::esplit',
+        "join"        => 'Fenom\Modifier::join',
     );
 
     /**
