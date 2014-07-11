@@ -52,6 +52,13 @@ Documentation
 * [strip](./mods/strip.md) — remove extra whitespaces
 * [length](./mods/length.md) — calculate length of string, array, object
 * [in](./mods/in.md) — find value in string or array
+* [match](./mods/match.md) — match string against a pattern.
+* [ematch](./mods/ematch.md) — perform a regular expression match.
+* [replace](./mods/replace.md) — replace all occurrences of the search string with the replacement string.
+* [ereplace](./mods/ereplace.md) — perform a regular expression search and replace.
+* [split](./mods/split.md) — split a string by string.
+* [esplit](./mods/esplit.md) — split string by a regular expression.
+* [join](./mods/join.md) — join array elements with a string.
 * allowed functions: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
 * or [add](./ext/extend.md#add-modifiers) yours
