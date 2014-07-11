@@ -139,6 +139,7 @@ class Fenom
         "split"       => 'Fenom\Modifier::split',
         "esplit"      => 'Fenom\Modifier::esplit',
         "join"        => 'Fenom\Modifier::join',
+        "in"          => 'Fenom\Modifier::in',
     );
 
     /**

@@ -16,12 +16,16 @@ class ModifiersTest extends TestCase
             array($lorem, 'Lorem...', 8, '...', true),
             array($lorem, 'Lorem ip...sit amet', 8, '...', false, true),
             array($lorem, 'Lorem...amet', 8, '...', true, true),
+            array($lorem, $lorem, 100, '...', true, true),
+            array($lorem, $lorem, 100, '...', true, false),
             // unicode
             array($uni, 'Лорем ип...', 8),
             array($uni, 'Лорем ип!!!', 8, '!!!'),
             array($uni, 'Лорем...', 8, '...', true),
             array($uni, 'Лорем ип...сит амет', 8, '...', false, true),
             array($uni, 'Лорем...амет', 8, '...', true, true),
+            array($uni, $uni, 100, '...', true, true),
+            array($uni, $uni, 100, '...', true, false),
         );
     }
 
@@ -119,6 +123,44 @@ class ModifiersTest extends TestCase
         );
     }
 
+    public static function providerIn()
+    {
+        return array(
+            array('"b"|in:["a", "b", "c"]', true),
+            array('"d"|in:["a", "b", "c"]', false),
+            array('2|in:["a", "b", "c"]', true),
+            array('3|in:["a", "b", "c"]', false),
+            array('"b"|in:"abc"', true),
+            array('"d"|in:"abc"', false),
+        );
+    }
+
+    /**
+     * @dataProvider providerIn
+     */
+    public function testIn($code, $valid)
+    {
+        $tpl = $this->fenom->compileCode('{if '.$code.'}valid{else}invalid{/if}');
+        $this->assertEquals($valid ? "valid" : "invalid", $tpl->fetch(array()));
+    }
+
+    public function testJoin()
+    {
+        $tpl = $this->fenom->compileCode('{if "a;b;c" === ["a", "b", "c"]|join:";"}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testJoinString()
+    {
+        $tpl = $this->fenom->compileCode('{if "a;b;c" === "a;b;c"|join:","}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
+
+    public function testJoinOther()
+    {
+        $tpl = $this->fenom->compileCode('{if "" === true|join:","}equal{/if}');
+        $this->assertEquals("equal", $tpl->fetch(array()));
+    }
 
     public function testSplit()
     {

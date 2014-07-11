@@ -163,6 +163,7 @@ class TemplateTest extends TestCase
             array('Mod: {$rescue|escape:"html"}!', $b, 'Mod: Chip &amp; Dale!'),
             array('Mod: {$rescue|escape:"url"}!', $b, 'Mod: Chip+%26+Dale!'),
             array('Mod: {$rescue|escape:"unknown"}!', $b, 'Mod: Chip & Dale!'),
+            array('Mod: {$rescue|escape:"js"}!', $b, 'Mod: "Chip & Dale"!'),
             array('Mod: {$rescue_html|unescape}!', $b, 'Mod: Chip & Dale!'),
             array('Mod: {$rescue_html|unescape:"html"}!', $b, 'Mod: Chip & Dale!'),
             array('Mod: {$rescue_url|unescape:"url"}!', $b, 'Mod: Chip & Dale!'),
