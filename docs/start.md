@@ -43,7 +43,7 @@ $fenom->setOptions($options);
 
 * `/path/to/templates` — directory, where stores your templates.
 * `/path/to/template/cache` — directory, where stores compiled templates in PHP files.
-* `$options` - bit-mask or array of [Fenom settings](./docs/configuration.md#template-settings).
+* `$options` - bit-mask or array of [Fenom settings](./configuration.md#template-settings).
 
 ### Use Fenom
 
