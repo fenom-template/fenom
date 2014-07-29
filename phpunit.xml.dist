@@ -33,6 +33,9 @@
         <whitelist>
             <directory>./src/</directory>
         </whitelist>
+        <blacklist>
+            <directory>./tests/</directory>
+        </blacklist>
     </filter>
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
