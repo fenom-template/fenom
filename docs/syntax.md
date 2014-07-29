@@ -26,7 +26,7 @@ Example outputs next HTML code:
 <div class="user">Hello, <a href="/users/17">Bzick</a>.</div>
 ```
 
-Переменные могут быть массивом. В этом случае обращение по ключу происходит через опертор `.` или, как в PHP, через операторы `[` и `]`
+You can also reference associative array variables by specifying the key after a dot `.` symbol or paste key name into square brackets, as in PHP.
 ```smarty
 <div class="user">Hello, <a href="/users/{$user.id}">{$user.name}</a>.</div>
 ```
@@ -35,12 +35,12 @@ Example outputs next HTML code:
 <div class="user">Hello, <a href="/users/{$user['id']}">{$user['name']}</a>.</div>
 ```
 
-В случае объекта, доступ к его свойствам осущесвляется так как и в PHP — через оператор `->`:
+Properties of objects assigned from PHP can be referenced by specifying the property name after the `->` symbol:
 ```smarty
 <div class="user">Hello, <a href="/users/{$user->id}">{$user->name}</a>.</div>
 ```
 
-Методы, как и свойства можно вызвать через оператор `->`, передав в метод любые рагументы:
+Methods of objects defined in PHP can be invoked by specifying the method name after the `->` symbol and use parenthesis with arguments:
 ```smarty
 <div class="user">Hello, <a href="/users/{$user->getId()}">{$user->getName()}</a>.</div>
 ```
@@ -50,7 +50,7 @@ Be careful, Fenom do not checks existence of the method before invoke.
 To avoid the problem class of the object have to define method `__call`, which throws an exception, etc.
 Also you can prohibit method call in [settings](./docs/configuration.md).
 
-Можно комбинировать различные варианты вызовов:
+Below is complex example:
 
 ```smarty
 {$foo.bar.baz}
@@ -76,7 +76,7 @@ Also you can prohibit method call in [settings](./docs/configuration.md).
 
 ### System variable
 
-Unnamed system variable starts with `$.` and allows access to global variables and system info (fix doc):
+Unnamed system variable starts with `$.` and allows access to global variables and template information:
 
 * `$.get` is `$_GET`.
 * `$.post` is `$_POST`.
@@ -98,27 +98,14 @@ Unnamed system variable starts with `$.` and allows access to global variables a
 {/if}
 ```
 
-### Math operations
+### Variable operations
 
-```smarty
-{$x+$y}
-{$foo[$x+3]}
-{$foo[$x+3]*$x+3*$y % 3}
-```
+Fenom supports math, logic, comparison, containment, test, concatenation operators...
+
+todo
 
 See all [operators](./operators.md)
 
-
-### Static method support
-
-```smarty
-{Lib\Math::multiple x=3 y=4} static method as tag
-{Lib\Math::multiple(3,4)}  inline static method
-{12 + Lib\Math::multiple(3,4)}
-{12 + 3|Lib\Math::multiple:4}  static method as modifier
-```
-
-You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
 
 ### Set variable
 
@@ -187,20 +174,45 @@ but if use single quote any template expressions will be on display as it is
 {'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
 ```
 
-### Numbers
+### Integers
+
+Integers can be specified in decimal (base 10), hexadecimal (base 16), octal (base 8) or binary (base 2) notation, optionally preceded by a sign (- or +).
+
+To use octal notation, precede the number with a 0 (zero). To use hexadecimal notation precede the number with 0x.
+To use binary notation precede the number with 0b.
 
 ```smarty
-{2|pow:10}
-{var $magick = 5381|calc}
-{0.2|round}
-{1e-6|round}
+{var $a = 1234} decimal number
+{var $a = -123} a negative number
+{var $a = 0123} octal number (equivalent to 83 decimal)
+{var $a = 0x1A} hexadecimal number (equivalent to 26 decimal)
+{var $a = 0b11111111} binary number (equivalent to 255 decimal)
+```
+
+**Note**
+The size of an integer is platform-dependent, although a maximum value of about two billion is the usual value (that's 32 bits signed).
+64-bit platforms usually have a maximum value of about 9223372036854775807
+
+**Warning**
+If an invalid digit is given in an octal integer (i.e. 8 or 9), the rest of the number is ignored.
+
+### Floating point numbers
+
+Floating point numbers (also known as "floats", "doubles", or "real numbers") can be specified using any of the following syntaxes:
+
+```smarty
+{var $a = 1.234}
+{var $b = 1.2e3}
+{var $c = 7E-10}
 ```
 
 ## Modifiers
 
-* Modifiers allows change some value before output or using.
-* To apply a modifier, specify the value followed by a `|` (pipe) and the modifier name.
-* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a `:` (colon).
+
+Variable modifiers can be applied to variables, custom functions or strings.
+To apply a modifier, specify the value followed by a | (pipe) and the modifier name.
+A modifier may accept additional parameters that affect its behavior.
+These parameters follow the modifier name and are separated by a : (colon).
 
 ```smarty
 {var $foo="User"}
@@ -261,14 +273,30 @@ Tags starts with name and may have attributes
 {funct arg=($a.d.c|count+4)/3}
 ```
 
-### Ignoring template code
+## Static method support
 
-В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
-Если требуется вывести текст, содержащий фигурные скобки, то есть следующие варианты это сделать:
+By default static methods are allowed in templates
 
-1. Использование блочного тега `{ignore}{/ignore}`. Текст внутри этого тега текст не компилируется шаблонизатором и выводится как есть.
-2. Если после открывающей фигурной скобки есть пробельный символ (пробел или `\t`) или перенос строки (`\r` или `\n`), то она не воспринимается как разделитель кода Fenom и код после неё выводится как есть.
-3. Установить опцию `:ignore` у блочного тега. Все Fenom теги внутри блока будут проигнорированны
+```smarty
+{Lib\Math::multiple x=3 y=4} static method as tag
+{Lib\Math::multiple(3,4)}  inline static method
+{12 + Lib\Math::multiple(3,4)}
+{12 + 3|Lib\Math::multiple:4}  static method as modifier
+```
+
+You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
+
+
+## Ignoring template code
+
+It is sometimes desirable or even necessary to have ignore sections it would otherwise parse.
+A classic example is embedding Javascript or CSS code in a template.
+The problem arises as those languages use the `{` and `}` characters which are also the default delimiters for Fenom.
+Fenom has several solutions:
+
+1. Uses block tag `{ignore} {/ignore}`. Anything within `{ignore} {/ignore}` tags is not interpreted, but displayed as-is.
+2. The `{` and `}` braces will be ignored so long as they are surrounded by white space.
+3. Uses tag option `:ignore` for block tag. Все Fenom теги внутри блока будут проигнорированны
 
 Example:
 
@@ -308,7 +336,7 @@ Outputs
 
 ### Whitespaces
 
-Шаблонизатор допускает любое количество пробелов или переносов строк в своём коде
+Tags to allow any number of spaces
 
 ```smarty
 {include 'control.tpl'
@@ -331,6 +359,8 @@ Outputs
 ```
 
 ### Tag options
+
+TODO
 
 |    name | code | type  | description  |
 | ------- | ---- | ----- | ------------ |
