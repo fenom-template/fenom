@@ -50,12 +50,6 @@ class Template extends Render
     public $blocks = array();
 
     /**
-     * Escape outputs value
-     * @var bool
-     */
-    public $escape = false;
-
-    /**
      * @var string|null
      */
     public $extends;
@@ -195,11 +189,9 @@ class Template extends Render
     public function compile()
     {
         $end          = $pos = 0;
-        $this->escape = $this->_options & Fenom::AUTO_ESCAPE;
         foreach ($this->_fenom->getPreFilters() as $filter) {
             $this->_src = call_user_func($filter, $this, $this->_src);
         }
-
         while (($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
             switch ($this->_src[$start + 1]) { // check next character
                 case "\n":
@@ -232,37 +224,35 @@ class Template extends Render
                         }
                         $tag = substr(
                             $this->_src,
-                            $start,
-                            $end - $start + 1
-                        ); // variable $tag contains fenom tag '{...}'
-
-                        $_tag = substr($tag, 1, -1); // strip delimiters '{' and '}'
+                            $start + 1, // skip '{'
+                            $end - $start - 1 // skip '}'
+                        );
 
                         if ($this->_ignore) { // check ignore
-                            if ($_tag === '/' . $this->_ignore) { // turn off ignore
+                            if ($tag === '/' . $this->_ignore) { // turn off ignore
                                 $this->_ignore = false;
                             } else { // still ignore
-                                $this->_appendText($tag);
+                                $this->_appendText('{' . $tag . '}');
                                 continue;
                             }
                         }
 
                         if ($this->_tag_filters) {
                             foreach ($this->_tag_filters as $filter) {
-                                $_tag = call_user_func($filter, $_tag, $this);
+                                $tag = call_user_func($filter, $tag, $this);
                             }
                         }
-                        $tokens = new Tokenizer($_tag); // tokenize the tag
+                        $tokens = new Tokenizer($tag); // tokenize the tag
                         if ($tokens->isIncomplete()) { // all strings finished?
                             $need_more = true;
                         } else {
-                            $this->_appendCode($this->parseTag($tokens), $tag); // start the tag lexer
+                            $this->_appendCode($this->parseTag($tokens), '{' . $tag . '}'); // start the tag lexer
                             if ($tokens->key()) { // if tokenizer have tokens - throws exceptions
                                 throw new CompileException("Unexpected token '" . $tokens->current() . "' in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line);
                             }
                         }
                     } while ($need_more);
-                    unset($_tag, $tag); // cleanup
+                    unset($tag); // cleanup
                     break;
             }
             $pos = $end + 1; // move search-pointer to end of the tag
@@ -272,17 +262,13 @@ class Template extends Render
         $this->_appendText(substr($this->_src, $end ? $end + 1 : 0)); // append tail of the template
         if ($this->_stack) {
             $_names = array();
-            $_line  = 0;
             foreach ($this->_stack as $scope) {
-                if (!$_line) {
-                    $_line = $scope->line;
-                }
                 $_names[] = '{' . $scope->name . '} opened on line ' . $scope->line;
             }
-            throw new CompileException("Unclosed tag" . (count($_names) == 1 ? "" : "s") . ": " . implode(
-                    ", ",
-                    $_names
-                ), 0, 1, $this->_name, $_line);
+            throw new CompileException("Unclosed tag" . (count($_names) > 1 ? "s" : "") . ": " . implode(
+                ", ",
+                $_names
+            ), 0, 1, $this->_name, $scope->line); // $scope already defined there!
         }
         $this->_src = ""; // cleanup
         if ($this->_post) {
@@ -778,12 +764,12 @@ class Template extends Render
             $unary = "";
         }
         if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
-            $code = $unary . $this->parseScalar($tokens, true);
+            return $unary . $this->parseScalar($tokens, true);
         } elseif ($tokens->is(T_CONSTANT_ENCAPSED_STRING, '"', T_ENCAPSED_AND_WHITESPACE)) {
             if ($unary) {
                 throw new UnexpectedTokenException($tokens->back());
             }
-            $code = $this->parseScalar($tokens, true);
+            return $this->parseScalar($tokens, true);
         } elseif ($tokens->is(T_VARIABLE)) {
             $code = $unary . $this->parseVariable($tokens);
             if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
@@ -803,28 +789,30 @@ class Template extends Render
             } else {
                 $is_var = true;
             }
+            return $code;
         } elseif ($tokens->is('$')) {
             $var  = $this->parseAccessor($tokens, $is_var);
-            $code = $unary . $var;
+            return $unary . $var;
         } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-            $code = $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
+            return $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
         } elseif ($tokens->is("(")) {
             $tokens->next();
             $code = $unary . "(" . $this->parseExpr($tokens) . ")";
             $tokens->need(")")->next();
+            return $code;
         } elseif ($tokens->is(T_STRING)) {
             if ($tokens->isSpecialVal()) {
-                $code = $unary . $tokens->getAndNext();
+                return $unary . $tokens->getAndNext();
             } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
                 $func = $this->_fenom->getModifier($tokens->current(), $this);
                 if (!$func) {
                     throw new \Exception("Function " . $tokens->getAndNext() . " not found");
                 }
-                $code = $unary . $func . $this->parseArgs($tokens->next());
+                return $unary . $func . $this->parseArgs($tokens->next());
             } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
                 $method = $this->parseStatic($tokens);
                 $args   = $this->parseArgs($tokens);
-                $code   = $unary . $method . $args;
+                return $unary . $method . $args;
             } else {
                 return false;
             }
@@ -833,6 +821,7 @@ class Template extends Render
             if ($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
                 $code = $unary . $func . "(" . $this->parseVariable($tokens->next()) . ")";
                 $tokens->need(')')->next();
+                return $code;
             } else {
                 throw new TokenizeException("Unexpected token " . $tokens->getNext() . ", isset() and empty() accept only variables");
             }
@@ -840,14 +829,12 @@ class Template extends Render
             if ($unary) {
                 throw new UnexpectedTokenException($tokens->back());
             }
-            $code = $this->parseArray($tokens);
+            return $this->parseArray($tokens);
         } elseif ($unary) {
             throw new UnexpectedTokenException($tokens->back());
         } else {
             return false;
         }
-
-        return $code;
     }
 
     /**

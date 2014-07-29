@@ -13,4 +13,4 @@ script:
   - phpunit
 
 after_script:
-  - php vendor/bin/coveralls
+  - CODECLIMATE_REPO_TOKEN=6739bff0f9a6eb7eaa5cfd1b086b55a3413aff24991d793b5b12da91c3803471 ./vendor/bin/test-reporter
