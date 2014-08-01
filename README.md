@@ -9,7 +9,7 @@ Fenom - Template Engine for PHP
 [![Coverage Status](https://coveralls.io/repos/bzick/fenom/badge.png?branch=master)](https://coveralls.io/r/bzick/fenom?branch=master)
 [![Code Climate](https://codeclimate.com/github/bzick/fenom.png)](https://codeclimate.com/github/bzick/fenom)
 [![Total Downloads](https://poser.pugx.org/fenom/fenom/downloads.png)](https://packagist.org/packages/fenom/fenom)
-## [Quick start](./docs/start.md) :: [Documentation](./docs/readme.md) :: [Benchmark](./docs/benchmark.md)
+## [Quick start](./docs/en/start.md) :: [Documentation](./docs/readme.md) [en](./docs/en/readme.md)/[ru](./docs/ru/readme.md) :: [Benchmark](./docs/en/benchmark.md)
 <!-- :: [Articles](./docs/articles.md) -->
 
 ### What is it
@@ -18,13 +18,13 @@ Fenom - Template Engine for PHP
 
 It means:
 
-* Known Smarty-like [syntax](./docs/syntax.md) with improvements. 
-* Very [fast](./docs/benchmark.md).
-* [Lightweight](./docs/benchmark.md).
-* Very [flexible](./docs/configuration.md#extends).
+* Known Smarty-like [syntax](./docs/en/syntax.md) with improvements.
+* Very [fast](./docs/en/benchmark.md).
+* [Lightweight](./docs/en/benchmark.md).
+* Very [flexible](./docs/en/configuration.md#extends).
 * Progressive parser without regular expressions.
 * High [code coverage](https://coveralls.io/r/bzick/fenom?branch=master).
-* Easy to understand [how it works](./docs/dev/readme.md).
-* Easy to [use](./docs/start.md).
-* Maximum [protection](./docs/configuration.md#configure).
+* Easy to understand [how it works](./docs/en/dev/readme.md).
+* Easy to [use](./docs/en/start.md).
+* Maximum [protection](./docs/en/configuration.md#configure).
 

@@ -21,7 +21,7 @@ Documentation
 * [if](./tags/if.md), `elseif` и `else` — условный оператор
 * [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — перебор элементов массива или объекта
 * [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
-* [switch](./tags/switch.md), `case`, `default` —
+* [switch](./tags/switch.md), `case`, `default` — груповой условный оператор
 * [cycle](./tags/cycle.md) — циклицеский перебор массива значений
 * [include](./tags/include.md), `insert` — вставляет и испольняет указанный шаблон
 * [extends](./tags/extends.md), `use`, `block` и `parent` — наследование шаблонов

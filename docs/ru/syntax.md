@@ -205,7 +205,7 @@ but if use single quote any template expressions will be on display as it is
 {var $c = 7E-10}
 ```
 
-### Операции над переменными
+### Операции
 
 Как и любой другой язык программирования/шаблонизации Fenom поддерживает множество различных операторов:
 

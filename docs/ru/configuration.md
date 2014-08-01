@@ -1,52 +1,55 @@
-Setup
-=====
+Настройка
+=========
 
 ## Configure
 
-### Template cache
+### Кеш шаблонов
 
 ```php
 $fenom->setCompileDir($dir);
 ```
 
-This method set the name of the directory where template caches are stored. By default this is `/tmp`. This directory must be writeable.
+Задает имя каталога, в котором хранятся компилированные шаблоны. По умолчанию это `/tmp`. Каталог дожен быть доступен на запись.
 
-### Template settings
+### Параметры обработчика
 
+Установка параметров через фабрику
 ```php
-// set options using factory
 $fenom = Fenom::factory($tpl_dir, $compile_dir, $options);
-// or inline using method setOptions
-$fenom->setOptions($options);
 ```
 
-Options may by associative array like `'option_name' => true` or bitwise mask.
+Установка параметров через метод
+```php
+$fenom->setOptions($options);
+```
+В обоих случаях аргумет `$options` может быть массивом или битовой маской.
+В массиве ключем должно быть название параметра, а ключем — булевый флаг `true` (активировать) или `false` (деактивировать).
+Битавая маска должна состоять из занчений констант из таблице ниже
 
-| Option name            | Constant                  | Description  | Affect  |
+| Название параметра     | Константа                 | Описание  | Эффект  |
 | ---------------------- | ------------------------- | ------------ | ------- |
-| *disable_methods*      | `Fenom::DENY_METHODS`     | disable calling methods of objects in templates.  | |
-| *disable_native_funcs* | `Fenom::DENY_NATIVE_FUNCS`| disable calling native function in templates, except allowed. | |
-| *auto_reload*          | `Fenom::AUTO_RELOAD`      | reload template if source will be changed | decreases performance |
-| *force_compile*        | `Fenom::FORCE_COMPILE`    | recompile template every time when the template renders | very decreases performance |
-| *disable_cache*        | `Fenom::DISABLE_CACHE`    | disable compile cache | greatly decreases performance |
-| *force_include*        | `Fenom::FORCE_INCLUDE`    | paste template body instead of include-tag | increases performance, increases cache size |
-| *auto_escape*          | `Fenom::AUTO_ESCAPE`      | html-escape each variables outputs | decreases performance |
-| *force_verify*         | `Fenom::FORCE_VERIFY`     | check existence every used variable | decreases performance |
-<!-- | *auto_trim*            | `Fenom::AUTO_TRIM`        | remove space-characters before and after tags | | -->
-| *disable_statics*      | `Fenom::DENY_STATICS`     | disable calling static methods in templates. | |
-| *strip*                | `Fenom::AUTO_STRIP`            | strip all whitespaces in templates. | decrease cache size |
+| *disable_methods*      | `Fenom::DENY_METHODS`     | отключает воззможность вызова методов в шаблоне  | |
+| *disable_native_funcs* | `Fenom::DENY_NATIVE_FUNCS`| отключает возможность использования фунций PHP, за исключением разрешенных  | |
+| *auto_reload*          | `Fenom::AUTO_RELOAD`      | автоматически пересобирать кеш шаблона если шаблон изменился | понижает производительность |
+| *force_compile*        | `Fenom::FORCE_COMPILE`    | каждый раз пересобирать кеш шаблонов (рекоммендуется только для отладки)| очень сильно понижает производительность |
+| *disable_cache*        | `Fenom::DISABLE_CACHE`    | не кешировать компилированный шаблон | эпично понижает производительность |
+| *force_include*        | `Fenom::FORCE_INCLUDE`    | стараться по возможности вставить код дочернего шаблона в родительский при подключении шаблона  | повышает производительность, увеличивает размер файлов в кеше, уменьшает количество файлов в кеше |
+| *auto_escape*          | `Fenom::AUTO_ESCAPE`      | автоматически экранировать HTML сущности при выводе переменных в шаблон | понижает производительность |
+| *force_verify*         | `Fenom::FORCE_VERIFY`     | автоматически проверять существование переменной перед использованием в шаблоне | понижает производительность |
+| *disable_statics*      | `Fenom::DENY_STATICS`     | отключает воззможность вызова статических методов в шаблоне | |
+| *strip*                | `Fenom::AUTO_STRIP`       | удаляет лишиние пробелы в шаблоне | уменьшает размер кеша |
 
 ```php
 $fenom->setOptions(array(
     "compile_check" => true,
     "force_include" => true
 ));
-// same
+// тоже самое что и
 $fenom->setOptions(Fenom::AUTO_RELOAD | Fenom::FORCE_INCLUDE);
 ```
 
-**Note**
-By default all options disabled
+**Замечание**
+По умолчанию все параметры деактивированы.
 
 ## Extends
 
