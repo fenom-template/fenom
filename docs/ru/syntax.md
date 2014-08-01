@@ -1,0 +1,498 @@
+Синтаксис
+=========
+
+По синтаксису шаблона Fenom похож на [Smarty](http://www.smarty.net/), но обладает рядом улучшений.
+Все теги шаблонизатора заключаются в фигрные скобки: `{` — открытие тега и `}` — закрытие тега.
+
+**Замечание**
+Хоть Fenom и позаимствовал синтаксис Smarty, но он не заимствовал теги Smarty как есть.
+Однако некоторые теги очень похожи. Но не все так плохо, Fenom имеет набор [дополнений](https://github.com/bzick/fenom-extra)
+которые могут сделать Fenom более похожим на Smarty что бы переход был мягче.
+
+## Переменные
+
+Переменные могут быть выведены на экран или могут быть использованы для функций, атрибутов, модификаторов внутри сложных выражений и т.д.
+
+### Использование переменных
+
+Следующий пример использует простые переменные `$user_id` и `$user_name` для формирования приветственного сообщения.
+
+```smarty
+<div class="user">Hello, <a href="/users/{$user_id}">{$user_name}</a>.</div>
+```
+
+Пример выведет следующий HTML код:
+
+```html
+<div class="user">Hello, <a href="/users/17">Bzick</a>.</div>
+```
+
+Переменные могут быть массивом. В этом случае обращение по ключу происходит через опертор `.` или, как в PHP, через операторы `[` и `]`
+```smarty
+<div class="user">Hello, <a href="/users/{$user.id}">{$user.name}</a>.</div>
+```
+`{$user.id}` and `{$user['id']}` are same:
+```smarty
+<div class="user">Hello, <a href="/users/{$user['id']}">{$user['name']}</a>.</div>
+```
+
+В случае объекта, доступ к его свойствам осущесвляется так как и в PHP — через оператор `->`:
+```smarty
+<div class="user">Hello, <a href="/users/{$user->id}">{$user->name}</a>.</div>
+```
+
+Методы, как и свойства можно вызвать через оператор `->`, передав в метод любые рагументы:
+```smarty
+<div class="user">Hello, <a href="/users/{$user->getId()}">{$user->getName()}</a>.</div>
+```
+
+**Note**
+Будте осторожны, Fenom не проверяет наличие метода в классе перед вызовом.
+Что бы избежать фатальной ошибки определите метод `__call` у класса объекта.
+Вызов методов в шаблоне можно вообще выключить в [настройках](./docs/configuration.md).
+
+Ниже приведены комбинированые примеры работы с переменными:
+
+```smarty
+{$foo.bar.baz}
+{$foo.$bar.$baz}
+{$foo[5].baz}
+{$foo[5].$baz}
+{$foo.bar.baz[4]}
+{$foo[ $bar.baz ]}
+{$foo[5]}
+{$foo.5}
+{$foo.bar}
+{$foo.'bar'}
+{$foo."bar"}
+{$foo['bar']}
+{$foo["bar"]}
+{$foo.$bar}
+{$foo[$bar]}
+{$foo->bar}
+{$foo->bar.buz}
+{$foo->bar.buz[ $bar->getId("user") ]}
+{$foo->bar(5)->buz(5.5)}
+```
+
+### Системная переменная
+
+Безименная системная переменная начинается с `$.` и предоставляет доступ к глобальным системным переменным и системной информации:
+
+* `$.get` — `$_GET`.
+* `$.post` — `$_POST`.
+* `$.cookie` — `$_COOKIE`.
+* `$.session` — `$_SESSION`.
+* `$.globals` — `$GLOBALS`.
+* `$.request` — `$_REQUEST`.
+* `$.files` — `$_FILES`.
+* `$.server` — `$_SERVER`.
+* `$.env` — `$_ENV`.
+* `$.tpl.name` возвращает текущее название шаблона.
+* `$.tpl.schema` возвращает код провайдера шаблона.
+* `$.version` возвращает версию Fenom.
+* `$.const` обращение к PHP константе: `$.const.PHP_EOL` .
+
+```smarty
+{if $.get.debug? && $.const.DEBUG}
+   ...
+{/if}
+```
+
+## Скалярные значения
+
+### Строки
+
+Строка может быть определена двумя различными способами: двойные кавычки (`"string"`) и одинарные кавычки (`'string'`).
+
+#### Двойные кавычки
+
+Если строка заключена в двойные кавычки `"`, Fenom распознает большее количество управляющих последовательностей для специальных символов:
+`\n`, `\r`, `\t`, `\v`, `\e`, `\f`, `\\`, `\$`, `\"`, `\[0-7]{1,3}`, `\x[0-9A-Fa-f]{1,2}`.
+Но самым важным свойством строк в двойных кавычках является обработка переменных.
+Существует два типа синтаксиса: простой и сложный. Простой синтаксис более легок и удобен.
+Он дает возможность обработки переменной, значения массива или свойства объекта с минимумом усилий.
+Сложный синтаксис может быть определен по фигурным скобкам, окружающим выражение.
+
+##### Простой синтаксис
+
+Если Fenom встречает знак доллара ($), он захватывает так много символов, сколько возможно, чтобы сформировать правильное имя переменной.
+Если вы хотите точно определить конец имени, заключайте имя переменной в фигурные скобки.
+
+```smarty
+{"Hi, $username!"}   выведет "Hi, Username!"
+```
+
+Аналогично могут быть обработаны элемент массива или свойство объекта
+
+```smarty
+{"Hi, $user.name!"}
+{"Hi, $user->name!"}
+```
+
+Для чего-либо более сложного, используйте сложный синтаксис.
+
+##### Сложный синтаксис
+
+Он называется сложным не потому, что труден в понимании, а потому что позволяет использовать сложные выражения.
+Любая скалярная переменная, элемент массива или свойство объекта, отображаемое в строку, может быть представлена в строке этим синтаксисом.
+Просто запишите выражение так же, как и вне строки, а затем заключите его в `{` и `}`.
+Поскольку `{` не может быть экранирован, этот синтаксис будет распознаваться только когда `$` следует непосредственно за `{`.
+Используйте `{\$`, чтобы напечатать `{$`. Несколько поясняющих примеров:
+
+```smarty
+{"Hi, {$user.name}!"}        выводит: Hi, Username!
+{"Hi, {$user->name}!"}       выводит: Hi, Username!
+{"Hi, {$user->getName()}!"}  выводит: Hi, Username!
+{"Hi, {\$user->name}!"}      выводит: Hi, {\$user->name}!
+```
+
+Допускаются также различные операции и модификаторы:
+
+```smarty
+{"Hi, {$user.name|up}!"}                  выводит: Hi, USERNAME!
+{"Hi, {$user.name|up ~ " (admin)"}!"}     выводит: Hi, USERNAME (admin)!
+```
+
+but if use single quote any template expressions will be on display as it is
+
+#### Одинарные кавычки
+
+Простейший способ определить строку - это заключить ее в одинарные кавычки (символ `'`).
+
+Чтобы использовать одинарную кавычку внутри строки, проэкранируйте ее обратной косой чертой `\`.
+Если необходимо написать саму обратную косую черту, продублируйте ее `\\`.
+Все остальные случаи применения обратной косой черты будут интерпретированы как обычные символы:
+это означает, что если вы попытаетесь использовать другие управляющие последовательности, такие как `\r` или `\n`, они будут выведены как есть вместо какого-либо особого поведения.
+
+```smarty
+{'Hi, $foo'}            outputs 'Hi, $foo'
+{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
+{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
+{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
+```
+
+### Целые числа
+
+Целые числа могут быть указаны в десятичной (основание 10), шестнадцатеричной (основание 16),
+восьмеричной (основание 8) или двоичной (основание 2) системе счисления, с необязательным предшествующим знаком (- или +).
+
+Для записи в восьмеричной системе счисления, необходимо поставить пред числом 0 (ноль). Для записи в шестнадцатеричной системе счисления, необходимо поставить перед числом 0x.
+Для записи в двоичной системе счисления, необходимо поставить перед числом 0b
+
+```smarty
+{var $a = 1234} // десятичное число
+{var $a = -123} // отрицательное число
+{var $a = 0123} // восьмеричное число (эквивалентно 83 в десятичной системе)
+{var $a = 0x1A} // шестнадцатеричное число (эквивалентно 26 в десятичной системе)
+{var $a = 0b11111111} // двоичное число (эквивалентно 255 в десятичной системе)
+```
+
+**Замечение**
+Размер целого числоа зависит от платформы, хотя, как правило, максимальное значение примерно равно 2 миллиардам (это 32-битное знаковое).
+64-битные платформы обычно имеют максимальное значение около 9223372036854775807.
+
+**Предупреждение**
+Если в восьмеричном целом числе будет обнаружена неверная цифра (например, 8 или 9), оставшаяся часть числа будет проигнорирована.
+
+### Числа с плавающей точкой
+
+Числа с плавающей точкой (также известные как "float", "double", или "real") могут быть определены следующими синтаксисами:
+
+```smarty
+{var $a = 1.234}
+{var $b = 1.2e3}
+{var $c = 7E-10}
+```
+
+### Операции над переменными
+
+Как и любой другой язык программирования/шаблонизации Fenom поддерживает множество различных операторов:
+
+* [Арифметические операторы](./operators.md#arithmetic-operators) — `+`, `-`, `*`, `/`, `%`
+* [Логические операторы](./operators.md#logical-operators) — `||`, `&&`, `!$var`, `and`, `or`, `xor`
+* [Операторы сравнения](./operators.md#comparison-operators) — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
+* [Битовые операторы](./operators.md#bitwise-operators) — `|`, `&`, `^`, `~$var`, `>>`, `<<`
+* [Операторы присвоения](./operators.md#assignment-operators) — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
+* [Строковый оператор](./operators.md#string-operator) — `$str1 ~ $str2`
+* [Тернарные операторы](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
+* [Проверяющие операторы](./operators.md#check-operators) — `$var?`, `$var!`
+* [Оператор тестирование](./operators.md#test-operator) — `is`, `is not`
+* [Оператор содержания](./operators.md#containment-operator) — `in`, `not in`
+
+Подробнее об [операторах](./operators.md)
+
+### Set variable
+
+```smarty
+{var $foo = "bar"}
+{var $foo = "bar"|upper} {* apply modifier *}
+{var $foo = 5}
+{var $foo = $x + $y}
+{var $foo = $x.y[z] + $y}
+{var $foo = strlen($a)} {* work with functions *}
+{var $foo = myfunct( ($x+$y)*3 )}
+{var $foo.bar.baz = 1} {* multidimensional value support *}
+{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
+```
+
+Using block tag
+
+```smarty
+{var $foo}
+    content {$text|truncate:30}
+{/var}
+{var $foo|truncate:50} {* apply modifier to content *}
+    content {$text}
+{/var}
+```
+
+Set array
+
+```smarty
+{var $foo = [1, 2, 3]} numeric array
+{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
+{var $foo = [1, [9, 8], 3]} can be nested
+{var $foo = [1, $two, $three * 3 + 9]}
+{var $foo = [$a, $d.c, $a + $f]}
+{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
+{var $foo = [1, [$parent, $a->method()], 3]}
+```
+
+See also [{var}](./tags/var.md) documentation.
+
+
+### Static method support
+
+```smarty
+{Lib\Math::multiple x=3 y=4} static method as tag
+{Lib\Math::multiple(3,4)}  inline static method
+{12 + Lib\Math::multiple(3,4)}
+{12 + 3|Lib\Math::multiple:4}  static method as modifier
+```
+
+You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
+
+### Set variable
+
+```smarty
+{var $foo = "bar"}
+{var $foo = "bar"|upper} {* apply modifier *}
+{var $foo = 5}
+{var $foo = $x + $y}
+{var $foo = $x.y[z] + $y}
+{var $foo = strlen($a)} {* work with functions *}
+{var $foo = myfunct( ($x+$y)*3 )}
+{var $foo.bar.baz = 1} {* multidimensional value support *}
+{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
+```
+
+Using block tag
+
+```smarty
+{var $foo}
+    content {$text|truncate:30}
+{/var}
+{var $foo|truncate:50} {* apply modifier to content *}
+    content {$text}
+{/var}
+```
+
+Set array
+
+```smarty
+{var $foo = [1, 2, 3]} numeric array
+{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
+{var $foo = [1, [9, 8], 3]} can be nested
+{var $foo = [1, $two, $three * 3 + 9]}
+{var $foo = [$a, $d.c, $a + $f]}
+{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
+{var $foo = [1, [$parent, $a->method()], 3]}
+```
+
+See also [{var}](./tags/var.md) documentation.
+
+
+## Scalar values
+
+### Strings
+
+When the string in double quotation marks, all the expressions in the string will be run.
+The result of expressions will be inserted into the string instead it.
+
+```smarty
+{var $foo="Username"}
+{var $user.name="Username"}
+{"Hi, $foo"}          outputs "Hi, Username"
+{"Hi, {$foo}"}        outputs "Hi, Username"
+{"Hi, {$user.name}"}  outputs "Hi, Username"
+{"Hi, {$user.name|up}"} outputs "Hi, USERNAME"
+{"Hi, {$user->getName(true)}"} outputs Hi, Username
+{var $message = "Hi, {$user.name}"}
+```
+
+but if use single quote any template expressions will be on display as it is
+
+```smarty
+{'Hi, $foo'}            outputs 'Hi, $foo'
+{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
+{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
+{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
+```
+
+### Numbers
+
+```smarty
+{2|pow:10}
+{var $magick = 5381|calc}
+{0.2|round}
+{1e-6|round}
+```
+
+## Modifiers
+
+* Modifiers allows change some value before output or using.
+* To apply a modifier, specify the value followed by a `|` (pipe) and the modifier name.
+* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a `:` (colon).
+
+```smarty
+{var $foo="User"}
+{$foo|upper}            outputs "USER"
+{$foo|lower}            outputs "user"
+{"{$foo|lower}"}        outputs "user"
+{"User"|lower}}         outputs "user"
+{$looong_text|truncate:80:"..."}  truncate the text to 80 symbols and append <continue> symbols, like "..."
+{$looong_text|lower|truncate:$settings.count:$settings.etc}
+{var $foo="Ivan"|upper}    sets $foo value "USER"
+```
+
+[List of modifiers](./main.md#modifiers)
+
+## Tags
+
+Basically, tag seems like
+
+```smarty
+{FUNCNAME attr1 = "val1" attr2 = $val2}
+```
+
+Tags starts with name and may have attributes
+
+Это общий формат функций, но могут быть исключения, например функция [{var}](./tags/var.md), использованная выше.
+
+```smarty
+{include file="my.tpl"}
+{var $foo=5}
+{if $user.loggined}
+    Welcome, <span style="color: red">{$user.name}!</span>
+{else}
+    Who are you?
+{/if}
+```
+
+В общем случае аргументы принимают любой формат переменных, в том числе результаты арифметических операций и модификаторов.
+
+```smarty
+{funct arg=true}
+{funct arg=5}
+{funct arg=1.2}
+{funct arg='string'}
+{funct arg="string this {$var}"}
+{funct arg=[1,2,34]}
+{funct arg=$x}
+{funct arg=$x.c}
+```
+
+```smarty
+{funct arg="ivan"|upper}
+{funct arg=$a.d.c|lower}
+```
+
+```smarty
+{funct arg=1+2}
+{funct arg=$a.d.c+4}
+{funct arg=($a.d.c|count+4)/3}
+```
+
+### Ignoring template code
+
+В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
+Если требуется вывести текст, содержащий фигурные скобки, то есть следующие варианты это сделать:
+
+1. Использование блочного тега `{ignore}{/ignore}`. Текст внутри этого тега текст не компилируется шаблонизатором и выводится как есть.
+2. Если после открывающей фигурной скобки есть пробельный символ (пробел или `\t`) или перенос строки (`\r` или `\n`), то она не воспринимается как разделитель кода Fenom и код после неё выводится как есть.
+3. Установить опцию `:ignore` у блочного тега. Все Fenom теги внутри блока будут проигнорированны
+
+Example:
+
+```smarty
+{ignore}
+<style>
+	h1 {font-size: 24px; color: #F00;}
+</style>
+{/ignore}
+<script>
+	(function (text) {
+		var e = document.createElement('P');
+		e.innerHTML = text;
+		document.body.appendChild(e);
+	})('test');
+{if:ignore $cdn.yandex}
+    var item = {cdn: "//yandex.st/"};
+{/if}
+</script>
+```
+
+Outputs
+
+```html
+<style>
+	h1 {font-size: 24px; color: #F00;}
+</style>
+<script>
+	(function (text) {
+		var e = document.createElement('P');
+		e.innerHTML = text;
+		document.body.appendChild(e);
+	})('test');
+	var item = {cdn: "//yandex.st/"};
+</script>
+```
+
+### Whitespaces
+
+Шаблонизатор допускает любое количество пробелов или переносов строк в своём коде
+
+```smarty
+{include 'control.tpl'
+    $options = $list
+    $name    = $cp.name
+    $type    = 'select'
+    isolate  = true
+    disable_static = true
+}
+
+{foreach [
+    "one"   => 1,
+    "two"   => 2,
+    "three" => 3
+] as $key   => $val}
+
+    {$key}: {$val}
+
+{/foreach}
+```
+
+### Tag options
+
+|    name | code | type  | description  |
+| ------- | ---- | ----- | ------------ |
+|   strip |    s | block | enable `strip` option for a block of the template |
+|     raw |    a | any   | ignore escape option |
+|  escape |    e | any   | force escape |
+|  ignore |    i | block | ignore Fenom syntax |
+
+```smarty
+{script:ignore} ... {/script}
+{foreach:ignore:strip ...} ... {/foreach}
+```
