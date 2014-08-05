@@ -24,7 +24,7 @@ For functions use tag with prefix `raw:`:
     {my_func page=5} {* escape *}
     {my_func:raw page=5} {* unescape *}
     ...
-{/autoescate}
+{/autoescape}
 ```
 
 Tag can not be applied to compilers as `foreach`, `if` and other.
