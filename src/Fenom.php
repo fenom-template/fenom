@@ -229,10 +229,20 @@ class Fenom
             'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagInsert'
         ),
-        'var'        => array( // {var ...}
+        'var'       => array( // {var ...}
             'type'  => self::BLOCK_COMPILER,
-            'open'  => 'Fenom\Compiler::varOpen',
-            'close' => 'Fenom\Compiler::varClose'
+            'open'  => 'Fenom\Compiler::setOpen',
+            'close' => 'Fenom\Compiler::setClose'
+        ),
+        'set'       => array( // {set ...}
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::setOpen',
+            'close' => 'Fenom\Compiler::setClose'
+        ),
+        'add'       => array( // {add ...}
+            'type'  => self::BLOCK_COMPILER,
+            'open'  => 'Fenom\Compiler::setOpen',
+            'close' => 'Fenom\Compiler::setClose'
         ),
         'block'      => array( // {block ...} {parent} {/block}
             'type'       => self::BLOCK_COMPILER,

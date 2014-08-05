@@ -12,6 +12,8 @@
 ## Переменные
 
 Переменные могут быть выведены на экран или могут быть использованы для функций, атрибутов, модификаторов внутри сложных выражений и т.д.
+Переменные в Fenom представлены знаком доллара с последующим именем переменной. Имя переменной чувствительно к регистру.
+Правильное имя переменной должно начинаться с буквы или символа подчеркивания и состоять из букв, цифр и символов подчеркивания в любом количестве.
 
 ### Использование переменных
 
@@ -123,13 +125,6 @@
 {"Hi, $username!"}   выведет "Hi, Username!"
 ```
 
-Аналогично могут быть обработаны элемент массива или свойство объекта
-
-```smarty
-{"Hi, $user.name!"}
-{"Hi, $user->name!"}
-```
-
 Для чего-либо более сложного, используйте сложный синтаксис.
 
 ##### Сложный синтаксис
@@ -166,10 +161,10 @@ but if use single quote any template expressions will be on display as it is
 это означает, что если вы попытаетесь использовать другие управляющие последовательности, такие как `\r` или `\n`, они будут выведены как есть вместо какого-либо особого поведения.
 
 ```smarty
-{'Hi, $foo'}            outputs 'Hi, $foo'
-{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
-{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
-{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
+{'Hi, $foo'}            выводит 'Hi, $foo'
+{'Hi, {$foo}'}          выводит 'Hi, {$foo}'
+{'Hi, {$user.name}'}    выводит 'Hi, {$user.name}'
+{'Hi, {$user.name|up}'} выводит "Hi, {$user.name|up}"
 ```
 
 ### Целые числа
@@ -205,149 +200,36 @@ but if use single quote any template expressions will be on display as it is
 {var $c = 7E-10}
 ```
 
+### Булев
+
+Это простейший тип. Булевое выражает истинность значения. Он может быть либо TRUE либо FALSE.
+Для указания булевого значения, используйте ключевое слово TRUE или FALSE. Оба регистро-независимы.
+
+{set $a = true}
+
+### NULL
+
+Специальное значение NULL представляет собой переменную без значения. NULL - это единственно возможное значение типа null.
+
+Обычно возникают путаницы между NULL и FALSE, так как по роли они похожи, но разлицаются по принципу:
+NULL - это отсутствие присутствия, а FALSE - присутвие отсутствия.
+
 ### Операции
 
 Как и любой другой язык программирования/шаблонизации Fenom поддерживает множество различных операторов:
 
-* [Арифметические операторы](./operators.md#arithmetic-operators) — `+`, `-`, `*`, `/`, `%`
-* [Логические операторы](./operators.md#logical-operators) — `||`, `&&`, `!$var`, `and`, `or`, `xor`
-* [Операторы сравнения](./operators.md#comparison-operators) — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
-* [Битовые операторы](./operators.md#bitwise-operators) — `|`, `&`, `^`, `~$var`, `>>`, `<<`
-* [Операторы присвоения](./operators.md#assignment-operators) — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
-* [Строковый оператор](./operators.md#string-operator) — `$str1 ~ $str2`
-* [Тернарные операторы](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
-* [Проверяющие операторы](./operators.md#check-operators) — `$var?`, `$var!`
-* [Оператор тестирование](./operators.md#test-operator) — `is`, `is not`
-* [Оператор содержания](./operators.md#containment-operator) — `in`, `not in`
+* Арифметические операторы — `+`, `-`, `*`, `/`, `%`
+* Логические операторы — `||`, `&&`, `!$var`, `and`, `or`, `xor`
+* Операторы сравнения — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
+* Битовые операторы — `|`, `&`, `^`, `~$var`, `>>`, `<<`
+* Операторы присвоения — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
+* Строковый оператор — `$str1 ~ $str2`
+* Тернарные операторы — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
+* Проверяющие операторы — `$var?`, `$var!`
+* Оператор тестирование — `is`, `is not`
+* Оператор содержания — `in`, `not in`
 
-Подробнее об [операторах](./operators.md)
-
-### Set variable
-
-```smarty
-{var $foo = "bar"}
-{var $foo = "bar"|upper} {* apply modifier *}
-{var $foo = 5}
-{var $foo = $x + $y}
-{var $foo = $x.y[z] + $y}
-{var $foo = strlen($a)} {* work with functions *}
-{var $foo = myfunct( ($x+$y)*3 )}
-{var $foo.bar.baz = 1} {* multidimensional value support *}
-{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
-```
-
-Using block tag
-
-```smarty
-{var $foo}
-    content {$text|truncate:30}
-{/var}
-{var $foo|truncate:50} {* apply modifier to content *}
-    content {$text}
-{/var}
-```
-
-Set array
-
-```smarty
-{var $foo = [1, 2, 3]} numeric array
-{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
-{var $foo = [1, [9, 8], 3]} can be nested
-{var $foo = [1, $two, $three * 3 + 9]}
-{var $foo = [$a, $d.c, $a + $f]}
-{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
-{var $foo = [1, [$parent, $a->method()], 3]}
-```
-
-See also [{var}](./tags/var.md) documentation.
-
-
-### Static method support
-
-```smarty
-{Lib\Math::multiple x=3 y=4} static method as tag
-{Lib\Math::multiple(3,4)}  inline static method
-{12 + Lib\Math::multiple(3,4)}
-{12 + 3|Lib\Math::multiple:4}  static method as modifier
-```
-
-You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
-
-### Set variable
-
-```smarty
-{var $foo = "bar"}
-{var $foo = "bar"|upper} {* apply modifier *}
-{var $foo = 5}
-{var $foo = $x + $y}
-{var $foo = $x.y[z] + $y}
-{var $foo = strlen($a)} {* work with functions *}
-{var $foo = myfunct( ($x+$y)*3 )}
-{var $foo.bar.baz = 1} {* multidimensional value support *}
-{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
-```
-
-Using block tag
-
-```smarty
-{var $foo}
-    content {$text|truncate:30}
-{/var}
-{var $foo|truncate:50} {* apply modifier to content *}
-    content {$text}
-{/var}
-```
-
-Set array
-
-```smarty
-{var $foo = [1, 2, 3]} numeric array
-{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
-{var $foo = [1, [9, 8], 3]} can be nested
-{var $foo = [1, $two, $three * 3 + 9]}
-{var $foo = [$a, $d.c, $a + $f]}
-{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
-{var $foo = [1, [$parent, $a->method()], 3]}
-```
-
-See also [{var}](./tags/var.md) documentation.
-
-
-## Scalar values
-
-### Strings
-
-When the string in double quotation marks, all the expressions in the string will be run.
-The result of expressions will be inserted into the string instead it.
-
-```smarty
-{var $foo="Username"}
-{var $user.name="Username"}
-{"Hi, $foo"}          outputs "Hi, Username"
-{"Hi, {$foo}"}        outputs "Hi, Username"
-{"Hi, {$user.name}"}  outputs "Hi, Username"
-{"Hi, {$user.name|up}"} outputs "Hi, USERNAME"
-{"Hi, {$user->getName(true)}"} outputs Hi, Username
-{var $message = "Hi, {$user.name}"}
-```
-
-but if use single quote any template expressions will be on display as it is
-
-```smarty
-{'Hi, $foo'}            outputs 'Hi, $foo'
-{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
-{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
-{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
-```
-
-### Numbers
-
-```smarty
-{2|pow:10}
-{var $magick = 5381|calc}
-{0.2|round}
-{1e-6|round}
-```
+Подробнее об [операторах](./operators.md).
 
 ## Modifiers
 
@@ -368,53 +250,11 @@ but if use single quote any template expressions will be on display as it is
 
 [List of modifiers](./main.md#modifiers)
 
-## Tags
+## Функции
 
-Basically, tag seems like
+## Компиляторы
 
-```smarty
-{FUNCNAME attr1 = "val1" attr2 = $val2}
-```
-
-Tags starts with name and may have attributes
-
-Это общий формат функций, но могут быть исключения, например функция [{var}](./tags/var.md), использованная выше.
-
-```smarty
-{include file="my.tpl"}
-{var $foo=5}
-{if $user.loggined}
-    Welcome, <span style="color: red">{$user.name}!</span>
-{else}
-    Who are you?
-{/if}
-```
-
-В общем случае аргументы принимают любой формат переменных, в том числе результаты арифметических операций и модификаторов.
-
-```smarty
-{funct arg=true}
-{funct arg=5}
-{funct arg=1.2}
-{funct arg='string'}
-{funct arg="string this {$var}"}
-{funct arg=[1,2,34]}
-{funct arg=$x}
-{funct arg=$x.c}
-```
-
-```smarty
-{funct arg="ivan"|upper}
-{funct arg=$a.d.c|lower}
-```
-
-```smarty
-{funct arg=1+2}
-{funct arg=$a.d.c+4}
-{funct arg=($a.d.c|count+4)/3}
-```
-
-### Ignoring template code
+### Игнорирование кода
 
 В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
 Если требуется вывести текст, содержащий фигурные скобки, то есть следующие варианты это сделать:

@@ -1,5 +1,5 @@
-Tag {foreach} [RU]
-==================
+Тег {foreach}
+=============
 
 ```smarty
 {foreach $list as [$key =>] $value [index=$index] [first=$first] [last=$last]}

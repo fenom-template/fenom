@@ -17,14 +17,14 @@ Documentation
 
 [Использование](./syntax.md#tags) тегов.
 
-* [var](./tags/var.md) — определение переменной
+* [set](./tags/set.md), `add` и `var` — определение значения переменной
 * [if](./tags/if.md), `elseif` и `else` — условный оператор
 * [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — перебор элементов массива или объекта
 * [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
-* [switch](./tags/switch.md), `case`, `default` — груповой условный оператор
+* [switch](./tags/switch.md), `case` — груповой условный оператор
 * [cycle](./tags/cycle.md) — циклицеский перебор массива значений
 * [include](./tags/include.md), `insert` — вставляет и испольняет указанный шаблон
-* [extends](./tags/extends.md), `use`, `block` и `parent` — наследование шаблонов
+* [extends](./tags/extends.md), `use`, `block` и `parent` — [наследование](./inheritance.md) шаблонов
 * [filter](./tags/filter.md) — примение модификаторов к фрагменту шаблона
 * [ignore](./tags/ignore.md) — игнорирование тегов Fenom
 * [macro](./tags/macro.md) и `import` — пользовательские функции шаблонов

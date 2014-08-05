@@ -1,46 +1,61 @@
-Tag {switch}
+Тег {switch}
 ============
 
-The `{switch}` tag is similar to a series of `{if}` statements on the same expression.
-In many occasions, you may want to compare the same variable (or expression) with many different values,
-and execute a different piece of code depending on which value it equals to. This is exactly what the `{switch}` tag is for.
+Тег `{switch}` подобен серии операторов `{if}` с одинаковым условием.
+Во многих случаях вам может понадобиться сравнивать одну и ту же переменную (или выражение) с множеством различных значений,
+и выполнять различные участки кода в зависимости от того, какое значение принимает эта переменная (или выражение).
+Это именно тот случай, для которого удобен тег `{switch}`.
 
-Tag `{switch}` accepts any expression. But `{case}` accepts only static scalar values or constants.
+Тег `{switch}` в качестве аргумента принимает любое выражение.
+Каждый возможный случай описывается тегом `{case value}` значения `value` которых могут быть только явно заданные скалярные значения.
+Случаи могут повторятся, в этом случае блоки для которых повторялся случай будут последовательно выполнены по направлению сверху вниз.
+Случай `default` подразумевает обработку если ни один случай не произошел.
 
 ```smarty
 {switch <condition>}
-{case <value1>}
+{case value1}
     ...
-{case <value2>, <value3>, ...}
+{case value2, value3, ...}
     ...
-{case <value3>}
+{case value3}
     ...
 {case default, <value1>}
     ...
 {/switch}
 ```
 
-For example,
+Рассмотрим пример:
 
 ```smarty
-{switch $type}
-{case 'new'}
-    It is new item
-{case 'current', 'new'}
-    It is new or current item
-{case 'current'}
-    It is current item
-{case 'new', 'newer'}
-    It is new item, again
-{case default}
-    I don't know the type {$type}
+{switch $color}
+{case 'red', 'scarlet'}
+    Оттенок красного цвета
+{case 'green', 'harlequin'}
+    Оттенок зеленого цвета
+{case 'black', 'grey', 'gray'}
+    Черный цвет
+{case 'white', 'grey', 'gray'}
+    Белый цвет
+{case default, 'unknown'}
+    Неизвестный цвет
 {/switch}
 ```
 
-if `$type = 'new'` then template output
+если задать `$color = 'red'` результатом будет:
 
 ```
-It is new item
-It is new or current item
-It is new item, again
+Оттенок красного цвета
+```
+
+для случая `$color = 'grey'` будут вызваны два бока:
+
+```
+Черный цвет
+Белый цвет
+```
+
+случаи `$color = 'yellow'` и `$color = 'unknown'` будут обработаны последним блоком:
+
+```
+Неизвестный цвет
 ```

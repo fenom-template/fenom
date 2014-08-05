@@ -1,4 +1,4 @@
-Tag {ignore}
+Тег {ignore}
 ============
 
 {ignore} tags allow a block of data to be taken literally.
