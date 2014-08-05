@@ -740,7 +740,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function varOpen(Tokenizer $tokens, Tag $scope)
+    public static function setOpen(Tokenizer $tokens, Tag $scope)
     {
         $var = $scope->tpl->parseVariable($tokens);
         if ($tokens->is('=')) { // inline tag {var ...}
@@ -767,7 +767,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function varClose(Tokenizer $tokens, Tag $scope)
+    public static function setClose(Tokenizer $tokens, Tag $scope)
     {
         return $scope["name"] . '=' . $scope["value"] . ';';
     }
