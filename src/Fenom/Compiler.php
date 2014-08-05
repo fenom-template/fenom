@@ -743,20 +743,25 @@ class Compiler
     public static function setOpen(Tokenizer $tokens, Tag $scope)
     {
         $var = $scope->tpl->parseVariable($tokens);
+        $before = $after = "";
+        if($scope->name == 'add') {
+            $before = "if(!isset($var)) {\n";
+            $after = "\n}";
+        }
         if ($tokens->is('=')) { // inline tag {var ...}
             $scope->close();
             $tokens->next();
             if ($tokens->is("[")) {
-                return $var . '=' . $scope->tpl->parseArray($tokens);
+                return $before.$var . '=' . $scope->tpl->parseArray($tokens) . ';'.$after;
             } else {
-                return $var . '=' . $scope->tpl->parseExpr($tokens);
+                return $before.$var . '=' . $scope->tpl->parseExpr($tokens) . ';'.$after;
             }
         } else {
             $scope["name"] = $var;
             if ($tokens->is('|')) {
-                $scope["value"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
+                $scope["value"] = $before . $scope->tpl->parseModifier($tokens, "ob_get_clean()").';'.$after;
             } else {
-                $scope["value"] = "ob_get_clean()";
+                $scope["value"] = $before . "ob_get_clean();" . $after;
             }
             return 'ob_start();';
         }

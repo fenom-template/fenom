@@ -471,40 +471,42 @@ class TemplateTest extends TestCase
             "z" => 99
         );
         return array(
-            array('Create: {var $v = $x+$y} Result: {$v} end', $a, 'Create: Result: 36 end'),
+            array('Create: {set $v = $x+$y} Result: {$v} end', $a, 'Create: Result: 36 end'),
+            array('Create: {add $x = $x+$y} Result: {$x} end', $a, 'Create: Result: 9 end'),
+            array('Create: {add $v = 3} {add $v = 9} Result: {$v} end', $a, 'Create: Result: 3 end'),
             array(
-                'Create: {var $v =
+                'Create: {set $v =
                             $x
                             +
                             $y} Result: {$v} end',
                 $a,
                 'Create: Result: 36 end'
             ),
-            array('Create: {var $v = $z++} Result: {$v}, {$z} end', $a, 'Create: Result: 99, 100 end'),
-            array('Create: {var $v = $z++ + 1} Result: {$v}, {$z} end', $a, 'Create: Result: 100, 100 end'),
-            array('Create: {var $v = --$z} Result: {$v}, {$z} end', $a, 'Create: Result: 98, 98 end'),
-            array('Create: {var $v = $y/$x} Result: {$v} end', $a, 'Create: Result: 3 end'),
-            array('Create: {var $v = $y-$x} Result: {$v} end', $a, 'Create: Result: 18 end'),
-            array('Create: {var $v = $y*$x-2} Result: {$v} end', $a, 'Create: Result: 241 end'),
-            array('Create: {var $v = ($y^$x)+7} Result: {$v} end', $a, 'Create: Result: 25 end'),
-            array('Create: {var $v = [1,2,3]} Result: {$v.1} end', $a, 'Create: Result: 2 end'),
+            array('Create: {set $v = $z++} Result: {$v}, {$z} end', $a, 'Create: Result: 99, 100 end'),
+            array('Create: {set $v = $z++ + 1} Result: {$v}, {$z} end', $a, 'Create: Result: 100, 100 end'),
+            array('Create: {set $v = --$z} Result: {$v}, {$z} end', $a, 'Create: Result: 98, 98 end'),
+            array('Create: {set $v = $y/$x} Result: {$v} end', $a, 'Create: Result: 3 end'),
+            array('Create: {set $v = $y-$x} Result: {$v} end', $a, 'Create: Result: 18 end'),
+            array('Create: {set $v = $y*$x-2} Result: {$v} end', $a, 'Create: Result: 241 end'),
+            array('Create: {set $v = ($y^$x)+7} Result: {$v} end', $a, 'Create: Result: 25 end'),
+            array('Create: {set $v = [1,2,3]} Result: {$v.1} end', $a, 'Create: Result: 2 end'),
             array(
-                'Create: {var $v = []} Result: {if $v} have items {else} empty {/if} end',
+                'Create: {set $v = []} Result: {if $v} have items {else} empty {/if} end',
                 $a,
                 'Create: Result: empty end'
             ),
             array(
-                'Create: {var $v = ["one"|upper => 1, 4 => $x, "three" => 3]} Result: {$v.three}, {$v.4}, {$v.ONE} end',
+                'Create: {set $v = ["one"|upper => 1, 4 => $x, "three" => 3]} Result: {$v.three}, {$v.4}, {$v.ONE} end',
                 $a,
                 'Create: Result: 3, 9, 1 end'
             ),
             array(
-                'Create: {var $v = ["key1" => $y*$x-2, "key2" => ["z" => $z]]} Result: {$v.key1}, {$v.key2.z} end',
+                'Create: {set $v = ["key1" => $y*$x-2, "key2" => ["z" => $z]]} Result: {$v.key1}, {$v.key2.z} end',
                 $a,
                 'Create: Result: 241, 99 end'
             ),
             array(
-                'Create: {var $v = count([1,2,3])+7} Result: {$v} end',
+                'Create: {set $v = count([1,2,3])+7} Result: {$v} end',
                 $a,
                 'Create: Result: 10 end'
             ),
@@ -514,58 +516,59 @@ class TemplateTest extends TestCase
     public static function providerCreateVarInvalid()
     {
         return array(
-            array('Create: {var $v} Result: {$v} end', 'Fenom\Error\CompileException', "Unclosed tag: {var} opened"),
+            array('Create: {set $v} Result: {$v} end', 'Fenom\Error\CompileException', "Unclosed tag: {set} opened"),
+            array('Create: {add $v} Result: {$v} end', 'Fenom\Error\CompileException', "Unclosed tag: {add} opened"),
             array(
-                'Create: {var $v = } Result: {$v} end',
+                'Create: {set $v = } Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected end of expression"
             ),
-            array('Create: {var $v = 1++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
-            array('Create: {var $v = c} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 'c'"),
+            array('Create: {set $v = 1++} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '++'"),
+            array('Create: {set $v = c} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token 'c'"),
             array(
-                'Create: {var $v = ($a)++} Result: {$v} end',
+                'Create: {set $v = ($a)++} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected token '++'"
             ),
             array(
-                'Create: {var $v = --$a++} Result: {$v} end',
+                'Create: {set $v = --$a++} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected token '++'"
             ),
             array(
-                'Create: {var $v = $a|upper++} Result: {$v} end',
+                'Create: {set $v = $a|upper++} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected token '++'"
             ),
             array(
-                'Create: {var $v = max($a,2)++} Result: {$v} end',
+                'Create: {set $v = max($a,2)++} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected token '++'"
             ),
             array(
-                'Create: {var $v = max($a,2)} Result: {$v} end',
+                'Create: {set $v = max($a,2)} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Function max not found",
                 Fenom::DENY_NATIVE_FUNCS
             ),
             array(
-                'Create: {var $v = 4*} Result: {$v} end',
+                'Create: {set $v = 4*} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected end of expression"
             ),
-            array('Create: {var $v = ""$a} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '\$a'"),
+            array('Create: {set $v = ""$a} Result: {$v} end', 'Fenom\Error\CompileException', "Unexpected token '\$a'"),
             array(
-                'Create: {var $v = [1,2} Result: {$v} end',
+                'Create: {set $v = [1,2} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected end of expression"
             ),
             array(
-                'Create: {var $v = empty(2)} Result: {$v} end',
+                'Create: {set $v = empty(2)} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected token 2, isset() and empty() accept only variables"
             ),
             array(
-                'Create: {var $v = isset(2)} Result: {$v} end',
+                'Create: {set $v = isset(2)} Result: {$v} end',
                 'Fenom\Error\CompileException',
                 "Unexpected token 2, isset() and empty() accept only variables"
             ),
@@ -576,32 +579,32 @@ class TemplateTest extends TestCase
     public static function providerArrays()
     {
         return array(
-            array('{var $arr = []}', array()),
-            array('{var $arr = [1]}', array(1)),
-            array('{var $arr = [1,]}', array(1)),
-            array('{var $arr = [1, 2, 3, 5]}', array(1, 2, 3, 5)),
-            array('{var $arr = [1, true, false, null, -1, 1.1, -2.2, 5, "str"]}', array(1, true, false, null, -1, 1.1, -2.2, 5, "str")),
-            array('{var $arr = [5 => 1, "two" => 2, 3]}', array(5 => 1, "two" => 2, 3)),
-            array('{var $arr = [1 + 1, 2 * 2, 3 / 3 + 7,]}', array(1 + 1, 2 * 2, 3 / 3 + 7)),
-            array('{var $arr = [$zero, $two => $one, $num.3 => $.const.PHP_VERSION]}', array(0, 2 => 1, "three" => PHP_VERSION)),
-            array('{var $arr = [5 - 1 => 1, "two"|up => "two"|low, 3 => count([1,2])]}', array(4 => 1, "TWO" => "two", 3 => 2)),
+            array('{set $arr = []}', array()),
+            array('{set $arr = [1]}', array(1)),
+            array('{set $arr = [1,]}', array(1)),
+            array('{set $arr = [1, 2, 3, 5]}', array(1, 2, 3, 5)),
+            array('{set $arr = [1, true, false, null, -1, 1.1, -2.2, 5, "str"]}', array(1, true, false, null, -1, 1.1, -2.2, 5, "str")),
+            array('{set $arr = [5 => 1, "two" => 2, 3]}', array(5 => 1, "two" => 2, 3)),
+            array('{set $arr = [1 + 1, 2 * 2, 3 / 3 + 7,]}', array(1 + 1, 2 * 2, 3 / 3 + 7)),
+            array('{set $arr = [$zero, $two => $one, $num.3 => $.const.PHP_VERSION]}', array(0, 2 => 1, "three" => PHP_VERSION)),
+            array('{set $arr = [5 - 1 => 1, "two"|up => "two"|low, 3 => count([1,2])]}', array(4 => 1, "TWO" => "two", 3 => 2)),
 
-            array('{var $arr = [[1]]}', array(array(1))),
-            array('{var $arr = [[],[]]}', array(array(),array())),
-            array('{var $arr = [1, [2, 3], 5]}', array(1, array(2, 3), 5)),
-            array('{var $arr = [1, [true, false, null, -1, 1.1, -2.2, 5], "str"]}', array(1, array(true, false, null, -1, 1.1, -2.2, 5), "str")),
-            array('{var $arr = [5 => [1, "two" => 2], 3]}', array(5 => array(1, "two" => 2), 3)),
-            array('{var $arr = [1 + 1, [2 * 2, 3 / 3 + 7,],]}', array(1 + 1, array(2 * 2, 3 / 3 + 7))),
-            array('{var $arr = [$zero, [$two => $one, $num.3 => $.const.PHP_VERSION]]}', array(0, array(2 => 1, "three" => PHP_VERSION))),
-            array('{var $arr = [5 - 1 => 1, ["two"|up => ("two"|low ~ "..."), 3 => count([1,2])]]}', array(4 => 1, array("TWO" => "two...", 3 => 2))),
+            array('{set $arr = [[1]]}', array(array(1))),
+            array('{set $arr = [[],[]]}', array(array(),array())),
+            array('{set $arr = [1, [2, 3], 5]}', array(1, array(2, 3), 5)),
+            array('{set $arr = [1, [true, false, null, -1, 1.1, -2.2, 5], "str"]}', array(1, array(true, false, null, -1, 1.1, -2.2, 5), "str")),
+            array('{set $arr = [5 => [1, "two" => 2], 3]}', array(5 => array(1, "two" => 2), 3)),
+            array('{set $arr = [1 + 1, [2 * 2, 3 / 3 + 7,],]}', array(1 + 1, array(2 * 2, 3 / 3 + 7))),
+            array('{set $arr = [$zero, [$two => $one, $num.3 => $.const.PHP_VERSION]]}', array(0, array(2 => 1, "three" => PHP_VERSION))),
+            array('{set $arr = [5 - 1 => 1, ["two"|up => ("two"|low ~ "..."), 3 => count([1,2])]]}', array(4 => 1, array("TWO" => "two...", 3 => 2))),
         );
     }
 
     public static function providerUnset() {
         return array(
-            array('{var $a = 5} {unset $a} {if $a is not set}not set{/if}', 'not set'),
-            array('{var $a = ["b" => 5, "c" => 6]} {unset $a.b} {if $a.b is not set}not set{/if} but c is {$a.c}', 'not set but c is 6'),
-            array('{var $a = ["b" => 5, "c" => 6]} {unset $a.b $a.c} {if $a.b is not set}not set{/if} {if $a.c is not set}not set{/if}', 'not set not set'),
+            array('{set $a = 5} {unset $a} {if $a is not set}not set{/if}', 'not set'),
+            array('{set $a = ["b" => 5, "c" => 6]} {unset $a.b} {if $a.b is not set}not set{/if} but c is {$a.c}', 'not set but c is 6'),
+            array('{set $a = ["b" => 5, "c" => 6]} {unset $a.b $a.c} {if $a.b is not set}not set{/if} {if $a.c is not set}not set{/if}', 'not set not set'),
         );
     }
 
@@ -1104,7 +1107,7 @@ class TemplateTest extends TestCase
                 "Template multi-extended by block1"
             ),
             array(
-                '{extends "parent.tpl"}{var $bk = "bk3"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} {block "$bk"} block3 {/block} garbage',
+                '{extends "parent.tpl"}{set $bk = "bk3"}{block "bk1"} block1 {/block}{block "bk2"} block2 {/block} {block "$bk"} block3 {/block} garbage',
                 "Template multi-extended by block1"
             ),
         );
@@ -1312,7 +1315,7 @@ class TemplateTest extends TestCase
         try {
             var_dump(
                 $this->fenom->compileCode(
-                    '{unset $a $a.c $b}'
+                    '{add $x = 3} {add $x = 9}'
                 )->getBody()
             );
         } catch (\Exception $e) {
