@@ -122,9 +122,11 @@ class TemplateTest extends TestCase
     {
         return array(
             array('hello, {$a.}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('hello, {$b[}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
+            array('hello, {$b.}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('hello, {$b[c}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('hello, {$b.c]}!', 'Fenom\Error\CompileException', "Unexpected token ']'"),
-            array('hello, {$b[ ]}!', 'Fenom\Error\CompileException', "Unexpected token ']'"),
+            array('hello, {$b[ ]}!', 'Fenom\Error\CompileException', "Unexpected end of expression"),
             array('hello, {$b[9/].c}!', 'Fenom\Error\CompileException', "Unexpected token ']'"),
             array('hello, {$b[3]$c}!', 'Fenom\Error\CompileException', "Unexpected token '\$c'"),
             array('hello, {$b[3]c}!', 'Fenom\Error\CompileException', "Unexpected token 'c'"),
@@ -579,6 +581,7 @@ class TemplateTest extends TestCase
     public static function providerArrays()
     {
         return array(
+            array('{set $arr[] = 4}', array(4)),
             array('{set $arr = []}', array()),
             array('{set $arr = [1]}', array(1)),
             array('{set $arr = [1,]}', array(1)),
@@ -1315,7 +1318,7 @@ class TemplateTest extends TestCase
         try {
             var_dump(
                 $this->fenom->compileCode(
-                    '{add $x = 3} {add $x = 9}'
+                    '{add $a[] = 5}'
                 )->getBody()
             );
         } catch (\Exception $e) {

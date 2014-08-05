@@ -748,13 +748,17 @@ class Compiler
             $before = "if(!isset($var)) {\n";
             $after = "\n}";
         }
-        if ($tokens->is('=')) { // inline tag {var ...}
+        if ($tokens->is(Tokenizer::MACRO_EQUALS, '[')) { // inline tag {var ...}
+            $equal = $tokens->getAndNext();
+            if($equal == '[') {
+                $tokens->need(']')->next()->need('=')->next();
+                $equal = '[]=';
+            }
             $scope->close();
-            $tokens->next();
             if ($tokens->is("[")) {
-                return $before.$var . '=' . $scope->tpl->parseArray($tokens) . ';'.$after;
+                return $before.$var . $equal . $scope->tpl->parseArray($tokens) . ';'.$after;
             } else {
-                return $before.$var . '=' . $scope->tpl->parseExpr($tokens) . ';'.$after;
+                return $before.$var . $equal . $scope->tpl->parseExpr($tokens) . ';'.$after;
             }
         } else {
             $scope["name"] = $var;
