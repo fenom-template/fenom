@@ -1,19 +1,19 @@
-Modifier esplit
+Модификатор esplit
 ===============
 
-Split string by a regular expression.
-[Read more](http://www.php.net/manual/en/reference.pcre.pattern.syntax.php) about regular expression.
+Разбивает строку по регулярному выражению.
+[Подробнее](http://www.php.net/manual/ru/reference.pcre.pattern.syntax.php) о регулярных выражениях.
 
 ```
 {$string|esplit:$pattern = '/,\s*/'}
 ```
 
-My default modifier split string by comma with spaces.
+По умолчанию модификатор разбивает строку по запятой с возможнымиы проблеами
 
 ```smarty
 {var $fruits1 = "banana, apple, pear"|esplit}
-$fruits1 is array ["banana", "apple", "pear"]
+$fruits1 — массив ["banana", "apple", "pear"]
 
 {var $fruits2 = "banana; apple; pear"|esplit:'/;\s/'} is ["banana", "apple", "pear"]
-$fruits2 is array ["banana", "apple", "pear"] too
+$fruits2 — массив ["banana", "apple", "pear"]
 ```

@@ -1,7 +1,7 @@
-Modifier length
+Модификатор length
 ===============
 
-The modifier returns the number of items of a sequence or mapping, or the length of a string (works with UTF8 without `mbstring`)
+Модификатор возвращает количество элементов массива, итератора или символов в строке (работает с UTF8).
 
 ```smarty
 {if $images|length > 5}

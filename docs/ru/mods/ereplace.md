@@ -1,23 +1,25 @@
-Modifier ereplace
+Модификатор ereplace
 =================
 
-Perform a regular expression search and replace.
-[Read more](http://www.php.net/manual/en/reference.pcre.pattern.syntax.php) about regular expression.
+Выполняет поиск и замену по регулярному выражению.
+[Подробнее](http://www.php.net/manual/ru/reference.pcre.pattern.syntax.php) о регулярных выражениях.
 
 ```
 {$string|replace:$pattern:$replacement}
 ```
 
-Searches `$string` for matches to `$pattern` and replaces them with `$replacement`.
+Выполняет поиск совпадений в строке `$subject` с шаблоном pattern и заменяет их на replacement.
 
-`$replacement` may contain references of the form `\n`, `$n` or `${n}`, with the latter form being the preferred one.
-Every such reference will be replaced by the text captured by the n'th parenthesized pattern. n can be from 0 to 99,
-and `\0` or `$0` refers to the text matched by the whole pattern.
-Opening parentheses are counted from left to right (starting from 1) to obtain the number of the capturing subpattern.
-To use backslash in replacement, it must be doubled.
+`$replacement` может содержать ссылки вида `\n`, `$n` или `${n}`, причем последний вариант предпочтительней.
+Каждая такая ссылка будет заменена на подстроку, соответствующую n-ой подмаске. n может принимать значения от 0 до 99,
+причем ссылка `\0` (либо $0) соответствует вхождению всего шаблона.
+Подмаски нумеруются слева направо, начиная с единицы. Для использования обратного слэша, его необходимо продублировать.
+
 
 ```smarty
 {var $string = 'April 15, 2014'}
 
 {$string|ereplace:'/(\w+) (\d+), (\d+)/i':'${1}1, $3'} {* April1, 2014 *}
 ```
+
+**Замечание:** воизбежание скрытых ошибок при выполнении сущностей регулярные выражения стоит помещать в одинарные кавычки.

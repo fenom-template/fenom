@@ -1,18 +1,18 @@
-Modifier ematch
+Модификатор ematch
 ==============
 
-Perform a regular expression match.
-[Read more](http://www.php.net/manual/en/reference.pcre.pattern.syntax.php) about regular expression.
+Выполняет проверку на соответствие регулярному выражению.
+[Подробнее](http://www.php.net/manual/ru/reference.pcre.pattern.syntax.php) о регулярных выражениях.
 
 
 ```
 {$string|ematch:$pattern}
 ```
 
-Searches `$string` for a match to the regular expression given in `$pattern`.
+Ищет в заданном тексте `$subject` совпадения с шаблоном `$pattern`.
 
 ```smarty
-{if $color|ematch:'/^gr[ae]y$/i'}
-  some form of gray ...
+{if $color|ematch:'/^(.*?)gr[ae]y$/i'}
+  какой-то оттенок серого ...
 {/if}
 ```
