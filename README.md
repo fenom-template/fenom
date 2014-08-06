@@ -9,7 +9,7 @@ Fenom - Template Engine for PHP
 [![Coverage Status](https://coveralls.io/repos/bzick/fenom/badge.png?branch=master)](https://coveralls.io/r/bzick/fenom?branch=master)
 [![Code Climate](https://codeclimate.com/github/bzick/fenom.png)](https://codeclimate.com/github/bzick/fenom)
 [![Total Downloads](https://poser.pugx.org/fenom/fenom/downloads.png)](https://packagist.org/packages/fenom/fenom)
-## [Quick start](./docs/en/start.md) :: [Documentation](./docs/readme.md) [en](./docs/en/readme.md)/[ru](./docs/ru/readme.md) :: [Benchmark](./docs/en/benchmark.md)
+## [Quick start](./docs/en/start.md) :: [Documentation](./docs/readme.md) [[en](./docs/en/readme.md)|[ru](./docs/ru/readme.md)] :: [Benchmark](./docs/en/benchmark.md)
 <!-- :: [Articles](./docs/articles.md) -->
 
 ### What is it
