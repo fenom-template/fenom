@@ -1,8 +1,8 @@
-Tag {raw}
+Тег {raw}
 =========
 
-Tag `{raw <expression>}` allow outputs render results without escaping.
-This tag rewrite global option `auto_escape` for specified code.
+Тег `{raw <expression>}` позволяет вывести результат выражения без экранирования.
+
 
 ```smarty
 {autoescape true}
@@ -16,7 +16,7 @@ This tag rewrite global option `auto_escape` for specified code.
 {/autoescate}
 ```
 
-For functions use tag with prefix `raw:`:
+Для функций используйте параметр тега `:raw`:
 
 ```smarty
 {autoescape true}
@@ -26,5 +26,3 @@ For functions use tag with prefix `raw:`:
     ...
 {/autoescate}
 ```
-
-Tag can not be applied to compilers as `foreach`, `if` and other.

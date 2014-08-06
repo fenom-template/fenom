@@ -5,12 +5,12 @@
 С его помощью можно легко реализовать чередование двух или более заданных значений.
 
 ```smarty
-{for $i=$a.c..}
+{for $i=1 to=6}
     <div class="{cycle ["odd", "even"]}">
 {/for}
 
 
-{for $i=$a.c..}
+{for $i=1 to=6}
     <div class="{cycle ["odd", "even"] index=$i}">
 {/for}
 ```

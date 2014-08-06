@@ -1,14 +1,12 @@
-Tag {autotrim}
+Тег {autotrim}
 ==============
 
-Force enable or disable `auto_trim` option for block area:
+Задает индивидуальное значение параметра `auto_trim` на фрагмент шаблона:
 
 ```smarty
 {autotrim true}
     ...
-    Text: {$text} {* value of the variable $text will be escaped *}
+    Text: {$text}
     ...
 {/autotrim}
 ```
-
-Also see :trim, :rtrim and :ltrim tag options
