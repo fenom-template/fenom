@@ -24,5 +24,5 @@
     {my_func page=5} {* escape *}
     {my_func:raw page=5} {* unescape *}
     ...
-{/autoescate}
+{/autoescape}
 ```
