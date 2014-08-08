@@ -740,23 +740,32 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function varOpen(Tokenizer $tokens, Tag $scope)
+    public static function setOpen(Tokenizer $tokens, Tag $scope)
     {
         $var = $scope->tpl->parseVariable($tokens);
-        if ($tokens->is('=')) { // inline tag {var ...}
+        $before = $after = "";
+        if($scope->name == 'add') {
+            $before = "if(!isset($var)) {\n";
+            $after = "\n}";
+        }
+        if ($tokens->is(Tokenizer::MACRO_EQUALS, '[')) { // inline tag {var ...}
+            $equal = $tokens->getAndNext();
+            if($equal == '[') {
+                $tokens->need(']')->next()->need('=')->next();
+                $equal = '[]=';
+            }
             $scope->close();
-            $tokens->next();
             if ($tokens->is("[")) {
-                return $var . '=' . $scope->tpl->parseArray($tokens);
+                return $before.$var . $equal . $scope->tpl->parseArray($tokens) . ';'.$after;
             } else {
-                return $var . '=' . $scope->tpl->parseExpr($tokens);
+                return $before.$var . $equal . $scope->tpl->parseExpr($tokens) . ';'.$after;
             }
         } else {
             $scope["name"] = $var;
             if ($tokens->is('|')) {
-                $scope["value"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
+                $scope["value"] = $before . $scope->tpl->parseModifier($tokens, "ob_get_clean()").';'.$after;
             } else {
-                $scope["value"] = "ob_get_clean()";
+                $scope["value"] = $before . "ob_get_clean();" . $after;
             }
             return 'ob_start();';
         }
@@ -767,7 +776,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function varClose(Tokenizer $tokens, Tag $scope)
+    public static function setClose(Tokenizer $tokens, Tag $scope)
     {
         return $scope["name"] . '=' . $scope["value"] . ';';
     }

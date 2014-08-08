@@ -1,13 +1,13 @@
-Modifier lower
+Модификатор lower
 ==============
 
-Modifier is used to lowercase a variable or string. Have short alias `low`
-This is equivalent to the PHP [strtolower()](http://docs.php.net/lower) function.
+Переводит строку в нижний регистр. Является эквивалентом функции PHP [strtolower()](http://docs.php.net/ru/lower).
+Имеет псевданим `low`.
 
 ```smarty
-{var $name = "Bzick"}
+{set $name = "Bzick"}
 
-{$name}         output Bzick
-{$name|upper}   output bzick
-{$name|up}      output bzick too
+{$name}         выведет Bzick
+{$name|upper}   выведет bzick
+{$name|up}      выведет bzick
 ```

@@ -1,29 +1,35 @@
-Tag {include}
+Тег {include}
 =============
 
-`{include}` tags are used for including other templates in the current template. Any variables available in the current template are also available within the included template.
+Тэги `{include}` используются для включения других шаблонов в текущий. Любые переменные, доступные в текущем шаблоне, доступны и во включаемом.
 
 ```smarty
 {include "about.tpl"}
 ```
 
-If you need to set yours variables for template list them in attributes.
+Вы также можете передать переменные в подключаемый шаблон в виде атрибутов.
+Любая переменная, переданная в подключаемый шаблон, доступны только в области видимости подключаемого файла.
+Переданные переменные имеют преимущество перед существующими переменными с аналогичными именами.
 
 ```smarty
-{include "about.tpl" page=$item limit=50}
+{include "pagination.tpl" count=$total_pages current=$.get.page}
 ```
 
-All variables changed in child template has no affect to variables in parent template.
+Все значения присвоенных переменных восстанавливаются после того, как подключаемый шаблон отработал.
+Это значит, что вы можете использовать все переменные из подключающего шаблона в подключаемом, но изменения переменных внутри подключаемого шаблона не будут видны внутри подключающего шаблона после команды {include}.
 
 ### {insert}
 
-The tag insert template code instead self.
+В отличии от `{include}` тег `{insert}` не вызывает дочерний шаблон во время отрисовки, в ставляет код дочернего шаблона в родительский на момент компиляции.
+Это позволяет сэкономить ресурсы на проверке и чтении шаблона. Однако такой формат подключения шаблона имеет ограничения.
+Имя шаблона должно быть задано явно, без использования переменных и выражений:
 
-* No dynamic name allowed.
-* No variables as attribute allowed.
-* Increase performance because insert code as is in compilation time.
+```smarty
+{insert 'pagination.tpl'} {* отработает *}
+{insert $pagination} {* вызовет ошибку *}
+```
 
-For example, main.tpl:
+Рассмотрим тега `{insert}` на примере. Допустим шаблон `main.tpl` имеет следующий код:
 
 ```smarty
 a: {$a}
@@ -31,13 +37,13 @@ a: {$a}
 c: {$c}
 ```
 
-b.tpl:
+`b.tpl`:
 
 ```
 b: {$b}
 ```
 
-Code of `b.tpl` will be inserted into `main.tpl` as is:
+Компилятор увидит шаблон `main.tpl` таким:
 
 ```smarty
 a: {$a}

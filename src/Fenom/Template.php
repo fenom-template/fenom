@@ -693,11 +693,15 @@ class Template extends Render
                     $cond = false;
                 }
                 $op = $tokens->getAndNext();
-            } elseif ($tokens->is(Tokenizer::MACRO_EQUALS)) { // assignment operator: $a = 4, $a += 3, ...
+            } elseif ($tokens->is(Tokenizer::MACRO_EQUALS, '[')) { // assignment operator: $a = 4, $a += 3, ...
                 if (!$var) {
                     break;
                 }
                 $op = $tokens->getAndNext();
+                if($op == '[') {
+                    $tokens->need(']')->next()->need('=')->next();
+                    $op = '[]=';
+                }
             } elseif ($tokens->is(T_STRING)) { // test or containment operator: $a in $b, $a is set, ...
                 if (!$exp) {
                     break;
@@ -866,6 +870,9 @@ class Template extends Render
                 }
                 $var .= $key;
             } elseif ($t === "[") {
+                if($tokens->isNext(']')) {
+                    break;
+                }
                 $tokens->next();
                 if ($tokens->is(Tokenizer::MACRO_STRING)) {
                     if ($tokens->isNext("(")) {

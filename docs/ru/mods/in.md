@@ -1,7 +1,7 @@
-Modifier in
+Модификатор in
 ===========
 
-The modifier is implementation of [in](../operators.md#containment-operator) operator (performs containment test).
+Модификатор является реализацией оператора сдержания [in](../operators.md#Оператор-содержания).
 
 ```smarty
 {if $number|in:[1, 3, 42]}

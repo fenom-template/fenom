@@ -1,9 +1,9 @@
-Tag {ignore}
+Тег {ignore}
 ============
 
-{ignore} tags allow a block of data to be taken literally.
-This is typically used around Javascript or stylesheet blocks where {curly braces} would interfere with the template delimiter syntax.
-Anything within {ignore}{/ignore} tags is not interpreted, but displayed as-is.
+Теги `{ignore}{/ignore}` позволяют игнорировать заключенные в них другие теги.
+Весь текст внутри тегов `{ignore}{/ignore}` не интерпретируется, а выводится "как есть".
+Обычно они используются вместе с javascript или таблицами стилей, в которых фигурные скобки конфликтуют с синтаксисом разделителей.
 
 ```smarty
 {ignore}
@@ -11,8 +11,8 @@ Anything within {ignore}{/ignore} tags is not interpreted, but displayed as-is.
 {/ignore}
 ```
 
-{ignore} tags are normally not necessary, as Fenom ignores delimiters that are surrounded by whitespace.
-Be sure your javascript and CSS curly braces are surrounded by whitespace:
+Использование тегов {ignore} не всегда обязательное так как Fenom игнорирует фигурные скобки `{` сразу после которых идут пробельные символы.
+Убедитесь что открывающие фигурные скобки в JavaScript и CSS имеют хотя бы по пробелу справа:
 
 ```smarty
 var data = { "time": obj.ts };

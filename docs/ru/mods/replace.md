@@ -1,13 +1,13 @@
-Modifier replace
+Модификатор replace
 ================
 
-Replace all occurrences of the search string with the replacement string
+Заменяет все вхождения строки поиска на строку замены
 
 ```
 {$string|replace:$search:$replace}
 ```
 
-This modifier returns a string with all occurrences of `$search` in subject replaced with the given `$replace` value.
+Этот модификатор возвращает строку, в котором все вхождения `$search` в `$subject` заменены на `$replace`.
 
 ```smarty
 {$fruits|replace:"pear":"orange"}

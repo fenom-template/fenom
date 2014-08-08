@@ -1,20 +1,19 @@
-Modifier escape
+Модификатор escape
 ===============
 
-The modifier escapes a string for safe insertion into the output.
-It supports different escaping strategies depending on the template context.
-By default, it uses the HTML escaping strategy:
+Используется для кодирования или экранирования спецсимволов по алгоритмам экранирования HTML, URL'ов и javascript.
+По умолчанию активирован режим экранирования HTML.
 
 ```smarty
-{$post.title|escape:'html'}
+{$text|escape:$type = 'html':$charset = 'UTF8'}
 ```
 
-The modifier supports the following escaping strategies:
+Модификатор поддерживает несколько режимов работы
 
-* html: escapes a string for the HTML body context.
-* url: escapes a string for the URI or parameter contexts.
-* js: escapes a string for the JavaScript context.
+* `html`: экранирует HTML сущности в строке.
+* `url`: экранирует строку для использования в URL.
+* `js`: экранирует строку для использования в JavaScript.
 
-For convenience, the `e` modifier is defined as an alias of `escape` modifier.
+Модификатор `e` является псевданимом модификатора от `escape`.
 
-Second parameter is charset.
+Параметр `$charset` указывает кодировку для режима `html`.

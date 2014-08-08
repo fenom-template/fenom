@@ -1,9 +1,9 @@
-Extends Fenom
-=============
+Расширение Fenom
+================
 
 *TODO*
 
-# Add tags
+# Добавление тегов
 
 В шаблонизаторе принято различать два типа тегов: _компиляторы_ и _функции_.
 Compilers invokes during compilation template to PHP source and have to
@@ -11,7 +11,7 @@ Compilers invokes during compilation template to PHP source and have to
 А функции вызываются непременно в момент выполнения шаблона и возвращают непосредственно данные которые будут отображены.
 Среди тегов как и в HTML есть строчные и блоковые теги.
 
-## Inline function
+## Линейные функции
 
 Примитивное добавление функции можно осуществить следующим образом:
 
@@ -48,7 +48,7 @@ then
 ```
 Таким образом вы успешно можете добавлять Ваши функции или методы.
 
-## Block function
+## Блоковые функции
 
 Добавление блоковой функции аналогичен добавлению строковой за исключением того что есть возможность указать парсер для закрывающего тега.
 
@@ -61,7 +61,7 @@ $fenom->addBlockFunction(string $function_name, callable $callback[, callable $p
 $fenom->addBlockFunction('some_block_function', function ($content, array $params) { /* ... */});
 ```
 
-## Inline compiler
+## Линейный компилятор
 
 Добавление строчного компилятора осуществляеться очень просто:
 
@@ -78,7 +78,7 @@ $fenom->addCompilerSmart(string $compiler, $storage);
 
 `$storage` может быть как классом так и объектом. В данном случае шаблонизатор будет искать метод `tag{$compiler}`, который будет взят в качестве парсера тега.
 
-## Block compiler
+## Блоковый компилятор
 
 Добавление блочного компилятора осуществяется двумя способами. Первый
 
@@ -93,7 +93,7 @@ $fenom->addBlockCompiler(string $compiler, array $parsers, array $tags);
 $fenom->addBlockCompilerSmart(string $compiler, $storage, array $tags, array $floats);
 ```
 
-# Add modifiers
+# Добавление модификаторов
 
 ```
 $fenom->addModifier(string $modifier, callable $callback);
@@ -114,22 +114,55 @@ $fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
 });
 ```
 
-# Extends test operator
+# Расширение тестовго оператора
 
 ```php
 $fenom->addTest($name, $code);
 ?>
 ```
 
-# Add template provider
+# Расширение глобальной переменной
 
-Бывает так что шаблны не хранятся на файловой сиситеме, а хранятся в некотором хранилище, например, в базе данных MySQL.
-В этом случае шаблонизатору нужно описать как забирать шаблоны из хранилища, как проверять дату изменения шаблона и где хранить кеш шаблонов (опционально).
-Эту задачу берут на себя Providers, это объекты реальзующие интерфейс `Fenom\ProviderInterface`.
+# Источники шаблонов
 
-# Extends accessor
+Шаблоны можно получать из самых разных источников.
+Когда вы отображаете или вызываете шаблон, либо когда вы подключаете один шаблон к другому, вы указываете источник,
+вместе с соответствующим путём и названием шаблона. Если источник явно не задан, то используется источник `Fenom\Provider`,
+который считывает шаблоны из указанной директории.
 
-# Extends cache
+Источник шаблонов должен реализовать интерфейс `Fenom\ProviderInterface`.
+Используйте метод `$fenom->setProvider(...)`  что бы добавить источник в шаблонизатор, указав навание источника и, если есть необходимость,
+задать директорию кеша для шаблонов из этого источника. Рассмотрим на примере, реализуем источик шаблонов из базы данных.
+
+Создадим источник:
+
+```php
+
+class DbProvider implements Fenom\ProviderInterface {
+    // ...
+}
+
+```
+
+Добавляем источник, указав удобное имя.
+
+```php
+
+$provider = new DbProvider();
+$fenom->setProvider("db", $provider, "/tmp/cached/db");
+```
+
+Теперь источник можно использовать.
+
+```php
+$fenom->display("db:index.tpl", $vars);
+```
+
+```smarty
+{include "db:menu.tpl"}
+```
+
+# Расширение кеша (эксперементальное)
 
 Изначально Fenom не расчитывался на то что кеш скомпиленых шаблонов может располагаться не на файловой системе.
 Однако, в теории, есть возможность реализовать свое кеширование для скомпиленых шаблонов без переопределения шаблонизатора.
@@ -150,9 +183,9 @@ For `include`:
 * [CacheStreamWrapper::stream_eof](http://www.php.net/manual/en/streamwrapper.stream-eof.php)
 
 **Note**
-(On 2014-05-13) Zend OpCacher doesn't support custom protocols except `file://` and `phar://`.
+(On 2014-05-13) Zend OpCacher кроме `file://` и `phar://` не поддеривает другие протоколы.
 
-For example,
+Пример работы кеша
 
 ```php
 $this->setCacheDir("redis://hash/compiled/");

@@ -1,5 +1,7 @@
-Tag {foreach} [RU]
-==================
+Тег {foreach}
+=============
+
+Тег `foreach` предоставляет простой способ перебора массивов.
 
 ```smarty
 {foreach $list as [$key =>] $value [index=$index] [first=$first] [last=$last]}
@@ -81,6 +83,5 @@ Tag {foreach} [RU]
 
 В блоке `{foreachelse}...{/foreach}` использование `{break}`, `{continue}` выбросит исключение `Fenom\CompileException` при компиляции
 
-### Notice
-
+**Замечание:**
 Использование last требует от `$list` быть **countable**.

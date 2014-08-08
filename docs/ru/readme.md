@@ -1,15 +1,20 @@
-Documentation
+Документация
 =============
-
 
 ### Fenom
 
 * [Быстрый старт](./start.md)
 * [Адаптеры для фрейморков](./adapters.md)
-* [Для разработчиков](./dev/readme.md)
-* [Нстройки](./configuration.md)
-* [Синтаксис шаблонов](./syntax.md)
-* [Операторы](./operators.md)
+* [Разработка Fenom](./dev/readme.md)
+* [Настройки](./configuration.md)
+* [Синтаксис](./syntax.md)
+    * [Переменные](./syntax.md#Переменные)
+    * [Значения](./syntax.md#Скалярные-значения)
+    * [Массивы](./syntax.md#Массивы)
+    * [Операторы](./operators.md)
+    * [Модификаторы](./syntax.md#Модификаторы)
+    * [Теги](./syntax.md#Теги)
+    * [Параметры тегов](./syntax.md#Параметры-тегов)
 
 ***
 
@@ -17,14 +22,14 @@ Documentation
 
 [Использование](./syntax.md#tags) тегов.
 
-* [var](./tags/var.md) — определение переменной
+* [set](./tags/set.md), `add` и `var` — определение значения переменной
 * [if](./tags/if.md), `elseif` и `else` — условный оператор
 * [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — перебор элементов массива или объекта
 * [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
-* [switch](./tags/switch.md), `case`, `default` — груповой условный оператор
+* [switch](./tags/switch.md), `case` — груповой условный оператор
 * [cycle](./tags/cycle.md) — циклицеский перебор массива значений
 * [include](./tags/include.md), `insert` — вставляет и испольняет указанный шаблон
-* [extends](./tags/extends.md), `use`, `block` и `parent` — наследование шаблонов
+* [extends](./tags/extends.md), `use`, `block` и `parent` — [наследование](./inheritance.md) шаблонов
 * [filter](./tags/filter.md) — примение модификаторов к фрагменту шаблона
 * [ignore](./tags/ignore.md) — игнорирование тегов Fenom
 * [macro](./tags/macro.md) и `import` — пользовательские функции шаблонов
@@ -65,20 +70,25 @@ Documentation
 
 ### Операторы
 
-* [Арифметические операторы](./operators.md#arithmetic-operators) — `+`, `-`, `*`, `/`, `%`
-* [Логические операторы](./operators.md#logical-operators) — `||`, `&&`, `!$var`, `and`, `or`, `xor`
-* [Операторы сравнения](./operators.md#comparison-operators) — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
-* [Битовые операторы](./operators.md#bitwise-operators) — `|`, `&`, `^`, `~$var`, `>>`, `<<`
-* [Операторы присвоения](./operators.md#assignment-operators) — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
-* [Строковый оператор](./operators.md#string-operator) — `$str1 ~ $str2`
-* [Тернарные операторы](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
-* [Проверяющие операторы](./operators.md#check-operators) — `$var?`, `$var!`
-* [Оператор тестирование](./operators.md#test-operator) — `is`, `is not`
-* [Оператор содержания](./operators.md#containment-operator) — `in`, `not in`
+* [Арифметические операторы](./operators.md#Арифметические-операторы) — `+`, `-`, `*`, `/`, `%`
+* [Логические операторы](./operators.md#Логические-операторы) — `||`, `&&`, `!$var`, `and`, `or`, `xor`
+* [Операторы сравнения](./operators.md#Операторы-сравнения) — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
+* [Битовые операторы](./operators.md#Битовые-операторы) — `|`, `&`, `^`, `~$var`, `>>`, `<<`
+* [Операторы присвоения](./operators.md#Операторы-присвоения) — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
+* [Строковый оператор](./operators.md#Строковый-оператор) — `$str1 ~ $str2`
+* [Тернарные операторы](./operators.md#Тернарные-операторы) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
+* [Проверяющие операторы](./operators.md#Проверяющие-операторы) — `$var?`, `$var!`
+* [Оператор тестирования](./operators.md#Оператор-тестирования) — `is`, `is not`
+* [Оператор содержания](./operators.md#Оператор-содержания) — `in`, `not in`
 
 ***
 
 ### Расширение
 
+* [Источники шаблонов](./ext/extend.md#Источники-шаблонов)
+* [Добавление модификаторов](./ext/extend.md#Добавление-модификаторов)
+* [Добавление тегов](./ext/extend.md#Добавление-тегов)
+* [Расширение тестового оператора](./ext/extend.md#Расширение-тестовго-оператора)
+* [Расширение глобальной переменной](./ext/extend.md#Расширение-глобальной-переменной)
 * [Расширение Fenom](./ext/extend.md)
 * [Add-ons](./ext/extensions.md)
