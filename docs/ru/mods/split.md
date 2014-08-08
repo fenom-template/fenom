@@ -1,13 +1,13 @@
-Modifier split
+Модификатор split
 ==============
 
-Split a string by string
+Разбивает строку с помощью разделителя
 
 ```
 {$string|split:$delimiter = ","}
 ```
 
-Returns an array of strings, each of which is a substring of `$string` formed by splitting it on boundaries formed by the string `$delimiter`.
+Возвращает массив строк, полученных разбиением строки с использованием `$delimiter` в качестве разделителя.
 
 ```smarty
 {var $fruits1 = "banana,apple,pear"|split}

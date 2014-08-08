@@ -1,16 +1,27 @@
-Modifier strip
+Модификатор strip
 ==============
+
+Заменяет все повторяющиеся пробелы, переводы строк и символы табуляции одним пробелом.
 
 This replaces all repeated spaces and tabs with a single space, or with the supplied string.
 
 ```smarty
-{"   one    two   "|strip} => 'one two'
+{"   one    two   "|strip}
+```
+Результат обработки
+```
+one two
 ```
 
-Optional boolean parameter tell to the modifier strip also newline
+Опционально указывается флаг мультистрочности: `true` - тку же срезать переносы строк, `false` - срезать все кроме переносов строк.
 
 ```smarty
 {"    multi
     line
-    text    "|strip:true} => 'multi line text'
+    text    "|strip:true}
+```
+
+Результат обработки
+```
+multi line text
 ```

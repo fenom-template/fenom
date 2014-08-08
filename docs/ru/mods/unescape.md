@@ -1,5 +1,9 @@
-Modifier unescape
+Модификатор unescape
 =================
 
-`Unescape` is used to decode entity, html, js and URI. See [escape](./escape.md)
+Модификато `unescape` является обратным действием модификатора `escape`. Так же имеет режимы `html`, `js` and `URI`.
+
+```smarty
+{$text|unescape:$type = 'html'}
+```
 

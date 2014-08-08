@@ -1,14 +1,14 @@
-Tag {autoescape}
-=====================
+Тег {autoescape}
+================
 
-Force enable or disable `auto_escape` option for block area:
+Задает индивидуальное значение параметра `auto_escape` на фрагмент шаблона:
 
 ```smarty
 {autoescape true}
     ...
-    Text: {$text} {* value of the variable $text will be escaped *}
+    Text: {$text} {* значение переменной $text будет заэкранированно *}
     ...
 {/autoescape}
 ```
 
-Also see {raw} tag and :raw tag option
+Так же смотите тег [{raw}](./raw.md) и параметр тега [:raw](../configuration.md)

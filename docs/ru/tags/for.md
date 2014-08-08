@@ -1,4 +1,4 @@
-Tag {for}
+Тег {for}
 =========
 
 ```smarty

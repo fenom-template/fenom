@@ -12,6 +12,8 @@
 ## Переменные
 
 Переменные могут быть выведены на экран или могут быть использованы для функций, атрибутов, модификаторов внутри сложных выражений и т.д.
+Переменные в Fenom представлены знаком доллара с последующим именем переменной. Имя переменной чувствительно к регистру.
+Правильное имя переменной должно начинаться с буквы или символа подчеркивания и состоять из букв, цифр и символов подчеркивания в любом количестве.
 
 ### Использование переменных
 
@@ -123,13 +125,6 @@
 {"Hi, $username!"}   выведет "Hi, Username!"
 ```
 
-Аналогично могут быть обработаны элемент массива или свойство объекта
-
-```smarty
-{"Hi, $user.name!"}
-{"Hi, $user->name!"}
-```
-
 Для чего-либо более сложного, используйте сложный синтаксис.
 
 ##### Сложный синтаксис
@@ -154,8 +149,6 @@
 {"Hi, {$user.name|up ~ " (admin)"}!"}     выводит: Hi, USERNAME (admin)!
 ```
 
-but if use single quote any template expressions will be on display as it is
-
 #### Одинарные кавычки
 
 Простейший способ определить строку - это заключить ее в одинарные кавычки (символ `'`).
@@ -166,10 +159,10 @@ but if use single quote any template expressions will be on display as it is
 это означает, что если вы попытаетесь использовать другие управляющие последовательности, такие как `\r` или `\n`, они будут выведены как есть вместо какого-либо особого поведения.
 
 ```smarty
-{'Hi, $foo'}            outputs 'Hi, $foo'
-{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
-{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
-{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
+{'Hi, $foo'}            выводит 'Hi, $foo'
+{'Hi, {$foo}'}          выводит 'Hi, {$foo}'
+{'Hi, {$user.name}'}    выводит 'Hi, {$user.name}'
+{'Hi, {$user.name|up}'} выводит "Hi, {$user.name|up}"
 ```
 
 ### Целые числа
@@ -189,7 +182,11 @@ but if use single quote any template expressions will be on display as it is
 ```
 
 **Замечение**
-Размер целого числоа зависит от платформы, хотя, как правило, максимальное значение примерно равно 2 миллиардам (это 32-битное знаковое).
+Двоичная запись числа (`0b1011011`) не доступна на старых версиях PHP — 5.3 или ниже.
+Попытка исользовать на старых версия PHP приведет к исключению при компиляциях.
+
+**Замечение**
+Размер целого числа зависит от платформы, хотя, как правило, максимальное значение примерно равно 2 миллиардам (это 32-битное знаковое).
 64-битные платформы обычно имеют максимальное значение около 9223372036854775807.
 
 **Предупреждение**
@@ -205,216 +202,121 @@ but if use single quote any template expressions will be on display as it is
 {var $c = 7E-10}
 ```
 
+### Булев
+
+Это простейший тип. Булевое выражает истинность значения. Он может быть либо TRUE либо FALSE.
+Для указания булевого значения, используйте ключевое слово TRUE или FALSE. Оба регистро-независимы.
+
+{set $a = true}
+
+### NULL
+
+Специальное значение NULL представляет собой переменную без значения. NULL - это единственно возможное значение типа null.
+
+Обычно возникают путаницы между NULL и FALSE, так как по роли они похожи, но разлицаются по принципу:
+NULL - это отсутствие присутствия, а FALSE - присутвие отсутствия.
+
 ### Операции
 
 Как и любой другой язык программирования/шаблонизации Fenom поддерживает множество различных операторов:
 
-* [Арифметические операторы](./operators.md#arithmetic-operators) — `+`, `-`, `*`, `/`, `%`
-* [Логические операторы](./operators.md#logical-operators) — `||`, `&&`, `!$var`, `and`, `or`, `xor`
-* [Операторы сравнения](./operators.md#comparison-operators) — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
-* [Битовые операторы](./operators.md#bitwise-operators) — `|`, `&`, `^`, `~$var`, `>>`, `<<`
-* [Операторы присвоения](./operators.md#assignment-operators) — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
-* [Строковый оператор](./operators.md#string-operator) — `$str1 ~ $str2`
-* [Тернарные операторы](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
-* [Проверяющие операторы](./operators.md#check-operators) — `$var?`, `$var!`
-* [Оператор тестирование](./operators.md#test-operator) — `is`, `is not`
-* [Оператор содержания](./operators.md#containment-operator) — `in`, `not in`
+* Арифметические операторы — `+`, `-`, `*`, `/`, `%`
+* Логические операторы — `||`, `&&`, `!$var`, `and`, `or`, `xor`
+* Операторы сравнения — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
+* Битовые операторы — `|`, `&`, `^`, `~$var`, `>>`, `<<`
+* Операторы присвоения — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
+* Строковый оператор — `$str1 ~ $str2`
+* Тернарные операторы — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
+* Проверяющие операторы — `$var?`, `$var!`
+* Оператор тестирование — `is`, `is not`
+* Оператор содержания — `in`, `not in`
 
-Подробнее об [операторах](./operators.md)
+Подробнее об [операторах](./operators.md).
 
-### Set variable
+## Массивы
+
+Массив (тип array) может быть создан конструкцией `[]`. В качестве параметров она принимает любое количество разделенных запятыми пар `key => value` (`ключ => значение`).
+```
+[
+    key  => value,
+    key2 => value2,
+    key3 => value3,
+    ...
+]
+```
+Запятая после последнего элемента массива необязательна и может быть опущена.
+Обычно это делается для однострочных массивов, т.е. `[1, 2]` предпочтительней `[1, 2, ]`.
+Для многострочных массивов с другой стороны обычно используется завершающая запятая, так как позволяет легче добавлять новые элементы в конец массива.
 
 ```smarty
-{var $foo = "bar"}
-{var $foo = "bar"|upper} {* apply modifier *}
-{var $foo = 5}
-{var $foo = $x + $y}
-{var $foo = $x.y[z] + $y}
-{var $foo = strlen($a)} {* work with functions *}
-{var $foo = myfunct( ($x+$y)*3 )}
-{var $foo.bar.baz = 1} {* multidimensional value support *}
-{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
+{set $array = [
+    "foo" => "bar",
+    "bar" => "foo",
+]}
+
 ```
 
-Using block tag
+`key` может быть либо целым числом, либо строкой. `value` может быть любого типа.
+
+Дополнительно с ключом key будут сделаны следующие преобразования:
+
+* Строки, содержащие целое число будут преобразованы к числу. Например, ключ со значением `"8"` будет в действительности сохранен со значением `8`. С другой стороны, значение `"08"` не будет преобразовано, так как оно не является корректным десятичным целым.
+* Числа с плавающей точкой также будут преобразованы к числу, т.е. дробная часть будет отброшена. Например, ключ со значением `8.7` будет в действительности сохранен со значением `8`.
+* Булев также преобразовываются к целому числу. Например, ключ со значением `true` будет сохранен со значением `1` и ключ со значением `false` будет сохранен со значением `0`.
+* NULL будет преобразован к пустой строке. Например, ключ со значением `null` будет в действительности сохранен со значением `""`.
+* Массивы (тип array) и объекты (тип object) не могут использоваться в качестве ключей. При подобном использовании будет генерироваться предупреждение: Недопустимый тип смещения (Illegal offset type).
+
+Если несколько элементов в объявлении массива используют одинаковый ключ, то только последний будет использоваться, а все другие будут перезаписаны.
+
+Параметр `key` является необязательным. Если он не указан, Fenom будет использовать предыдущее наибольшее значение целочисленного ключа, увеличенное на 1.
+
+Существующий массив может быть изменен явной установкой значений в нем.
+Это выполняется присвоением значений массиву с указанием в скобках ключа или после точки.
+Кроме того, используя скобки, вы можете опустить ключ.
 
 ```smarty
-{var $foo}
-    content {$text|truncate:30}
-{/var}
-{var $foo|truncate:50} {* apply modifier to content *}
-    content {$text}
-{/var}
+{set $arr.key = value}
+{set $arr[] = value} {* будет взят максимальный целочисленый ключ, увеличенный на 1 *}
 ```
 
-Set array
+Если массив `$arr` еще не существует, он будет создан. Таким образом, это еще один способ определить массив.
+Однако такой способ применять не рекомендуется, так как если переменная `$arr` уже содержит некоторое значение (например, строку),
+то это значение останется на месте и `[]` может на самом деле означать доступ к символу в строке. Лучше инициализировать переменную путем явного присваивания значения.
 
-```smarty
-{var $foo = [1, 2, 3]} numeric array
-{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
-{var $foo = [1, [9, 8], 3]} can be nested
-{var $foo = [1, $two, $three * 3 + 9]}
-{var $foo = [$a, $d.c, $a + $f]}
-{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
-{var $foo = [1, [$parent, $a->method()], 3]}
-```
+## Модификаторы
 
-See also [{var}](./tags/var.md) documentation.
-
-
-### Static method support
-
-```smarty
-{Lib\Math::multiple x=3 y=4} static method as tag
-{Lib\Math::multiple(3,4)}  inline static method
-{12 + Lib\Math::multiple(3,4)}
-{12 + 3|Lib\Math::multiple:4}  static method as modifier
-```
-
-You may disable call static methods in template, see in [security options](./settings.md) option `deny_static`
-
-### Set variable
-
-```smarty
-{var $foo = "bar"}
-{var $foo = "bar"|upper} {* apply modifier *}
-{var $foo = 5}
-{var $foo = $x + $y}
-{var $foo = $x.y[z] + $y}
-{var $foo = strlen($a)} {* work with functions *}
-{var $foo = myfunct( ($x+$y)*3 )}
-{var $foo.bar.baz = 1} {* multidimensional value support *}
-{var $foo = $object->item->method($y, 'named')} {* work with object fine *}
-```
-
-Using block tag
-
-```smarty
-{var $foo}
-    content {$text|truncate:30}
-{/var}
-{var $foo|truncate:50} {* apply modifier to content *}
-    content {$text}
-{/var}
-```
-
-Set array
-
-```smarty
-{var $foo = [1, 2, 3]} numeric array
-{var $foo = ['y' => 'yellow', 'b' => 'blue']} associative array
-{var $foo = [1, [9, 8], 3]} can be nested
-{var $foo = [1, $two, $three * 3 + 9]}
-{var $foo = [$a, $d.c, $a + $f]}
-{var $foo = ['y' => 'yellow', $color|upper => $colors[ $color ]}
-{var $foo = [1, [$parent, $a->method()], 3]}
-```
-
-See also [{var}](./tags/var.md) documentation.
-
-
-## Scalar values
-
-### Strings
-
-When the string in double quotation marks, all the expressions in the string will be run.
-The result of expressions will be inserted into the string instead it.
-
-```smarty
-{var $foo="Username"}
-{var $user.name="Username"}
-{"Hi, $foo"}          outputs "Hi, Username"
-{"Hi, {$foo}"}        outputs "Hi, Username"
-{"Hi, {$user.name}"}  outputs "Hi, Username"
-{"Hi, {$user.name|up}"} outputs "Hi, USERNAME"
-{"Hi, {$user->getName(true)}"} outputs Hi, Username
-{var $message = "Hi, {$user.name}"}
-```
-
-but if use single quote any template expressions will be on display as it is
-
-```smarty
-{'Hi, $foo'}            outputs 'Hi, $foo'
-{'Hi, {$foo}'}          outputs 'Hi, {$foo}'
-{'Hi, {$user.name}'}    outputs 'Hi, {$user.name}'
-{'Hi, {$user.name|up}'} outputs "Hi, {$user.name|up}"
-```
-
-### Numbers
-
-```smarty
-{2|pow:10}
-{var $magick = 5381|calc}
-{0.2|round}
-{1e-6|round}
-```
-
-## Modifiers
-
-* Modifiers allows change some value before output or using.
-* To apply a modifier, specify the value followed by a `|` (pipe) and the modifier name.
-* A modifier may accept additional parameters that affect its behavior. These parameters follow the modifier name and are separated by a `:` (colon).
+Модификаторы переменных могут быть прмменены к переменным, пользовательским функциям или строкам.
+Для их применения надо после модифицируемого значения указать символ `|` (вертикальная черта) и название модификатора.
+Так же модификаторы могут принимать параметры, которые влияют на их поведение.
+Эти параметры следуют за названием модификатора и разделяются `:` (двоеточием).
+Кроме того, по умолчанию все функции PHP могут быть использованы в качестве модификаторов (что можно отключить в настройках) и модификаторы можно комбинировать.
 
 ```smarty
 {var $foo="User"}
-{$foo|upper}            outputs "USER"
-{$foo|lower}            outputs "user"
-{"{$foo|lower}"}        outputs "user"
-{"User"|lower}}         outputs "user"
-{$looong_text|truncate:80:"..."}  truncate the text to 80 symbols and append <continue> symbols, like "..."
+{$foo|upper}            выведет "USER"
+{$foo|lower}            выведет "user"
+{"{$foo|lower}"}        выведет "user"
+{"User"|lower}}         выведет "user"
+{$looong_text|truncate:80:"..."}  обрежет текст до 80 символов и добавит символы "..."
 {$looong_text|lower|truncate:$settings.count:$settings.etc}
-{var $foo="Ivan"|upper}    sets $foo value "USER"
+{set $foo="Ivan"|upper}    значение переменной $foo будет "USER"
 ```
 
-[List of modifiers](./main.md#modifiers)
+## Теги
 
-## Tags
+Все сущности шаблона можно разжелить на две группы:
 
-Basically, tag seems like
+* заполнитель (placeholder) — вывод переменной в шаблоне, например `{$name}`
+* тег — конструкция выполняющаяя некоторые действия, выглядит как именованный заполнитель (placeholder), например `{include $name}`
 
-```smarty
-{FUNCNAME attr1 = "val1" attr2 = $val2}
-```
+Теги так же можно разделить на две группы:
 
-Tags starts with name and may have attributes
+* Функии. Тег функции вызывает пользовательскую во время выполнения шаблона, результат функции будет выведен вместо тега.
+Пользовательские функции являются дополнительными и могут быть индивидуальными. Они могут быть изменены по вашему желанию, также вы можете создать новые.
+* Компиляторы. В отличии от функций компиляторы вызываются во время компиляции шаблона и возвращают PHP код, который описывает некоторое действие.
+Компиляторы и формируют основные конструкции типа `if`, `foreach` и т.д.
 
-Это общий формат функций, но могут быть исключения, например функция [{var}](./tags/var.md), использованная выше.
-
-```smarty
-{include file="my.tpl"}
-{var $foo=5}
-{if $user.loggined}
-    Welcome, <span style="color: red">{$user.name}!</span>
-{else}
-    Who are you?
-{/if}
-```
-
-В общем случае аргументы принимают любой формат переменных, в том числе результаты арифметических операций и модификаторов.
-
-```smarty
-{funct arg=true}
-{funct arg=5}
-{funct arg=1.2}
-{funct arg='string'}
-{funct arg="string this {$var}"}
-{funct arg=[1,2,34]}
-{funct arg=$x}
-{funct arg=$x.c}
-```
-
-```smarty
-{funct arg="ivan"|upper}
-{funct arg=$a.d.c|lower}
-```
-
-```smarty
-{funct arg=1+2}
-{funct arg=$a.d.c+4}
-{funct arg=($a.d.c|count+4)/3}
-```
-
-### Ignoring template code
+### Игнорирование кода
 
 В шаблонизаторе Fenom используются фигурные скобки для отделения HTML от кода Fenom.
 Если требуется вывести текст, содержащий фигурные скобки, то есть следующие варианты это сделать:
@@ -459,7 +361,7 @@ Outputs
 </script>
 ```
 
-### Whitespaces
+### Пробелы
 
 Шаблонизатор допускает любое количество пробелов или переносов строк в своём коде
 
@@ -483,14 +385,14 @@ Outputs
 {/foreach}
 ```
 
-### Tag options
+### Параметры тегов
 
-|    name | code | type  | description  |
-| ------- | ---- | ----- | ------------ |
-|   strip |    s | block | enable `strip` option for a block of the template |
-|     raw |    a | any   | ignore escape option |
-|  escape |    e | any   | force escape |
-|  ignore |    i | block | ignore Fenom syntax |
+|    имя  | код  | тип тега  | описание |
+| ------- | ---- | --------- | ------------ |
+|   strip |    s | блокоый   | активирует удаление лишних пробелов на подобии модфикатора `strip` |
+|  ignore |    i | блокоый   | парсер будет игнорировать любой Fenom синтаксис на контент блокового тега  |
+|     raw |    a | любой     | отключает экранирование |
+|  escape |    e | любой     | принудительно активирует экранирование |
 
 ```smarty
 {script:ignore} ... {/script}

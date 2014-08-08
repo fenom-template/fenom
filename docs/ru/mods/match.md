@@ -1,24 +1,26 @@
-Modifier match
-==============
+Модификатор match
+=================
 
-Match string against a pattern.
-The average user may be used to shell patterns or at least in their simplest form to `?` and `*` wildcards so using `match`
-instead of `ematch` for frontend search expression input may be way more convenient for non-programming users.
+Проверяет совпадение строки с паттерном.
+Среднестатистический пользователь знаком с подстановками оболочки, как минимум с самыми простыми из них - `?` и `*`,
+так что использование `match` вместо `ematch` для поиска в пользовательской части сайта может быть намного удобнее для пользователей,
+не являющихся программистами.
+
 
 ```
 {$string|match:$pattern}
 ```
 
-Special pattern symbols:
+Специальные символы:
 
-* `?` — match one or zero unknown characters. `?at` matches `Cat`, `cat`, `Bat` or `bat`, `but` not `at`.
-* `*` — match any number of unknown characters. `Law*` matches `Law`, `Laws`, or `Lawyer`.
-* `[characters]` — Match a character as part of a group of characters. `[CB]at` matches `Cat` or `Bat` but not `cat`, `rat` or `bat`.
-* `\` - Escape character. `Law\*` will only match `Law*`
+* `?` — соответствие одному или нулю любых символов. `?at` соответствует `Cat`, `cat`, `Bat` или `bat`.
+* `*` — соответствие любому количеству символов. `Law*` соответствует `Law`, `Laws`, или `Lawyer`.
+* `[characters]` — соответствие символа группе символов. `[CB]at` соответствует `Cat` или `Bat`, но не `cat`, `rat` или `bat`.
+* `\` - экрнирующийсимвол. `Law\*` будет соответвовать только `Law*`
 
 
 ```smarty
 {if $color|match:"*gr[ae]y"}
-  some form of gray ...
+  какой-то оттенок серого
 {/if}
 ```

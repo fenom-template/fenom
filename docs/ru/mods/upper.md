@@ -1,13 +1,13 @@
-Modifier upper
+Модификатор upper
 ==============
 
-Modifier is used to uppercase a variable or string. Have short alias `up`.
-This is equivalent to the PHP [strtoupper()](http://docs.php.net/strtoupper) function.
+Переводит строку в верхний регистр. Является эквивалентом функции PHP [strtoupper()](http://docs.php.net/ru/strtoupper).
+Имеет псевдоним `up`.
 
 ```smarty
 {var $name = "Bzick"}
 
-{$name}         outputs Bzick
-{$name|upper}   outputs BZICK
-{$name|up}      outputs BZICK too
+{$name}         выводит Bzick
+{$name|upper}   выводит BZICK
+{$name|up}      выводит BZICK
 ```

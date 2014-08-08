@@ -241,7 +241,6 @@ class Tokenizer
             \T_SR_EQUAL    => 1,
             \T_XOR_EQUAL   => 1,
             '='            => 1,
-//            \T_CONCAT_EQUAL => 1,
         ),
         self::MACRO_SCALAR  => array(
             \T_LNUMBER                  => 1,

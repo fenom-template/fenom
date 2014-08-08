@@ -50,27 +50,3 @@ $fenom->setOptions(Fenom::AUTO_RELOAD | Fenom::FORCE_INCLUDE);
 
 **Замечание**
 По умолчанию все параметры деактивированы.
-
-## Extends
-
-### Template providers
-
-Бывает так что шаблны не хранятся на файловой сиситеме, а хранятся в некотором хранилище, например, в базе данных MySQL.
-В этом случае шаблонизатору нужно описать как забирать шаблоны из хранилища, как проверять дату изменения шаблона и где хранить кеш шаблонов (опционально).
-Эту задачу берут на себя Providers, это объекты реальзующие интерфейс `Fenom\ProviderInterface`.
-
-### Callbacks and filters
-
-#### Before compile callback
-
-```php
-$fenom->addPreFilter(function () { /* ... */ });
-```
-
-#### Tag filter callback
-
-#### Filter callback
-
-#### After compile callback
-
-

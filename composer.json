@@ -16,7 +16,7 @@
     },
     "require-dev": {
         "phpunit/phpunit": "*",
-        "codeclimate/php-test-reporter": "dev-master"
+        "satooshi/php-coveralls": "dev-master"
     },
     "autoload": {
         "psr-0": { "Fenom\\": "src/" },

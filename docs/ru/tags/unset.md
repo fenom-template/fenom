@@ -1,12 +1,12 @@
-Tag {unset}
+Тег {unset}
 ===========
 
-Unset a given variables.
+Удаляет переменные.
 
 ```smarty
 
-{unset $a} unset single variable
+{unset $a} единичное удаление
 
-{unset $a $b $c.d.e} multiple unset
+{unset $a $b $c.d.e} множественное удаление
 
 ```
