@@ -287,6 +287,10 @@ class Helper
         $this->self = $this;
     }
 
+    public static function method() {
+        return new \ArrayObject(array("page" => new \ArrayObject(array("title" => "test page"), \ArrayObject::ARRAY_AS_PROPS)), \ArrayObject::ARRAY_AS_PROPS);
+    }
+
     public function chunk()
     {
         return $this;
@@ -301,3 +305,4 @@ class Helper
         return array(1,2,3);
     }
 }
+

@@ -114,6 +114,7 @@ class TemplateTest extends TestCase
             array('hello, {"World"}!', $a, 'hello, World!'),
             array('hello, {"W{$a}d"}!', $a, 'hello, WWorldd!'),
             array('hello, {$world->chunk(1)->self->chunk("new")}!', $b, 'hello, world!'),
+            array(':: {Fenom\Helper::method()->page->title} ::', $b, ':: test page ::'),
         );
     }
 
@@ -1318,7 +1319,7 @@ class TemplateTest extends TestCase
         try {
             var_dump(
                 $this->fenom->compileCode(
-                    '{add $a[] = 5}'
+                    '{Fenom\Helper::method()->page->title}'
                 )->getBody()
             );
         } catch (\Exception $e) {
