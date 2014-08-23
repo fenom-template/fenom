@@ -19,7 +19,7 @@ Compilers invokes during compilation template to PHP source and have to
 $fenom->addFunction(string $function_name, callable $callback[, callable $parser]);
 ```
 
-В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом:
+В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML атрибутов и отдаст их в функцию ассоциативным массивом:
 ```php
 $fenom->addFunction("some_function", function (array $params) { /* ... */ });
 ```
@@ -41,10 +41,10 @@ public static function calc($x, $y = 5) { /* ... */}
 // ...
 $fenom->addFunctionSmart('calc', 'XYCalcs::calc');
 ```
-then
+пример выше позволяет объявить тег `{calc}` и спользовать его:
 ```smarty
-{calc x=$top y=50} or {calc y=50 x=$top} is XYCalcs::calc($top, 50)
-{calc x=$top} or {calc $top} is XYCalcs::calc($top)
+{calc x=$top y=50} или {calc y=50 x=$top} вызовет XYCalcs::calc($top, 50)
+{calc x=$top} или {calc $top} вызовет XYCalcs::calc($top)
 ```
 Таким образом вы успешно можете добавлять Ваши функции или методы.
 
@@ -131,8 +131,8 @@ $fenom->addTest($name, $code);
 который считывает шаблоны из указанной директории.
 
 Источник шаблонов должен реализовать интерфейс `Fenom\ProviderInterface`.
-Используйте метод `$fenom->setProvider(...)`  что бы добавить источник в шаблонизатор, указав навание источника и, если есть необходимость,
-задать директорию кеша для шаблонов из этого источника. Рассмотрим на примере, реализуем источик шаблонов из базы данных.
+Используйте метод `$fenom->setProvider(...)`  что бы добавить источник в шаблонизатор, указав название источника и, если есть необходимость,
+задать директорию кеша для шаблонов из этого источника. Рассмотрим на примере, реализуем источник шаблонов из базы данных.
 
 Создадим источник:
 
@@ -164,11 +164,11 @@ $fenom->display("db:index.tpl", $vars);
 
 # Расширение кеша (эксперементальное)
 
-Изначально Fenom не расчитывался на то что кеш скомпиленых шаблонов может располагаться не на файловой системе.
+Изначально Fenom не рассчитывался на то что кеш скомпиленых шаблонов может располагаться не на файловой системе.
 Однако, в теории, есть возможность реализовать свое кеширование для скомпиленых шаблонов без переопределения шаблонизатора.
 Речь идет о своем протоколе, отличным от `file://`, который [можно определить](http://php.net/manual/en/class.streamwrapper.php) в PHP.
 
-Ваш протол должени иметь класс реализации протокола как указан в документации [Stream Wrapper](http://www.php.net/manual/en/class.streamwrapper.php).
+Ваш протокол должен иметь класс реализации как указано в документации [Stream Wrapper](http://www.php.net/manual/en/class.streamwrapper.php).
 Класс протокола может иметь не все указанные в документации методы. Вот список методов, необходимых шаблонизатору:
 
 * [CacheStreamWrapper::stream_open](http://www.php.net/manual/en/streamwrapper.stream-open.php)
@@ -176,14 +176,14 @@ $fenom->display("db:index.tpl", $vars);
 * [CacheStreamWrapper::stream_close](http://www.php.net/manual/en/streamwrapper.stream-close.php)
 * [CacheStreamWrapper::rename](http://www.php.net/manual/en/streamwrapper.rename.php)
 
-For `include`:
+Для работы через `include`:
 
 * [CacheStreamWrapper::stream_stat](http://www.php.net/manual/en/streamwrapper.stream-stat.php)
 * [CacheStreamWrapper::stream_read](http://www.php.net/manual/en/streamwrapper.stream-read.php)
 * [CacheStreamWrapper::stream_eof](http://www.php.net/manual/en/streamwrapper.stream-eof.php)
 
 **Note**
-(On 2014-05-13) Zend OpCacher кроме `file://` и `phar://` не поддеривает другие протоколы.
+(On 2014-05-13) Zend OpCacher кроме `file://` и `phar://` не поддерживает другие протоколы.
 
 Пример работы кеша
 
