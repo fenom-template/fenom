@@ -780,14 +780,7 @@ class Template extends Render
                 if ($this->_options & Fenom::DENY_METHODS) {
                     throw new \LogicException("Forbidden to call methods");
                 }
-                do { // parse call-chunks: $var->func()->func()->prop->func()->...
-                    if ($tokens->is('(')) {
-                        $code .= $this->parseArgs($tokens);
-                    }
-                    if ($tokens->is(T_OBJECT_OPERATOR) && $tokens->isNext(T_STRING)) {
-                        $code .= '->' . $tokens->next()->getAndNext();
-                    }
-                } while ($tokens->is('(', T_OBJECT_OPERATOR));
+                $code = $this->parseChain($tokens, $code);
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 $code .= $tokens->getAndNext();
             } else {
@@ -812,11 +805,11 @@ class Template extends Render
                 if (!$func) {
                     throw new \Exception("Function " . $tokens->getAndNext() . " not found");
                 }
-                return $unary . $func . $this->parseArgs($tokens->next());
+                return $unary . $this->parseChain($tokens, $func . $this->parseArgs($tokens->next()));
             } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
                 $method = $this->parseStatic($tokens);
                 $args   = $this->parseArgs($tokens);
-                return $unary . $method . $args;
+                return $unary . $this->parseChain($tokens, $method . $args);
             } else {
                 return false;
             }
@@ -839,6 +832,25 @@ class Template extends Render
         } else {
             return false;
         }
+    }
+
+    /**
+     * Parse call-chunks: $var->func()->func()->prop->func()->...
+     * @param Tokenizer $tokens
+     * @param string $code start point (it is $var)
+     * @return string
+     */
+    public function parseChain(Tokenizer $tokens, $code) {
+        do {
+            if ($tokens->is('(')) {
+                $code .= $this->parseArgs($tokens);
+            }
+            if ($tokens->is(T_OBJECT_OPERATOR) && $tokens->isNext(T_STRING)) {
+                $code .= '->' . $tokens->next()->getAndNext();
+            }
+        } while ($tokens->is('(', T_OBJECT_OPERATOR));
+
+        return $code;
     }
 
     /**
