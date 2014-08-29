@@ -58,7 +58,7 @@ $fenom->addBlockFunction(string $function_name, callable $callback[, callable $p
 
 Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега:
 ```php
-$fenom->addBlockFunction('some_block_function', function ($content, array $params) { /* ... */});
+$fenom->addBlockFunction('some_block_function', function (array $params, $content) { /* ... */});
 ```
 
 ## Линейный компилятор
