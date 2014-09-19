@@ -6,7 +6,7 @@ Fenom - Template Engine for PHP
 
 [![Latest Stable Version](https://poser.pugx.org/fenom/fenom/v/stable.png)](https://packagist.org/packages/fenom/fenom)
 [![Build Status](https://travis-ci.org/bzick/fenom.svg?branch=master)](https://travis-ci.org/bzick/fenom)
-[![Coverage Status](https://coveralls.io/repos/bzick/fenom/badge.png?branch=master)](https://coveralls.io/r/bzick/fenom?branch=master)
+[![Coverage Status](https://img.shields.io/coveralls/bzick/fenom.svg)](https://coveralls.io/r/bzick/fenom?branch=master)
 [![Total Downloads](https://poser.pugx.org/fenom/fenom/downloads.png)](https://packagist.org/packages/fenom/fenom)
 
 ## [Quick start](./docs/en/start.md) :: [Documentation](./docs/readme.md) [[en](./docs/en/readme.md)|[ru](./docs/ru/readme.md)] :: [Benchmark](./docs/en/benchmark.md)
