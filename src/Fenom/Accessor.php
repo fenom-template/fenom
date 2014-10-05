@@ -65,7 +65,7 @@ class Accessor {
      * @return string
      */
     public static function constant(Tokenizer $tokens) {
-        $const = [$tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext()];
+        $const = array($tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext());
         while($tokens->is('.')) {
             $const[] = $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
         }
@@ -83,7 +83,7 @@ class Accessor {
      * @return string
      */
     public static function php(Tokenizer $tokens, Template $tpl) {
-        $callable = [$tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext()];
+        $callable = array($tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext());
         while($tokens->is('.')) {
             $callable[] = $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
         }
