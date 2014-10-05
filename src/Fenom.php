@@ -17,7 +17,7 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '2.0';
+    const VERSION = '2.4';
     /* Actions */
     const INLINE_COMPILER = 1;
     const BLOCK_COMPILER  = 5;
@@ -80,6 +80,11 @@ class Fenom
      * @var callable[]
      */
     public $tag_filters = array();
+
+    /**
+     * @var string[]
+     */
+    public $call_filters = array();
 
     /**
      * @var callable[]
@@ -340,6 +345,24 @@ class Fenom
         'third'    => '!(%s %% 3)'
     );
 
+    protected $_accessors = array(
+        'get'     => 'Fenom\Accessor::getVar',
+        'env'     => 'Fenom\Accessor::getVar',
+        'post'    => 'Fenom\Accessor::getVar',
+        'request' => 'Fenom\Accessor::getVar',
+        'cookie'  => 'Fenom\Accessor::getVar',
+        'globals' => 'Fenom\Accessor::getVar',
+        'server'  => 'Fenom\Accessor::getVar',
+        'session' => 'Fenom\Accessor::getVar',
+        'files'   => 'Fenom\Accessor::getVar',
+        'tpl'     => 'Fenom\Accessor::tpl',
+        'version' => 'Fenom\Accessor::version',
+        'const'   => 'Fenom\Accessor::constant',
+        'php'     => 'Fenom\Accessor::php',
+        'tag'     => 'Fenom\Accessor::Tag',
+        'fetch'   => 'Fenom\Accessor::Fetch',
+    );
+
     /**
      * Just factory
      *
@@ -510,12 +533,7 @@ class Fenom
      * @param array $tags
      * @return Fenom
      */
-    public function addBlockCompiler(
-        $compiler,
-        $open_parser,
-        $close_parser = self::DEFAULT_CLOSE_COMPILER,
-        array $tags = array()
-    ) {
+    public function addBlockCompiler($compiler, $open_parser, $close_parser = self::DEFAULT_CLOSE_COMPILER, array $tags = array()) {
         $this->_actions[$compiler] = array(
             'type'  => self::BLOCK_COMPILER,
             'open'  => $open_parser,
@@ -770,6 +788,53 @@ class Fenom
     public function getOptions()
     {
         return $this->_options;
+    }
+
+    /**
+     * Add global accessor ($.)
+     * @param string $name
+     * @param callable $parser
+     * @return Fenom
+     */
+    public function addAccessor($name, $parser)
+    {
+        $this->_accessors[$name] = $parser;
+        return $this;
+    }
+
+    /**
+     * Remove accessor
+     * @param string $name
+     * @return Fenom
+     */
+    public function removeAccessor($name)
+    {
+        unset($this->_accessors[$name]);
+        return $this;
+    }
+
+    /**
+     * Get an accessor
+     * @param string $name
+     * @return callable
+     */
+    public function getAccessor($name) {
+        if(isset($this->_accessors[$name])) {
+            return $this->_accessors[$name];
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Add filter for $.php accessor.
+     * Uses glob syntax.
+     * @param string $pattern
+     * @return $this
+     */
+    public function addCallFilter($pattern) {
+        $this->call_filters[] = $pattern;
+        return $this;
     }
 
     /**

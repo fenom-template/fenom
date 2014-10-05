@@ -268,7 +268,7 @@ class Template extends Render
             throw new CompileException("Unclosed tag" . (count($_names) > 1 ? "s" : "") . ": " . implode(
                 ", ",
                 $_names
-            ), 0, 1, $this->_name, $scope->line); // $scope already defined there!
+            ), 0, 1, $this->_name, $scope->line); // for PHPStorm: $scope already defined there!
         }
         $this->_src = ""; // cleanup
         if ($this->_post) {
@@ -662,7 +662,7 @@ class Template extends Render
             // parse term
             $term = $this->parseTerm($tokens, $var); // term of the expression
             if ($term !== false) {
-                if ($this->_options & Fenom::FORCE_VERIFY) {
+                if ($var && ($this->_options & Fenom::FORCE_VERIFY)) {
                     $term = '(isset(' . $term . ') ? ' . $term . ' : null)';
                     $var  = false;
                 }
@@ -728,6 +728,10 @@ class Template extends Render
                         if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
                             $concat[] = "strval(" . $this->parseTerm($tokens) . ")";
                         } else {
+                            if($tokens->is('~')) {
+                                $tokens->next();
+                                $concat[] = " ";
+                            }
                             if(!$concat[] = $this->parseTerm($tokens)) {
                                 throw new UnexpectedTokenException($tokens);
                             }
@@ -788,7 +792,8 @@ class Template extends Render
             }
             return $code;
         } elseif ($tokens->is('$')) {
-            $var  = $this->parseAccessor($tokens, $is_var);
+            $is_var = false;
+            $var  = $this->parseAccessor($tokens);
             return $unary . $var;
         } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
             return $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
@@ -913,44 +918,18 @@ class Template extends Render
 
     /**
      * Parse accessor
+     * @param Tokenizer $tokens
+     * @return string
      */
-    public function parseAccessor(Tokenizer $tokens, &$is_var)
+    public function parseAccessor(Tokenizer $tokens)
     {
-        $is_var = false;
-        $vars   = array(
-            'get'     => '$_GET',
-            'post'    => '$_POST',
-            'session' => '$_SESSION',
-            'cookie'  => '$_COOKIE',
-            'request' => '$_REQUEST',
-            'files'   => '$_FILES',
-            'globals' => '$GLOBALS',
-            'server'  => '$_SERVER',
-            'env'     => '$_ENV',
-            'tpl'     => '$tpl->info'
-        );
-        if ($this->_options & Fenom::DENY_ACCESSOR) {
-            throw new \LogicException("Accessor are disabled");
+        $accessor = $tokens->need('$')->next()->need('.')->next()->current();
+        $callback = $this->getStorage()->getAccessor($accessor);
+        if($callback) {
+            return call_user_func($callback, $tokens->next(), $this);
+        } else {
+            throw new \RuntimeException("Unknown accessor '$accessor'");
         }
-        $key = $tokens->need('$')->next()->need('.')->next()->current();
-        $tokens->next();
-        if (isset($vars[$key])) {
-            $is_var = true;
-            return $this->parseVariable($tokens, $vars[$key]);
-        }
-        switch ($key) {
-            case 'const':
-                $tokens->need('.')->next();
-                $var = '@constant(' . var_export($this->parseName($tokens), true) . ')';
-                break;
-            case 'version':
-                $var = '\Fenom::VERSION';
-                break;
-            default:
-                throw new UnexpectedTokenException($tokens->back());
-        }
-
-        return $var;
     }
 
     /**

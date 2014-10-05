@@ -17,15 +17,7 @@ class TemplateTest extends TestCase
     {
         parent::setUp();
         $this->tpl('welcome.tpl', '<b>Welcome, {$username} ({$email})</b>');
-        $_GET['one']     = 'get1';
-        $_POST['one']    = 'post1';
-        $_REQUEST['one'] = 'request1';
-        $_FILES['one']   = 'files1';
-        $_SERVER['one']  = 'server1';
-        $_SESSION['one'] = 'session1';
-        $GLOBALS['one']  = 'globals1';
-        $_ENV['one']     = 'env1';
-        $_COOKIE['one']  = 'cookie1';
+
     }
 
     public static function providerVars()
@@ -1217,40 +1209,6 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerAccessor()
-    {
-        return array(
-            array('{$.get.one}', 'get1'),
-            array('{$.post.one}', 'post1'),
-            array('{$.request.one}', 'request1'),
-            array('{$.session.one}', 'session1'),
-            array('{$.files.one}', 'files1'),
-            array('{$.globals.one}', 'globals1'),
-            array('{$.cookie.one}', 'cookie1'),
-            array('{$.server.one}', 'server1'),
-            array('{$.const.PHP_EOL}', PHP_EOL),
-            array('{$.const.MY}', ''),
-            array('{$.version}', Fenom::VERSION),
-            array('{"string"|append:"_":$.get.one}', 'string_get1'),
-            array('{$.get.one?}', '1'),
-            array('{$.get.one is set}', '1'),
-            array('{$.get.two is empty}', '1'),
-            array('{$.version}', Fenom::VERSION),
-            array('{$.tpl?}', '1'),
-            array('{$.tpl.name}', 'runtime.tpl'),
-            array('{$.tpl.time}', '0'),
-            array('{$.tpl.schema}', ''),
-        );
-    }
-
-    public static function providerAccessorInvalid()
-    {
-        return array(
-            array('{$.nope.one}', 'Fenom\Error\CompileException', "Unexpected token 'nope'"),
-            array('{$.get.one}', 'Fenom\Error\SecurityException', 'Accessor are disabled', Fenom::DENY_ACCESSOR),
-        );
-    }
-
     public function providerStatic()
     {
         return array(
@@ -1622,19 +1580,19 @@ class TemplateTest extends TestCase
      * @group accessor
      * @dataProvider providerAccessor
      */
-    public function testAccessor($code, $result)
-    {
-        $this->exec($code, self::getVars(), $result);
-    }
+//    public function testAccessor($code, $result)
+//    {
+//        $this->exec($code, self::getVars(), $result);
+//    }
 
     /**
      * @group accessor
      * @dataProvider providerAccessorInvalid
      */
-    public function testAccessorInvalid($code, $exception, $message, $options = 0)
-    {
-        $this->execError($code, $exception, $message, $options);
-    }
+//    public function testAccessorInvalid($code, $exception, $message, $options = 0)
+//    {
+//        $this->execError($code, $exception, $message, $options);
+//    }
 
     /**
      * @group static

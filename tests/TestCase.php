@@ -276,8 +276,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 }
 
+const HELPER_CONSTANT = 'helper.const';
+
 class Helper
 {
+
+    const CONSTANT = "helper.class.const";
 
     public $word = 'helper';
 
@@ -304,5 +308,9 @@ class Helper
     public function getArray() {
         return array(1,2,3);
     }
+}
+
+function helper_func($string, $pad = 10) {
+    return str_pad($string, $pad, ".");
 }
 
