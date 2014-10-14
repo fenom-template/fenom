@@ -620,12 +620,8 @@ class Fenom
      * @param callable|string $parser_close
      * @return Fenom
      */
-    public function addBlockFunction(
-        $function,
-        $callback,
-        $parser_open = self::DEFAULT_FUNC_OPEN,
-        $parser_close = self::DEFAULT_FUNC_CLOSE
-    ) {
+    public function addBlockFunction($function, $callback, $parser_open = self::DEFAULT_FUNC_OPEN, $parser_close = self::DEFAULT_FUNC_CLOSE)
+    {
         $this->_actions[$function] = array(
             'type'     => self::BLOCK_FUNCTION,
             'open'     => $parser_open,
@@ -1034,7 +1030,7 @@ class Fenom
     }
 
     /**
-     * Flush internal memory template cache
+     * Flush internal template in-memory-cache
      */
     public function flush()
     {
@@ -1047,6 +1043,7 @@ class Fenom
     public function clearAllCompiles()
     {
         \Fenom\Provider::clean($this->_compile_dir);
+        $this->flush();
     }
 
     /**

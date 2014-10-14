@@ -48,5 +48,9 @@ $fenom->setOptions(array(
 $fenom->setOptions(Fenom::AUTO_RELOAD | Fenom::FORCE_INCLUDE);
 ```
 
+```php
+$fenom->addCallFilter('View\Widget\*::get*')
+```
+
 **Замечание**
 По умолчанию все параметры деактивированы.

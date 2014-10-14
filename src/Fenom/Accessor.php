@@ -33,7 +33,8 @@ class Accessor {
      * @param Tokenizer $tokens
      * @param Template $tpl
      */
-    public static function getVar(Tokenizer $tokens, Template $tpl) {
+    public static function getVar(Tokenizer $tokens, Template $tpl)
+    {
         $name = $tokens->prev[Tokenizer::TEXT];
         if(isset(self::$vars[$name])) {
             $var = $tpl->parseVariable($tokens, self::$vars[$name]);
@@ -47,7 +48,8 @@ class Accessor {
      * Accessor for template information
      * @param Tokenizer $tokens
      */
-    public static function tpl(Tokenizer $tokens) {
+    public static function tpl(Tokenizer $tokens)
+    {
         $method = $tokens->skip('.')->need(T_STRING)->getAndNext();
         if(method_exists('Fenom\Render', 'get'.$method)) {
             return '$tpl->get'.ucfirst($method).'()';
@@ -56,7 +58,8 @@ class Accessor {
         }
     }
 
-    public static function version() {
+    public static function version()
+    {
         return 'Fenom::VERSION';
     }
 
@@ -64,7 +67,8 @@ class Accessor {
      * @param Tokenizer $tokens
      * @return string
      */
-    public static function constant(Tokenizer $tokens) {
+    public static function constant(Tokenizer $tokens)
+    {
         $const = array($tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext());
         while($tokens->is('.')) {
             $const[] = $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
@@ -82,7 +86,8 @@ class Accessor {
      * @param Template $tpl
      * @return string
      */
-    public static function php(Tokenizer $tokens, Template $tpl) {
+    public static function php(Tokenizer $tokens, Template $tpl)
+    {
         $callable = array($tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext());
         while($tokens->is('.')) {
             $callable[] = $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
@@ -91,8 +96,16 @@ class Accessor {
         if($tokens->is(T_DOUBLE_COLON)) {
             $callable .= '::'.$tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
         }
+        $call_filter = $tpl->getStorage()->call_filters;
+        if($call_filter) {
+            foreach($call_filter as $filter) {
+                if(!fnmatch(addslashes($filter), $callable)) {
+                    throw new \LogicException("Callback ".str_replace('\\', '.', $callable)." is not available by settings");
+                }
+            }
+        }
         if(!is_callable($callable)) {
-            throw new \LogicException("PHP method ".str_replace('\\', '.', $callable).' does not exists.');
+            throw new \RuntimeException("PHP method ".str_replace('\\', '.', $callable).' does not exists.');
         }
         if($tokens->is('(')) {
             $arguments = 'array'.$tpl->parseArgs($tokens).'';
@@ -103,11 +116,28 @@ class Accessor {
 
     }
 
-    public static function tag(Tokenizer $tokens, Template $tpl) {
-        $tag = $tokens->get(Tokenizer::MACRO_STRING);
-        $info = $tpl->getStorage()->getTag($tag, $tpl);
-        if($info['type'] !== \Fenom::INLINE_FUNCTION) {
-            throw new \LogicException("Only inline functions allowed in accessor");
+    /**
+     * Accessor {$.fetch(...)}
+     * @param Tokenizer $tokens
+     * @param Template $tpl
+     * @return string
+     */
+    public static function fetch(Tokenizer $tokens, Template $tpl)
+    {
+        $tokens->skip('(');
+        $name = $tpl->parsePlainArg($tokens, $static);
+        if($static) {
+            if(!$tpl->getStorage()->templateExists($static)) {
+                throw new \RuntimeException("Template $static not found");
+            }
         }
+        if($tokens->is(',')) {
+            $tokens->skip()->need('[');
+            $vars = $tpl->parseArray($tokens) . ' + $var';
+        } else {
+            $vars = '$var';
+        }
+        $tokens->skip(')');
+        return '$tpl->getStorage()->fetch('.$name.', '.$vars.')';
     }
 } 

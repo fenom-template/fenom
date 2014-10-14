@@ -97,8 +97,23 @@ class AccessorTest  extends TestCase
     public static function providerPHP() {
         return array(
             array('$.php.strrev("string")', strrev("string")),
+            array('$.php.strrev("string")', strrev("string"), 'str*'),
+            array('$.php.strrev("string")', strrev("string"), 'strrev'),
+            array('$.php.get_current_user', get_current_user()),
             array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12)),
+            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), 'Fenom\\*'),
+            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), 'Fenom\helper_func'),
+            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), '*helper_func'),
+            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), '*'),
             array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string")),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase*'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase::*'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*::dots'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*::*'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase::dots'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), '*::dots'),
+            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), '*'),
         );
     }
 
@@ -106,8 +121,43 @@ class AccessorTest  extends TestCase
      * @dataProvider providerPHP
      * @group php
      */
-    public function testPHP($tpl, $result) {
+    public function testPHP($tpl, $result, $mask = null) {
+        if($mask) {
+            $this->fenom->addCallFilter($mask);
+        }
         $this->assertRender('{'.$tpl.'}', $result);
+    }
+
+    public static function providerPHPInvalid() {
+        return array(
+            array('$.php.aaa("string")', 'Fenom\Error\CompileException', 'PHP method aaa does not exists'),
+            array('$.php.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', 'strrevZ'),
+            array('$.php.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', 'str*Z'),
+            array('$.php.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', '*Z'),
+            array('$.php.Fenom.aaa("string")', 'Fenom\Error\CompileException', 'PHP method Fenom.aaa does not exists'),
+            array('$.php.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Reflection\*'),
+            array('$.php.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Fenom\*Z'),
+            array('$.php.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Fenom\*::*'),
+            array('$.php.TestCase::aaa("string")', 'Fenom\Error\CompileException', 'PHP method TestCase::aaa does not exists'),
+            array('$.php.Fenom.TestCase::aaa("string")', 'Fenom\Error\CompileException', 'PHP method Fenom.TestCase::aaa does not exists'),
+            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Reflection\*'),
+            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\*Z'),
+            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\*::get*'),
+            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\TestCase::get*'),
+            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\TestCase::*Z'),
+            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', '*::*Z'),
+        );
+    }
+
+    /**
+     * @dataProvider providerPHPInvalid
+     * @group php
+     */
+    public function testPHPInvalid($tpl, $exception, $message, $methods = null) {
+        if($methods) {
+            $this->fenom->addCallFilter($methods);
+        }
+        $this->execError('{'.$tpl.'}', $exception, $message);
     }
 
 
@@ -133,12 +183,48 @@ class AccessorTest  extends TestCase
         );
     }
 
-
     public static function providerAccessorInvalid()
     {
         return array(
             array('{$.nope.one}', 'Fenom\Error\CompileException', "Unexpected token 'nope'"),
             array('{$.get.one}', 'Fenom\Error\SecurityException', 'Accessor are disabled', \Fenom::DENY_ACCESSOR),
         );
+    }
+
+    public static function providerFetch()
+    {
+        return array(
+            array('{$.fetch("welcome.tpl")}'),
+            array('{set $tpl = "welcome.tpl"}{$.fetch($tpl)}'),
+            array('{$.fetch("welcome.tpl", ["username" => "Bzick", "email" => "bzick@dev.null"])}'),
+            array('{set $tpl = "welcome.tpl"}{$.fetch($tpl, ["username" => "Bzick", "email" => "bzick@dev.null"])}'),
+        );
+    }
+
+    /**
+     * @group fetch
+     * @dataProvider providerFetch
+     */
+    public function testFetch($code)
+    {
+        $this->tpl('welcome.tpl', '<b>Welcome, {$username} ({$email})</b>');
+        $values = array('username' => 'Bzick', 'email' => 'bzick@dev.null');
+        $this->assertRender($code, $this->fenom->fetch('welcome.tpl', $values), $values);
+    }
+
+    public static function providerFetchInvalid()
+    {
+        return array(
+            array('{$.fetch("welcome_.tpl")}', 'Fenom\Error\CompileException', "Template welcome_.tpl not found"),
+            array('{$.fetch("welcome_.tpl", [])}', 'Fenom\Error\CompileException', "Template welcome_.tpl not found"),
+        );
+    }
+
+    /**
+     * @group fetchInvalid
+     * @dataProvider providerFetchInvalid
+     */
+    public function testFetchInvalidTpl($tpl, $exception, $message) {
+        $this->execError($tpl, $exception, $message);
     }
 } 

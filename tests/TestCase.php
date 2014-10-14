@@ -161,13 +161,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->fail("Code $code must be invalid");
     }
 
-    public function assertRender($tpl, $result, $debug = false)
+    public function assertRender($tpl, $result, array $vars = array(), $debug = false)
     {
         $template = $this->fenom->compileCode($tpl);
         if ($debug) {
             print_r("\nDEBUG $tpl:\n" . $template->getBody());
         }
-        $this->assertSame($result, $template->fetch($this->values));
+        $this->assertSame($result, $template->fetch($vars + $this->values));
         return $template;
     }
 
