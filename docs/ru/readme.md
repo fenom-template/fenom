@@ -20,7 +20,7 @@
 
 ### Теги
 
-[Использование](./syntax.md#tags) тегов.
+[Использование](./syntax.md#Теги) тегов.
 
 * [set](./tags/set.md), `add` и `var` — определение значения переменной
 * [if](./tags/if.md), `elseif` и `else` — условный оператор
@@ -36,7 +36,7 @@
 * [autoescape](./tags/autoescape.md) — экранирует фрагмент шаблона
 * [raw](./tags/raw.md) — отключает экранирование фрагмента шаблона
 * [unset](./tags/unset.md) — удаляет переменные
-* или [добавте](./ext/extend.md#add-tags) свои
+* или [добавте](./ext/extend.md#Добавление-тегов) свои
 
 
 ***
@@ -64,7 +64,7 @@
 * [join](./mods/join.md) — объединяет массив в строку
 * так же разрешены функции: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
-* или [добавте](./ext/extend.md#add-modifiers) свои
+* или [добавте](./ext/extend.md#Добавление-модификаторов) свои
 
 ***
 
