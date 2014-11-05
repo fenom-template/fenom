@@ -193,7 +193,7 @@ class Template extends Render
             $this->_src = call_user_func($filter, $this, $this->_src);
         }
         while (($start = strpos($this->_src, '{', $pos)) !== false) { // search open-symbol of tags
-            switch ($this->_src[$start + 1]) { // check next character
+            switch (substr($this->_src, $start + 1, 1)) { // check next character
                 case "\n":
                 case "\r":
                 case "\t":
