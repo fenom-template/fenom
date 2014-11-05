@@ -663,10 +663,6 @@ class Template extends Render
             // parse term
             $term = $this->parseTerm($tokens, $var); // term of the expression
             if ($term !== false) {
-                if ($var && ($this->_options & Fenom::FORCE_VERIFY)) {
-                    $term = '(isset(' . $term . ') ? ' . $term . ' : null)';
-                    $var  = false;
-                }
                 if ($tokens->is('|')) {
                     $term = $this->parseModifier($tokens, $term);
                     $var  = false;
@@ -780,24 +776,37 @@ class Template extends Render
             }
             return $this->parseScalar($tokens, true);
         } elseif ($tokens->is(T_VARIABLE)) {
-            $code = $unary . $this->parseVariable($tokens);
+            $code = $this->parseVariable($tokens);
             if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
                 if ($this->_options & Fenom::DENY_METHODS) {
                     throw new \LogicException("Forbidden to call methods");
                 }
-                $code = $this->parseChain($tokens, $code);
+                return $this->parseChain($tokens, $code);
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-                $code .= $tokens->getAndNext();
+                if($this->_options & Fenom::FORCE_VERIFY) {
+                    return $unary . '(isset(' . $code . ') ? ' . $code . $tokens->getAndNext() . ' : null)';
+                } else {
+                    return $unary . $code . $tokens->getAndNext();
+                }
             } else {
-                $is_var = true;
+                if($this->_options & Fenom::FORCE_VERIFY) {
+                    return $unary . '(isset(' . $code . ') ? ' . $code . ' : null)';
+                } else {
+                    $is_var = true;
+                    return $unary . $code;
+                }
             }
-            return $code;
         } elseif ($tokens->is('$')) {
             $is_var = false;
             $var  = $this->parseAccessor($tokens);
             return $unary . $var;
         } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-            return $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
+            if($this->_options & Fenom::FORCE_VERIFY) {
+                $var = $this->parseVariable($tokens);
+                return $unary . '(isset(' . $var . ') ? ' . $tokens->getAndNext() . $this->parseVariable($tokens).' : null)';
+            } else {
+                return $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
+            }
         } elseif ($tokens->is("(")) {
             $tokens->next();
             $code = $unary . "(" . $this->parseExpr($tokens) . ")";

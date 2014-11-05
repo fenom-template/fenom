@@ -433,6 +433,7 @@ class TemplateTest extends TestCase
                 'if: block1 end'
             ),
             array('if: {if $unexist} block1 {else} block2 {/if} end', $a, 'if: block2 end', Fenom::FORCE_VERIFY),
+            array('if: {if !$unexist} block1 {else} block2 {/if} end', $a, 'if: block1 end', Fenom::FORCE_VERIFY),
         );
     }
 

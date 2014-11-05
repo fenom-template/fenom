@@ -36,8 +36,13 @@ class Fenom
     const DISABLE_CACHE     = 0x400;
     const FORCE_VERIFY      = 0x800;
     const AUTO_TRIM         = 0x1000; // reserved
-    const DENY_STATICS      = 0x2000;
+    const DENY_PHP_CALLS    = 0x2000;
     const AUTO_STRIP        = 0x4000;
+    /**
+     * Use DENY_PHP_CALLS
+     * @deprecated
+     */
+    const DENY_STATICS      = 0x2000;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -63,6 +68,7 @@ class Fenom
         "auto_escape"          => self::AUTO_ESCAPE,
         "force_verify"         => self::FORCE_VERIFY,
         "auto_trim"            => self::AUTO_TRIM,
+        "disable_php_calls"    => self::DENY_PHP_CALLS,
         "disable_statics"      => self::DENY_STATICS,
         "strip"                => self::AUTO_STRIP,
     );
@@ -397,6 +403,9 @@ class Fenom
     public function __construct(Fenom\ProviderInterface $provider)
     {
         $this->_provider = $provider;
+    }
+
+    public function setCachePerms() {
     }
 
     /**
