@@ -874,7 +874,8 @@ class Fenom
     /**
      * Execute template and write result into stdout
      *
-     * @param string $template name of template
+     * @param string|array $template name of template.
+     * If it is array of names of templates they will be extended from left to right.
      * @param array $vars array of data for template
      * @return Fenom\Render
      */
@@ -885,7 +886,8 @@ class Fenom
 
     /**
      *
-     * @param string $template name of template
+     * @param string|array $template name of template.
+     * If it is array of names of templates they will be extended from left to right.
      * @param array $vars array of data for template
      * @return mixed
      */
@@ -897,7 +899,8 @@ class Fenom
     /**
      * Creates pipe-line of template's data to callback
      * @note Method not works correctly in old PHP 5.3.*
-     * @param string $template name of the template
+     * @param string|array $template name of the template.
+     * If it is array of names of templates they will be extended from left to right.
      * @param callable $callback template's data handler
      * @param array $vars
      * @param float $chunk amount of bytes of chunk

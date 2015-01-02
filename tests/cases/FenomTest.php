@@ -96,6 +96,7 @@ class FenomTest extends \Fenom\TestCase
     public function testCheckMTime()
     {
         $this->fenom->setOptions(Fenom::FORCE_COMPILE);
+        $this->fenom->getProvider()->setClearCachedStats();
         $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
         $tpl = $this->fenom->getTemplate('custom.tpl');
