@@ -1,6 +1,24 @@
 Changelog
 =========
 
+## 2.3.0 (2014-08-08)
+
+- Add tags {set} and {add}
+- Fix bug #97
+- ++Docs
+- --Bugs
+- ++Tests
+
+### 2.2.1 (2014-07-29)
+
+- ++Docs
+- --Bugs
+
+## 2.2.0 (2014-07-11)
+- Add new modifiers: match, ematch, replace, ereplace, split, esplit, join
+- ++Docs
+- ++Tests
+
 ### 2.1.2 (2014-07-03)
 
 - Add test for bug #86 

@@ -37,7 +37,7 @@ How it work
 ## Процесс работы
 
 При вызове метода `Fenom::display($template, $vars)` шаблонизатор [ищет](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L712) в своем хранилище уже загруженный шаблон.
-Если шаблона [нет](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L727) - либо [загружает](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L762) код шаблона с файловой системыб либо [инициирует](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L759) его [компиляцию](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L788).
+Если шаблона [нет](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L727) - либо [загружает](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L762) код шаблона с файловой системы, либо [инициирует](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L759) его [компиляцию](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L788).
 
 ### Компиляция шаблонов
 
@@ -64,7 +64,7 @@ How it work
 
 ### Как работает токенайзер
 
-Объек токенайзера принимает на вход любую строчку и разбирает ее при помощи функции token_get_all(). Полученные токен складываются в массив. Каждый токен прдсатвляет из себя числовой массив из 4-х элементов:
+Объект токенайзера принимает на вход любую строчку и разбирает ее при помощи функции token_get_all(). Полученные токен складываются в массив. Каждый токен прдсатвляет из себя числовой массив из 4-х элементов:
 
 * Код токена. Это либо число либо один символ.
 * Тело токена. Содержимое токена.

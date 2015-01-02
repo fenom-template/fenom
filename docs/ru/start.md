@@ -5,7 +5,7 @@
 
 ### Composer
 
-Fenom зарегестирован на [packagist.org](https://packagist.org/) как пакет [fenom/fenom](https://packagist.org/packages/fenom/fenom).
+Fenom зарегистрирован на [packagist.org](https://packagist.org/) как пакет [fenom/fenom](https://packagist.org/packages/fenom/fenom).
 Что бы установить Fenom через composer пропишите в `composer.json` списке пакетов:
 ```json
 {
@@ -16,15 +16,15 @@ Fenom зарегестирован на [packagist.org](https://packagist.org/) 
 ```
 и обновите зависимости: `composer update`.
 
-### Custom loader
+### Произвольная подгрузка
 
-Склонируйте Fenom в любую директорию Вашего проекта: `git clone https://github.com/bzick/fenom.git`. Рекомендуется использовать последнюю версию.
+Клонируйте Fenom в любую директорию Вашего проекта: `git clone https://github.com/bzick/fenom.git`. Рекомендуется использовать последнюю версию.
 Для загрузки классов Fenom использует [psr-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md#autoloading-standard) стандарт.
 Таким образом вы можете:
-* использовать Ваш загрузчик, который понимает `psr-0` формат для загрузки классов Fenom из директории `src/` с пространством имен `Fenom`.
-* или использовать строенный загрузчик Fenom: `Fenom::registerAutoload();` для загрузки самого себя.
+* использовать Ваш автозагрузчик, который понимает `psr-0` формат для загрузки классов Fenom из директории `src/` с пространством имен `Fenom`.
+* или использовать встроенный автозагрузчик Fenom: `Fenom::registerAutoload();` для загрузки самого себя.
 
-Так же вы можете использовать встроенный в Fenom загрузчик для загрузки других классов в `psr-0` формате наименования класса и файла:
+Так же вы можете использовать встроенный в Fenom автозагрузчик для загрузки других классов в `psr-0` формате:
 ```php
 Fenom::registerAutoload(PROJECT_DIR."/classes");
 ```
@@ -66,7 +66,7 @@ $fenom->display("template/name.tpl", $vars);
 $result = $fenom->fetch("template/name.tpl", $vars);
 ```
 
-Для отрисовки большого количества данных можно использовать поток
+Для вывода большого количества данных можно использовать поток
 
 ```php
 // $fenom->pipe(string $template, array $variables, callable $callback, int $chunk_size) : void
@@ -82,3 +82,29 @@ $fenom->pipe(
 Поток позволяет обрабатывать большой результат по кускам, размер куска указывается в байтах аргументом `$chunk_size`.
 Каждый кусок передается в `$callback` для обработки или вывода.
 
+<!--
+## Пример простого приложения
+
+```
+App/ (ROOT_DIR)
+ ┠─ configs/ (файлы конфигурации приложения)
+ ┠─ src/ (классы приложения)
+ ┠─ templates/ (шаблоны приложения)
+ ┠─ public/ (DOCUMENT_ROOT)
+ ┃   ┠─ static/ (папка со статикой) 
+ ┃   ┖─ index.php (скрипт обработки всех динамических запросов)
+ ┠─ tmp/ (папка доступная для записи web-серверу для хранения временных файлов)
+ ┃   ┖─ compiled/ (кеша шаблонов)
+ ┠─ vendor/ (строронние бибилиотеки)
+ ┖─ composer.json (описание зависимостей для composer) 
+```
+
+`index.php`:
+```php
+define('ROOT_DIR', dirname(__DIR__));
+
+$fenom = Fenom::factory(ROOT_DIR.'/templates', ROOT_DIR.'/cache', Fenom::FORCE_VERIFY | Fenom::AUTO_RELOAD);
+
+
+```
+-->
