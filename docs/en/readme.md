@@ -1,8 +1,6 @@
 Documentation
 =============
 
-**Please, help translate documentation to english or fix typos. [Read more](./helpme.md).**
-
 ### Fenom
 
 * [Quick start](./start.md)
@@ -11,7 +9,13 @@ Documentation
 * [For developers](./dev/readme.md)
 * [Configuration](./configuration.md)
 * [Syntax](./syntax.md)
-* [Operators](./operators.md)
+    * [Variables](./syntax.md#Variables)
+    * [Values](./syntax.md#Values)
+    * [Arrays](./syntax.md#Arrays)
+    * [Operators](./operators.md)
+    * [Modificators](./syntax.md#Modificators)
+    * [Tags](./syntax.md#Tags)
+    * [Tag configuration](./syntax.md#Tag-configuration)
 
 ***
 
@@ -19,7 +23,7 @@ Documentation
 
 [Usage](./syntax.md#tags)
 
-* [var](./tags/var.md) — define variable
+* [set](./tags/var.md), `add` and `var` — define variables
 * [if](./tags/if.md), `elseif` and `else` — conditional statement
 * [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — traversing items in an array or object
 * [for](./tags/for.md), `forelse`, `break` and `continue` — loop statement
@@ -72,7 +76,7 @@ Documentation
 * [Comparison operators](./operators.md#comparison-operators) — `>`, `>=`, `<`, `<=`, `==`, `!=`, `!==`, `<>`
 * [Bitwise operators](./operators.md#bitwise-operators) — `|`, `&`, `^`, `~$var`, `>>`, `<<`
 * [Assignment operators](./operators.md#assignment-operators) — `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&=`, `|=`, `^=`, `>>=`, `<<=`
-* [String concatenation operator](./operators.md#string-operator) — `$str1 ~ $str2`
+* [String concatenation operators](./operators.md#string-operators) — `$str1 ~ $str2`, `$str1 ~~ $str2`, `$str1 ~= $str2`
 * [Ternary operators](./operators.md#ternary-operators) — `$a ? $b : $c`, `$a ! $b : $c`, `$a ?: $c`, `$a !: $c`
 * [Check operators](./operators.md#check-operators) — `$var?`, `$var!`
 * [Test operator](./operators.md#test-operator) — `is`, `is not`
