@@ -161,13 +161,13 @@ class TestCase extends \PHPUnit_Framework_TestCase
         $this->fail("Code $code must be invalid");
     }
 
-    public function assertRender($tpl, $result, $debug = false)
+    public function assertRender($tpl, $result, array $vars = array(), $debug = false)
     {
         $template = $this->fenom->compileCode($tpl);
         if ($debug) {
             print_r("\nDEBUG $tpl:\n" . $template->getBody());
         }
-        $this->assertSame($result, $template->fetch($this->values));
+        $this->assertSame($result, $template->fetch($vars + $this->values));
         return $template;
     }
 
@@ -276,8 +276,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
     }
 }
 
+const HELPER_CONSTANT = 'helper.const';
+
 class Helper
 {
+
+    const CONSTANT = "helper.class.const";
 
     public $word = 'helper';
 
@@ -304,5 +308,9 @@ class Helper
     public function getArray() {
         return array(1,2,3);
     }
+}
+
+function helper_func($string, $pad = 10) {
+    return str_pad($string, $pad, ".");
 }
 

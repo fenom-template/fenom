@@ -241,7 +241,7 @@ class Compiler
      */
     public static function forOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p              = array(
+        $p = array(
             "index" => false,
             "first" => false,
             "last"  => false,

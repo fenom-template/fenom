@@ -90,8 +90,7 @@ class Render extends \ArrayObject
         $this->_time      = $props["time"];
         $this->_depends   = $props["depends"];
         $this->_macros    = $props["macros"];
-//        $this->_blocks = $props["blocks"];
-        $this->_code = $code;
+        $this->_code      = $code;
     }
 
     /**
@@ -249,19 +248,6 @@ class Render extends \ArrayObject
 
     public function __get($name)
     {
-        if ($name == 'info') {
-            return array(
-                'name'   => $this->_name,
-                'schema' => $this->_scm,
-                'time'   => $this->_time
-            );
-        } else {
-            return null;
-        }
-    }
-
-    public function __isset($name)
-    {
-        return $name == 'info';
+        return $this->$name = null;
     }
 }

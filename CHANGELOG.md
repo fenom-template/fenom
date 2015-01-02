@@ -1,6 +1,24 @@
 Changelog
 =========
 
+## 2.4.0 (2015-01-02)
+
+- Fix bugs #120, #104, #119
+- Add `~~` operator. Concatenation with space. 
+- Improve #126. Disable clearcachestats() by default in Fenom\Provider. clearcachestats() may be enabled.
+- Improve accessors (unnamed system variable). Now possible add, redefine yours accessors.
+- ++Docs
+- ++Tests
+
+### 2.3.1 (2014-11-06)
+
+- Fix #122
+
+### 2.3.1 (2014-08-27)
+
+- Fix #105
+- ++Tests
+
 ## 2.3.0 (2014-08-08)
 
 - Add tags {set} and {add}

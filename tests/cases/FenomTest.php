@@ -96,6 +96,7 @@ class FenomTest extends \Fenom\TestCase
     public function testCheckMTime()
     {
         $this->fenom->setOptions(Fenom::FORCE_COMPILE);
+        $this->fenom->getProvider()->setClearCachedStats();
         $this->tpl('custom.tpl', 'Custom template');
         $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
         $tpl = $this->fenom->getTemplate('custom.tpl');
@@ -324,7 +325,7 @@ class FenomTest extends \Fenom\TestCase
     <a href="/item/{\$one}">number  {\$num.1}</a>
 </div>
 TPL;
-        $this->assertRender($tpl, '<div class="item item-one"><a href="/item/1">number one</a></div>');
+        $this->assertRender($tpl, '<div class="item item-one"> <a href="/item/1">number one</a> </div>');
     }
 }
 

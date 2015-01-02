@@ -13,11 +13,12 @@ use Fenom\Template;
 /**
  * Fenom Template Engine
  *
+ *
  * @author     Ivan Shalganov <a.cobest@gmail.com>
  */
 class Fenom
 {
-    const VERSION = '2.0';
+    const VERSION = '2.4';
     /* Actions */
     const INLINE_COMPILER = 1;
     const BLOCK_COMPILER  = 5;
@@ -35,8 +36,13 @@ class Fenom
     const DISABLE_CACHE     = 0x400;
     const FORCE_VERIFY      = 0x800;
     const AUTO_TRIM         = 0x1000; // reserved
-    const DENY_STATICS      = 0x2000;
+    const DENY_PHP_CALLS    = 0x2000;
     const AUTO_STRIP        = 0x4000;
+    /**
+     * Use DENY_PHP_CALLS
+     * @deprecated
+     */
+    const DENY_STATICS      = 0x2000;
 
     /* Default parsers */
     const DEFAULT_CLOSE_COMPILER = 'Fenom\Compiler::stdClose';
@@ -62,6 +68,7 @@ class Fenom
         "auto_escape"          => self::AUTO_ESCAPE,
         "force_verify"         => self::FORCE_VERIFY,
         "auto_trim"            => self::AUTO_TRIM,
+        "disable_php_calls"    => self::DENY_PHP_CALLS,
         "disable_statics"      => self::DENY_STATICS,
         "strip"                => self::AUTO_STRIP,
     );
@@ -80,6 +87,11 @@ class Fenom
      * @var callable[]
      */
     public $tag_filters = array();
+
+    /**
+     * @var string[]
+     */
+    public $call_filters = array();
 
     /**
      * @var callable[]
@@ -340,6 +352,24 @@ class Fenom
         'third'    => '!(%s %% 3)'
     );
 
+    protected $_accessors = array(
+        'get'     => 'Fenom\Accessor::getVar',
+        'env'     => 'Fenom\Accessor::getVar',
+        'post'    => 'Fenom\Accessor::getVar',
+        'request' => 'Fenom\Accessor::getVar',
+        'cookie'  => 'Fenom\Accessor::getVar',
+        'globals' => 'Fenom\Accessor::getVar',
+        'server'  => 'Fenom\Accessor::getVar',
+        'session' => 'Fenom\Accessor::getVar',
+        'files'   => 'Fenom\Accessor::getVar',
+        'tpl'     => 'Fenom\Accessor::tpl',
+        'version' => 'Fenom\Accessor::version',
+        'const'   => 'Fenom\Accessor::constant',
+        'php'     => 'Fenom\Accessor::php',
+        'tag'     => 'Fenom\Accessor::Tag',
+        'fetch'   => 'Fenom\Accessor::Fetch',
+    );
+
     /**
      * Just factory
      *
@@ -373,6 +403,9 @@ class Fenom
     public function __construct(Fenom\ProviderInterface $provider)
     {
         $this->_provider = $provider;
+    }
+
+    public function setCachePerms() {
     }
 
     /**
@@ -510,12 +543,7 @@ class Fenom
      * @param array $tags
      * @return Fenom
      */
-    public function addBlockCompiler(
-        $compiler,
-        $open_parser,
-        $close_parser = self::DEFAULT_CLOSE_COMPILER,
-        array $tags = array()
-    ) {
+    public function addBlockCompiler($compiler, $open_parser, $close_parser = self::DEFAULT_CLOSE_COMPILER, array $tags = array()) {
         $this->_actions[$compiler] = array(
             'type'  => self::BLOCK_COMPILER,
             'open'  => $open_parser,
@@ -602,12 +630,8 @@ class Fenom
      * @param callable|string $parser_close
      * @return Fenom
      */
-    public function addBlockFunction(
-        $function,
-        $callback,
-        $parser_open = self::DEFAULT_FUNC_OPEN,
-        $parser_close = self::DEFAULT_FUNC_CLOSE
-    ) {
+    public function addBlockFunction($function, $callback, $parser_open = self::DEFAULT_FUNC_OPEN, $parser_close = self::DEFAULT_FUNC_CLOSE)
+    {
         $this->_actions[$function] = array(
             'type'     => self::BLOCK_FUNCTION,
             'open'     => $parser_open,
@@ -773,6 +797,53 @@ class Fenom
     }
 
     /**
+     * Add global accessor ($.)
+     * @param string $name
+     * @param callable $parser
+     * @return Fenom
+     */
+    public function addAccessor($name, $parser)
+    {
+        $this->_accessors[$name] = $parser;
+        return $this;
+    }
+
+    /**
+     * Remove accessor
+     * @param string $name
+     * @return Fenom
+     */
+    public function removeAccessor($name)
+    {
+        unset($this->_accessors[$name]);
+        return $this;
+    }
+
+    /**
+     * Get an accessor
+     * @param string $name
+     * @return callable
+     */
+    public function getAccessor($name) {
+        if(isset($this->_accessors[$name])) {
+            return $this->_accessors[$name];
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Add filter for $.php accessor.
+     * Uses glob syntax.
+     * @param string $pattern
+     * @return $this
+     */
+    public function addCallFilter($pattern) {
+        $this->call_filters[] = $pattern;
+        return $this;
+    }
+
+    /**
      * @param bool|string $scm
      * @return Fenom\ProviderInterface
      * @throws InvalidArgumentException
@@ -803,7 +874,8 @@ class Fenom
     /**
      * Execute template and write result into stdout
      *
-     * @param string $template name of template
+     * @param string|array $template name of template.
+     * If it is array of names of templates they will be extended from left to right.
      * @param array $vars array of data for template
      * @return Fenom\Render
      */
@@ -814,7 +886,8 @@ class Fenom
 
     /**
      *
-     * @param string $template name of template
+     * @param string|array $template name of template.
+     * If it is array of names of templates they will be extended from left to right.
      * @param array $vars array of data for template
      * @return mixed
      */
@@ -826,7 +899,8 @@ class Fenom
     /**
      * Creates pipe-line of template's data to callback
      * @note Method not works correctly in old PHP 5.3.*
-     * @param string $template name of the template
+     * @param string|array $template name of the template.
+     * If it is array of names of templates they will be extended from left to right.
      * @param callable $callback template's data handler
      * @param array $vars
      * @param float $chunk amount of bytes of chunk
@@ -969,7 +1043,7 @@ class Fenom
     }
 
     /**
-     * Flush internal memory template cache
+     * Flush internal template in-memory-cache
      */
     public function flush()
     {
@@ -982,6 +1056,7 @@ class Fenom
     public function clearAllCompiles()
     {
         \Fenom\Provider::clean($this->_compile_dir);
+        $this->flush();
     }
 
     /**

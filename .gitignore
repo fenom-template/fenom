@@ -1,17 +1,9 @@
 .idea
 vendor
-coverage
 build
 composer.lock
 composer.phar
 tests/resources/compile/*
 !.gitkeep
 tests/resources/template/*
-!.gitkeep
 sandbox/compiled/*
-!.gitkeep
-benchmark/compile/*
-benchmark/templates/inheritance/smarty
-benchmark/templates/inheritance/twig
-benchmark/sandbox/compiled/*
-!.gitkeep

@@ -9,8 +9,6 @@
  */
 namespace Fenom;
 
-use Fenom\ProviderInterface;
-
 /**
  * Base template provider
  * @author Ivan Shalganov
@@ -18,6 +16,8 @@ use Fenom\ProviderInterface;
 class Provider implements ProviderInterface
 {
     private $_path;
+
+    protected $_clear_cache = false;
 
     /**
      * Clean directory from files
@@ -76,6 +76,15 @@ class Provider implements ProviderInterface
     }
 
     /**
+     * Disable PHP cache for files. PHP cache some operations with files then script works.
+     * @see http://php.net/manual/en/function.clearstatcache.php
+     * @param bool $status
+     */
+    public function setClearCachedStats($status = true) {
+        $this->_clear_cache = $status;
+    }
+
+    /**
      * Get source and mtime of template by name
      * @param string $tpl
      * @param int $time load last modified time
@@ -84,7 +93,9 @@ class Provider implements ProviderInterface
     public function getSource($tpl, &$time)
     {
         $tpl = $this->_getTemplatePath($tpl);
-        clearstatcache(true, $tpl);
+        if($this->_clear_cache) {
+            clearstatcache(true, $tpl);
+        }
         $time = filemtime($tpl);
         return file_get_contents($tpl);
     }
@@ -96,7 +107,10 @@ class Provider implements ProviderInterface
      */
     public function getLastModified($tpl)
     {
-        clearstatcache(true, $tpl = $this->_getTemplatePath($tpl));
+        $tpl = $this->_getTemplatePath($tpl);
+        if($this->_clear_cache) {
+            clearstatcache(true, $tpl);
+        }
         return filemtime($tpl);
     }
 
@@ -158,7 +172,10 @@ class Provider implements ProviderInterface
     public function verify(array $templates)
     {
         foreach ($templates as $template => $mtime) {
-            clearstatcache(true, $template = $this->_path . '/' . $template);
+            $template = $this->_path . '/' . $template;
+            if($this->_clear_cache) {
+                clearstatcache(true, $template);
+            }
             if (@filemtime($template) !== $mtime) {
                 return false;
             }
