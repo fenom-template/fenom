@@ -938,7 +938,6 @@ class Fenom
                 return $tpl;
             }
         } elseif ($this->_options & self::FORCE_COMPILE) {
-
             return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
         } else {
             return $this->_storage[$key] = $this->_load($template, $options);
@@ -1020,9 +1019,8 @@ class Fenom
             $template = $this->getRawTemplate()->load($tpl);
         } else {
             $template = $this->getRawTemplate()->load($tpl[0], false);
-            unset($tpl[0]);
-            foreach ($tpl as $t) {
-                $template->extend($t);
+            for($i = 1; $i < count($tpl); $i++) {
+                $template->extend($tpl[ $i ]);
             }
         }
         if ($store) {
