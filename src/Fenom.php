@@ -1025,7 +1025,6 @@ class Fenom
         }
         if ($store) {
             $cache   = $this->_getCacheName($tpl, $options);
-            dumpt($cache, $tpl);
             $tpl_tmp = tempnam($this->_compile_dir, $cache);
             $tpl_fp  = fopen($tpl_tmp, "w");
             if (!$tpl_fp) {

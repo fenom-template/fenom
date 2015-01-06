@@ -176,14 +176,13 @@ class Render extends \ArrayObject
      */
     public function isValid()
     {
-        if (count($this->_depends[0]) === 1) { // if no external dependencies, only self
-            $provider = $this->_fenom->getProvider($this->_scm);
-            if ($provider->getLastModified($this->_name) !== $this->_time) {
-                return false;
-            }
-        } else {
-            foreach ($this->_depends as $scm => $templates) {
-                $provider = $this->_fenom->getProvider($scm);
+        foreach ($this->_depends as $scm => $templates) {
+            $provider = $this->_fenom->getProvider($scm);
+            if(count($templates) === 1) {
+                if ($provider->getLastModified(key($templates)) !== $this->_time) {
+                    return false;
+                }
+            } else {
                 if (!$provider->verify($templates)) {
                     return false;
                 }
