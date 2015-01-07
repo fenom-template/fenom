@@ -9,11 +9,9 @@
  */
 namespace Fenom;
 
+use Doctrine\Instantiator\Exception\InvalidArgumentException;
 use Fenom\Error\InvalidUsageException;
 use Fenom\Error\UnexpectedTokenException;
-use Fenom\Tokenizer;
-use Fenom\Template;
-use Fenom\Scope;
 
 /**
  * Compilers collection
@@ -116,7 +114,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function tagElse(Tokenizer $tokens, Tag $scope)
+    public static function tagElse($tokens, Tag $scope)
     {
         $scope["else"] = true;
         return '} else {';
@@ -247,8 +245,8 @@ class Compiler
             "last"  => false,
             "step"  => 1,
             "to"    => false,
-            "max"   => false,
-            "min"   => false
+//            "max"   => false,
+//            "min"   => false
         );
         $scope["after"] = $before = $body = array();
         $i              = array('', '');
@@ -312,7 +310,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function forElse(Tokenizer $tokens, Tag $scope)
+    public static function forElse($tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = true;
         $scope["else"]     = true;
@@ -436,7 +434,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function switchClose(Tokenizer $tokens, Tag $scope)
+    public static function switchClose($tokens, Tag $scope)
     {
         self::_caseResort($scope);
         $expr    = $scope["var"];
@@ -776,7 +774,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function setClose(Tokenizer $tokens, Tag $scope)
+    public static function setClose($tokens, Tag $scope)
     {
         return $scope["name"] . '=' . $scope["value"] . ';';
     }
@@ -787,7 +785,7 @@ class Compiler
      * @param Tag $scope
      * @return string
      */
-    public static function filterOpen(Tokenizer $tokens, Tag $scope)
+    public static function filterOpen($tokens, Tag $scope)
     {
         $scope["filter"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()");
         return "ob_start();";
@@ -962,7 +960,7 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $scope
      */
-    public static function macroClose(Tokenizer $tokens, Tag $scope)
+    public static function macroClose($tokens, Tag $scope)
     {
         if ($scope["recursive"]) {
             $scope["macro"]["recursive"] = true;
@@ -1017,7 +1015,7 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $tag
      */
-    public static function ignoreOpen(Tokenizer $tokens, Tag $tag)
+    public static function ignoreOpen($tokens, Tag $tag)
     {
         $tag->tpl->ignore('ignore');
     }

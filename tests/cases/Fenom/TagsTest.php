@@ -5,15 +5,12 @@ namespace Fenom;
 
 class TagsTest extends TestCase
 {
-
-    public function _testSandbox()
+    /**
+     * @group test-for
+     */
+    public function testFor()
     {
-        try {
-            var_dump($this->fenom->compileCode("{var \$a=12313}\nVar: {\$a}")->getBody());
-        } catch (\Exception $e) {
-            echo "$e";
-        }
-        exit;
+        $this->assertRender('{for $i=0 to=3}{$i},{/for}', "0,1,2,3,");
     }
 
     /**

@@ -1467,13 +1467,13 @@ class Template extends Render
             if ($tokens->is(Tokenizer::MACRO_STRING)) {
                 $key = $tokens->getAndNext();
                 if ($defaults && !isset($defaults[$key])) {
-                    throw new \Exception("Unknown parameter '$key'");
+                    throw new InvalidUsageException("Unknown parameter '$key'");
                 }
                 if ($tokens->is("=")) {
                     $tokens->next();
                     $params[$key] = $this->parseExpr($tokens);
                 } else {
-                    $params[$key] = 'true';
+                    throw new InvalidUsageException("Invalid value for parameter '$key'");
                 }
             } elseif ($tokens->is(Tokenizer::MACRO_SCALAR, '"', T_VARIABLE, "[", '(')) {
                 $params[] = $this->parseExpr($tokens);
