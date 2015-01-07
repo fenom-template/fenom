@@ -261,9 +261,6 @@ class Compiler
         $p   = $scope->tpl->parseParams($tokens, $p);
 
         if (is_numeric($p["step"])) {
-            if($p['to'] === false) {
-                throw new InvalidArgumentException("Invalid value for parameter 'to'");
-            }
             if ($p["step"] > 0) {
                 $condition = "$var <= {$p['to']}";
                 if ($p["last"]) {
