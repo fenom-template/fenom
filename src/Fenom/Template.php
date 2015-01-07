@@ -1472,8 +1472,6 @@ class Template extends Render
                 if ($tokens->is("=")) {
                     $tokens->next();
                     $params[$key] = $this->parseExpr($tokens);
-                } else {
-                    $params[$key] = 'true';
                 }
             } elseif ($tokens->is(Tokenizer::MACRO_SCALAR, '"', T_VARIABLE, "[", '(')) {
                 $params[] = $this->parseExpr($tokens);

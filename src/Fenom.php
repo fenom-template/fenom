@@ -405,9 +405,6 @@ class Fenom
         $this->_provider = $provider;
     }
 
-    public function setCachePerms() {
-    }
-
     /**
      * Set compile directory
      *
