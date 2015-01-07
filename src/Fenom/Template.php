@@ -1473,7 +1473,7 @@ class Template extends Render
                     $tokens->next();
                     $params[$key] = $this->parseExpr($tokens);
                 } else {
-                    throw new InvalidUsageException("Invalid value for parameter '$key' ");
+                    throw new InvalidUsageException("Invalid value for parameter '$key'");
                 }
             } elseif ($tokens->is(Tokenizer::MACRO_SCALAR, '"', T_VARIABLE, "[", '(')) {
                 $params[] = $this->parseExpr($tokens);
