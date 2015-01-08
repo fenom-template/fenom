@@ -922,9 +922,9 @@ class Fenom
     {
         $options |= $this->_options;
         if (is_array($template)) {
-            $key = dechex($options) . "@" . implode(",", $template);
+            $key = $options . "@" . implode(",", $template);
         } else {
-            $key = dechex($options) . "@" . $template;
+            $key = $options . "@" . $template;
         }
         if (isset($this->_storage[$key])) {
             /** @var Fenom\Template $tpl */
@@ -948,6 +948,10 @@ class Fenom
      */
     public function templateExists($template)
     {
+        $key = $this->_options . "@" . $template;
+        if (isset($this->_storage[$key])) { // already loaded
+            return true;
+        }
         if ($provider = strstr($template, ":", true)) {
             if (isset($this->_providers[$provider])) {
                 return $this->_providers[$provider]->templateExists(substr($template, strlen($provider) + 1));
@@ -972,6 +976,7 @@ class Fenom
             $fenom = $this; // used in template
             $_tpl  = include($this->_compile_dir . "/" . $file_name);
             /* @var Fenom\Render $_tpl */
+
             if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
                 return $_tpl;
             }

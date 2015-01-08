@@ -146,8 +146,8 @@ class Provider implements ProviderInterface
      */
     protected function _getTemplatePath($tpl)
     {
-
-        if (($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0) {
+        $path = realpath($this->_path . "/" . $tpl);
+        if ($path && strpos($path, $this->_path) === 0) {
             return $path;
         } else {
             throw new \RuntimeException("Template $tpl not found");

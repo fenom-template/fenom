@@ -107,11 +107,9 @@ class Modifier
             if (preg_match('#^(.{' . $length . '}).*?(.{' . $length . '})?$#usS', $string, $match)) {
                 if (count($match) == 3) {
                     if ($by_words) {
-                        return preg_replace('#\s.*$#usS', "", $match[1]) . $etc . preg_replace(
-                            '#.*\s#usS',
-                            "",
-                            $match[2]
-                        );
+                        return preg_replace('#\s.*$#usS', "", $match[1]) .
+                               $etc .
+                               preg_replace('#.*\s#usS', "", $match[2]);
                     } else {
                         return $match[1] . $etc . $match[2];
                     }
