@@ -265,10 +265,9 @@ class Template extends Render
             foreach ($this->_stack as $scope) {
                 $_names[] = '{' . $scope->name . '} opened on line ' . $scope->line;
             }
-            throw new CompileException("Unclosed tag" . (count($_names) > 1 ? "s" : "") . ": " . implode(
-                ", ",
-                $_names
-            ), 0, 1, $this->_name, $scope->line); // for PHPStorm: $scope already defined there!
+            /* @var Tag $scope */
+            $message = "Unclosed tag" . (count($_names) > 1 ? "s" : "") . ": " . implode(", ", $_names);
+            throw new CompileException($message, 0, 1, $this->_name, $scope->line);
         }
         $this->_src = ""; // cleanup
         if ($this->_post) {
@@ -467,7 +466,7 @@ class Template extends Render
      */
     public function addDepend(Render $tpl)
     {
-        $this->_depends[$tpl->getScm()][$tpl->getName()] = $tpl->getTime();
+        $this->_depends[$tpl->getScm()][$tpl->getBaseName()] = $tpl->getTime();
     }
 
     /**

@@ -17,6 +17,7 @@ class CustomProviderTest extends TestCase
         $this->assertTrue($this->fenom->templateExists('my:include.tpl'));
         $this->assertFalse($this->fenom->templateExists('my:include-none.tpl'));
         $this->assertRender("start: {include 'my:include.tpl'}", 'start: include template');
-        //$this->assertRender("start: {import 'my:macros.tpl' as ops} {ops.add a=3 b=6}");
+        $this->assertTrue($this->fenom->getTemplate('my:include.tpl')->isValid());
     }
+
 }
