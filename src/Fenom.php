@@ -978,8 +978,6 @@ class Fenom
             /* @var Fenom\Render $_tpl */
 
             if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
-                dumpt("loaded");
-
                 return $_tpl;
             }
         }
