@@ -1244,7 +1244,7 @@ class Template extends Render
 
             $args = array();
             while ($tokens->is(":")) {
-                if (!$args[] = $this->parseTerm($tokens->next())) {
+                if (($args[] = $this->parseTerm($tokens->next())) === false) {
                     throw new UnexpectedTokenException($tokens);
                 }
             }
