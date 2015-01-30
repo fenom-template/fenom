@@ -589,12 +589,10 @@ class Compiler
     {
         $tpl  = $scope->tpl;
         $name = $scope["name"];
-
         if (isset($tpl->blocks[$name])) { // block defined
             $block = & $tpl->blocks[$name];
             if ($block['use_parent']) {
                 $parent = $scope->getContent();
-
                 $block['block'] = str_replace($block['use_parent'] . " ?>", "?>" . $parent, $block['block']);
             }
             if (!$block["import"]) { // not from {use} - redefine block
@@ -625,7 +623,7 @@ class Compiler
     {
         $block_scope = $scope->tpl->getParentScope('block');
         if (!$block_scope['use_parent']) {
-            $block_scope['use_parent'] = "/* %%parent#" . mt_rand(0, 1e6) . "%% */";
+            $block_scope['use_parent'] = "/* %%parent#{$scope['name']}%% */";
         }
         return $block_scope['use_parent'];
     }

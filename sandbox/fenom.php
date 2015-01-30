@@ -7,5 +7,6 @@ require_once __DIR__.'/../tests/tools.php';
 
 $fenom = Fenom::factory(__DIR__.'/templates', __DIR__.'/compiled');
 $fenom->setOptions(Fenom::AUTO_RELOAD);
-$fenom->display(["blocks/body.tpl", "layout.tpl"], []);
+var_dump($fenom->compile("blocks/second.tpl", false)->getBody());
+//$fenom->display("blocks/second.tpl", []);
 // $fenom->getTemplate("problem.tpl");
