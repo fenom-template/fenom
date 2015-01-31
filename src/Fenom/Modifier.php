@@ -107,9 +107,9 @@ class Modifier
             if (preg_match('#^(.{' . $length . '}).*?(.{' . $length . '})?$#usS', $string, $match)) {
                 if (count($match) == 3) {
                     if ($by_words) {
-                        return preg_replace('#\s.*$#usS', "", $match[1]) .
+                        return preg_replace('#\s\S*$#usS', "", $match[1]) .
                                $etc .
-                               preg_replace('#.*\s#usS', "", $match[2]);
+                               preg_replace('#\S*\s#usS', "", $match[2]);
                     } else {
                         return $match[1] . $etc . $match[2];
                     }
@@ -118,7 +118,7 @@ class Modifier
         } else {
             if (preg_match('#^(.{' . $length . '})#usS', $string, $match)) {
                 if ($by_words) {
-                    return preg_replace('#\s.*$#usS', "", $match[1]) . $etc;
+                    return preg_replace('#\s\S*$#usS', "", $match[1]) . $etc;
                 } else {
                     return $match[1] . $etc;
                 }
@@ -170,10 +170,12 @@ class Modifier
      */
     public static function in($value, $haystack)
     {
-        if (is_array($haystack)) {
-            return in_array($value, $haystack) || array_key_exists($value, $haystack);
-        } elseif (is_string($haystack)) {
-            return strpos($haystack, $value) !== false;
+        if(is_scalar($value)) {
+            if (is_array($haystack)) {
+                return in_array($value, $haystack) || array_key_exists($value, $haystack);
+            } elseif (is_string($haystack)) {
+                return strpos($haystack, $value) !== false;
+            }
         }
         return false;
     }

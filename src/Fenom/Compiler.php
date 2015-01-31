@@ -648,10 +648,10 @@ class Compiler
     public static function stdFuncParser(Tokenizer $tokens, Tag $tag)
     {
         if(is_string($tag->callback)) {
-            return $tag->out($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl)');
+            return $tag->out($tag->callback . "(" . self::toArray($tag->tpl->parseParams($tokens)) . ', $tpl, $var)');
         } else {
             return '$info = $tpl->getStorage()->getTag('.var_export($tag->name, true).');'.PHP_EOL.
-            $tag->out('call_user_func($info["function"], '.self::toArray($tag->tpl->parseParams($tokens)).', $tpl)');
+            $tag->out('call_user_func_array($info["function"], array('.self::toArray($tag->tpl->parseParams($tokens)).', $tpl, &$var))');
         }
     }
 
@@ -709,10 +709,10 @@ class Compiler
     {
         $tag->restore(\Fenom::AUTO_ESCAPE);
         if(is_string($tag->callback)) {
-            return $tag->out($tag->callback . "(" . $tag["params"] . ', ob_get_clean(), $tpl)');
+            return $tag->out($tag->callback . "(" . $tag["params"] . ', ob_get_clean(), $tpl, $var)');
         } else {
             return '$info = $tpl->getStorage()->getTag('.var_export($tag->name, true).');'.PHP_EOL.
-            $tag->out('call_user_func($info["function"], ' . $tag["params"] . ', ob_get_clean(), $tpl)');
+            $tag->out('call_user_func_array($info["function"], array(' . $tag["params"] . ', ob_get_clean(), $tpl, &$var))');
         }
     }
 

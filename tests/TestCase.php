@@ -29,6 +29,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
                 "b"   => 2,
                 "two" => 2
             ),
+            "level1" => array(
+                "level2" => array(
+                    "one" => 1,
+                    "two" => 2
+                )
+            ),
             "num"  => array(
                 1 => "one",
                 2 => "two",
