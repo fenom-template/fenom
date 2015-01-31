@@ -1185,6 +1185,8 @@ class TemplateTest extends TestCase
             array('{if $one in keys [1 => "one", 2 => "two", 3 => "three"]} block1 {else} block2 {/if}', 'block1'),
             array('{if $one in $two} block1 {else} block2 {/if}', 'block2'),
             array('{if $one in $list} block1 {else} block2 {/if}', 'block1'),
+            array('{if "one" in $num} block1 {else} block2 {/if}', 'block1'),
+            array('{if "one" in $level1.level2} block1 {else} block2 {/if}', 'block1'),
         );
     }
 
