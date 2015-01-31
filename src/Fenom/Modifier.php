@@ -170,10 +170,12 @@ class Modifier
      */
     public static function in($value, $haystack)
     {
-        if (is_array($haystack)) {
-            return in_array($value, $haystack) || array_key_exists($value, $haystack);
-        } elseif (is_string($haystack)) {
-            return strpos($haystack, $value) !== false;
+        if(is_scalar($value)) {
+            if (is_array($haystack)) {
+                return in_array($value, $haystack) || array_key_exists($value, $haystack);
+            } elseif (is_string($haystack)) {
+                return strpos($haystack, $value) !== false;
+            }
         }
         return false;
     }
