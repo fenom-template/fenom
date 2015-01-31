@@ -109,7 +109,7 @@ class Modifier
                     if ($by_words) {
                         return preg_replace('#\s\S*$#usS', "", $match[1]) .
                                $etc .
-                               preg_replace('#\s\S*$#usS', "", $match[2]);
+                               preg_replace('#\S*\s#usS', "", $match[2]);
                     } else {
                         return $match[1] . $etc . $match[2];
                     }
