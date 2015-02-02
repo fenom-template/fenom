@@ -106,6 +106,7 @@ class TemplateTest extends TestCase
             array('hello, {"World"}!', $a, 'hello, World!'),
             array('hello, {"W{$a}d"}!', $a, 'hello, WWorldd!'),
             array('hello, {$world->chunk(1)->self->chunk("new")}!', $b, 'hello, world!'),
+            array('hello, {!$world->chunk(1)->self->chunk("new")}!', $b, 'hello, !'),
             array(':: {Fenom\Helper::method()->page->title} ::', $b, ':: test page ::'),
         );
     }
@@ -657,6 +658,8 @@ class TemplateTest extends TestCase
             array('{0 ? "no way" : "right"}', $a),
             array('{$a ? "right" : "no way"}', $a),
             array('{1 ? "right" : "no way"}', $a),
+            array('{$a == 1 ? "right" : "no way"}', $a),
+            array('{$a > 0 ? "right" : "no way"}', $a),
             // !
             array('{if $a!} right {/if}', $a),
             array('{if 1!} right {/if}', $a),
