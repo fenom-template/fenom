@@ -780,7 +780,7 @@ class Template extends Render
                 if ($this->_options & Fenom::DENY_METHODS) {
                     throw new \LogicException("Forbidden to call methods");
                 }
-                return $this->parseChain($tokens, $code);
+                return $unary . $this->parseChain($tokens, $code);
             } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
                 if($this->_options & Fenom::FORCE_VERIFY) {
                     return $unary . '(isset(' . $code . ') ? ' . $code . $tokens->getAndNext() . ' : null)';
