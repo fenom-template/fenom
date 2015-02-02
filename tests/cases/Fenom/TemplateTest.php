@@ -659,6 +659,7 @@ class TemplateTest extends TestCase
             array('{$a ? "right" : "no way"}', $a),
             array('{1 ? "right" : "no way"}', $a),
             array('{$a == 1 ? "right" : "no way"}', $a),
+            array('{$a > 0 ? "right" : "no way"}', $a),
             // !
             array('{if $a!} right {/if}', $a),
             array('{if 1!} right {/if}', $a),
