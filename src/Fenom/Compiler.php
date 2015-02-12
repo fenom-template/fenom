@@ -239,6 +239,7 @@ class Compiler
      */
     public static function forOpen(Tokenizer $tokens, Tag $scope)
     {
+        trigger_error("Fenom: tag {for} deprecated, use {foreach 1..4 as \$value}", E_USER_DEPRECATED);
         $p = array(
             "index" => false,
             "first" => false,

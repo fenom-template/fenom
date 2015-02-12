@@ -1629,5 +1629,39 @@ class TemplateTest extends TestCase
     {
         $this->execError($code, $exception, $message, $options);
     }
+
+
+    public static function providerRange()
+    {
+        return array(
+            array('{set $a=1..3}', "1,2,3,"),
+            array('{set $a="a".."f"}', "a,b,c,d,e,f,"),
+            array('{set $a=1.."f"}', "1,0,"),
+            array('{set $a="a"..2}', "0,1,2,"),
+            array('{set $a=$one..$three}', "1,2,3,"),
+            array('{set $a=$one..3}', "1,2,3,"),
+            array('{set $a=1..$three}', "1,2,3,"),
+            array('{set $a=$one..$three++}', "1,2,3,"),
+            array('{set $a=$one..++$three}', "1,2,3,4,"),
+            array('{set $a=$one--..$three++}', "1,2,3,"),
+            array('{set $a=--$one..++$three}', "0,1,2,3,4,"),
+            array('{set $a="a"|up.."f"|up}', "A,B,C,D,E,F,"),
+            array('{set $a=$one|min:0..$three|max:4}', "0,1,2,3,4,"),
+            array('{set $a=$one|min:0..4}', "0,1,2,3,4,"),
+            array('{set $a=0..$three|max:4}', "0,1,2,3,4,"),
+        );
+    }
+
+    /**
+     * @dataProvider providerRange
+     * @group testRange
+     * @param string $code
+     * @param string $result
+     */
+    public function testRange($code, $result)
+    {
+        $this->exec($code.'{foreach $a as $v}{$v},{/foreach}', self::getVars(), $result);
+    }
+
 }
 

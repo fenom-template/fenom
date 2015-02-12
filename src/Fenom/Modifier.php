@@ -279,4 +279,15 @@ class Modifier
             return "";
         }
     }
+
+    /**
+     * @param string|int $from
+     * @param string|int $to
+     * @param int $step
+     * @return array
+     */
+    public static function range($from, $to, $step = 1) {
+        $v = range($from, $to, $step);
+        return $v ? $v : array();
+    }
 }
