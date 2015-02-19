@@ -670,6 +670,7 @@ class Template extends Render
                     if($cond) {
                         $term = array_pop($exp) . ' ' . $term;
                         $term = '('. array_pop($exp) . ' ' . $term . ')';
+                        $var  = false;
                     }
                     $term = $this->parseTernary($tokens, $term, $var);
                     $var  = false;
