@@ -13,8 +13,9 @@ class SandboxTest extends TestCase {
 //            return '<?php ' . $tag->cutContent();
 //        });
 //        $this->tpl('welcome.tpl', '{$a}');
+//        $this->fenom->addModifier('min', function () {});
 //        try {
-//            var_dump($this->fenom->compileCode('{for $i=0 to 3} {/for}')->getBody());
+//            var_dump($this->fenom->compileCode('{time() + min(1, 10)}')->getBody());
 //        } catch (\Exception $e) {
 //            print_r($e->getMessage() . "\n" . $e->getTraceAsString());
 //            while ($e->getPrevious()) {
