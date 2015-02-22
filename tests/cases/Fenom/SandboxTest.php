@@ -5,6 +5,9 @@ namespace Fenom;
 
 class SandboxTest extends TestCase {
 
+    /**
+     * @group sb
+     */
     public function test()
     {
 
@@ -13,9 +16,9 @@ class SandboxTest extends TestCase {
 //            return '<?php ' . $tag->cutContent();
 //        });
 //        $this->tpl('welcome.tpl', '{$a}');
-//        $this->fenom->addModifier('min', function () {});
+//            var_dump($this->fenom->compileCode('{set $a=$one|min:0..$three|max:4}')->getBody());
 //        try {
-//            var_dump($this->fenom->compileCode('{time() + min(1, 10)}')->getBody());
+//            var_dump($this->fenom->compileCode('{foreach $a as $k => $v} {/foreach}')->getBody());
 //        } catch (\Exception $e) {
 //            print_r($e->getMessage() . "\n" . $e->getTraceAsString());
 //            while ($e->getPrevious()) {

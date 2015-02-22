@@ -43,8 +43,7 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
                 T_STRING,
                 'please',
                 '  ',
-                1,
-                'T_STRING'
+                1
             ),
             $tokens->curr
         );
@@ -108,6 +107,15 @@ class TokenizerTest extends \PHPUnit_Framework_TestCase
         $tokens->p = -1000;
         $this->assertSame($tokens, $tokens->back());
         $this->assertNull($tokens->undef);
+    }
+
+    public function testFixFloats() {
+        $text   = "1..3";
+        $tokens = new Tokenizer($text);
+        $this->assertTrue($tokens->is(T_LNUMBER));
+        $this->assertTrue($tokens->next()->is('.'));
+        $this->assertTrue($tokens->next()->is('.'));
+        $this->assertTrue($tokens->next()->is(T_LNUMBER));
     }
 
 }

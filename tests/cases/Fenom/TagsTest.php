@@ -8,17 +8,17 @@ class TagsTest extends TestCase
     /**
      * @group test-for
      */
-    public function testFor()
-    {
-        $this->assertRender('{for $i=0 to=3}{$i},{/for}', "0,1,2,3,");
-    }
+//    public function testFor()
+//    {
+//        $this->assertRender('{for $i=0 to=3}{$i},{/for}', "0,1,2,3,");
+//    }
 
     /**
      * @dataProvider providerScalars
      */
     public function testVar($tpl_val, $val)
     {
-        $this->assertRender("{var \$a=$tpl_val}\nVar: {\$a}", "Var: " . $val);
+        $this->assertRender("{set \$a=$tpl_val}\nVar: {\$a}", "Var: " . $val);
     }
 
     /**
@@ -26,7 +26,7 @@ class TagsTest extends TestCase
      */
     public function testVarBlock($tpl_val, $val)
     {
-        $this->assertRender("{var \$a}before {{$tpl_val}} after{/var}\nVar: {\$a}", "Var: before " . $val . " after");
+        $this->assertRender("{set \$a}before {{$tpl_val}} after{/set}\nVar: {\$a}", "Var: before " . $val . " after");
     }
 
     /**
@@ -35,14 +35,14 @@ class TagsTest extends TestCase
     public function testVarBlockModified($tpl_val, $val)
     {
         $this->assertRender(
-            "{var \$a|low|dots}before {{$tpl_val}} after{/var}\nVar: {\$a}",
+            "{set \$a|low|dots}before {{$tpl_val}} after{/set}\nVar: {\$a}",
             "Var: " . strtolower("before " . $val . " after") . "..."
         );
     }
 
     public function testCycle()
     {
-        $this->assertRender('{for $i=0 to=4}{cycle ["one", "two"]}, {/for}', "one, two, one, two, one, ");
+        $this->assertRender('{foreach 0..4 as $i}{cycle ["one", "two"]}, {/foreach}', "one, two, one, two, one, ");
     }
 
     /**
@@ -51,7 +51,7 @@ class TagsTest extends TestCase
     public function testCycleIndex()
     {
         $this->assertRender(
-            '{var $a=["one", "two"]}{for $i=1 to=5}{cycle $a index=$i}, {/for}',
+            '{set $a=["one", "two"]}{foreach 1..5 as $i}{cycle $a index=$i}, {/foreach}',
             "two, one, two, one, two, "
         );
     }

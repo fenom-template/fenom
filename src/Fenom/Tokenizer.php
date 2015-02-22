@@ -186,25 +186,48 @@ class Tokenizer
                 if ($token === '"' || $token === "'" || $token === "`") {
                     $this->quotes++;
                 }
-                $tokens[] = array(
+                $token = array(
                     $token,
                     $token,
-                    "",
                     $line,
                 );
-                $i++;
             } elseif ($token[0] === \T_WHITESPACE) {
                 $tokens[$i - 1][2] = $token[1];
-            } else {
-                $tokens[] = array(
-                    $token[0],
-                    $token[1],
-                    "",
-                    $line = $token[2],
-                    token_name($token[0]) // debug
-                );
-                $i++;
+                continue;
+            } elseif ($token[0] === \T_DNUMBER) { // fix .1 and 1.
+                if(strpos($token[1], '.') === 0) {
+                    $tokens[] = array(
+                        '.',
+                        '.',
+                        "",
+                        $line = $token[2]
+                    );
+                    $token = array(
+                        T_LNUMBER,
+                        ltrim($token[1], '.'),
+                        $line = $token[2]
+                    );
+                } elseif(strpos($token[1], '.') === strlen($token[1]) - 1) {
+                    $tokens[] = array(
+                        T_LNUMBER,
+                        rtrim($token[1], '.'),
+                        "",
+                        $line = $token[2]
+                    );
+                    $token = array(
+                        '.',
+                        '.',
+                        $line = $token[2]
+                    );
+                }
             }
+            $tokens[] = array(
+                $token[0],
+                $token[1],
+                "",
+                $line = $token[2]
+            );
+            $i++;
 
         }
         unset($tokens[-1]);
