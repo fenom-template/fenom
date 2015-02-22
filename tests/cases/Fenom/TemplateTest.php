@@ -688,105 +688,28 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerForeach()
-    {
-        $a = array(
-            "list"  => array(1 => "one", 2 => "two", 3 => "three"),
-            "empty" => array(),
-            "obj"   => new Helper("testing")
-        );
-        return array(
-            array('Foreach: {foreach $list as $e} {$e}, {/foreach} end', $a, 'Foreach: one, two, three, end'),
-            array('Foreach: {foreach $list as $e} {$e},{break} break {/foreach} end', $a, 'Foreach: one, end'),
-            array(
-                'Foreach: {foreach $list as $e} {$e},{continue} continue {/foreach} end',
-                $a,
-                'Foreach: one, two, three, end'
-            ),
-            array(
-                'Foreach: {foreach ["one", "two", "three"] as $e} {$e}, {/foreach} end',
-                $a,
-                'Foreach: one, two, three, end'
-            ),
-            array(
-                'Foreach: {foreach $list as $k => $e} {$k} => {$e}, {/foreach} end',
-                $a,
-                'Foreach: 1 => one, 2 => two, 3 => three, end'
-            ),
-            array(
-                'Foreach: {foreach [1 => "one", 2 => "two", 3 => "three"] as $k => $e} {$k} => {$e}, {/foreach} end',
-                $a,
-                'Foreach: 1 => one, 2 => two, 3 => three, end'
-            ),
-            array('Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
-            array('Foreach: {foreach [] as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
-            array('Foreach: {foreach $obj->getArray() as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: 0 => 1, 1 => 2, 2 => 3, end'),
-            array('Foreach: {foreach $unexists as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
-            array(
-                'Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {foreachelse} empty {/foreach} end',
-                $a,
-                'Foreach: empty end'
-            ),
-            array(
-                'Foreach: {foreach $list as $e index=$i} {$i}: {$e}, {/foreach} end',
-                $a,
-                'Foreach: 0: one, 1: two, 2: three, end'
-            ),
-            array(
-                'Foreach: {foreach $list as $k => $e index=$i} {$i}: {$k} => {$e}, {/foreach} end',
-                $a,
-                'Foreach: 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
-            ),
-            array(
-                'Foreach: {foreach $empty as $k => $e index=$i} {$i}: {$k} => {$e}, {foreachelse} empty {/foreach} end',
-                $a,
-                'Foreach: empty end'
-            ),
-            array(
-                'Foreach: {foreach $list as $k => $e first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {/foreach} end',
-                $a,
-                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
-            ),
-            array(
-                'Foreach: {foreach $list as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {/foreach} end',
-                $a,
-                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, last end'
-            ),
-            array(
-                'Foreach: {foreach $empty as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {foreachelse} empty {/foreach} end',
-                $a,
-                'Foreach: empty end'
-            ),
-            array(
-                'Foreach: {foreach [1 => "one", 2 => "two", 3 => "three"] as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {/foreach} end',
-                $a,
-                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, last end'
-            ),
-        );
-    }
-
     public static function providerForeachInvalid()
     {
         return array(
             array(
                 'Foreach: {foreach} {$e}, {/foreach} end',
                 'Fenom\Error\CompileException',
-                "Unexpected end of tag {foreach}"
+                "Unexpected end of expression"
             ),
             array(
                 'Foreach: {foreach $list} {$e}, {/foreach} end',
                 'Fenom\Error\CompileException',
                 "Unexpected end of expression"
             ),
-            array(
-                'Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end',
-                'Fenom\Error\CompileException',
-                "Unexpected token '+'"
-            ),
+//            array(
+//                'Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end',
+//                'Fenom\Error\CompileException',
+//                "Unexpected token '+'"
+//            ),
             array(
                 'Foreach: {foreach array_random() as $e} {$e}, {/foreach} end',
                 'Fenom\Error\CompileException',
-                "Unexpected token 'array_random'"
+                "Function array_random not found"
             ),
             array(
                 'Foreach: {foreach $list as $e+1} {$e}, {/foreach} end',
@@ -826,7 +749,7 @@ class TemplateTest extends TestCase
             array(
                 'Foreach: {foreach last=$l $list as $e } {$e}, {/foreach} end',
                 'Fenom\Error\CompileException',
-                "Unexpected token 'last' in tag {foreach}"
+                "Unexpected token 'last' in expression"
             ),
             array(
                 'Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end',
@@ -966,95 +889,6 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerFor()
-    {
-        $a = array("c" => 1, "s" => 1, "m" => 3);
-        return array(
-            array('For: {for $a=4 to=6} $a: {$a}, {/for} end', $a, 'For: $a: 4, $a: 5, $a: 6, end'),
-            array('For: {for $a=4 step=2 to=10} $a: {$a}, {/for} end', $a, 'For: $a: 4, $a: 6, $a: 8, $a: 10, end'),
-            array('For: {for $a=4 step=-2 to=0} $a: {$a}, {/for} end', $a, 'For: $a: 4, $a: 2, $a: 0, end'),
-            array('For: {for $a=$c step=$s to=$m} $a: {$a}, {/for} end', $a, 'For: $a: 1, $a: 2, $a: 3, end'),
-            array('For: {for $a=-1 step=-max(1,2) to=-5} $a: {$a}, {/for} end', $a, 'For: $a: -1, $a: -3, $a: -5, end'),
-            array('For: {for $a=4 step=2 to=10} $a: {$a}, {break} break {/for} end', $a, 'For: $a: 4, end'),
-            array(
-                'For: {for $a=4 step=2 to=8} $a: {$a}, {continue} continue {/for} end',
-                $a,
-                'For: $a: 4, $a: 6, $a: 8, end'
-            ),
-            array(
-                'For: {for $a=4 step=2 to=8 index=$i} $a{$i}: {$a}, {/for} end',
-                $a,
-                'For: $a0: 4, $a1: 6, $a2: 8, end'
-            ),
-            array(
-                'For: {for $a=4 step=2 to=8 index=$i first=$f} {if $f}first{/if} $a{$i}: {$a}, {/for} end',
-                $a,
-                'For: first $a0: 4, $a1: 6, $a2: 8, end'
-            ),
-            array(
-                'For: {for $a=4 step=2 to=8 index=$i first=$f last=$l} {if $f} first {/if} $a{$i}: {$a}, {if $l} last {/if} {/for} end',
-                $a,
-                'For: first $a0: 4, $a1: 6, $a2: 8, last end'
-            ),
-            array('For: {for $a=1 to=-1 } $a: {$a}, {forelse} empty {/for} end', $a, 'For: empty end'),
-            array(
-                'For: {for $a=1 to=-1 index=$i first=$f last=$l} {if $f} first {/if} $a{$i}: {$a}, {if $l} last {/if} {forelse} empty {/for} end',
-                $a,
-                'For: empty end'
-            ),
-        );
-    }
-
-    public static function providerForInvalid()
-    {
-        return array(
-            array('For: {for} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
-            array('For: {for $a=} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected end of expression"),
-            array('For: {for $a+1=3 to=6} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token '+'"),
-            array(
-                'For: {for max($a,$b)=3 to=6} block1 {/for} end',
-                'Fenom\Error\CompileException',
-                "Unexpected token '='"
-            ),
-            array('For: {for to=6 $a=3} block1 {/for} end', 'Fenom\Error\CompileException', "Unexpected token 'to'"),
-            array(
-                'For: {for index=$i $a=3 to=6} block1 {/for} end',
-                'Fenom\Error\CompileException',
-                "Unexpected token 'index'"
-            ),
-            array(
-                'For: {for first=$i $a=3 to=6} block1 {/for} end',
-                'Fenom\Error\CompileException',
-                "Unexpected token 'first'"
-            ),
-            array(
-                'For: {for last=$i $a=3 to=6} block1 {/for} end',
-                'Fenom\Error\CompileException',
-                "Unexpected token 'last'"
-            ),
-            array(
-                'For: {for $a=4 to=6 unk=4} block1 {/for} end',
-                'Fenom\Error\CompileException',
-                "Unknown parameter 'unk'"
-            ),
-            array(
-                'For: {for $a=4 to=6 step=0} block1 {/for} end',
-                'Fenom\Error\CompileException',
-                "Invalid step value"
-            ),
-            array(
-                'For: {for $a=4 to=6} $a: {$a}, {forelse} {break} {/for} end',
-                'Fenom\Error\CompileException',
-                "Improper usage of the tag {break}"
-            ),
-            array(
-                'For: {for $a=4 to=6} $a: {$a}, {forelse} {continue} {/for} end',
-                'Fenom\Error\CompileException',
-                "Improper usage of the tag {continue}"
-            ),
-        );
-    }
-
     public static function providerLayersInvalid()
     {
         return array(
@@ -1070,14 +904,14 @@ class TemplateTest extends TestCase
             ),
             array('Layers: {blah} end', 'Fenom\Error\CompileException', "Unexpected tag 'blah'"),
             array(
-                'Layers: {for $a=4 to=6} block1 {if 1} {forelse} {/if} {/for} end',
+                'Layers: {foreach 4..6 as $a} block1 {if 1} {foreachelse} {/if} {/foreach} end',
                 'Fenom\Error\CompileException',
-                "Unexpected tag 'forelse' (this tag can be used with 'for')"
+                "Unexpected tag 'foreachelse' (this tag can be used with 'foreach')"
             ),
             array(
-                'Layers: {for $a=4 to=6} block1 {if 1}  {/for} {/if} end',
+                'Layers: {foreach 4..6 as $a} block1 {if 1}  {/foreach} {/if} end',
                 'Fenom\Error\CompileException',
-                "Unexpected closing of the tag 'for'"
+                "Unexpected closing of the tag 'foreach'"
             ),
             array(
                 'Layers: {switch 1} {if 1} {case 1} {/if} {/switch} end',
@@ -1464,11 +1298,101 @@ class TemplateTest extends TestCase
         $this->exec(__FUNCTION__ . ": $code end", $vars, __FUNCTION__ . ": $result end");
     }
 
+
+    public static function providerForeach()
+    {
+        $a = array(
+            "list"  => array(1 => "one", 2 => "two", 3 => "three"),
+            "empty" => array(),
+            "obj"   => new Helper("testing")
+        );
+        return array(
+            array('Foreach: {foreach $list as $e} {$e}, {/foreach} end', $a, 'Foreach: one, two, three, end'),
+            array('Foreach: {foreach $list as $e} {$e},{break} break {/foreach} end', $a, 'Foreach: one, end'),
+            array(
+                'Foreach: {foreach $list as $e} {$e},{continue} continue {/foreach} end',
+                $a,
+                'Foreach: one, two, three, end'
+            ),
+            array(
+                'Foreach: {foreach ["one", "two", "three"] as $e} {$e}, {/foreach} end',
+                $a,
+                'Foreach: one, two, three, end'
+            ),
+            array(
+                'Foreach: {foreach $list as $k => $e} {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: 1 => one, 2 => two, 3 => three, end'
+            ),
+            array(
+                'Foreach: {foreach [1 => "one", 2 => "two", 3 => "three"] as $k => $e} {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: 1 => one, 2 => two, 3 => three, end'
+            ),
+            array('Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
+            array('Foreach: {foreach [] as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
+            array('Foreach: {foreach $obj->getArray() as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: 0 => 1, 1 => 2, 2 => 3, end'),
+            array('Foreach: {foreach $unexists as $k => $e} {$k} => {$e}, {/foreach} end', $a, 'Foreach: end'),
+            array(
+                'Foreach: {foreach $empty as $k => $e} {$k} => {$e}, {foreachelse} empty {/foreach} end',
+                $a,
+                'Foreach: empty end'
+            ),
+            array(
+                'Foreach: {foreach $list as $e index=$i} {$i}: {$e}, {/foreach} end',
+                $a,
+                'Foreach: 0: one, 1: two, 2: three, end'
+            ),
+            array(
+                'Foreach: {foreach $list as $k => $e index=$i} {$i}: {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
+            ),
+            array(
+                'Foreach: {foreach $empty as $k => $e index=$i} {$i}: {$k} => {$e}, {foreachelse} empty {/foreach} end',
+                $a,
+                'Foreach: empty end'
+            ),
+            array(
+                'Foreach: {foreach $list as $k => $e first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
+            ),
+            array(
+                'Foreach: {foreach $list as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {/foreach} end',
+                $a,
+                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, last end'
+            ),
+            array(
+                'Foreach: {foreach $empty as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {foreachelse} empty {/foreach} end',
+                $a,
+                'Foreach: empty end'
+            ),
+            array(
+                'Foreach: {foreach [1 => "one", 2 => "two", 3 => "three"] as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {/foreach} end',
+                $a,
+                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, last end'
+            ),
+            array(
+                'Foreach: {foreach 1..3 as $k => $e} {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: 0 => 1, 1 => 2, 2 => 3, end'
+            ),
+            array(
+                'Foreach: {foreach $.get.items as $e} {$e}, {/foreach} end',
+                $a,
+                'Foreach: one, two, three, end'
+            ),
+        );
+    }
+
     /**
      * @dataProvider providerForeach
+     * @backupGlobals
      */
     public function testForeach($code, $vars, $result)
     {
+        $_GET['items'] = array('one', 'two', 'three');
         $this->exec($code, $vars, $result);
     }
 
@@ -1483,18 +1407,18 @@ class TemplateTest extends TestCase
     /**
      * @dataProvider providerFor
      */
-    public function testFor($code, $vars, $result)
-    {
-        $this->exec($code, $vars, $result);
-    }
+//    public function testFor($code, $vars, $result)
+//    {
+//        $this->exec($code, $vars, $result);
+//    }
 
     /**
      * @dataProvider providerForInvalid
      */
-    public function testForInvalid($code, $exception, $message, $options = 0)
-    {
-        $this->execError($code, $exception, $message, $options);
-    }
+//    public function testForInvalid($code, $exception, $message, $options = 0)
+//    {
+//        $this->execError($code, $exception, $message, $options);
+//    }
 
     /**
      * @group testIgnores

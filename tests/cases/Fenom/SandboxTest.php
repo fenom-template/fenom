@@ -18,7 +18,7 @@ class SandboxTest extends TestCase {
 //        $this->tpl('welcome.tpl', '{$a}');
 //            var_dump($this->fenom->compileCode('{set $a=$one|min:0..$three|max:4}')->getBody());
 //        try {
-//            var_dump($this->fenom->compileCode('{foreach $a..$b|up as $k => $v} {/foreach}')->getBody());
+//            var_dump($this->fenom->compileCode('{foreach $a as $k => $v} {/foreach}')->getBody());
 //        } catch (\Exception $e) {
 //            print_r($e->getMessage() . "\n" . $e->getTraceAsString());
 //            while ($e->getPrevious()) {

@@ -136,21 +136,20 @@ class Compiler
         $key     = null;
         $before  = $body = array();
         $prepend = "";
-        if ($tokens->is(T_VARIABLE)) {
-            $from    = $scope->tpl->parseTerm($tokens, $is_var);
-            if($is_var) {
-                $check = '!empty('.$from.')';
-            } else {
-                $scope["var"] = $scope->tpl->tmpVar();
-                $prepend = $scope["var"].' = '.$from.';';
-                $from = $check = $scope["var"];
-            }
-        } elseif ($tokens->is('[')) {
+        if ($tokens->is('[')) {
             $count = 0;
             $from = $scope->tpl->parseArray($tokens, $count);
             $check = $count;
         } else {
-            throw new UnexpectedTokenException($tokens, null, "tag {foreach}");
+            $from    = $scope->tpl->parseExpr($tokens, $is_var);
+            if($is_var) {
+                $check = '!empty('.$from.') && (is_array('.$from.') || '.$from.' instanceof \Traversable)';
+            } else {
+                $scope["var"] = $scope->tpl->tmpVar();
+                $prepend = $scope["var"].' = '.$from.';';
+                $from  = $scope["var"];
+                $check = 'is_array('.$from.') && count('.$from.') || ('.$from.' instanceof \Traversable)';
+            }
         }
         $tokens->get(T_AS);
         $tokens->next();
@@ -193,9 +192,9 @@ class Compiler
         $body           = $body ? implode("; ", $body) . ";" : "";
         $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
         if ($key) {
-            return "$prepend if($check) { $before foreach($from as $key => $value) { $body";
+            return "$prepend if($check) {\n $before foreach($from as $key => $value) { $body";
         } else {
-            return "$prepend if($check) { $before foreach($from as $value) { $body";
+            return "$prepend if($check) {\n $before foreach($from as $value) { $body";
         }
     }
 
@@ -236,10 +235,11 @@ class Compiler
      * @throws Error\UnexpectedTokenException
      * @throws Error\InvalidUsageException
      * @return string
+     * @codeCoverageIgnore
      */
     public static function forOpen(Tokenizer $tokens, Tag $scope)
     {
-        trigger_error("Fenom: tag {for} deprecated, use {foreach 1..4 as \$value}", E_USER_DEPRECATED);
+        trigger_error("Fenom: tag {for} deprecated, use {foreach 1..4 as \$value} (in {$scope->tpl->getName()}:{$scope->line})", E_USER_DEPRECATED);
         $p = array(
             "index" => false,
             "first" => false,
@@ -310,6 +310,7 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $scope
      * @return string
+     * @codeCoverageIgnore
      */
     public static function forElse($tokens, Tag $scope)
     {
@@ -323,6 +324,7 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $scope
      * @return string
+     * @codeCoverageIgnore
      */
     public static function forClose($tokens, Tag $scope)
     {

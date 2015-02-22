@@ -657,10 +657,11 @@ class Template extends Render
      * Parse expressions. The mix of operators and terms.
      *
      * @param Tokenizer $tokens
+     * @param bool $is_var
+     * @throws \Exception
      * @return string
-     * @throws Error\UnexpectedTokenException
      */
-    public function parseExpr(Tokenizer $tokens)
+    public function parseExpr(Tokenizer $tokens, &$is_var = false)
     {
         $exp  = array();
         $var  = false; // last term was: true - variable, false - mixed
@@ -754,6 +755,10 @@ class Template extends Render
 
         if ($op || !$exp) {
             throw new UnexpectedTokenException($tokens);
+        }
+
+        if(count($exp) == 1 && $var) {
+            $is_var = true;
         }
         return implode(' ', $exp);
     }
