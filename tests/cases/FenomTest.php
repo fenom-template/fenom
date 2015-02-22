@@ -119,10 +119,32 @@ class FenomTest extends \Fenom\TestCase
     public function testSetModifier()
     {
         $this->fenom->addModifier("mymod", "myMod");
-        $this->tpl('custom.tpl', 'Custom modifier {$a|mymod}');
-        $this->assertSame(
+        $this->assertRender(
+            'Custom modifier {$a|mymod}',
             "Custom modifier (myMod)Custom(/myMod)",
-            $this->fenom->fetch('custom.tpl', array("a" => "Custom"))
+            array("a" => "Custom")
+        );
+        $this->assertRender(
+            'Custom modifier {mymod($a)}',
+            "Custom modifier (myMod)Custom(/myMod)",
+            array("a" => "Custom")
+        );
+    }
+
+    public function testSetModifierClosure()
+    {
+        $this->fenom->addModifier("mymod", function ($value) {
+            return "(myMod)$value(/myMod)";
+        });
+        $this->assertRender(
+            'Custom modifier {$a|mymod}',
+            "Custom modifier (myMod)Custom(/myMod)",
+            array("a" => "Custom")
+        );
+        $this->assertRender(
+            'Custom modifier {mymod($a)}',
+            "Custom modifier (myMod)Custom(/myMod)",
+            array("a" => "Custom")
         );
     }
 

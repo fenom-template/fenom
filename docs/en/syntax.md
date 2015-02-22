@@ -212,7 +212,7 @@ To use octal notation, precede the number with a 0 (zero).
 To use hexadecimal notation precede the number with 0x. 
 To use binary notation precede the number with 0b.
 
-``smarty
+```smarty
 {var $a = 1234}  decimal number
 {var $a = -123}  a negative number
 {var $a = 0123}  octal number (equivalent to 83 decimal)

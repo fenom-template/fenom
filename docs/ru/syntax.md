@@ -352,7 +352,7 @@ Fenom предоставляет возможноть обращаться к ф
 {"User"|lower}}         выведет "user"
 {$looong_text|truncate:80:"..."}  обрежет текст до 80 символов и добавит символы "..."
 {$looong_text|lower|truncate:$settings.count:$settings.etc}
-{set $foo="Ivan"|upper}    значение переменной $foo будет "USER"
+{set $foo="User"|upper}    значение переменной $foo будет "USER"
 ```
 
 ## Теги

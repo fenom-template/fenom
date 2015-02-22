@@ -1,7 +1,6 @@
 .idea
 vendor
 build
-composer.lock
 composer.phar
 tests/resources/compile/*
 !.gitkeep

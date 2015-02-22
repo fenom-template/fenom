@@ -63,8 +63,8 @@
 * [ematch](./mods/ematch.md) — проверяет соответствие регулярному выражению
 * [replace](./mods/replace.md) — заменяет все вхождения подстроки на строку замену
 * [ereplace](./mods/ereplace.md) — заменяет все соответсвия регулярному выражению на строку замену.
-* [split](./mods/split.md) — разивает строку по подстроке
-* [esplit](./mods/esplit.md) — разивает строку по регулярному выражению
+* [split](./mods/split.md) — разбивает строку по подстроке
+* [esplit](./mods/esplit.md) — разбивает строку по регулярному выражению
 * [join](./mods/join.md) — объединяет массив в строку
 * так же разрешены функции: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`

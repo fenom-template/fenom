@@ -674,6 +674,7 @@ class Template extends Render
                     if($cond) {
                         $term = array_pop($exp) . ' ' . $term;
                         $term = '('. array_pop($exp) . ' ' . $term . ')';
+                        $var  = false;
                     }
                     $term = $this->parseTernary($tokens, $term, $var);
                     $var  = false;
@@ -820,11 +821,16 @@ class Template extends Render
             if ($tokens->isSpecialVal()) {
                 $code = $unary . $tokens->getAndNext();
             } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
-                $func = $this->_fenom->getModifier($tokens->current(), $this);
+                $func = $this->_fenom->getModifier($modifier = $tokens->current(), $this);
                 if (!$func) {
                     throw new \Exception("Function " . $tokens->getAndNext() . " not found");
                 }
-                $code = $unary . $this->parseChain($tokens, $func . $this->parseArgs($tokens->next()));
+                if (!is_string($func)) { // dynamic modifier
+                    $call = 'call_user_func_array($tpl->getStorage()->getModifier("' . $modifier . '"), array'.$this->parseArgs($tokens->next()).')'; // @todo optimize
+                } else {
+                    $call = $func . $this->parseArgs($tokens->next());
+                }
+                $code = $unary . $this->parseChain($tokens, $call);
             } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
                 $method = $this->parseStatic($tokens);
                 $args   = $this->parseArgs($tokens);
@@ -1401,7 +1407,7 @@ class Template extends Render
      * (1 + 2.3, 'string', $var, [2,4])
      *
      * @param Tokenizer $tokens
-     * @throws TokenizeException
+     * @param bool $as_string
      * @return string
      */
     public function parseArgs(Tokenizer $tokens)
