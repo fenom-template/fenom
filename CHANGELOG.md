@@ -1,6 +1,60 @@
 Changelog
 =========
 
+## 2.6.0 (2015-02-22)
+
+- Add range operator (`1..3`)
+- Tag `for` now is deprecated, use tag `foreach` with range
+- Internal improves
+
+### 2.5.4 (2015-02-19)
+
+- Fix bug #152
+- Add composer.lock to git
+
+### 2.5.3 (2015-02-19)
+
+- Fix bug #147
+
+### 2.5.2 (2015-02-10)
+
+- Fix bug: unexpected array conversion when object given to {foreach} with force verify option (pull #148)
+
+### 2.5.1 (2015-02-10)
+
+- Fix bugs #144, #135
+
+
+## 2.5.0 (2015-02-01)
+
+- Internal improvement: functions accept array of template variables 
+- Improve `in` operator
+- Fix bug #142
+
+### 2.4.6 (2015-01-30)
+
+- Fix bug #138
+
+### 2.4.5 (2015-01-30)
+
+Move project to organization `fenom-template`
+
+### 2.4.4 (2015-01-22)
+
+- Fix: parse error then modifier's argument converts to false
+
+### 2.4.3 (2015-01-08)
+
+- Fix #132
+
+### 2.4.2 (2015-01-07)
+
+- Internal improvements and code cleaning
+
+### 2.4.2 (2015-01-07)
+
+- Fix bug #128
+
 ## 2.4.0 (2015-01-02)
 
 - Fix bugs #120, #104, #119
