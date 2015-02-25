@@ -111,7 +111,7 @@ $fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
 });
 ```
 
-# Расширение тестовго оператора
+# Расширение тестового оператора
 
 ```php
 $fenom->addTest(string $name, string $code);
