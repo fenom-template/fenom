@@ -30,17 +30,17 @@
 * [if](./tags/if.md), `elseif` и `else` — условный оператор
 * [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — перебор элементов массива или объекта
 * [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
-* [switch](./tags/switch.md), `case` — груповой условный оператор
+* [switch](./tags/switch.md), `case` — групповой условный оператор
 * [cycle](./tags/cycle.md) — циклицеский перебор массива значений
-* [include](./tags/include.md), `insert` — вставляет и испольняет указанный шаблон
+* [include](./tags/include.md), `insert` — вставляет и исполняет указанный шаблон
 * [extends](./tags/extends.md), `use`, `block` и `parent` — [наследование](./inheritance.md) шаблонов
-* [filter](./tags/filter.md) — примение модификаторов к фрагменту шаблона
+* [filter](./tags/filter.md) — применение модификаторов к фрагменту шаблона
 * [ignore](./tags/ignore.md) — игнорирование тегов Fenom
 * [macro](./tags/macro.md) и `import` — пользовательские функции шаблонов
 * [autoescape](./tags/autoescape.md) — экранирует фрагмент шаблона
 * [raw](./tags/raw.md) — отключает экранирование фрагмента шаблона
 * [unset](./tags/unset.md) — удаляет переменные
-* или [добавте](./ext/extend.md#Добавление-тегов) свои
+* или [добавьте](./ext/extend.md#Добавление-тегов) свои
 
 
 ***
@@ -50,7 +50,7 @@
 [Использование](./syntax.md#modifiers) модификаторов.
 
 * [upper](./mods/upper.md) aka `up` — конвертирование строки в верхний регистр
-* [lower](./mods/lower.md) aka `low` — конвертирование строки в низкий регистр
+* [lower](./mods/lower.md) aka `low` — конвертирование строки в нижний регистр
 * [date_format](./mods/date_format.md) - форматирует дату, штамп времени через strftime() функцию
 * [date](./mods/date.md) - форматирует дату, штамп времени через date() функцию
 * [truncate](./mods/truncate.md) — обрезает текст до указанной длины
@@ -92,7 +92,7 @@
 * [Источники шаблонов](./ext/extend.md#Источники-шаблонов)
 * [Добавление модификаторов](./ext/extend.md#Добавление-модификаторов)
 * [Добавление тегов](./ext/extend.md#Добавление-тегов)
-* [Расширение тестового оператора](./ext/extend.md#Расширение-тестовго-оператора)
+* [Расширение тестового оператора](./ext/extend.md#Расширение-тестового-оператора)
 * [Расширение глобальной переменной](./ext/extend.md#Расширение-глобальной-переменной)
 * [Расширение Fenom](./ext/extend.md)
 * [Add-ons](./ext/extensions.md)
