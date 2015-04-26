@@ -925,28 +925,28 @@ class Compiler
         if (!$tokens->valid()) {
             return;
         }
-        $tokens->next()->need('(')->next();
-        if ($tokens->is(')')) {
-            return;
-        }
-        while ($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
-            $param = $tokens->current();
-            if ($tokens->is(T_VARIABLE)) {
-                $param = ltrim($param, '$');
-            }
+        $tokens->next();
+        if($tokens->is('(') || !$tokens->isNext(')')){
             $tokens->next();
-            $args[] = $param;
-            if ($tokens->is('=')) {
-                $tokens->next();
-                if ($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
-                    $defaults[$param] = $tokens->getAndNext();
-                } else {
-                    throw new InvalidUsageException("Macro parameters may have only scalar defaults");
+            while ($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
+                $param = $tokens->current();
+                if ($tokens->is(T_VARIABLE)) {
+                    $param = ltrim($param, '$');
                 }
+                $tokens->next();
+                $args[] = $param;
+                if ($tokens->is('=')) {
+                    $tokens->next();
+                    if ($tokens->is(T_CONSTANT_ENCAPSED_STRING, T_LNUMBER, T_DNUMBER) || $tokens->isSpecialVal()) {
+                        $defaults[$param] = $tokens->getAndNext();
+                    } else {
+                        throw new InvalidUsageException("Macro parameters may have only scalar defaults");
+                    }
+                }
+                $tokens->skipIf(',');
             }
-            $tokens->skipIf(',');
+            $tokens->skipIf(')');
         }
-        $tokens->skipIf(')');
         $scope["macro"] = array(
             "name"      => $scope["name"],
             "args"      => $args,
