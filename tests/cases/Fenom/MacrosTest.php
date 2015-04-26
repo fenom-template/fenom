@@ -7,22 +7,28 @@ class MacrosTest extends TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->tpl(
-            "math.tpl",
-            '
-                   {macro plus(x, y)}
-                       x + y = {$x + $y}
-                   {/macro}
+        $this->tpl("math.tpl",
+           '{macro plus(x, y)}
+              x + y = {$x + $y}
+            {/macro}
 
-                   {macro minus(x, y, z=0)}
-                       x - y - z = {$x - $y - $z}
-                   {/macro}
+            {macro minus(x, y, z=0)}
+              x - y - z = {$x - $y - $z}
+            {/macro}
 
-                   {macro multi(x, y)}
-                       x * y = {$x * $y}
-                   {/macro}
+            {macro multi(x, y)}
+               x * y = {$x * $y}
+            {/macro}
 
-                   Math: {macro.plus x=2 y=3}, {macro.minus x=10 y=4}
+            {macro e()}
+               2.71827
+            {/macro}
+
+            {macro pi}
+               3.14159
+            {/macro}
+
+               Math: {macro.plus x=2 y=3}, {macro.minus x=10 y=4}
                    '
         );
 
@@ -99,6 +105,10 @@ class MacrosTest extends TestCase
         exit;
     }
 
+    /**
+     * @throws \Exception
+     * @group macros
+     */
     public function testMacros()
     {
         $tpl = $this->fenom->compile('math.tpl');
