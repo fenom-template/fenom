@@ -17,3 +17,12 @@
 ```smarty
 var data = { "time": obj.ts };
 ```
+
+Так же для игнорирования синтаксиса Fenom можно использовать модификатор `:ignore` для любого блочного тега.
+```smarty
+{if:ignore $cdn.yandex}
+    var item = {cdn: "//yandex.st/"};
+{/if}
+{script:ignore} ... {/script}
+{foreach:ignore ...} ... {/foreach}
+```
