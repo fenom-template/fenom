@@ -1047,6 +1047,13 @@ class TemplateTest extends TestCase
             array('{"string" ~ "one" ~ "end"}', "stringoneend"),
             array('{"string" ~ 1 ~ "end"}', "string1end"),
             array('{$one ~= "string"} is {$one}', "1string is 1string"),
+
+            array('{"string" ~~ $one ~~ up("end")}', "string 1 END"),
+            array('{"string" ~~ $one++ ~~ "end"}', "string 1 end"),
+            array('{"string" ~~ ++$one ~~ "end"}', "string 2 end"),
+            array('{"string" ~~ "one" ~~ "end"}', "string one end"),
+            array('{"string" ~~ 1 ~~ "end"}', "string 1 end"),
+            array('{$one ~= "string"} is {$one}', "1string is 1string"),
         );
     }
 
