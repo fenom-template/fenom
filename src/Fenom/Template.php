@@ -734,13 +734,15 @@ class Template extends Render
                         if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
                             $concat[] = "strval(" . $this->parseTerm($tokens) . ")";
                         } else {
+
                             if ($tokens->is('~')) {
                                 $tokens->next();
-                                $concat[] = " ";
+                                $concat[] = "' '";
                             }
-                            if (!$concat[] = $this->parseTerm($tokens)) {
+                            if (!$term2 = "strval(".$this->parseTerm($tokens).")") {
                                 throw new UnexpectedTokenException($tokens);
                             }
+                            $concat[] = $term2;
                         }
                     }
                     $exp[] = "(" . implode(".", $concat) . ")";
