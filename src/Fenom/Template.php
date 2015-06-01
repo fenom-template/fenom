@@ -811,8 +811,7 @@ class Template extends Render
                 }
             }
         } elseif ($tokens->is('$')) {
-            $is_var = false;
-            $code = $unary . $this->parseAccessor($tokens);
+            $code = $unary . $this->parseAccessor($tokens, $is_var);
         } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
             if($this->_options & Fenom::FORCE_VERIFY) {
                 $var = $this->parseVariable($tokens);
@@ -958,14 +957,20 @@ class Template extends Render
     /**
      * Parse accessor
      * @param Tokenizer $tokens
+     * @param bool $is_var
      * @return string
      */
-    public function parseAccessor(Tokenizer $tokens)
+    public function parseAccessor(Tokenizer $tokens, &$is_var = false)
     {
         $accessor = $tokens->need('$')->next()->need('.')->next()->current();
-        $callback = $this->getStorage()->getAccessor($accessor);
-        if($callback) {
-            return call_user_func($callback, $tokens->next(), $this);
+        $parser = $this->getStorage()->getAccessor($accessor);
+        $is_var = false;
+        if($parser) {
+            if(is_string($parser)) {
+                return call_user_func_array($parser, array($tokens->next(), $this, &$is_var));
+            } else {
+                return call_user_func_array($parser['parser'], array($parser['accessor'], $tokens->next(), $this, &$is_var));
+            }
         } else {
             throw new \RuntimeException("Unknown accessor '$accessor'");
         }
