@@ -782,85 +782,102 @@ class Template extends Render
         } else {
             $unary = "";
         }
-        if ($tokens->is(T_LNUMBER, T_DNUMBER)) {
-            $code = $unary . $this->parseScalar($tokens, true);
-        } elseif ($tokens->is(T_CONSTANT_ENCAPSED_STRING, '"', T_ENCAPSED_AND_WHITESPACE)) {
-            if ($unary) {
-                throw new UnexpectedTokenException($tokens->back());
-            }
-            $code = $this->parseScalar($tokens, true);
-        } elseif ($tokens->is(T_VARIABLE)) {
-            $code = $this->parseVariable($tokens);
-            if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
-                if ($this->_options & Fenom::DENY_METHODS) {
-                    throw new \LogicException("Forbidden to call methods");
+        switch($tokens->key()) {
+            case T_LNUMBER:
+            case T_DNUMBER:
+                $code = $unary . $this->parseScalar($tokens, true);
+                break;
+            case T_CONSTANT_ENCAPSED_STRING:
+            case '"':
+            case T_ENCAPSED_AND_WHITESPACE:
+                if ($unary) {
+                    throw new UnexpectedTokenException($tokens->back());
                 }
-                $code = $unary . $this->parseChain($tokens, $code);
-            } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
+                $code = $this->parseScalar($tokens, true);
+                break;
+            case T_VARIABLE:
+                $code = $this->parseVariable($tokens);
+                if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
+                    if ($this->_options & Fenom::DENY_METHODS) {
+                        throw new \LogicException("Forbidden to call methods");
+                    }
+                    $code = $unary . $this->parseChain($tokens, $code);
+                } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
+                    if($this->_options & Fenom::FORCE_VERIFY) {
+                        $code = $unary . '(isset(' . $code . ') ? ' . $code . $tokens->getAndNext() . ' : null)';
+                    } else {
+                        $code = $unary . $code . $tokens->getAndNext();
+                    }
+                } else {
+                    if($this->_options & Fenom::FORCE_VERIFY) {
+                        $code = $unary . '(isset(' . $code . ') ? ' . $code . ' : null)';
+                    } else {
+                        $is_var = true;
+                        $code = $unary . $code;
+                    }
+                }
+                break;
+            case '$':
+                $code = $unary . $this->parseAccessor($tokens, $is_var);
+                break;
+            case T_DEC:
+            case T_INC:
                 if($this->_options & Fenom::FORCE_VERIFY) {
-                    $code = $unary . '(isset(' . $code . ') ? ' . $code . $tokens->getAndNext() . ' : null)';
+                    $var = $this->parseVariable($tokens);
+                    $code = $unary . '(isset(' . $var . ') ? ' . $tokens->getAndNext() . $this->parseVariable($tokens).' : null)';
                 } else {
-                    $code = $unary . $code . $tokens->getAndNext();
+                    $code = $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
                 }
-            } else {
-                if($this->_options & Fenom::FORCE_VERIFY) {
-                    $code = $unary . '(isset(' . $code . ') ? ' . $code . ' : null)';
+                break;
+            case '(':
+                $tokens->next();
+                $code = $unary . "(" . $this->parseExpr($tokens) . ")";
+                $tokens->need(")")->next();
+                break;
+            case T_STRING:
+                if ($tokens->isSpecialVal()) {
+                    $code = $unary . $tokens->getAndNext();
+                } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
+                    $func = $this->_fenom->getModifier($modifier = $tokens->current(), $this);
+                    if (!$func) {
+                        throw new \Exception("Function " . $tokens->getAndNext() . " not found");
+                    }
+                    if (!is_string($func)) { // dynamic modifier
+                        $call = 'call_user_func_array($tpl->getStorage()->getModifier("' . $modifier . '"), array'.$this->parseArgs($tokens->next()).')'; // @todo optimize
+                    } else {
+                        $call = $func . $this->parseArgs($tokens->next());
+                    }
+                    $code = $unary . $this->parseChain($tokens, $call);
+                } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
+                    $method = $this->parseStatic($tokens);
+                    $args   = $this->parseArgs($tokens);
+                    $code   = $unary . $this->parseChain($tokens, $method . $args);
                 } else {
-                    $is_var = true;
-                    $code = $unary . $code;
+                    return false;
                 }
-            }
-        } elseif ($tokens->is('$')) {
-            $code = $unary . $this->parseAccessor($tokens, $is_var);
-        } elseif ($tokens->is(Tokenizer::MACRO_INCDEC)) {
-            if($this->_options & Fenom::FORCE_VERIFY) {
-                $var = $this->parseVariable($tokens);
-                $code = $unary . '(isset(' . $var . ') ? ' . $tokens->getAndNext() . $this->parseVariable($tokens).' : null)';
-            } else {
-                $code = $unary . $tokens->getAndNext() . $this->parseVariable($tokens);
-            }
-        } elseif ($tokens->is("(")) {
-            $tokens->next();
-            $code = $unary . "(" . $this->parseExpr($tokens) . ")";
-            $tokens->need(")")->next();
-        } elseif ($tokens->is(T_STRING)) {
-            if ($tokens->isSpecialVal()) {
-                $code = $unary . $tokens->getAndNext();
-            } elseif ($tokens->isNext("(") && !$tokens->getWhitespace()) {
-                $func = $this->_fenom->getModifier($modifier = $tokens->current(), $this);
-                if (!$func) {
-                    throw new \Exception("Function " . $tokens->getAndNext() . " not found");
-                }
-                if (!is_string($func)) { // dynamic modifier
-                    $call = 'call_user_func_array($tpl->getStorage()->getModifier("' . $modifier . '"), array'.$this->parseArgs($tokens->next()).')'; // @todo optimize
+                break;
+            case T_ISSET:
+            case T_EMPTY:
+                $func = $tokens->getAndNext();
+                if ($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
+                    $code = $unary . $func . "(" . $this->parseVariable($tokens->next()) . ")";
+                    $tokens->need(')')->next();
                 } else {
-                    $call = $func . $this->parseArgs($tokens->next());
+                    throw new TokenizeException("Unexpected token " . $tokens->getNext() . ", isset() and empty() accept only variables");
                 }
-                $code = $unary . $this->parseChain($tokens, $call);
-            } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
-                $method = $this->parseStatic($tokens);
-                $args   = $this->parseArgs($tokens);
-                $code   = $unary . $this->parseChain($tokens, $method . $args);
-            } else {
-                return false;
-            }
-        } elseif ($tokens->is(T_ISSET, T_EMPTY)) {
-            $func = $tokens->getAndNext();
-            if ($tokens->is("(") && $tokens->isNext(T_VARIABLE)) {
-                $code = $unary . $func . "(" . $this->parseVariable($tokens->next()) . ")";
-                $tokens->need(')')->next();
-            } else {
-                throw new TokenizeException("Unexpected token " . $tokens->getNext() . ", isset() and empty() accept only variables");
-            }
-        } elseif ($tokens->is('[')) {
-            if ($unary) {
-                throw new UnexpectedTokenException($tokens->back());
-            }
-            $code = $this->parseArray($tokens);
-        } elseif ($unary) {
-            throw new UnexpectedTokenException($tokens->back());
-        } else {
-            return false;
+                break;
+            case '[':
+                if ($unary) {
+                    throw new UnexpectedTokenException($tokens->back());
+                }
+                $code = $this->parseArray($tokens);
+                break;
+            default:
+                if ($unary) {
+                    throw new UnexpectedTokenException($tokens->back());
+                } else {
+                    return false;
+                }
         }
         if (($allows & self::TERM_MODS) && $tokens->is('|')) {
             $code    = $this->parseModifier($tokens, $code);
