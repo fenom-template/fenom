@@ -53,6 +53,10 @@ class Fenom
 
     const MAX_MACRO_RECURSIVE = 32;
 
+    const ACCESSOR_CUSTOM = null;
+    const ACCESSOR_VAR    = 'Fenom\Accessor::parserVar';
+    const ACCESSOR_CALL   = 'Fenom\Accessor::parserCall';
+
     /**
      * @var int[] of possible options, as associative array
      * @see setOptions
@@ -796,12 +800,16 @@ class Fenom
     /**
      * Add global accessor ($.)
      * @param string $name
-     * @param callable $parser
+     * @param callable|string $accessor
+     * @param string $parser
      * @return Fenom
      */
-    public function addAccessor($name, $parser)
+    public function addAccessor($name, $accessor, $parser = self::ACCESSOR_CUSTOM)
     {
-        $this->_accessors[$name] = $parser;
+        $this->_accessors[$name] = array(
+            "accessor" => $accessor,
+            "parser" => $parser
+        );
         return $this;
     }
 

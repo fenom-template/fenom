@@ -795,8 +795,16 @@ class Template extends Render
                 }
                 $code = $this->parseScalar($tokens, true);
                 break;
+            case '$':
+                $code = $this->parseAccessor($tokens, $is_var);
+                if(!$is_var) {
+                    $code = $unary . $code;
+                    break;
+                }
             case T_VARIABLE:
-                $code = $this->parseVariable($tokens);
+                if(!isset($code)) {
+                    $code = $this->parseVariable($tokens);
+                }
                 if ($tokens->is("(") && $tokens->hasBackList(T_STRING, T_OBJECT_OPERATOR)) {
                     if ($this->_options & Fenom::DENY_METHODS) {
                         throw new \LogicException("Forbidden to call methods");
@@ -816,9 +824,6 @@ class Template extends Render
                         $code = $unary . $code;
                     }
                 }
-                break;
-            case '$':
-                $code = $unary . $this->parseAccessor($tokens, $is_var);
                 break;
             case T_DEC:
             case T_INC:
