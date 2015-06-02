@@ -490,7 +490,7 @@ class Template extends Render
             $escape = $this->_options & Fenom::AUTO_ESCAPE;
         }
         if ($escape) {
-            return "echo htmlspecialchars($data, ENT_COMPAT, 'UTF-8');";
+            return "echo htmlspecialchars($data, ENT_COMPAT, ".var_export(Fenom::$charset, true).");";
         } else {
             return "echo $data;";
         }

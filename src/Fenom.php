@@ -58,6 +58,8 @@ class Fenom
     const ACCESSOR_VAR    = 'Fenom\Accessor::parserVar';
     const ACCESSOR_CALL   = 'Fenom\Accessor::parserCall';
 
+    public static $charset = "UTF-8";
+
     /**
      * @var int[] of possible options, as associative array
      * @see setOptions
