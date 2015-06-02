@@ -19,6 +19,7 @@ use Fenom\Template;
 class Fenom
 {
     const VERSION = '2.4';
+    const REV = 1;
     /* Actions */
     const INLINE_COMPILER = 1;
     const BLOCK_COMPILER  = 5;
@@ -800,12 +801,23 @@ class Fenom
     /**
      * Add global accessor ($.)
      * @param string $name
+     * @param callable $parser
+     * @return Fenom
+     */
+    public function addAccessor($name, $parser)
+    {
+        $this->_accessors[$name] = $parser;
+        return $this;
+    }
+
+    /**
+     * Add global accessor ($.)
+     * @param string $name
      * @param callable|string $accessor
      * @param string $parser
      * @return Fenom
      */
-    public function addAccessor($name, $accessor, $parser = self::ACCESSOR_CUSTOM)
-    {
+    public function addAccessorSmart($name, $accessor, $parser) {
         $this->_accessors[$name] = array(
             "accessor" => $accessor,
             "parser" => $parser

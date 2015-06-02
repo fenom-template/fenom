@@ -12,7 +12,7 @@ class SandboxTest extends TestCase {
     {
         return;
         $this->fenom->setOptions(\Fenom::FORCE_VERIFY);
-        $this->fenom->addAccessor('q', 'Navi::$q', \Fenom::ACCESSOR_VAR);
+        $this->fenom->addAccessorSmart('q', 'Navi::$q', \Fenom::ACCESSOR_VAR);
 //        $this->assertEquals([1, 2, 4, "as" => 767, "df" => ["qert"]], [1, 2, 4, "as" => 767, "df" => ["qet"]]);
 //        $this->fenom->addBlockCompiler('php', 'Fenom\Compiler::nope', function ($tokens, Tag $tag) {
 //            return '<?php ' . $tag->cutContent();
@@ -20,7 +20,7 @@ class SandboxTest extends TestCase {
 //        $this->tpl('welcome.tpl', '{$a}');
 //            var_dump($this->fenom->compileCode('{set $a=$one|min:0..$three|max:4}')->getBody());
         try {
-            var_dump($this->fenom->compileCode('{$.q.ddqd->d() + 333}')->getBody());
+            var_dump($this->fenom->compileCode('{set $.q.ddqd->d() = 333}')->getBody());
         } catch (\Exception $e) {
             print_r($e->getMessage() . "\n" . $e->getTraceAsString());
             while ($e->getPrevious()) {
