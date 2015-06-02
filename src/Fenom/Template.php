@@ -428,9 +428,9 @@ class Template extends Render
     {
         if ($this->macros) {
             $macros = array();
-            foreach ($this->macros as $m) {
+            foreach ($this->macros as $name => $m) {
                 if ($m["recursive"]) {
-                    $macros[] = "\t\t'" . $m["name"] . "' => function (\$var, \$tpl) {\n?>" . $m["body"] . "<?php\n}";
+                    $macros[] = "\t\t'" . $name . "' => function (\$var, \$tpl) {\n?>" . $m["body"] . "<?php\n}";
                 }
             }
             return "array(\n" . implode(",\n", $macros) . ")";
@@ -1369,6 +1369,7 @@ class Template extends Render
     {
         $recursive = false;
         $macro     = false;
+
         if (isset($this->macros[$name])) {
             $macro     = $this->macros[$name];
             $recursive = $macro['recursive'];
