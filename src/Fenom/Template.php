@@ -1442,7 +1442,6 @@ class Template extends Render
      * (1 + 2.3, 'string', $var, [2,4])
      *
      * @param Tokenizer $tokens
-     * @param bool $as_string
      * @return string
      */
     public function parseArgs(Tokenizer $tokens)

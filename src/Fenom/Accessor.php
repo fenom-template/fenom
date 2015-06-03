@@ -33,8 +33,9 @@ class Accessor {
         return $tpl->parseVariable($tokens, $var);
     }
 
-    public static function parserCall($accessor, Tokenizer $tokens, Template $tpl) {
-//        return $tpl->parseVariable($tokens, $var);
+
+    public static function parserCall($call, Tokenizer $tokens, Template $tpl) {
+        return $call.$tpl->parseArgs($tokens);
     }
 
     /**
