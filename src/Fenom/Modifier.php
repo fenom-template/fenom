@@ -58,13 +58,13 @@ class Modifier
      * @param string $charset
      * @return string
      */
-    public static function escape($text, $type = 'html', $charset = 'UTF-8')
+    public static function escape($text, $type = 'html', $charset = null)
     {
         switch (strtolower($type)) {
             case "url":
                 return urlencode($text);
             case "html";
-                return htmlspecialchars($text, ENT_COMPAT, $charset);
+                return htmlspecialchars($text, ENT_COMPAT, $charset ? $charset : \Fenom::$charset);
             case "js":
                 return json_encode($text, 64 | 256); // JSON_UNESCAPED_SLASHES = 64, JSON_UNESCAPED_UNICODE = 256
             default:

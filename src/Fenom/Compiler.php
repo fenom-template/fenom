@@ -741,7 +741,16 @@ class Compiler
      */
     public static function setOpen(Tokenizer $tokens, Tag $scope)
     {
-        $var = $scope->tpl->parseVariable($tokens);
+        if($tokens->is(T_VARIABLE)) {
+            $var = $scope->tpl->parseVariable($tokens);
+        } elseif($tokens->is('$')) {
+            $var = $scope->tpl->parseAccessor($tokens, $is_var);
+            if(!$is_var) {
+                throw new InvalidUsageException("Accessor is not writable");
+            }
+        } else {
+            throw new InvalidUsageException("{set} and {add} accept only variable");
+        }
         $before = $after = "";
         if($scope->name == 'add') {
             $before = "if(!isset($var)) {\n";

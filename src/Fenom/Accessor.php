@@ -28,10 +28,21 @@ class Accessor {
         'env'     => '$_ENV'
     );
 
+    public static function parserVar($var, Tokenizer $tokens, Template $tpl, &$is_var) {
+        $is_var = true;
+        return $tpl->parseVariable($tokens, $var);
+    }
+
+
+    public static function parserCall($call, Tokenizer $tokens, Template $tpl) {
+        return $call.$tpl->parseArgs($tokens);
+    }
+
     /**
      * Accessor for global variables
      * @param Tokenizer $tokens
      * @param Template $tpl
+     * @return string
      */
     public static function getVar(Tokenizer $tokens, Template $tpl)
     {
@@ -47,6 +58,7 @@ class Accessor {
     /**
      * Accessor for template information
      * @param Tokenizer $tokens
+     * @return string
      */
     public static function tpl(Tokenizer $tokens)
     {
