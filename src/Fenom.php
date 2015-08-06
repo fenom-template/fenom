@@ -118,7 +118,7 @@ class Fenom
     /**
      * @var string compile prefix ID template
      */
-    protected $_compile_id = "default";
+    protected $_compile_id;
 
     /**
      * @var string[] compile directory for custom provider
@@ -1037,10 +1037,10 @@ class Fenom
             foreach ($tpl as &$t) {
                 $t = str_replace(":", "_", basename($t));
             }
-            return $this->_compile_id . '_' . implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
+            return $this->_compile_id . implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
         } else {
             $hash = $tpl . ":" . $options;
-            return sprintf($this->_compile_id . "_%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+            return sprintf($this->_compile_id . "%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
         }
     }
 
