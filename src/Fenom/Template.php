@@ -988,10 +988,10 @@ class Template extends Render
         $parser = $this->getStorage()->getAccessor($accessor);
         $is_var = false;
         if($parser) {
-            if(is_string($parser)) {
-                return call_user_func_array($parser, array($tokens->next(), $this, &$is_var));
-            } else {
+            if(is_array($parser)) {
                 return call_user_func_array($parser['parser'], array($parser['accessor'], $tokens->next(), $this, &$is_var));
+            } else {
+                return call_user_func_array($parser, array($tokens->next(), $this, &$is_var));
             }
         } else {
             throw new \RuntimeException("Unknown accessor '$accessor'");
