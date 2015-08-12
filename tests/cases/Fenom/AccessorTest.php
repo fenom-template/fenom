@@ -234,10 +234,10 @@ class AccessorTest  extends TestCase
 
     public static function providerSmartAccessor() {
         return array(
-            ['acc', '$tpl->getStorage()->test->values', \Fenom::ACCESSOR_VAR, '{$.acc.three}', '3'],
-            ['acc', '$tpl->getStorage()->test->getThree', \Fenom::ACCESSOR_CALL, '{$.acc()}', '3'],
-            ['acc', 'three', \Fenom::ACCESSOR_PROPERTY, '{$.acc}', '3'],
-            ['acc', 'templateExists', \Fenom::ACCESSOR_METHOD, '{$.acc("persist:pipe.tpl")}', '1']
+            array('acc', '$tpl->getStorage()->test->values', \Fenom::ACCESSOR_VAR, '{$.acc.three}', '3'),
+            array('acc', '$tpl->getStorage()->test->getThree', \Fenom::ACCESSOR_CALL, '{$.acc()}', '3'),
+            array('acc', 'three', \Fenom::ACCESSOR_PROPERTY, '{$.acc}', '3'),
+            array('acc', 'templateExists', \Fenom::ACCESSOR_METHOD, '{$.acc("persist:pipe.tpl")}', '1')
         );
     }
 
