@@ -28,7 +28,7 @@
 
 * [set](./tags/set.md), `add` и `var` — определение значения переменной
 * [if](./tags/if.md), `elseif` и `else` — условный оператор
-* [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — перебор элементов массива или объекта
+* [foreach](./tags/foreach.md), `foreachelse`, `break` and `continue` — перебор элементов массива или объекта
 * [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
 * [switch](./tags/switch.md), `case` — групповой условный оператор
 * [cycle](./tags/cycle.md) — циклицеский перебор массива значений
