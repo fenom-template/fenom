@@ -118,6 +118,11 @@ class Fenom
     protected $_compile_dir = "/tmp";
 
     /**
+     * @var string compile prefix ID template
+     */
+    protected $_compile_id;
+
+    /**
      * @var string[] compile directory for custom provider
      */
     protected $_compiles = array();
@@ -427,6 +432,18 @@ class Fenom
             throw new LogicException("Cache directory $dir is not writable");
         }
         $this->_compile_dir = $dir;
+        return $this;
+    }
+
+    /**
+     * Set compile prefix ID template
+     *
+     * @param string $id prefix ID to store compiled templates
+     * @return Fenom
+     */
+    public function setCompileId($id)
+    {
+        $this->_compile_id = $id;
         return $this;
     }
 
@@ -1022,10 +1039,10 @@ class Fenom
             foreach ($tpl as &$t) {
                 $t = str_replace(":", "_", basename($t));
             }
-            return implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
+            return $this->_compile_id . implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
         } else {
             $hash = $tpl . ":" . $options;
-            return sprintf("%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+            return sprintf($this->_compile_id . "%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
         }
     }
 
