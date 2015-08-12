@@ -227,4 +227,33 @@ class AccessorTest  extends TestCase
     public function testFetchInvalidTpl($tpl, $exception, $message) {
         $this->execError($tpl, $exception, $message);
     }
+
+    public function getThree() {
+        return 3;
+    }
+
+    public static function providerSmartAccessor() {
+        return array(
+            ['acc', '$tpl->getStorage()->test->values', \Fenom::ACCESSOR_VAR, '{$.acc.three}', '3'],
+            ['acc', '$tpl->getStorage()->test->getThree', \Fenom::ACCESSOR_CALL, '{$.acc()}', '3'],
+            ['acc', 'three', \Fenom::ACCESSOR_PROPERTY, '{$.acc}', '3'],
+            ['acc', 'templateExists', \Fenom::ACCESSOR_METHOD, '{$.acc("persist:pipe.tpl")}', '1']
+        );
+    }
+
+    /**
+     * @group testSmartAccessor
+     * @dataProvider providerSmartAccessor
+     * @param $name
+     * @param $accessor
+     * @param $type
+     * @param $code
+     * @param $result
+     */
+    public function testSmartAccessor($name, $accessor, $type, $code, $result) {
+        $this->fenom->test = $this;
+        $this->fenom->three = 3;
+        $this->fenom->addAccessorSmart($name, $accessor, $type);
+        $this->assertRender($code, $result, $this->getVars());
+    }
 } 

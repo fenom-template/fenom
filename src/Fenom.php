@@ -54,9 +54,11 @@ class Fenom
 
     const MAX_MACRO_RECURSIVE = 32;
 
-    const ACCESSOR_CUSTOM = null;
-    const ACCESSOR_VAR    = 'Fenom\Accessor::parserVar';
-    const ACCESSOR_CALL   = 'Fenom\Accessor::parserCall';
+    const ACCESSOR_CUSTOM   = null;
+    const ACCESSOR_VAR      = 'Fenom\Accessor::parserVar';
+    const ACCESSOR_CALL     = 'Fenom\Accessor::parserCall';
+    const ACCESSOR_PROPERTY = 'Fenom\Accessor::parserProperty';
+    const ACCESSOR_METHOD   = 'Fenom\Accessor::parserMethod';
 
     public static $charset = "UTF-8";
 
@@ -815,7 +817,7 @@ class Fenom
     /**
      * Add global accessor ($.)
      * @param string $name
-     * @param callable|string $accessor
+     * @param mixed $accessor
      * @param string $parser
      * @return Fenom
      */
