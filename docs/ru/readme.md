@@ -1,7 +1,7 @@
 Документация
 =============
 
-<img style="float:right" src="http://aco.oml.ru/thumb/2Tdrgd9_ttbaBvqKcsSKIA/100r100/188321/gif-%D0%BF%D1%80%D0%B0%D0%B2%D0%B8%D0%BB%D0%B0-grammar-nazi-412594.jpg" alt="grammar nazi required">
+<img style="float:right" src="https://ficbook.net/images/user_avatars/avatar_%D0%93%D1%80%D0%B0%D0%BC%D0%BC%D0%B0%D1%80-%D0%9D%D0%B0%D1%86%D0%B8_1382414316.jpg" alt="grammar nazi required">
 
 **Внимание! Документация в режиме беты, тексты могут содержать опечатки**
 
