@@ -18,7 +18,7 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '2.7';
+    const VERSION = '2.8';
     const REV = 1;
     /* Actions */
     const INLINE_COMPILER = 1;
@@ -975,8 +975,8 @@ class Fenom
             } else {
                 return $tpl;
             }
-        } elseif ($this->_options & self::FORCE_COMPILE) {
-            return $this->compile($template, $this->_options & self::DISABLE_CACHE & ~self::FORCE_COMPILE, $options);
+        } elseif ($this->_options & (self::FORCE_COMPILE |  self::DISABLE_CACHE)) {
+            return $this->compile($template, !($this->_options & self::DISABLE_CACHE), $options);
         } else {
             return $this->_storage[$key] = $this->_load($template, $options);
         }
