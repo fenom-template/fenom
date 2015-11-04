@@ -5,7 +5,7 @@
 [Подробнее](http://www.php.net/manual/ru/reference.pcre.pattern.syntax.php) о регулярных выражениях.
 
 ```
-{$string|replace:$pattern:$replacement}
+{$string|ereplace:$pattern:$replacement}
 ```
 
 Выполняет поиск совпадений в строке `$subject` с шаблоном pattern и заменяет их на replacement.
