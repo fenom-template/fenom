@@ -8,6 +8,6 @@
 {set $name = "Bzick"}
 
 {$name}         выведет Bzick
-{$name|upper}   выведет bzick
-{$name|up}      выведет bzick
+{$name|lower}   выведет bzick
+{$name|low}      выведет bzick
 ```
