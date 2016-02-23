@@ -352,7 +352,7 @@ class Template extends Render
         if($this->_options & Fenom::AUTO_STRIP) {
 
             $text = preg_replace('/\s+/uS', ' ', str_replace(array("\r", "\n"), " ", $text));
-//            $text = preg_replace('/\s*([\pP\pS]+)\s*/uS', '$1', $text);
+            $text = str_replace("> <", "><", $text);
         }
         $this->_body .= $text;
     }

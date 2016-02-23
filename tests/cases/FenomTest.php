@@ -347,7 +347,7 @@ class FenomTest extends \Fenom\TestCase
     <a href="/item/{\$one}">number  {\$num.1}</a>
 </div>
 TPL;
-        $this->assertRender($tpl, '<div class="item item-one"> <a href="/item/1">number one</a> </div>');
+        $this->assertRender($tpl, '<div class="item item-one"><a href="/item/1">number one</a></div>');
     }
 }
 
