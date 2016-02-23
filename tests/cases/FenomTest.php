@@ -349,6 +349,18 @@ class FenomTest extends \Fenom\TestCase
 TPL;
         $this->assertRender($tpl, '<div class="item item-one"><a href="/item/1">number one</a></div>');
     }
+
+    /**
+     * Bug #195
+     * @group strip-xml
+     */
+    public function testStripXML() {
+        $this->fenom->setOptions(Fenom::AUTO_STRIP);
+        $tpl = <<<TPL
+<?xml version="1.0"?>
+TPL;
+        $this->assertRender($tpl, '<?xml version="1.0"?>');
+    }
 }
 
 
