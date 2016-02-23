@@ -8,6 +8,6 @@ This is equivalent to the PHP [strtolower()](http://docs.php.net/lower) function
 {var $name = "Bzick"}
 
 {$name}         output Bzick
-{$name|upper}   output bzick
-{$name|up}      output bzick too
+{$name|lower}   output bzick
+{$name|low}      output bzick too
 ```
