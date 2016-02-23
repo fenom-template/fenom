@@ -402,7 +402,7 @@ class Compiler
                 $tag["last"][] = false;
                 $tokens->next();
             } else {
-                $tag["last"][] = $tag->tpl->parseScalar($tokens, false);
+                $tag["last"][] = $tag->tpl->parseScalar($tokens);
             }
             if ($tokens->is(',')) {
                 $tokens->next();

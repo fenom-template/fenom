@@ -330,6 +330,7 @@ class Template extends Render
     private function _appendText($text)
     {
         $this->_line += substr_count($text, "\n");
+        $strip = $this->_options & Fenom::AUTO_STRIP;
         if ($this->_filters) {
             if (strpos($text, "<?") === false) {
                 foreach ($this->_filters as $filter) {
@@ -344,13 +345,12 @@ class Template extends Render
                         }
                     }
                 }
-                $text = implode('<?php echo "<?"; ?>', $fragments);
+                $text = implode('<?php echo "<?"; ?>' . ($strip ? '' : PHP_EOL), $fragments);
             }
         } else {
-            $text = str_replace("<?", '<?php echo "<?"; ?>' . PHP_EOL, $text);
+            $text = str_replace("<?", '<?php echo "<?"; ?>' . ($strip ? '' : PHP_EOL), $text);
         }
-        if($this->_options & Fenom::AUTO_STRIP) {
-
+        if($strip) {
             $text = preg_replace('/\s+/uS', ' ', str_replace(array("\r", "\n"), " ", $text));
             $text = str_replace("> <", "><", $text);
         }
@@ -563,6 +563,8 @@ class Template extends Render
             throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
             throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+        } catch (\Throwable $e) {
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         }
     }
 
@@ -718,7 +720,7 @@ class Template extends Render
                     $exp[] = $this->parseIs($tokens, $item, $var);
                 } elseif ($operator == "in" || ($operator == "not" && $tokens->isNextToken("in"))) {
                     $item  = array_pop($exp);
-                    $exp[] = $this->parseIn($tokens, $item, $var);
+                    $exp[] = $this->parseIn($tokens, $item);
                 } else {
                     break;
                 }
@@ -785,7 +787,7 @@ class Template extends Render
         switch($tokens->key()) {
             case T_LNUMBER:
             case T_DNUMBER:
-                $code = $unary . $this->parseScalar($tokens, true);
+                $code = $unary . $this->parseScalar($tokens);
                 break;
             case T_CONSTANT_ENCAPSED_STRING:
             case '"':
@@ -793,7 +795,7 @@ class Template extends Render
                 if ($unary) {
                     throw new UnexpectedTokenException($tokens->back());
                 }
-                $code = $this->parseScalar($tokens, true);
+                $code = $this->parseScalar($tokens);
                 break;
             case '$':
                 $code = $this->parseAccessor($tokens, $is_var);
