@@ -233,7 +233,7 @@ class DbProvider implements Fenom\ProviderInterface {
 ```php
 
 $provider = new DbProvider();
-$fenom->setProvider("db", $provider, "/tmp/cached/db");
+$fenom->addProvider("db", $provider, "/tmp/cached/db");
 ```
 
 Теперь источник можно использовать.
