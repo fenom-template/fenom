@@ -38,7 +38,7 @@ $fenom = Fenom::factory('/path/to/templates', '/path/to/compiled/template', $opt
 ```
 Пример создания Fenom через оператор `new`:
 ```php
-$fenom = new Fenom(new Fenom/Provider('/path/to/templates'));
+$fenom = new Fenom(new Fenom\Provider('/path/to/templates'));
 $fenom->setCompileDir('/path/to/template/cache');
 $fenom->setOptions($options);
 ```
