@@ -573,9 +573,6 @@ class Compiler
      */
     public static function tagBlockOpen(Tokenizer $tokens, Tag $scope)
     {
-        if ($scope->level > 0) {
-            $scope->tpl->_compatible = true;
-        }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
         if (!$name) {
             throw new \RuntimeException("Invalid block name");
