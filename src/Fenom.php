@@ -379,9 +379,11 @@ class Fenom
         'tpl'     => 'Fenom\Accessor::tpl',
         'version' => 'Fenom\Accessor::version',
         'const'   => 'Fenom\Accessor::constant',
-        'php'     => 'Fenom\Accessor::php',
+        'php'     => 'Fenom\Accessor::call',
+        'call'    => 'Fenom\Accessor::call',
         'tag'     => 'Fenom\Accessor::Tag',
-        'fetch'   => 'Fenom\Accessor::Fetch',
+        'fetch'   => 'Fenom\Accessor::fetch',
+        'blocks'  => 'Fenom\Accessor::blocks',
     );
 
     /**
