@@ -45,3 +45,13 @@
   content ...
 {/block}
 ```
+
+### {paste}
+
+```smarty
+{block 'b1'}
+  ...
+{/block}
+
+{paste 'b1'}
+```

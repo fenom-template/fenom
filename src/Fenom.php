@@ -330,7 +330,11 @@ class Fenom
         'unset'  => array(
             'type'   => self::INLINE_COMPILER,
             'parser' => 'Fenom\Compiler::tagUnset'
-        )
+        ),
+        'paste'  => array( // {include ...}
+            'type'   => self::INLINE_COMPILER,
+            'parser' => 'Fenom\Compiler::tagPaste'
+        ),
     );
 
     /**
