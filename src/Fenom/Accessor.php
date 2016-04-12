@@ -194,42 +194,17 @@ class Accessor {
     }
 
     /**
-     * Accessor {$.blocks.name}
-     * Accessor {$.blocks.name.from}
-     * Accessor {$.blocks.name.code}
-     * Accessor {$.blocks.name.use_parent}
-     * Accessor {$.blocks.name.import}
-     * Accessor {$.blocks}
+     * Accessor {$.block.NAME}
      * @param Tokenizer $tokens
      * @param Template $tpl
      * @return mixed
      */
-    public static function blocks(Tokenizer $tokens, Template $tpl)
+    public static function block(Tokenizer $tokens, Template $tpl)
     {
         if($tokens->is('.')) {
             $name = $tokens->next()->get(Tokenizer::MACRO_STRING);
-            if($tokens->isNext('.')) {
-                $part = $tokens->next()->next()->get(Tokenizer::MACRO_STRING);
-                $tokens->next();
-                if(!isset($tpl->blocks[$name])) {
-                    return 'NULL';
-                }
-                switch($part) {
-                    case 'code':
-                        return var_export($tpl->blocks[$name]["block"], true);
-                    case 'from':
-                        return var_export($tpl->blocks[$name]["from"], true);
-                    case 'use_parent':
-                        return var_export($tpl->blocks[$name]["use_parent"], true);
-                    case 'import':
-                        return var_export($tpl->blocks[$name]["import"], true);
-                    default:
-                        throw new UnexpectedTokenException($tokens->back());
-                }
-            } else {
-                $tokens->next();
-                return isset($tpl->blocks[$name]) ? 'true' : 'false';
-            }
+            $tokens->next();
+            return isset($tpl->blocks[$name]) ? 'true' : 'false';
         } else {
             return "array(".implode(",", array_keys($tpl->blocks)).")";
         }

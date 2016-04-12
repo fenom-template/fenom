@@ -1,5 +1,7 @@
-Tag {foreach} [RU]
-==================
+Tag {foreach}
+=============
+
+The tag `{foreach}` construct provides an easy way to iterate over arrays and ranges.
 
 ```smarty
 {foreach $list as [$key =>] $value [index=$index] [first=$first] [last=$last]}
@@ -15,7 +17,8 @@ Tag {foreach} [RU]
 
 ### {foreach}
 
-Перебор значений массива $list
+On each iteration, the value of the current element is assigned to `$value` and the internal array pointer is
+advanced by one (so on the next iteration, you'll be looking at the next element).
 
 ```smarty
 {foreach $list as $value}
@@ -23,7 +26,7 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-Перебор ключей и значений массива $list
+The next form will additionally assign the current element's key to the `$key` variable on each iteration.
 
 ```smarty
 {foreach $list as $key => $value}
@@ -31,7 +34,7 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-Получение номера (индекса) итерации
+Gets the current array index, starting with zero.
 
 ```smarty
 {foreach $list as $value index=$index}
@@ -39,7 +42,7 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-Определение первого элемента
+Detect first iteration:
 
 ```smarty
 {foreach $list as $value first=$first}
@@ -47,8 +50,9 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-Переменная `$first` будет иметь значение **TRUE**, если текущая итерация является первой.
-Определение последнего элемента
+`$first` is `TRUE` if the current `{foreach}` iteration is the initial one.
+
+Detect last iteration:
 
 ```smarty
 {foreach $list as $value last=$last}
@@ -56,22 +60,22 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-Переменная `$last` будет иметь значение **TRUE**, если текущая итерация является последней.
+`$last` is set to `TRUE` if the current `{foreach}` iteration is the final one.
 
 ### {break}
 
-Тег `{break}` используется для выхода из цикла до достижения последней итерации. Если в цикле встречается тег `{break}`, цикл завершает свою работу, и далее, выполняется код, следующий сразу за блоком цикла
+Tag `{break}` aborts the iteration.
 
 ### {continue}
 
-Тег `{continue}` используется для прерывания текущей итерации. Если в цикле встречается тег `{continue}`, часть цикла, следующая после тега, не выполняется, и начинается следующая итерация. Если текущая итерация была последней, цикл завершается.
+Tag `{continue}` leaves the current iteration and begins with the next iteration.
 
 ### {foreachelse}
 
-Тег {foreachelse} ограничивает код, который должен быть выполнен, если итерируемый объект пуст.
+`{foreachelse}` is executed when there are no values in the array variable.
 
 ```smarty
-{var $list = []}
+{set $list = []}
 {foreach $list as $value}
  <div>{if $last} last item {/if} {$value}</div>
 {foreachelse}
@@ -79,8 +83,4 @@ Tag {foreach} [RU]
 {/foreach}
 ```
 
-В блоке `{foreachelse}...{/foreach}` использование `{break}`, `{continue}` выбросит исключение `Fenom\CompileException` при компиляции
-
-### Notice
-
-Использование last требует от `$list` быть **countable**.
+`{foreachelse}` does not support tags `{break}` and `{continue}`.

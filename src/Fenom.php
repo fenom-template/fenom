@@ -387,7 +387,7 @@ class Fenom
         'call'    => 'Fenom\Accessor::call',
         'tag'     => 'Fenom\Accessor::Tag',
         'fetch'   => 'Fenom\Accessor::fetch',
-        'blocks'  => 'Fenom\Accessor::blocks',
+        'block'   => 'Fenom\Accessor::block',
     );
 
     /**

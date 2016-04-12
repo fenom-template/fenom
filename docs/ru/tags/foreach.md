@@ -5,7 +5,7 @@
 `Foreach` работает только с массивами, объектами и интервалами.
 
 ```smarty
-{foreach $list as [$key =>] $value [index=$index] [first=$first] [last=$last]}
+{foreach $list [as [$key =>] $value] [index=$index] [first=$first] [last=$last]}
    {* ...code... *}
    {break}
    {* ...code... *}

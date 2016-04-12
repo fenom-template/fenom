@@ -1,12 +1,12 @@
-Tag {macro} [RU]
-================
+Tag {macro}
+===========
 
-Макросы - фрагмент шаблона который можно повторить сколь угодно раз и в каком угодно месте.
-Макросы не имеют общего пространства имен с шаблоном и могут оперировать только переданными переменными.
+Macros are comparable with functions in regular programming languages.
+They are useful to put often used HTML idioms into reusable elements to not repeat yourself.
 
 ### {macro}
 
-Обявление макроса происходит при помощи блочного тега `{macro}`
+Macros can be defined in any template using tag `{macro}`.
 
 ```smarty
 {macro plus($x, $y, $z=0)}
@@ -14,13 +14,9 @@ Tag {macro} [RU]
 {/macro}
 ```
 
-Вызов макроса происходит при помощи строкового тега `{macro}`. Аргументы передаются стандартно, как атрибуты в HTML тегах
-
 ```smarty
 {macro.plus x=$num y=100}
 ```
-
-Во время рекурсивного вызова используйте суффикс macro что бы обратиться к текущему макросу:
 
 ```smarty
 {macro plus($x, $y, $z=0)}
@@ -32,22 +28,23 @@ Tag {macro} [RU]
 
 ### {import}
 
-Для использования маросов в другом шаблоне необходимо их импортировать при помощи тега `{import}`
+Macros can be defined in any template, and need to be "imported" before being used.
+The above import call imports the "math.tpl" file (which can contain only macros, or a template and some macros),
+and import the functions as items of the `macro` namespace.
 
 ```smarty
 {import 'math.tpl'}
+
+{macro.plus x=1 y=3}
 ```
 
-При импорте можно указать дргое пространство имен что бы можно было использовать одноименные макросы из разных шаблонов
+Use another namespace instead of `macro`
 
 ```smarty
 {import 'math.tpl' as math}
 ...
 {math.plus x=5 y=100}
 ```
-
-Пространство имен макросов может совпадать с названием какого-либо тега, в данном случае ничего плохого не произойдет: будет вызван макрос, а тег не исчезнит
-При необходимости можно импортировать только необходимые макросы, явно указав в теге `{import}`
 
 ```smarty
 {import [plus, minus, exp] from 'math.tpl' as math}
