@@ -26,23 +26,27 @@
 
 [Использование](./syntax.md#Теги) тегов.
 
-* [set](./tags/set.md), `add` и `var` — определение значения переменной
-* [if](./tags/if.md), `elseif` и `else` — условный оператор
-* [foreach](./tags/foreach.md), `foreachelse`, `break` and `continue` — перебор элементов массива или объекта
-* [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
-* [switch](./tags/switch.md), `case` — групповой условный оператор
+* [set](./tags/set.md), [add](./tags/set.md#add) и [var](./tags/set.md#var) — определение значения переменной
+* [if](./tags/if.md), [elseif](./tags/if.md#elseif) и [else](./tags/if.md#else) — условный оператор
+* [foreach](./tags/foreach.md), [foreachelse](./tags/foreach.md#foreachelse),
+  [break](./tags/foreach.md#break) и [continue](./tags/foreach.md#continue) — перебор элементов массива или объекта
+* [switch](./tags/switch.md) и [case](./tags/switch.md#case) — групповой условный оператор
 * [cycle](./tags/cycle.md) — циклицеский перебор массива значений
-* [include](./tags/include.md), `insert` — вставляет и исполняет указанный шаблон
-* [extends](./tags/extends.md), `use`, `block` и `parent` — [наследование](./inheritance.md) шаблонов
+* [include](./tags/include.md), [insert](./tags/include.md#insert) — вставляет и исполняет указанный шаблон
+* [extends](./tags/extends.md), [use](./tags/extends.md#use),
+  [block](./tags/extends.md#block), [parent](./tags/extends.md#parent) и
+  [paste](./tags/extends.md#paste) — [наследование](./inheritance.md) шаблонов
 * [filter](./tags/filter.md) — применение модификаторов к фрагменту шаблона
 * [ignore](./tags/ignore.md) — игнорирование тегов Fenom
-* [macro](./tags/macro.md) и `import` — пользовательские функции шаблонов
+* [macro](./tags/macro.md) и [import](./tags/macro.md#macro) — пользовательские функции шаблонов
 * [autoescape](./tags/autoescape.md) — экранирует фрагмент шаблона
 * [raw](./tags/raw.md) — отключает экранирование фрагмента шаблона
 * [unset](./tags/unset.md) — удаляет переменные
 * или [добавьте](./ext/extend.md#Добавление-тегов) свои
 
+Устаревшие теги
 
+* [for](./tags/for.md), `forelse`, `break` and `continue` — цикл
 ***
 
 ### Модификаторы
