@@ -55,7 +55,7 @@ Operators
 {if $a & 1} {var $b = 4 | $flags} {/if}
 ```
 
-### Assignment Operators
+### Assignment operators
 
 * `$a = $b` - assignment
 * `$a += $b` - assignment with addition
@@ -81,9 +81,11 @@ Operators
 * `--$a` - decrement the variable and use it
 * `$a--` - use the variable and decrement it
 
-### String operator
+### String operators
 
-* `$a ~ $b` - return concatenation of variables `$a` and `$b`
+* `$a ~ $b`  - return concatenation of variables `$a` and `$b`
+* `$a ~~ $b` - return concatenation of variables `$a` and `$b` separated by a space
+* `$a ~= $b` - assignment with concatenation
 
 ### Ternary operators
 

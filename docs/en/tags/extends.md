@@ -1,4 +1,4 @@
-Tag {extends}]
+Tag {extends}
 =============
 
 `{extends}` tags are used in child templates in template inheritance for extending parent templates.
