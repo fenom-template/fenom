@@ -59,6 +59,7 @@ class Fenom
     const ACCESSOR_CALL     = 'Fenom\Accessor::parserCall';
     const ACCESSOR_PROPERTY = 'Fenom\Accessor::parserProperty';
     const ACCESSOR_METHOD   = 'Fenom\Accessor::parserMethod';
+    const ACCESSOR_CHAIN    = 'Fenom\Accessor::parserChain';
 
     public static $charset = "UTF-8";
 
