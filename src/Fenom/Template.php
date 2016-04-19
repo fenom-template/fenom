@@ -1455,6 +1455,7 @@ class Template extends Render
             if (!$arg && $tokens->is(
                     T_VARIABLE,
                     T_STRING,
+                    "$",
                     "(",
                     Tokenizer::MACRO_SCALAR,
                     '"',
