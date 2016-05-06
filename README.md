@@ -29,7 +29,7 @@ Templater already has own autoload-function, to register call method `Fenom::reg
 Fenom::registerAutoload();
 ```
 
-### Usage
+### Setup
 
 There is two way to create Fenom instance:
 
@@ -56,7 +56,7 @@ Now Fenom is ready to work and now you can to configure it:
 $fenom->setOptions($options);
 ```
 
-**Short way.** Creating an object via factory method
+**Short way.** Creating an object via factory method with arguments from long way.
 
 ```php
 $fenom = Fenom::factory($template_dir, $template_cache_dir, $options);
@@ -64,3 +64,6 @@ $fenom = Fenom::factory($template_dir, $template_cache_dir, $options);
 
 Now Fenom is ready to work.
 
+### Usage
+
+### Example

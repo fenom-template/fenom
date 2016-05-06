@@ -284,10 +284,13 @@ class Modifier
      * @param string|int $from
      * @param string|int $to
      * @param int $step
-     * @return array
+     * @return RangeIterator
      */
     public static function range($from, $to, $step = 1) {
-        $v = range($from, $to, $step);
-        return $v ? $v : array();
+        if($from instanceof RangeIterator) {
+            return $from->setStep($to);
+        } else {
+            return new RangeIterator($from, $to, $step);
+        }
     }
 }

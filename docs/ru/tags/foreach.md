@@ -38,9 +38,15 @@
 {/foreach}
 ```
 
-Получение номера (индекса) итерации
+Получение номера (индекса) итерации, начиная с 0
 
 ```smarty
+{foreach $list as $value}
+ <div>№{$value:index}: {$value}</div>
+{/foreach}
+
+или
+
 {foreach $list as $value index=$index}
  <div>№{$index}: {$value}</div>
 {/foreach}
@@ -49,21 +55,21 @@
 Определение первого элемента
 
 ```smarty
-{foreach $list as $value first=$first}
- <div>{if $first} first item {/if} {$value}</div>
+{foreach $list as $value}
+ <div>{if $value:first} first item {/if} {$value}</div>
 {/foreach}
 ```
 
-Переменная `$first` будет иметь значение **TRUE**, если текущая итерация является первой.
+Переменная `$value:first` будет иметь значение **TRUE**, если текущая итерация является первой.
 Определение последнего элемента
 
 ```smarty
-{foreach $list as $value last=$last}
- <div>{if $last} last item {/if} {$value}</div>
+{foreach $list as $value}
+ <div>{if $value:last} last item {/if} {$value}</div>
 {/foreach}
 ```
 
-Переменная `$last` будет иметь значение **TRUE**, если текущая итерация является последней.
+Переменная `$value:last` будет иметь значение **TRUE**, если текущая итерация является последней.
 
 **Замечание:**
 Использование `last` требует от `$list` быть **countable**.

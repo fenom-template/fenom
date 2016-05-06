@@ -314,12 +314,12 @@ class Template extends Render
     }
 
     /**
-     * Generate temporary internal template variable
+     * Generate name of temporary internal template variable (may be random)
      * @return string
      */
     public function tmpVar()
     {
-        return sprintf('$t%x_%x', $this->_crc, $this->i++);
+        return sprintf('$t%x_%x', $this->_crc ? $this->_crc : mt_rand(0, 0x7FFFFFFF), $this->i++);
     }
 
     /**
@@ -892,7 +892,7 @@ class Template extends Render
         }
         if(($allows & self::TERM_RANGE) && $tokens->is('.') && $tokens->isNext('.')) {
             $tokens->next()->next();
-            $code = 'range('.$code.', '.$this->parseTerm($tokens, $var, self::TERM_MODS).')';
+            $code = '(new \Fenom\RangeIterator('.$code.', '.$this->parseTerm($tokens, $var, self::TERM_MODS).'))';
             $is_var  = false;
         }
         return $code;
@@ -918,7 +918,7 @@ class Template extends Render
     }
 
     /**
-     * Parse variable name: $a, $a.b, $a.b['c']
+     * Parse variable name: $a, $a.b, $a.b['c'], $a:index
      * @param Tokenizer $tokens
      * @param $var
      * @return string
@@ -927,8 +927,19 @@ class Template extends Render
     public function parseVariable(Tokenizer $tokens, $var = null)
     {
         if (!$var) {
-            $var = '$var["' . substr($tokens->get(T_VARIABLE), 1) . '"]';
-            $tokens->next();
+            if($tokens->isNext('@')) {
+//                $v = $tokens->get(T_VARIABLE);
+                $prop = $tokens->next()->next()->get(T_STRING);
+                if($tag = $this->getParentScope("foreach")) {
+                    $tokens->next();
+                    return Compiler::foreachProp($tag, $prop);
+                } else {
+                    throw new UnexpectedTokenException($tokens);
+                }
+            } else {
+                $var = '$var["' . substr($tokens->get(T_VARIABLE), 1) . '"]';
+                $tokens->next();
+            }
         }
         while ($t = $tokens->key()) {
             if ($t === ".") {
