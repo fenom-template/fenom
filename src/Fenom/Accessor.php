@@ -74,6 +74,17 @@ class Accessor {
     {
         return self::parserCall('$tpl->getStorage()->'.$method, $tokens, $tpl);
     }
+    
+    /**
+     * @param string $chain chain methods
+     * @param Tokenizer $tokens
+     * @param Template $tpl
+     * @return string
+     */
+    public static function parserChain($chain, Tokenizer $tokens, Template $tpl)
+    {
+        return $tpl->parseChain($tokens, '$tpl->getStorage()->'. $chain);
+    }
 
     /**
      * Accessor for global variables
