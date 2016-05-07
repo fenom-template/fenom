@@ -219,7 +219,7 @@ class Tag extends \ArrayObject
     }
 
     /**
-     * Return content of block
+     * Returns tag's content
      *
      * @throws \LogicException
      * @return string
@@ -230,7 +230,7 @@ class Tag extends \ArrayObject
     }
 
     /**
-     * Cut scope content
+     * Cut tag's content
      *
      * @return string
      * @throws \LogicException
@@ -243,7 +243,7 @@ class Tag extends \ArrayObject
     }
 
     /**
-     * Replace scope content
+     * Replace tag's content
      *
      * @param $new_content
      */

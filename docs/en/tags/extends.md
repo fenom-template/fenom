@@ -1,42 +1,20 @@
-Tag {extends} [RU]
-==================
+Tag {extends}
+=============
 
-Тег `{extends}` реализует наследование шаблонов, иерархия, обратная {include}. То есть шаблон сам выбирает своего родителя.
+`{extends}` tags are used in child templates in template inheritance for extending parent templates.
+The `{extends}` tag must be on before any block.
+Also if a child template extends a parent template with the `{extends}` tag it may contain only `{block}` tags. Any other template content is ignored.
 
 ### {extends}
-
-Родительский шаблон можно задать единожды и до объявления какого-либо блока.
 
 ```smarty
 {extends 'parent.tpl'}
 ```
 
-Имя родительского шаблона может быть задан динамически, в этом случае производительность отрисовки может снизиться.
-
-```smarty
-{extends $parent_tpl}
-```
-
 ### {block}
 
-Блок указывает фрагмент шаблона, который будет передан родителю. Имя блока может быть задано как явно
-
 ```smarty
-{block bk1}content 1{/block}
-...
 {block 'bk2'}content 2{/block}
-```
-
-так и не явно, но в данном случае пострадает производительность
-
-```smarty
-{block "bk{$number}"}content {$number}{/block}
-...
-{if $condition}
-    {block "bk-if"}content, then 'if' is true{/block}
-{else}
-    {block "bk{$fail}"}content, then 'if' is false{/block}
-{/if}
 ```
 
 ### {use}
@@ -44,39 +22,47 @@ Tag {extends} [RU]
 Что бы импортировать блоки из другого шаблона используйте тег {use}:
 
 ```smarty
-{use 'blocks.tpl'}
-```
+{use 'blocks.tpl'} merge blocks from blocks.tpl template
 
+{block 'alpha'} rewrite block alpha from blocks.tpl template, if it exists
+   ...
+{/block}
+```
 
 ### {parent}
 
-Planned. Not supported yet. Feature #5.
-
 ```smarty
-{block 'block1'}
+{extends 'parent.tpl'}
+
+{block 'header'}
   content ...
-  {parent}
+  {parent}  pase code from block 'header' from parent.tpl
   content ...
 {/block}
 ```
 
-### Performance
+### {paste}
 
-Алгоритм реализации наследования шаблонов может работать в разных режимах, в зависимости от условий.
-Каждый режим имеет свою производительность.
+Paste code of any block
 
-1. **Максимальная** производительность:
-    * Имена шаблонов в теге {extends } заданы явно, без использования переменных и условий.
-    * Имена блоков заданы явно, без использования переменных, условий и не вложены ни в какой другой тег.
-2. **Средняя** производительность:
-    * Имена шаблонов в теге {extends } заданы явно, без использования переменных и условий.
-    * Имена блоков заданы **не** явно, с использованием переменныч, условий или могут быть вложенные в другие теги.
-3. **Низкая** производительность:
-    * Имена шаблонов в теге {extends } заданы **не** явно, с использованием переменных и условий.
-    * Имена блоков заданы явно, без использования переменных, условий и не вложены ни в какой другой тег.
-4. **Минимальная** производительность:
-    * Имена шаблонов в теге {extends } заданы **не** явно, с использованием переменных и условий.
-    * Имена блоков заданы **не** явно, с использованием переменных, условий или могут быть вложенные в другие теги.
+```smarty
+{block 'b1'}
+    ...
+{/block}
 
-Режим может идти только на понижение, при изменении условий во время прохождения по иерархии шаблонов.
-При любом режиме работы не используется буферизация данных, то есть данные выводятся сразу.
+{block 'b2'}
+    ...
+    {paste 'b1'} paste code from b1
+{/block}
+
+```
+
+### {$.block}
+
+Checks if clock exists
+
+```smarty
+{if $.block.header}
+    block header exists
+{/if}
+```

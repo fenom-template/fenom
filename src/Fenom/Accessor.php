@@ -138,7 +138,7 @@ class Accessor {
      * @param Template $tpl
      * @return string
      */
-    public static function php(Tokenizer $tokens, Template $tpl)
+    public static function call(Tokenizer $tokens, Template $tpl)
     {
         $callable = array($tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext());
         while($tokens->is('.')) {
@@ -191,5 +191,22 @@ class Accessor {
         }
         $tokens->skip(')');
         return '$tpl->getStorage()->fetch('.$name.', '.$vars.')';
+    }
+
+    /**
+     * Accessor {$.block.NAME}
+     * @param Tokenizer $tokens
+     * @param Template $tpl
+     * @return mixed
+     */
+    public static function block(Tokenizer $tokens, Template $tpl)
+    {
+        if($tokens->is('.')) {
+            $name = $tokens->next()->get(Tokenizer::MACRO_STRING);
+            $tokens->next();
+            return isset($tpl->blocks[$name]) ? 'true' : 'false';
+        } else {
+            return "array(".implode(",", array_keys($tpl->blocks)).")";
+        }
     }
 } 

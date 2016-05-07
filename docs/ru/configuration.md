@@ -36,8 +36,9 @@ $fenom->setOptions($options);
 | *force_include*        | `Fenom::FORCE_INCLUDE`    | стараться по возможности вставить код дочернего шаблона в родительский при подключении шаблона  | повышает производительность, увеличивает размер файлов в кеше, уменьшает количество файлов в кеше |
 | *auto_escape*          | `Fenom::AUTO_ESCAPE`      | автоматически экранировать HTML сущности при выводе переменных в шаблон | понижает производительность |
 | *force_verify*         | `Fenom::FORCE_VERIFY`     | автоматически проверять существование переменной перед использованием в шаблоне | понижает производительность |
-| *disable_php_calls*    | `Fenom::DENY_PHP_CALLS`   | отключает возможность вызова статических методов и функций в шаблоне | |
-| *disable_statics*      | `Fenom::DENY_STATICS`     | устаревшее название disable_php_calls | |
+| *disable_call*         | `Fenom::DENY_CALL`        | отключает возможность вызова статических методов и функций в шаблоне | |
+| *disable_php_calls*    | `Fenom::DENY_PHP_CALLS`   | устаревшее название disable_call | |
+| *disable_statics*      | `Fenom::DENY_STATICS`     | устаревшее название disable_call | |
 | *strip*                | `Fenom::AUTO_STRIP`       | удаляет лишиние пробелы в шаблоне | уменьшает размер кеша |
 
 ```php

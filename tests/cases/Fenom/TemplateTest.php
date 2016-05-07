@@ -696,11 +696,11 @@ class TemplateTest extends TestCase
                 'Fenom\Error\CompileException',
                 "Unexpected end of expression"
             ),
-            array(
-                'Foreach: {foreach $list} {$e}, {/foreach} end',
-                'Fenom\Error\CompileException',
-                "Unexpected end of expression"
-            ),
+//            array(
+//                'Foreach: {foreach $list} {$e}, {/foreach} end',
+//                'Fenom\Error\CompileException',
+//                "Unexpected end of expression"
+//            ),
 //            array(
 //                'Foreach: {foreach $list+1 as $e} {$e}, {/foreach} end',
 //                'Fenom\Error\CompileException',
@@ -754,7 +754,7 @@ class TemplateTest extends TestCase
             array(
                 'Foreach: {foreach $list as $e unknown=1} {$e}, {/foreach} end',
                 'Fenom\Error\CompileException',
-                "Unknown parameter 'unknown'"
+                "Unknown foreach property 'unknown'"
             ),
             array(
                 'Foreach: {foreach $list as $e index=$i+1} {$e}, {/foreach} end',
@@ -1316,6 +1316,7 @@ class TemplateTest extends TestCase
         return array(
             array('Foreach: {foreach $list as $e} {$e}, {/foreach} end', $a, 'Foreach: one, two, three, end'),
             array('Foreach: {foreach $list as $e} {$e},{break} break {/foreach} end', $a, 'Foreach: one, end'),
+            array('Foreach: {foreach $list} 1, {/foreach} end', $a, 'Foreach: 1, 1, 1, end'),
             array(
                 'Foreach: {foreach $list as $e} {$e},{continue} continue {/foreach} end',
                 $a,
@@ -1351,7 +1352,17 @@ class TemplateTest extends TestCase
                 'Foreach: 0: one, 1: two, 2: three, end'
             ),
             array(
+                'Foreach: {foreach $list as $e} {$e@index}: {$e}, {/foreach} end',
+                $a,
+                'Foreach: 0: one, 1: two, 2: three, end'
+            ),
+            array(
                 'Foreach: {foreach $list as $k => $e index=$i} {$i}: {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
+            ),
+            array(
+                'Foreach: {foreach $list as $k => $e} {$e@index}: {$k} => {$e}, {/foreach} end',
                 $a,
                 'Foreach: 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
             ),
@@ -1366,7 +1377,17 @@ class TemplateTest extends TestCase
                 'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
             ),
             array(
+                'Foreach: {foreach $list as $k => $e} {if $e@first}first{/if} {$e@index}: {$k} => {$e}, {/foreach} end',
+                $a,
+                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, end'
+            ),
+            array(
                 'Foreach: {foreach $list as $k => $e last=$l first=$f index=$i} {if $f}first{/if} {$i}: {$k} => {$e}, {if $l}last{/if} {/foreach} end',
+                $a,
+                'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, last end'
+            ),
+            array(
+                'Foreach: {foreach $list as $k => $e} {if $e@first}first{/if} {$e@index}: {$k} => {$e}, {if $e@last}last{/if} {/foreach} end',
                 $a,
                 'Foreach: first 0: 1 => one, 1: 2 => two, 2: 3 => three, last end'
             ),
@@ -1566,9 +1587,9 @@ class TemplateTest extends TestCase
     {
         return array(
             array('{set $a=1..3}', "1,2,3,"),
-            array('{set $a="a".."f"}', "a,b,c,d,e,f,"),
-            array('{set $a=1.."f"}', "1,0,"),
-            array('{set $a="a"..2}', "0,1,2,"),
+//            array('{set $a="a".."f"}', "a,b,c,d,e,f,"),
+//            array('{set $a=1.."f"}', "1,0,"),
+//            array('{set $a="a"..2}', "0,1,2,"),
             array('{set $a=$one..$three}', "1,2,3,"),
             array('{set $a=$one..3}', "1,2,3,"),
             array('{set $a=1..$three}', "1,2,3,"),
@@ -1576,16 +1597,28 @@ class TemplateTest extends TestCase
             array('{set $a=$one..++$three}', "1,2,3,4,"),
             array('{set $a=$one--..$three++}', "1,2,3,"),
             array('{set $a=--$one..++$three}', "0,1,2,3,4,"),
-            array('{set $a="a"|up.."f"|up}', "A,B,C,D,E,F,"),
+//            array('{set $a="a"|up.."f"|up}', "A,B,C,D,E,F,"),
             array('{set $a=$one|min:0..$three|max:4}', "0,1,2,3,4,"),
             array('{set $a=$one|min:0..4}', "0,1,2,3,4,"),
             array('{set $a=0..$three|max:4}', "0,1,2,3,4,"),
+            array('{set $a=0..$three|max:4}', "0,1,2,3,4,"),
+
+            array('{set $a=range(1,3)}', "1,2,3,"),
+            array('{set $a=range(1,3, 2)}', "1,3,"),
+            array('{set $a=range(1..3, 2)}', "1,3,"),
+            array('{set $a=range(1..3, 3)}', "1,"),
+
+            array('{set $a=range(1,3, -1)}', "3,2,1,"),
+            array('{set $a=range(1,3, -2)}', "3,1,"),
+            array('{set $a=range(1..3, -2)}', "3,1,"),
+            array('{set $a=range(1..3, -3)}', "3,"),
         );
     }
 
     /**
      * @dataProvider providerRange
      * @group testRange
+     * @group dev
      * @param string $code
      * @param string $result
      */

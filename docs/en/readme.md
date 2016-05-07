@@ -23,22 +23,26 @@ Documentation
 
 [Usage](./syntax.md#tags)
 
-* [set](./tags/var.md), `add` and `var` — define variables
-* [if](./tags/if.md), `elseif` and `else` — conditional statement
-* [foreach](./tags/foreach.md), `foreaelse`, `break` and `continue` — traversing items in an array or object
-* [for](./tags/for.md), `forelse`, `break` and `continue` — loop statement
-* [switch](./tags/switch.md), `case`, `default` —
+* [set](./tags/set.md), [add](./tags/set.md#add) and `var` — define variables
+* [if](./tags/if.md), [elseif](./tags/if.md#elseif) and [else](./tags/if.md#else) — conditional statement
+* [foreach](./tags/foreach.md), [foreaelse](./tags/foreach.md#foreaelse),
+  [break](./tags/foreach.md#break) and [continue](./tags/foreach.md#continue) — traversing items in an array or object
+* [switch](./tags/switch.md), [case](./tags/switch.md#case) — complex condition statement
 * [cycle](./tags/cycle.md) — cycles on an array of values
-* [include](./tags/include.md), `insert` —  includes and evaluates the specified template
-* [extends](./tags/extends.md), `use`, `block` and `parent` — template inheritance
+* [include](./tags/include.md), [insert](./tags/include.md#insert) —  includes and evaluates the specified template
+* [extends](./tags/extends.md), [use](./tags/extends.md#use),
+  [block](./tags/extends.md#block), [parent](./tags/extends.md#parent) and [paste](./tags/extends.md#paste) — template inheritance
 * [filter](./tags/filter.md) — apply modifier on a block of template data
 * [ignore](./tags/ignore.md) — ignore Fenom syntax
-* [macro](./tags/macro.md) and `import` — template functions
+* [macro](./tags/macro.md) and [import](./tags/macro.md#import) — template functions
 * [autoescape](./tags/autoescape.md) — escape template fragment
 * [raw](./tags/raw.md) — unescape template fragment
 * [unset](./tags/unset.md) — unset a given variables
 * or [add](./ext/extend.md#add-tags) yours
 
+Deprecated tags
+
+* [for](./tags/for.md), `forelse`, `break` and `continue` — loop statement
 
 ***
 

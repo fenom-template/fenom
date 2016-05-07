@@ -10,6 +10,7 @@
 namespace Fenom;
 
 use Doctrine\Instantiator\Exception\InvalidArgumentException;
+use Fenom\Error\CompileException;
 use Fenom\Error\InvalidUsageException;
 use Fenom\Error\UnexpectedTokenException;
 
@@ -132,70 +133,53 @@ class Compiler
      */
     public static function foreachOpen(Tokenizer $tokens, Tag $scope)
     {
-        $p       = array("index" => false, "first" => false, "last" => false);
-        $key     = null;
-        $before  = $body = array();
-        $prepend = "";
-        if ($tokens->is('[')) {
+        $scope["else"] = false;
+        $scope["key"] = null;
+        $scope["prepend"] = "";
+        $scope["before"] = array();
+        $scope["after"] = array();
+        $scope["body"] = array();
+
+        if ($tokens->is('[')) { // array
             $count = 0;
-            $from = $scope->tpl->parseArray($tokens, $count);
-            $check = $count;
-        } else {
-            $from    = $scope->tpl->parseExpr($tokens, $is_var);
+            $scope['from'] = $scope->tpl->parseArray($tokens, $count);
+            $scope['check'] = $count;
+            $scope["var"] = $scope->tpl->tmpVar();
+            $scope['prepend'] = $scope["var"].' = '.$scope['from'].';';
+            $scope['from']  = $scope["var"];
+        } else { // expression
+            $scope['from'] = $scope->tpl->parseExpr($tokens, $is_var);
             if($is_var) {
-                $check = '!empty('.$from.') && (is_array('.$from.') || '.$from.' instanceof \Traversable)';
+                $scope['check'] = '!empty('.$scope['from'].') && (is_array('.$scope['from'].') || '.$scope['from'].' instanceof \Traversable)';
             } else {
                 $scope["var"] = $scope->tpl->tmpVar();
-                $prepend = $scope["var"].' = '.$from.';';
-                $from  = $scope["var"];
-                $check = 'is_array('.$from.') && count('.$from.') || ('.$from.' instanceof \Traversable)';
+                $scope['prepend'] = $scope["var"].' = '.$scope['from'].';';
+                $scope['from']  = $scope["var"];
+                $scope['check'] = 'is_array('.$scope['from'].') && count('.$scope['from'].') || ('.$scope['from'].' instanceof \Traversable)';
             }
         }
-        $tokens->get(T_AS);
-        $tokens->next();
-        $value = $scope->tpl->parseVariable($tokens);
-        if ($tokens->is(T_DOUBLE_ARROW)) {
+        if($tokens->is(T_AS)) {
             $tokens->next();
-            $key   = $value;
             $value = $scope->tpl->parseVariable($tokens);
+            if ($tokens->is(T_DOUBLE_ARROW)) {
+                $tokens->next();
+                $scope["key"]   = $value;
+                $scope["value"] = $scope->tpl->parseVariable($tokens);
+            } else {
+                $scope["value"] = $value;
+            }
+        } else {
+            $scope["value"] = '$_un';
         }
-
-        $scope["after"] = array();
-        $scope["else"]  = false;
-
         while ($token = $tokens->key()) {
             $param = $tokens->get(T_STRING);
-            if (!isset($p[$param])) {
-                throw new InvalidUsageException("Unknown parameter '$param' in {foreach}");
-            }
+            $var_name = self::foreachProp($scope, $param);
             $tokens->getNext("=");
             $tokens->next();
-            $p[$param] = $scope->tpl->parseVariable($tokens);
+            $scope['before'][] = $scope->tpl->parseVariable($tokens)." = &". $var_name;
         }
 
-        if ($p["index"]) {
-            $before[]         = $p["index"] . ' = 0';
-            $scope["after"][] = $p["index"] . '++';
-        }
-        if ($p["first"]) {
-            $before[]         = $p["first"] . ' = true';
-            $scope["after"][] = $p["first"] . ' && (' . $p["first"] . ' = false )';
-        }
-        if ($p["last"]) {
-            $before[]     = $p["last"] . ' = false';
-            $scope["uid"] = "v" . $scope->tpl->i++;
-            $before[]     = '$' . $scope["uid"] . " = count($from)";
-            $body[]       = 'if(!--$' . $scope["uid"] . ') ' . $p["last"] . ' = true';
-        }
-
-        $before         = $before ? implode("; ", $before) . ";" : "";
-        $body           = $body ? implode("; ", $body) . ";" : "";
-        $scope["after"] = $scope["after"] ? implode("; ", $scope["after"]) . ";" : "";
-        if ($key) {
-            return "$prepend if($check) {\n $before foreach($from as $key => $value) { $body";
-        } else {
-            return "$prepend if($check) {\n $before foreach($from as $value) { $body";
-        }
+        return '';
     }
 
     /**
@@ -208,7 +192,40 @@ class Compiler
     public static function foreachElse($tokens, Tag $scope)
     {
         $scope["no-break"] = $scope["no-continue"] = $scope["else"] = true;
-        return " {$scope['after']} } } else {";
+        $after = $scope["after"]  ? implode("; ", $scope["after"]) . ";" : "";
+        return " {$after} } } else {";
+    }
+
+    /**
+     * @param Tag $scope
+     * @param string $prop
+     * @return string
+     * @throws CompileException
+     */
+    public static function foreachProp(Tag $scope, $prop) {
+        if(empty($scope["props"][$prop])) {
+            $var_name = $scope["props"][$prop] = $scope->tpl->tmpVar()."_".$prop;
+            switch($prop) {
+                case "index":
+                    $scope["before"][] = $var_name . ' = 0';
+                    $scope["after"][]  = $var_name . '++';
+                    break;
+                case "first":
+                    $scope["before"][] = $var_name . ' = true';
+                    $scope["after"][]  = $var_name . ' && (' . $var_name . ' = false )';
+                    break;
+                case "last":
+                    $scope["before"][] = $var_name . ' = false';
+                    $scope["uid"]      = $scope->tpl->tmpVar();
+                    $scope["before"][] = $scope["uid"] . " = count({$scope["from"]})";
+                    $scope["body"][]   = 'if(!--' . $scope["uid"] . ') ' . $var_name . ' = true';
+                    break;
+                default:
+                    throw new CompileException("Unknown foreach property '$prop'");
+            }
+        }
+
+        return $scope["props"][$prop];
     }
 
     /**
@@ -221,10 +238,20 @@ class Compiler
      */
     public static function foreachClose($tokens, Tag $scope)
     {
+        $before         = $scope["before"] ? implode("; ", $scope["before"]) . ";" : "";
+        $head           = $scope["body"]   ? implode("; ", $scope["body"]) . ";" : "";
+        $body           = $scope->getContent();
+        if ($scope["key"]) {
+            $code = "<?php {$scope["prepend"]} if({$scope["check"]}) {\n $before foreach({$scope["from"]} as {$scope["key"]} => {$scope["value"]}) { $head?>$body";
+        } else {
+            $code = "<?php {$scope["prepend"]} if({$scope["check"]}) {\n $before foreach({$scope["from"]} as {$scope["value"]}) { $head?>$body";
+        }
+        $scope->replaceContent($code);
         if ($scope["else"]) {
             return '}';
         } else {
-            return " {$scope['after']} } }";
+            $after = $scope["after"]  ? implode("; ", $scope["after"]) . ";" : "";
+            return " {$after} } }";
         }
     }
 
@@ -573,9 +600,6 @@ class Compiler
      */
     public static function tagBlockOpen(Tokenizer $tokens, Tag $scope)
     {
-        if ($scope->level > 0) {
-            $scope->tpl->_compatible = true;
-        }
         $scope["cname"] = $scope->tpl->parsePlainArg($tokens, $name);
         if (!$name) {
             throw new \RuntimeException("Invalid block name");
@@ -1043,5 +1067,16 @@ class Compiler
             $unset[] = $tag->tpl->parseVariable($tokens);
         }
         return 'unset('.implode(", ", $unset).')';
+    }
+
+    public static function tagPaste(Tokenizer $tokens, Tag $tag)
+    {
+        $name = $tokens->get(T_CONSTANT_ENCAPSED_STRING);
+        $tokens->next();
+        if(isset($tag->tpl->blocks[$name])) {
+            return "?>".substr($tag->tpl->blocks[$name]["block"], 1, -1)."<?php ";
+        } else {
+            return "";
+        }
     }
 }

@@ -1,13 +1,15 @@
 Tag {cycle}
 ===========
 
+`{cycle}` is used to alternate a set of values.
+
 ```smarty
-{for $i=$a.c..}
+{foreach 1..10}
     <div class="{cycle ["odd", "even"]}">
-{/for}
+{/foreach}
 
 
-{for $i=$a.c..}
+{foreach 1..10}
     <div class="{cycle ["odd", "even"] index=$i}">
-{/for}
+{/foreach}
 ```

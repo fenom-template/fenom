@@ -1,7 +1,9 @@
-Tag {if} [RU]
-=============
+Tag {if}
+========
 
-Реализация оператора [if](http://docs.php.net/if) из PHP
+Tag {if}  have much the same flexibility as PHP [if](http://docs.php.net/if) statements,
+with a few added features for the template engine.
+All operators, allowed functions and variables are recognized in conditions.
 
 ```smarty
 {if <expression>}
@@ -21,8 +23,6 @@ Tag {if} [RU]
 {/if}
 ```
 
-Код, расположенный в теге `{if}` будет выполнен/выведен если выражение *<expression>* возвращает значение приводимое к **TRUE**
-
 ### {elseif}
 
 ```smarty
@@ -33,8 +33,6 @@ Tag {if} [RU]
 {/if}
 ```
 
-Код, расположенный после тега `{elseif}` будет выполнен/выведен, если выражение <expression1> вернуло значение приводимое к **FALSE**, <expression2> - приводимое к **TRUE**
-
 ### {else}
 
 ```smarty
@@ -44,6 +42,3 @@ Tag {if} [RU]
     {*...some code...*}
 {/if}
 ```
-
-Код, расположенный после тега `{else}` будет выполнен/выведен, если выражение <expression> вернуло значение приводимое к **FALSE**
-В тестируемых выражениях могут быть использованы логические операторы , что позволяет обрабатывать сочетания нескольких условий.
