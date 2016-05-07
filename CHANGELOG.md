@@ -1,6 +1,15 @@
 Changelog
 =========
 
+## 2.9.0 (2016-05-08)
+
+- Add `$.block`
+- Refactory range
+- Refactory blocks
+- Docs
+
+...
+
 ## 2.6.0 (2015-02-22)
 
 - Add range operator (`1..3`)
