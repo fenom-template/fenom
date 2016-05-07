@@ -38,11 +38,12 @@
 {/foreach}
 ```
 
+
 Получение номера (индекса) итерации, начиная с 0
 
 ```smarty
 {foreach $list as $value}
- <div>№{$value:index}: {$value}</div>
+ <div>№{$value@index}: {$value}</div>
 {/foreach}
 
 или
@@ -52,20 +53,32 @@
 {/foreach}
 ```
 
-Определение первого элемента
+Определение первой итерации:
 
 ```smarty
 {foreach $list as $value}
- <div>{if $value:first} first item {/if} {$value}</div>
+ <div>{if $value@first} first item {/if} {$value}</div>
+{/foreach}
+
+или
+
+{foreach $list as $value first=$first}
+ <div>{if $first} first item {/if} {$value}</div>
 {/foreach}
 ```
 
-Переменная `$value:first` будет иметь значение **TRUE**, если текущая итерация является первой.
-Определение последнего элемента
+Переменная `$value@first` будет иметь значение **TRUE**, если текущая итерация является первой.
+Определение последней интерации:
 
 ```smarty
 {foreach $list as $value}
- <div>{if $value:last} last item {/if} {$value}</div>
+ <div>{if $value@last} last item {/if} {$value}</div>
+{/foreach}
+
+или
+
+{foreach $list as $value last=$last}
+ <div>{if $last} last item {/if} {$value}</div>
 {/foreach}
 ```
 

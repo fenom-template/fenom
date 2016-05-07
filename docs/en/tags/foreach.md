@@ -37,6 +37,12 @@ The next form will additionally assign the current element's key to the `$key` v
 Gets the current array index, starting with zero.
 
 ```smarty
+{foreach $list as $value}
+ <div>№{$value@index}: {$value}</div>
+{/foreach}
+
+or
+
 {foreach $list as $value index=$index}
  <div>№{$index}: {$value}</div>
 {/foreach}
@@ -45,22 +51,34 @@ Gets the current array index, starting with zero.
 Detect first iteration:
 
 ```smarty
+{foreach $list as $value}
+ <div>{if $value@first} first item {/if} {$value}</div>
+{/foreach}
+
+or
+
 {foreach $list as $value first=$first}
  <div>{if $first} first item {/if} {$value}</div>
 {/foreach}
 ```
 
-`$first` is `TRUE` if the current `{foreach}` iteration is the initial one.
+`$first` is `TRUE` if the current `{foreach}` iteration is first iteration.
 
 Detect last iteration:
 
 ```smarty
+{foreach $list as $value}
+ <div>{if $value@last} last item {/if} {$value}</div>
+{/foreach}
+
+or
+
 {foreach $list as $value last=$last}
  <div>{if $last} last item {/if} {$value}</div>
 {/foreach}
 ```
 
-`$last` is set to `TRUE` if the current `{foreach}` iteration is the final one.
+`$last` is set to `TRUE` if the current `{foreach}` iteration is last iteration.
 
 ### {break}
 
