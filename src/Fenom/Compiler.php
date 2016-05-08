@@ -813,6 +813,11 @@ class Compiler
         return $scope["name"] . '=' . $scope["value"] . ';';
     }
 
+    public static function tagDo($tokens, Tag $scope)
+    {
+        return $scope->tpl->parseExpr($tokens).';';
+    }
+
 
     /**
      * @param Tokenizer $tokens

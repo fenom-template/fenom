@@ -272,6 +272,10 @@ class Fenom
             'open'  => 'Fenom\Compiler::setOpen',
             'close' => 'Fenom\Compiler::setClose'
         ),
+        'do'     => array( // {do ...}
+            'type'   => self::INLINE_COMPILER,
+            'parser' => 'Fenom\Compiler::tagDo'
+        ),
         'block'      => array( // {block ...} {parent} {/block}
             'type'       => self::BLOCK_COMPILER,
             'open'       => 'Fenom\Compiler::tagBlockOpen',

@@ -23,7 +23,8 @@ class RangeIterator implements \Iterator, \Countable
      * @param int $step
      * @return $this
      */
-    public function setStep($step) {
+    public function setStep($step)
+    {
         if($step > 0) {
             $this->current = min($this->min, $this->max);
         } elseif($step < 0) {

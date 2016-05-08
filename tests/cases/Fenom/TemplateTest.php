@@ -111,6 +111,18 @@ class TemplateTest extends TestCase
         );
     }
 
+    public static function providerDo() {
+        $vars = array(
+            "c" => 4,
+            "world" => new Helper('world')
+        );
+        return array(
+            array('{do "nope"}', $vars, ""),
+            array('{do $c++} -> {$c}', $vars, "-> 5"),
+            array('{do $world->chunk(1)}', $vars, ""),
+        );
+    }
+
 
     public static function providerVarsInvalid()
     {
@@ -1155,6 +1167,15 @@ class TemplateTest extends TestCase
     }
 
     /**
+     * @dataProvider providerDo
+     */
+    public function testDo($code, $vars, $result)
+    {
+        $this->exec($code, $vars, $result);
+    }
+
+
+    /**
      * @dataProvider providerVarsInvalid
      */
     public function testVarsInvalid($code, $exception, $message, $options = 0)
@@ -1587,6 +1608,8 @@ class TemplateTest extends TestCase
     {
         return array(
             array('{set $a=1..3}', "1,2,3,"),
+//            array('{set $a=0..0}', ""),
+//            array('{set $a=1..1}', ""),
 //            array('{set $a="a".."f"}', "a,b,c,d,e,f,"),
 //            array('{set $a=1.."f"}', "1,0,"),
 //            array('{set $a="a"..2}', "0,1,2,"),
@@ -1618,7 +1641,6 @@ class TemplateTest extends TestCase
     /**
      * @dataProvider providerRange
      * @group testRange
-     * @group dev
      * @param string $code
      * @param string $result
      */
