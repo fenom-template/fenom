@@ -1035,7 +1035,9 @@ class Fenom
             $_tpl  = include($this->_compile_dir . "/" . $file_name);
             /* @var Fenom\Render $_tpl */
 
-            if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD) && $_tpl->isValid()) {
+            if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD)
+                && $_tpl instanceof Fenom\Render
+                && $_tpl->isValid()) {
                 return $_tpl;
             }
         }
@@ -1051,6 +1053,7 @@ class Fenom
      */
     public function getCompilePath($tpl, $options = 0)
     {
+        $options = $this->_options | $options;
         if (is_array($tpl)) {
             $hash = implode(".", $tpl) . ":" . $options;
             foreach ($tpl as &$t) {
@@ -1074,7 +1077,6 @@ class Fenom
      */
     public function compile($tpl, $store = true, $options = 0)
     {
-        $options = $this->_options | $options;
         if (is_string($tpl)) {
             $template = $this->getRawTemplate()->load($tpl);
         } else {
