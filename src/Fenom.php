@@ -1029,7 +1029,7 @@ class Fenom
      */
     protected function _load($template, $opts)
     {
-        $file_name = $this->_getCacheName($template, $opts);
+        $file_name = $this->getCompilePath($template, $opts);
         if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this; // used in template
             $_tpl  = include($this->_compile_dir . "/" . $file_name);
@@ -1049,7 +1049,7 @@ class Fenom
      * @param int $options
      * @return string
      */
-    private function _getCacheName($tpl, $options)
+    public function getCompilePath($tpl, $options = 0)
     {
         if (is_array($tpl)) {
             $hash = implode(".", $tpl) . ":" . $options;
@@ -1084,17 +1084,15 @@ class Fenom
             }
         }
         if ($store) {
-            $cache   = $this->_getCacheName($tpl, $options);
-            $tpl_tmp = tempnam($this->_compile_dir, $cache);
-            $tpl_fp  = fopen($tpl_tmp, "w");
-            if (!$tpl_fp) {
-                throw new \RuntimeException("Can't to open temporary file $tpl_tmp. Directory " . $this->_compile_dir . " is writable?");
+            $cache_name   = $this->getCompilePath($tpl, $options);
+            $compile_path = $this->_compile_dir . "/" . $cache_name . "." . mt_rand(0, 100000) . ".tmp";
+            if(!file_put_contents($compile_path, $template->getTemplateCode())) {
+                throw new \RuntimeException("Can't to write to the file $compile_path. Directory " . $this->_compile_dir . " is writable?");
             }
-            fwrite($tpl_fp, $template->getTemplateCode());
-            fclose($tpl_fp);
-            $file_name = $this->_compile_dir . "/" . $cache;
-            if (!rename($tpl_tmp, $file_name)) {
-                throw new \RuntimeException("Can't to move $tpl_tmp to $file_name");
+            $cache_path = $this->_compile_dir . "/" . $cache_name;
+            if (!rename($compile_path, $cache_path)) {
+                unlink($compile_path);
+                throw new \RuntimeException("Can't to move $compile_path to $cache_path");
             }
         }
         return $template;
