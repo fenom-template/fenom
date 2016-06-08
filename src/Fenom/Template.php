@@ -525,6 +525,7 @@ class Template extends Render
         $parent           = $this->_fenom->getRawTemplate()->load($tpl, false);
         $parent->blocks   = & $this->blocks;
         $parent->macros   = & $this->macros;
+        $parent->_before   = & $this->_before;
         $parent->extended = $this->getName();
         if (!$this->ext_stack) {
             $this->ext_stack[] = $this->getName();
