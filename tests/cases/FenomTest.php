@@ -116,6 +116,19 @@ class FenomTest extends \Fenom\TestCase
         $this->assertSame("Custom template (new)", $this->fenom->fetch('custom.tpl', array()));
     }
 
+    /**
+     * @group dev
+     */
+    public function testCompileIdAndName()
+    {
+        $this->fenom->setCompileId("iddqd.");
+        $this->tpl('custom.tpl', 'Custom template');
+        $this->assertSame("Custom template", $this->fenom->fetch('custom.tpl', array()));
+        $compile_name = $this->fenom->getCompileName('custom.tpl');
+        $this->assertFileExists($this->getCompilePath().'/'.$compile_name);
+        $this->assertStringStartsWith('iddqd.', $compile_name);
+    }
+
     public function testSetModifier()
     {
         $this->fenom->addModifier("mymod", "myMod");

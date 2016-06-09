@@ -998,12 +998,7 @@ class Fenom
     {
         $options |= $this->_options;
         if (is_array($template)) {
-            if(count($template) === 1) {
-                $template = current($template);
-                $key = $options . "@" . $template;
-            } else {
-                $key = $options . "@" . implode(",", $template);
-            }
+            $key = $options . "@" . implode(",", $template);
         } else {
             $key = $options . "@" . $template;
         }
