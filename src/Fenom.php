@@ -866,7 +866,7 @@ class Fenom
      * @param callable $callback
      * @return Fenom
      */
-    public function addAccessorCallback($name, callable $callback)
+    public function addAccessorCallback($name, $callback)
     {
         $this->_accessors[$name] = array(
             "callback" => $callback
