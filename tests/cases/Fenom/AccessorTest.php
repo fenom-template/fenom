@@ -256,4 +256,20 @@ class AccessorTest  extends TestCase
         $this->fenom->addAccessorSmart($name, $accessor, $type);
         $this->assertRender($code, $result, $this->getVars());
     }
+
+    /**
+     * @group dev
+     */
+    public function testCallbackAccessor() {
+        $index = 1;
+        $this->fenom->addAccessorCallback('index', function($name, $template, $vars) use (&$index) {
+            $this->assertInstanceOf('Fenom\Render', $template);
+            $this->assertSame(1, $vars['one']);
+            $this->assertSame('index', $name);
+
+            return $index++;
+        });
+
+        $this->assertRender('{$.index}, {$.index}, {$.index}', '1, 2, 3', $this->getVars());
+    }
 } 

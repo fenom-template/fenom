@@ -1003,12 +1003,18 @@ class Template extends Render
         $is_var = false;
         if($parser) {
             if(is_array($parser)) {
-                return call_user_func_array($parser['parser'], array($parser['accessor'], $tokens->next(), $this, &$is_var));
+                if(isset($parser['callback'])) {
+                    $tokens->next();
+                    return 'call_user_func($tpl->getStorage()->getAccessor('.var_export($accessor, true).
+                        ', "callback"), '.var_export($accessor, true).', $tpl, $var)';
+                } else {
+                    return call_user_func_array($parser['parser'], array($parser['accessor'], $tokens->next(), $this, &$is_var));
+                }
             } else {
                 return call_user_func_array($parser, array($tokens->next(), $this, &$is_var));
             }
         } else {
-            throw new \RuntimeException("Unknown accessor '$accessor'");
+            throw new \RuntimeException("Unknown accessor '\$.$accessor'");
         }
     }
 
@@ -1025,7 +1031,7 @@ class Template extends Render
     {
         $empty = $tokens->is('?');
         $tokens->next();
-        if ($tokens->is(":")) {
+        if ($tokens->is(":", "?")) {
             $tokens->next();
             if ($empty) {
                 if ($is_var) {

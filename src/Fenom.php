@@ -844,16 +844,31 @@ class Fenom
     }
 
     /**
-     * Add global accessor ($.)
+     * Add global accessor as PHP code ($.)
      * @param string $name
      * @param mixed $accessor
      * @param string $parser
      * @return Fenom
      */
-    public function addAccessorSmart($name, $accessor, $parser) {
+    public function addAccessorSmart($name, $accessor, $parser = self::ACCESSOR_VAR)
+    {
         $this->_accessors[$name] = array(
             "accessor" => $accessor,
-            "parser" => $parser
+            "parser" => $parser,
+        );
+        return $this;
+    }
+
+    /**
+     * Add global accessor handler as callback ($.X)
+     * @param string $name
+     * @param callable $callback
+     * @return Fenom
+     */
+    public function addAccessorCallback($name, callable $callback)
+    {
+        $this->_accessors[$name] = array(
+            "callback" => $callback
         );
         return $this;
     }
@@ -872,11 +887,17 @@ class Fenom
     /**
      * Get an accessor
      * @param string $name
+     * @param string $key
      * @return callable
      */
-    public function getAccessor($name) {
+    public function getAccessor($name, $key = null)
+    {
         if(isset($this->_accessors[$name])) {
-            return $this->_accessors[$name];
+            if($key) {
+                return $this->_accessors[$name][$key];
+            } else {
+                return $this->_accessors[$name];
+            }
         } else {
             return false;
         }
@@ -888,7 +909,8 @@ class Fenom
      * @param string $pattern
      * @return $this
      */
-    public function addCallFilter($pattern) {
+    public function addCallFilter($pattern)
+    {
         $this->call_filters[] = $pattern;
         return $this;
     }
@@ -1029,7 +1051,7 @@ class Fenom
      */
     protected function _load($template, $opts)
     {
-        $file_name = $this->getCompilePath($template, $opts);
+        $file_name = $this->getCompileName($template, $opts);
         if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this; // used in template
             $_tpl  = include($this->_compile_dir . "/" . $file_name);
@@ -1047,11 +1069,11 @@ class Fenom
     /**
      * Generate unique name of compiled template
      *
-     * @param string $tpl
-     * @param int $options
+     * @param string|string[] $tpl
+     * @param int $options additional options
      * @return string
      */
-    public function getCompilePath($tpl, $options = 0)
+    public function getCompileName($tpl, $options = 0)
     {
         $options = $this->_options | $options;
         if (is_array($tpl)) {
@@ -1086,7 +1108,7 @@ class Fenom
             }
         }
         if ($store) {
-            $cache_name   = $this->getCompilePath($tpl, $options);
+            $cache_name   = $this->getCompileName($tpl, $options);
             $compile_path = $this->_compile_dir . "/" . $cache_name . "." . mt_rand(0, 100000) . ".tmp";
             if(!file_put_contents($compile_path, $template->getTemplateCode())) {
                 throw new \RuntimeException("Can't to write to the file $compile_path. Directory " . $this->_compile_dir . " is writable?");
