@@ -1,6 +1,21 @@
 Changelog
 =========
 
+## 2.11.0 (2016-06-09)
+
+- Added method to get the name of the cache template `$fenom->getCacheName($template_name)`(#231)
+- Fix bug with before-code in template inheritance (#229)
+- Added `??` operator.
+- Improve compile mechanism
+- ++Docs
+- ++Test
+
+## 2.10.0 (2016-05-08)
+
+- Add tag `{do ...}`
+- ++Docs
+- ++Tests
+
 ## 2.9.0 (2016-05-08)
 
 - Add `$.block`
