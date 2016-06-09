@@ -964,7 +964,7 @@ class Compiler
             return;
         }
         $tokens->next();
-        if($tokens->is('(') || !$tokens->isNext(')')){
+        if ($tokens->is('(') || !$tokens->isNext(')')) {
             $tokens->next();
             while ($tokens->is(Tokenizer::MACRO_STRING, T_VARIABLE)) {
                 $param = $tokens->current();
