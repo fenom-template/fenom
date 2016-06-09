@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the license.md
  * file that was distributed with this source code.
  */
+use Fenom\Error\CompileException;
 use Fenom\ProviderInterface;
 use Fenom\Template;
 
@@ -1094,7 +1095,7 @@ class Fenom
      * @param string|array $tpl
      * @param bool $store store template on disk
      * @param int $options
-     * @throws RuntimeException
+     * @throws CompileException
      * @return \Fenom\Template
      */
     public function compile($tpl, $store = true, $options = 0)
@@ -1111,12 +1112,12 @@ class Fenom
             $cache_name   = $this->getCompileName($tpl, $options);
             $compile_path = $this->_compile_dir . "/" . $cache_name . "." . mt_rand(0, 100000) . ".tmp";
             if(!file_put_contents($compile_path, $template->getTemplateCode())) {
-                throw new \RuntimeException("Can't to write to the file $compile_path. Directory " . $this->_compile_dir . " is writable?");
+                throw new CompileException("Can't to write to the file $compile_path. Directory " . $this->_compile_dir . " is writable?");
             }
             $cache_path = $this->_compile_dir . "/" . $cache_name;
             if (!rename($compile_path, $cache_path)) {
                 unlink($compile_path);
-                throw new \RuntimeException("Can't to move $compile_path to $cache_path");
+                throw new CompileException("Can't to move the file $compile_path -> $cache_path");
             }
         }
         return $template;

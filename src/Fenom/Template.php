@@ -102,7 +102,7 @@ class Template extends Render
      */
     private $_ignore = false;
 
-    private $_before;
+    private $_before = array();
 
     private $_filters = array();
 
@@ -310,7 +310,7 @@ class Template extends Render
      */
     public function before($code)
     {
-        $this->_before .= $code;
+        $this->_before[] = $code;
     }
 
     /**
@@ -405,7 +405,7 @@ class Template extends Render
      */
     public function getTemplateCode()
     {
-        $before = $this->_before ? $this->_before . "\n" : "";
+        $before = $this->_before ? implode("\n", $this->_before) . "\n" : "";
         return "<?php \n" .
         "/** Fenom template '" . $this->_name . "' compiled at " . date('Y-m-d H:i:s') . " */\n" .
         $before . // some code 'before' template
@@ -525,7 +525,7 @@ class Template extends Render
         $parent           = $this->_fenom->getRawTemplate()->load($tpl, false);
         $parent->blocks   = & $this->blocks;
         $parent->macros   = & $this->macros;
-        $parent->_before   = & $this->_before;
+        $parent->_before  = & $this->_before;
         $parent->extended = $this->getName();
         if (!$this->ext_stack) {
             $this->ext_stack[] = $this->getName();
@@ -798,12 +798,14 @@ class Template extends Render
                 }
                 $code = $this->parseScalar($tokens);
                 break;
+            /** @noinspection PhpMissingBreakStatementInspection */
             case '$':
                 $code = $this->parseAccessor($tokens, $is_var);
                 if(!$is_var) {
                     $code = $unary . $code;
                     break;
                 }
+                /* no break */
             case T_VARIABLE:
                 if(!isset($code)) {
                     $code = $this->parseVariable($tokens);
