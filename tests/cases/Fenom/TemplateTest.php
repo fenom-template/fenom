@@ -1130,27 +1130,6 @@ class TemplateTest extends TestCase
     }
 
     /**
-     * @group sb
-     */
-    public function _testSandbox()
-    {
-        try {
-            var_dump(
-                $this->fenom->compileCode(
-                    '{Fenom\Helper::method()->page->title}'
-                )->getBody()
-            );
-        } catch (\Exception $e) {
-            print_r($e->getMessage() . "\n" . $e->getTraceAsString());
-            while ($e->getPrevious()) {
-                $e = $e->getPrevious();
-                print_r("\n\n" . $e->getMessage() . " in {$e->getFile()}:{$e->getLine()}\n" . $e->getTraceAsString());
-            }
-        }
-        exit;
-    }
-
-    /**
      * @dataProvider providerScalars
      */
     public function testScalars($code, $result)
