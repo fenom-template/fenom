@@ -19,7 +19,7 @@ Also if a child template extends a parent template with the `{extends}` tag it m
 
 ### {use}
 
-Что бы импортировать блоки из другого шаблона используйте тег {use}:
+Import the blocks defined in another file. Specifying blocks in this template will override those from the other file.
 
 ```smarty
 {use 'blocks.tpl'} merge blocks from blocks.tpl template
@@ -30,6 +30,8 @@ Also if a child template extends a parent template with the `{extends}` tag it m
 ```
 
 ### {parent}
+
+Uses the code from the block as defined in the parent.
 
 ```smarty
 {extends 'parent.tpl'}
@@ -43,7 +45,7 @@ Also if a child template extends a parent template with the `{extends}` tag it m
 
 ### {paste}
 
-Paste code of any block
+Pastes the code of any block
 
 ```smarty
 {block 'b1'}
