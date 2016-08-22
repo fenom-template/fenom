@@ -10,7 +10,3 @@ require_once __DIR__ . "/TestCase.php";
 require_once __DIR__ . "/tools.php";
 
 ini_set('date.timezone', 'Europe/Moscow');
-
-if(PHP_VERSION_ID > 50400) {
-    function php_gte_54() {}
-}
