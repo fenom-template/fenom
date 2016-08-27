@@ -1407,6 +1407,11 @@ class TemplateTest extends TestCase
                 'Foreach: 0 => 1, 1 => 2, 2 => 3, end'
             ),
             array(
+                'Foreach: {foreach 1..3 as $k => $e last=$l} {$k} => {$e}, {if $l}last{/if} {/foreach} end',
+                $a,
+                'Foreach: 0 => 1, 1 => 2, 2 => 3, last end'
+            ),
+            array(
                 'Foreach: {foreach $.get.items as $e} {$e}, {/foreach} end',
                 $a,
                 'Foreach: one, two, three, end'
