@@ -82,6 +82,12 @@ class Template extends Render
     public $extend_body = false;
 
     /**
+     * Parent template
+     * @var Template
+     */
+    public $parent;
+
+    /**
      * Template PHP code
      * @var string
      */
@@ -121,10 +127,11 @@ class Template extends Render
     /**
      * @param Fenom $fenom Template storage
      * @param int $options
-     * @return \Fenom\Template
+     * @param Template $parent
      */
-    public function __construct(Fenom $fenom, $options)
+    public function __construct(Fenom $fenom, $options, Template $parent = null)
     {
+        $this->parent       = $parent;
         $this->_fenom       = $fenom;
         $this->_options     = $options;
         $this->_filters     = $this->_fenom->getFilters();

@@ -268,48 +268,6 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerInclude()
-    {
-        $a       = array(
-            "name"        => "welcome",
-            "tpl"         => "welcome.tpl",
-            "fragment"    => "come",
-            "pr_fragment" => "Come",
-            "pr_name"     => "Welcome",
-            "username"    => "Master",
-            "email"       => "dev@null.net"
-        );
-        $result  = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
-        $result2 = 'Include <b>Welcome, Flame (dev@null.net)</b>  template';
-        $result3 = 'Include <b>Welcome, Master (flame@dev.null)</b>  template';
-        $result4 = 'Include <b>Welcome, Flame (flame@dev.null)</b>  template';
-        return array(
-            array('Include {include "welcome.tpl"} template', $a, $result),
-            array('Include {include "welcome.tpl"} template', $a, $result, Fenom::FORCE_INCLUDE),
-            array('Include {include $tpl} template', $a, $result),
-            array('Include {include "$tpl"} template', $a, $result),
-            array('Include {include "{$tpl}"} template', $a, $result),
-            array('Include {include "$name.tpl"} template', $a, $result),
-            array('Include {include "{$name}.tpl"} template', $a, $result),
-            array('Include {include "{$pr_name|lower}.tpl"} template', $a, $result),
-            array('Include {include "wel{$fragment}.tpl"} template', $a, $result),
-            array('Include {include "wel{$pr_fragment|lower}.tpl"} template', $a, $result),
-            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2),
-            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2, Fenom::FORCE_INCLUDE),
-            array('Include {include "welcome.tpl" email="flame@dev.null"} template', $a, $result3),
-            array(
-                'Include {include "welcome.tpl" email="flame@dev.null"} template',
-                $a,
-                $result3,
-                Fenom::FORCE_INCLUDE
-            ),
-            array(
-                'Include {include "welcome.tpl" username="Flame" email="flame@dev.null"} template',
-                $a,
-                $result4
-            ),
-        );
-    }
 
     public static function providerIncludeInvalid()
     {
@@ -1195,12 +1153,66 @@ class TemplateTest extends TestCase
         $this->execError($code, $exception, $message, $options);
     }
 
+
+    public static function providerInclude()
+    {
+        $a       = array(
+            "name"        => "welcome",
+            "tpl"         => "welcome.tpl",
+            "fragment"    => "come",
+            "pr_fragment" => "Come",
+            "pr_name"     => "Welcome",
+            "username"    => "Master",
+            "email"       => "dev@null.net"
+        );
+
+        $result  = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
+        $result2 = 'Include <b>Welcome, Flame (dev@null.net)</b>  template';
+        $result3 = 'Include <b>Welcome, Master (flame@dev.null)</b>  template';
+        $result4 = 'Include <b>Welcome, Flame (flame@dev.null)</b>  template';
+
+        $recursive_result = 'Include <b>Hello, Master (dev@null.net)</b> template';
+        $recursive_result2 = 'Include <b>Hello, Flame (dev@null.net)</b> template';
+        return array(
+            array('Include {include "welcome.tpl"} template', $a, $result),
+            array('Include {include "welcome.tpl"} template', $a, $result, Fenom::FORCE_INCLUDE),
+            array('Include {include "recursive.tpl"} template', $a, $recursive_result, Fenom::FORCE_INCLUDE),
+            array('Include {include $tpl} template', $a, $result),
+            array('Include {include "$tpl"} template', $a, $result),
+            array('Include {include "{$tpl}"} template', $a, $result),
+            array('Include {include "$name.tpl"} template', $a, $result),
+            array('Include {include "{$name}.tpl"} template', $a, $result),
+            array('Include {include "{$pr_name|lower}.tpl"} template', $a, $result),
+            array('Include {include "wel{$fragment}.tpl"} template', $a, $result),
+            array('Include {include "wel{$pr_fragment|lower}.tpl"} template', $a, $result),
+            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2),
+            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2, Fenom::FORCE_INCLUDE),
+            array('Include {include "recursive.tpl" username="Flame"} template', $a, $recursive_result2, Fenom::FORCE_INCLUDE),
+            array('Include {include "welcome.tpl" email="flame@dev.null"} template', $a, $result3),
+            array(
+                'Include {include "welcome.tpl" email="flame@dev.null"} template',
+                $a,
+                $result3,
+                Fenom::FORCE_INCLUDE
+            ),
+            array(
+                'Include {include "welcome.tpl" username="Flame" email="flame@dev.null"} template',
+                $a,
+                $result4,
+            ),
+        );
+    }
+
     /**
-     * @group include
+     * @group dev
      * @dataProvider providerInclude
      */
     public function testInclude($code, $vars, $result, $options = 0)
     {
+        $this->tpls(array(
+            'welcome.tpl' => '<b>Welcome, {$username} ({$email})</b>',
+            'recursive.tpl' => '<b>Hello, {$username}  ({$email}){if false}{include "recursive.tpl"}{/if}</b>'
+        ));
         $this->exec($code, $vars, $result, $options);
     }
 

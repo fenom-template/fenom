@@ -944,9 +944,9 @@ class Fenom
      *
      * @return Fenom\Template
      */
-    public function getRawTemplate()
+    public function getRawTemplate(Template $parent = null)
     {
-        return new Template($this, $this->_options);
+        return new Template($this, $this->_options, $parent);
     }
 
     /**

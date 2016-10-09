@@ -116,6 +116,12 @@ class TestCase extends \PHPUnit_Framework_TestCase
         return filemtime(FENOM_RESOURCES . '/template/' . $name);
     }
 
+    public function tpls(array $list) {
+        foreach($list as $name => $tpl) {
+            $this->tpl($name, $tpl);
+        }
+    }
+
     /**
      * Compile and execute template
      *
