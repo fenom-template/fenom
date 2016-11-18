@@ -788,38 +788,6 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerSwitch()
-    {
-        $code1 = 'Switch: {switch $a}
-        {case 1, "one"} one
-        {case 2, "two"} two
-        {case "string", default} str
-        {default} def
-        {/switch} end';
-
-        $code2 = 'Switch: {switch $a}
-        {case 1, "one"} one
-        {case 2, "two"} two
-        {case "string"} str
-        {/switch} end';
-
-        $code3 = 'Switch: {switch $a} invalid
-        {case 1, "one"} one
-        {/switch} end';
-
-        return array(
-            array($code1, array("a" => 1), 'Switch: one end'),
-            array($code1, array("a" => 'one'), 'Switch: one end'),
-            array($code1, array("a" => 2), 'Switch: two end'),
-            array($code1, array("a" => 'two'), 'Switch: two end'),
-            array($code1, array("a" => "string"), 'Switch: str end'),
-            array($code1, array("a" => "unk"), 'Switch: str def end'),
-            array($code2, array("a" => "unk"), 'Switch: end'),
-            array($code3, array("a" => 1), 'Switch: one end'),
-            array($code3, array("a" => 'one'), 'Switch: one end'),
-        );
-    }
-
     public static function providerSwitchInvalid()
     {
         return array(
@@ -1473,6 +1441,44 @@ class TemplateTest extends TestCase
     {
         $this->exec($code, $vars, $result);
     }
+
+
+
+    public static function providerSwitch()
+    {
+        $code1 = 'Switch: {switch $a}
+        {case 1, "one"} one
+        {case 2, "two"} two
+        {case "string", default} str
+        {default} def
+        {/switch} end';
+
+        $code2 = 'Switch: {switch $a}
+        {case 1, "one"} one
+        {case 2, "two"} two
+        {case "string"} str
+        {/switch} end';
+
+        $code3 = 'Switch: {switch $a} invalid
+        {case 1, "one"} one
+        {/switch} end';
+
+        $code4 = 'Switch:{switch $a}{case 1}<b>one</b>{/switch}end';
+
+        return array(
+            array($code1, array("a" => 1), 'Switch: one end'),
+            array($code1, array("a" => 'one'), 'Switch: one end'),
+            array($code1, array("a" => 2), 'Switch: two end'),
+            array($code1, array("a" => 'two'), 'Switch: two end'),
+            array($code1, array("a" => "string"), 'Switch: str end'),
+            array($code1, array("a" => "unk"), 'Switch: str def end'),
+            array($code2, array("a" => "unk"), 'Switch: end'),
+            array($code3, array("a" => 1), 'Switch: one end'),
+            array($code3, array("a" => 'one'), 'Switch: one end'),
+            array($code4, array("a" => 1), 'Switch:<b>one</b>end'),
+        );
+    }
+
 
     /**
      * @group switch
