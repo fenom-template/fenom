@@ -430,11 +430,11 @@ class Fenom
     }
 
     /**
-     * @param Fenom\ProviderInterface $provider
+     * @param $provider
      */
-    public function __construct(Fenom\ProviderInterface $provider)
+    public function __construct($provider)
     {
-        $this->_provider = $provider;
+        $this->_provider = new Fenom\Provider($provider);
     }
 
     /**
