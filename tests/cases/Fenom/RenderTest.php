@@ -4,7 +4,7 @@ namespace Fenom;
 use Fenom,
     Fenom\Render;
 
-class RenderTest extends \PHPUnit_Framework_TestCase
+class RenderTest extends TestCase
 {
 
     /**
