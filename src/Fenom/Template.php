@@ -829,7 +829,14 @@ class Template extends Render
             case '$':
                 $code = $this->parseAccessor($tokens, $is_var);
                 if (!$is_var) {
-                    $code = $unary . $code;
+                    if($tokens->is(T_OBJECT_OPERATOR)) {
+                        if ($this->_options & Fenom::DENY_METHODS) {
+                            throw new \LogicException("Forbidden to call methods");
+                        }
+                        $code = $unary . $this->parseChain($tokens, $code);
+                    } else {
+                        $code = $unary . $code;
+                    }
                     break;
                 }
             /* no break */

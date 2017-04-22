@@ -94,58 +94,66 @@ class AccessorTest  extends TestCase
     }
 
 
-    public static function providerPHP() {
+    public static function providerCall() {
         return array(
-            array('$.php.strrev("string")', strrev("string")),
-            array('$.php.strrev("string")', strrev("string"), 'str*'),
-            array('$.php.strrev("string")', strrev("string"), 'strrev'),
-            array('$.php.get_current_user', get_current_user()),
-            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12)),
-            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), 'Fenom\\*'),
-            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), 'Fenom\helper_func'),
-            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), '*helper_func'),
-            array('$.php.Fenom.helper_func("string", 12)', helper_func("string", 12), '*'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string")),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase*'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase::*'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*::dots'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*::*'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase::dots'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), '*::dots'),
-            array('$.php.Fenom.TestCase::dots("string")', TestCase::dots("string"), '*'),
+            array('$.call.strrev("string")', strrev("string")),
+            array('$.call.strrev("string")', strrev("string"), 'str*'),
+            array('$.call.strrev("string")', strrev("string"), 'strrev'),
+            array('$.call.get_current_user', get_current_user()),
+            array('$.call.Fenom.helper_func("string", 12)', helper_func("string", 12)),
+            array('$.call.Fenom.helper_func("string", 12)', helper_func("string", 12), 'Fenom\\*'),
+            array('$.call.Fenom.helper_func("string", 12)', helper_func("string", 12), 'Fenom\helper_func'),
+            array('$.call.Fenom.helper_func("string", 12)', helper_func("string", 12), '*helper_func'),
+            array('$.call.Fenom.helper_func("string", 12)', helper_func("string", 12), '*'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string")),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase*'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase::*'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*::dots'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\*::*'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), 'Fenom\TestCase::dots'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), '*::dots'),
+            array('$.call.Fenom.TestCase::dots("string")', TestCase::dots("string"), '*'),
         );
     }
 
     /**
-     * @dataProvider providerPHP
+     * @dataProvider providerCall
      * @group php
      */
-    public function testPHP($tpl, $result, $mask = null) {
+    public function testCall($tpl, $result, $mask = null) {
         if($mask) {
             $this->fenom->addCallFilter($mask);
         }
         $this->assertRender('{'.$tpl.'}', $result);
     }
 
+    /**
+     * @group issue260
+     */
+    public function testBug260() {
+        $this->fenom->compileCode('{$.php.Fenom::factory()->addModifier("intval", "intval")}');
+    }
+
+
     public static function providerPHPInvalid() {
         return array(
-            array('$.php.aaa("string")', 'Fenom\Error\CompileException', 'PHP method aaa does not exists'),
-            array('$.php.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', 'strrevZ'),
-            array('$.php.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', 'str*Z'),
-            array('$.php.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', '*Z'),
-            array('$.php.Fenom.aaa("string")', 'Fenom\Error\CompileException', 'PHP method Fenom.aaa does not exists'),
-            array('$.php.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Reflection\*'),
-            array('$.php.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Fenom\*Z'),
-            array('$.php.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Fenom\*::*'),
-            array('$.php.TestCase::aaa("string")', 'Fenom\Error\CompileException', 'PHP method TestCase::aaa does not exists'),
-            array('$.php.Fenom.TestCase::aaa("string")', 'Fenom\Error\CompileException', 'PHP method Fenom.TestCase::aaa does not exists'),
-            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Reflection\*'),
-            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\*Z'),
-            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\*::get*'),
-            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\TestCase::get*'),
-            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\TestCase::*Z'),
-            array('$.php.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', '*::*Z'),
+            array('$.call.aaa("string")', 'Fenom\Error\CompileException', 'PHP method aaa does not exists'),
+            array('$.call.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', 'strrevZ'),
+            array('$.call.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', 'str*Z'),
+            array('$.call.strrev("string")', 'Fenom\Error\SecurityException', 'Callback strrev is not available by settings', '*Z'),
+            array('$.call.Fenom.aaa("string")', 'Fenom\Error\CompileException', 'PHP method Fenom.aaa does not exists'),
+            array('$.call.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Reflection\*'),
+            array('$.call.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Fenom\*Z'),
+            array('$.call.Fenom.helper_func("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.helper_func is not available by settings', 'Fenom\*::*'),
+            array('$.call.TestCase::aaa("string")', 'Fenom\Error\CompileException', 'PHP method TestCase::aaa does not exists'),
+            array('$.call.Fenom.TestCase::aaa("string")', 'Fenom\Error\CompileException', 'PHP method Fenom.TestCase::aaa does not exists'),
+            array('$.call.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Reflection\*'),
+            array('$.call.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\*Z'),
+            array('$.call.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\*::get*'),
+            array('$.call.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\TestCase::get*'),
+            array('$.call.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', 'Fenom\TestCase::*Z'),
+            array('$.call.Fenom.TestCase::dots("string")', 'Fenom\Error\SecurityException', 'Callback Fenom.TestCase::dots is not available by settings', '*::*Z'),
         );
     }
 
@@ -258,7 +266,7 @@ class AccessorTest  extends TestCase
     }
 
     /**
-     * @group dev
+     *
      */
     public function testCallbackAccessor() {
         $index = 1;
