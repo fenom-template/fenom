@@ -132,7 +132,7 @@ class AccessorTest  extends TestCase
      * @group issue260
      */
     public function testBug260() {
-        $this->fenom->compileCode('{$.php.Fenom::factory()->addDay()}');
+        $this->fenom->compileCode('{$.php.Fenom::factory()->addModifier("intval", "intval")}');
     }
 
 
