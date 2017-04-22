@@ -15,7 +15,7 @@
         "ext-tokenizer": "*"
     },
     "require-dev": {
-        "phpunit/phpunit": "*",
+        "phpunit/phpunit": "5.*",
         "satooshi/php-coveralls": "*"
     },
     "autoload": {
