@@ -90,7 +90,7 @@ class RangeIterator implements \Iterator, \Countable
      */
     public function count()
     {
-        return intval(($this->max - $this->min) / $this->step);
+        return intval(($this->max - $this->min + 1) / $this->step);
     }
 
     /**

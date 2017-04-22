@@ -38,13 +38,24 @@ class Compiler
         $p     = $tpl->parseParams($tokens);
         if ($name) {
             if ($tpl->getStorage()->getOptions() & \Fenom::FORCE_INCLUDE) {
-                $inc = $tpl->getStorage()->compile($name, false);
-                $tpl->addDepend($inc);
-                $var = $tpl->tmpVar();
-                if ($p) {
-                    return $var . ' = $var; $var = ' . self::toArray($p) . ' + $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
-                } else {
-                    return $var . ' = $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
+                $_t = $tpl;
+                $recursion = false;
+                while($_t->parent) {
+                    if($_t->parent->getName() == $name) { // recursion detected
+                        $recursion = true;
+                    }
+                    $_t = $_t->parent;
+                }
+                if(!$recursion) {
+                    $inc = $tpl->getStorage()->getRawTemplate($tpl);
+                    $inc->load($name, true);
+                    $tpl->addDepend($inc);
+                    $var = $tpl->tmpVar();
+                    if ($p) {
+                        return $var . ' = $var; $var = ' . self::toArray($p) . ' + $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
+                    } else {
+                        return $var . ' = $var; ?>' . $inc->getBody() . '<?php $var = ' . $var . '; unset(' . $var . ');';
+                    }
                 }
             } elseif (!$tpl->getStorage()->templateExists($name)) {
                 throw new \LogicException("Template $name not found");

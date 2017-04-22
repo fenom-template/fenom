@@ -65,6 +65,11 @@ class Fenom
     public static $charset = "UTF-8";
 
     /**
+     * @var int maximum length of compiled filename (use sha1 of name if bigger)
+     */
+    public static $filename_length = 200;
+
+    /**
      * @var int[] of possible options, as associative array
      * @see setOptions
      */
@@ -939,9 +944,9 @@ class Fenom
      *
      * @return Fenom\Template
      */
-    public function getRawTemplate()
+    public function getRawTemplate(Template $parent = null)
     {
-        return new Template($this, $this->_options);
+        return new Template($this, $this->_options, $parent);
     }
 
     /**
@@ -1075,13 +1080,17 @@ class Fenom
         if (is_array($tpl)) {
             $hash = implode(".", $tpl) . ":" . $options;
             foreach ($tpl as &$t) {
-                $t = str_replace(":", "_", basename($t));
+                $t = urlencode(str_replace(":", "_", basename($t)));
             }
-            return $this->_compile_id . implode("~", $tpl) . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
+            $tpl = implode("~", $tpl);
         } else {
             $hash = $tpl . ":" . $options;
-            return sprintf($this->_compile_id . "%s.%x.%x.php", str_replace(":", "_", basename($tpl)), crc32($hash), strlen($hash));
+            $tpl = urlencode(str_replace(":", "_", basename($tpl)));
         }
+        if($tpl > self::$filename_length) {
+            $tpl = sha1($tpl);
+        }
+        return $this->_compile_id . $tpl . "." . sprintf("%x.%x.php", crc32($hash), strlen($hash));
     }
 
     /**

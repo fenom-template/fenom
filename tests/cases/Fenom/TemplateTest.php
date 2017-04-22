@@ -268,48 +268,6 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerInclude()
-    {
-        $a       = array(
-            "name"        => "welcome",
-            "tpl"         => "welcome.tpl",
-            "fragment"    => "come",
-            "pr_fragment" => "Come",
-            "pr_name"     => "Welcome",
-            "username"    => "Master",
-            "email"       => "dev@null.net"
-        );
-        $result  = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
-        $result2 = 'Include <b>Welcome, Flame (dev@null.net)</b>  template';
-        $result3 = 'Include <b>Welcome, Master (flame@dev.null)</b>  template';
-        $result4 = 'Include <b>Welcome, Flame (flame@dev.null)</b>  template';
-        return array(
-            array('Include {include "welcome.tpl"} template', $a, $result),
-            array('Include {include "welcome.tpl"} template', $a, $result, Fenom::FORCE_INCLUDE),
-            array('Include {include $tpl} template', $a, $result),
-            array('Include {include "$tpl"} template', $a, $result),
-            array('Include {include "{$tpl}"} template', $a, $result),
-            array('Include {include "$name.tpl"} template', $a, $result),
-            array('Include {include "{$name}.tpl"} template', $a, $result),
-            array('Include {include "{$pr_name|lower}.tpl"} template', $a, $result),
-            array('Include {include "wel{$fragment}.tpl"} template', $a, $result),
-            array('Include {include "wel{$pr_fragment|lower}.tpl"} template', $a, $result),
-            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2),
-            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2, Fenom::FORCE_INCLUDE),
-            array('Include {include "welcome.tpl" email="flame@dev.null"} template', $a, $result3),
-            array(
-                'Include {include "welcome.tpl" email="flame@dev.null"} template',
-                $a,
-                $result3,
-                Fenom::FORCE_INCLUDE
-            ),
-            array(
-                'Include {include "welcome.tpl" username="Flame" email="flame@dev.null"} template',
-                $a,
-                $result4
-            ),
-        );
-    }
 
     public static function providerIncludeInvalid()
     {
@@ -830,38 +788,6 @@ class TemplateTest extends TestCase
         );
     }
 
-    public static function providerSwitch()
-    {
-        $code1 = 'Switch: {switch $a}
-        {case 1, "one"} one
-        {case 2, "two"} two
-        {case "string", default} str
-        {default} def
-        {/switch} end';
-
-        $code2 = 'Switch: {switch $a}
-        {case 1, "one"} one
-        {case 2, "two"} two
-        {case "string"} str
-        {/switch} end';
-
-        $code3 = 'Switch: {switch $a} invalid
-        {case 1, "one"} one
-        {/switch} end';
-
-        return array(
-            array($code1, array("a" => 1), 'Switch: one end'),
-            array($code1, array("a" => 'one'), 'Switch: one end'),
-            array($code1, array("a" => 2), 'Switch: two end'),
-            array($code1, array("a" => 'two'), 'Switch: two end'),
-            array($code1, array("a" => "string"), 'Switch: str end'),
-            array($code1, array("a" => "unk"), 'Switch: str def end'),
-            array($code2, array("a" => "unk"), 'Switch: end'),
-            array($code3, array("a" => 1), 'Switch: one end'),
-            array($code3, array("a" => 'one'), 'Switch: one end'),
-        );
-    }
-
     public static function providerSwitchInvalid()
     {
         return array(
@@ -1130,27 +1056,6 @@ class TemplateTest extends TestCase
     }
 
     /**
-     * @group sb
-     */
-    public function _testSandbox()
-    {
-        try {
-            var_dump(
-                $this->fenom->compileCode(
-                    '{Fenom\Helper::method()->page->title}'
-                )->getBody()
-            );
-        } catch (\Exception $e) {
-            print_r($e->getMessage() . "\n" . $e->getTraceAsString());
-            while ($e->getPrevious()) {
-                $e = $e->getPrevious();
-                print_r("\n\n" . $e->getMessage() . " in {$e->getFile()}:{$e->getLine()}\n" . $e->getTraceAsString());
-            }
-        }
-        exit;
-    }
-
-    /**
      * @dataProvider providerScalars
      */
     public function testScalars($code, $result)
@@ -1216,12 +1121,66 @@ class TemplateTest extends TestCase
         $this->execError($code, $exception, $message, $options);
     }
 
+
+    public static function providerInclude()
+    {
+        $a       = array(
+            "name"        => "welcome",
+            "tpl"         => "welcome.tpl",
+            "fragment"    => "come",
+            "pr_fragment" => "Come",
+            "pr_name"     => "Welcome",
+            "username"    => "Master",
+            "email"       => "dev@null.net"
+        );
+
+        $result  = 'Include <b>Welcome, Master (dev@null.net)</b>  template';
+        $result2 = 'Include <b>Welcome, Flame (dev@null.net)</b>  template';
+        $result3 = 'Include <b>Welcome, Master (flame@dev.null)</b>  template';
+        $result4 = 'Include <b>Welcome, Flame (flame@dev.null)</b>  template';
+
+        $recursive_result = 'Include <b>Hello, Master (dev@null.net)</b> template';
+        $recursive_result2 = 'Include <b>Hello, Flame (dev@null.net)</b> template';
+        return array(
+            array('Include {include "welcome.tpl"} template', $a, $result),
+            array('Include {include "welcome.tpl"} template', $a, $result, Fenom::FORCE_INCLUDE),
+            array('Include {include "recursive.tpl"} template', $a, $recursive_result, Fenom::FORCE_INCLUDE),
+            array('Include {include $tpl} template', $a, $result),
+            array('Include {include "$tpl"} template', $a, $result),
+            array('Include {include "{$tpl}"} template', $a, $result),
+            array('Include {include "$name.tpl"} template', $a, $result),
+            array('Include {include "{$name}.tpl"} template', $a, $result),
+            array('Include {include "{$pr_name|lower}.tpl"} template', $a, $result),
+            array('Include {include "wel{$fragment}.tpl"} template', $a, $result),
+            array('Include {include "wel{$pr_fragment|lower}.tpl"} template', $a, $result),
+            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2),
+            array('Include {include "welcome.tpl" username="Flame"} template', $a, $result2, Fenom::FORCE_INCLUDE),
+            array('Include {include "recursive.tpl" username="Flame"} template', $a, $recursive_result2, Fenom::FORCE_INCLUDE),
+            array('Include {include "welcome.tpl" email="flame@dev.null"} template', $a, $result3),
+            array(
+                'Include {include "welcome.tpl" email="flame@dev.null"} template',
+                $a,
+                $result3,
+                Fenom::FORCE_INCLUDE
+            ),
+            array(
+                'Include {include "welcome.tpl" username="Flame" email="flame@dev.null"} template',
+                $a,
+                $result4,
+            ),
+        );
+    }
+
     /**
-     * @group include
+     * @group dev
      * @dataProvider providerInclude
      */
     public function testInclude($code, $vars, $result, $options = 0)
     {
+        $this->tpls(array(
+            'welcome.tpl' => '<b>Welcome, {$username} ({$email})</b>',
+            'recursive.tpl' => '<b>Hello, {$username}  ({$email}){if false}{include "recursive.tpl"}{/if}</b>'
+        ));
         $this->exec($code, $vars, $result, $options);
     }
 
@@ -1428,6 +1387,11 @@ class TemplateTest extends TestCase
                 'Foreach: 0 => 1, 1 => 2, 2 => 3, end'
             ),
             array(
+                'Foreach: {foreach 1..3 as $k => $e last=$l} {$k} => {$e}, {if $l}last{/if} {/foreach} end',
+                $a,
+                'Foreach: 0 => 1, 1 => 2, 2 => 3, last end'
+            ),
+            array(
                 'Foreach: {foreach $.get.items as $e} {$e}, {/foreach} end',
                 $a,
                 'Foreach: one, two, three, end'
@@ -1477,6 +1441,44 @@ class TemplateTest extends TestCase
     {
         $this->exec($code, $vars, $result);
     }
+
+
+
+    public static function providerSwitch()
+    {
+        $code1 = 'Switch: {switch $a}
+        {case 1, "one"} one
+        {case 2, "two"} two
+        {case "string", default} str
+        {default} def
+        {/switch} end';
+
+        $code2 = 'Switch: {switch $a}
+        {case 1, "one"} one
+        {case 2, "two"} two
+        {case "string"} str
+        {/switch} end';
+
+        $code3 = 'Switch: {switch $a} invalid
+        {case 1, "one"} one
+        {/switch} end';
+
+        $code4 = 'Switch:{switch $a}{case 1}<b>one</b>{/switch}end';
+
+        return array(
+            array($code1, array("a" => 1), 'Switch: one end'),
+            array($code1, array("a" => 'one'), 'Switch: one end'),
+            array($code1, array("a" => 2), 'Switch: two end'),
+            array($code1, array("a" => 'two'), 'Switch: two end'),
+            array($code1, array("a" => "string"), 'Switch: str end'),
+            array($code1, array("a" => "unk"), 'Switch: str def end'),
+            array($code2, array("a" => "unk"), 'Switch: end'),
+            array($code3, array("a" => 1), 'Switch: one end'),
+            array($code3, array("a" => 'one'), 'Switch: one end'),
+            array($code4, array("a" => 1), 'Switch:<b>one</b>end'),
+        );
+    }
+
 
     /**
      * @group switch
