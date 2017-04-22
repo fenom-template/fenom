@@ -10,3 +10,7 @@ require_once __DIR__ . "/TestCase.php";
 require_once __DIR__ . "/tools.php";
 
 ini_set('date.timezone', 'Europe/Moscow');
+
+if(!class_exists('PHPUnit_Framework_TestCase') && class_exists('PHPUnit\Framework\TestCase')) {
+    class_alias('PHPUnit\Framework\TestCase', 'PHPUnit_Framework_TestCase');
+}
