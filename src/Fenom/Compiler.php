@@ -1087,7 +1087,7 @@ class Compiler
 
     public static function tagPaste(Tokenizer $tokens, Tag $tag)
     {
-        $name = $tokens->get(T_CONSTANT_ENCAPSED_STRING);
+        $name = str_replace(array('\'', '"'), '', $tokens->get(T_CONSTANT_ENCAPSED_STRING));
         $tokens->next();
         if(isset($tag->tpl->blocks[$name])) {
             return "?>".substr($tag->tpl->blocks[$name]["block"], 1, -1)."<?php ";
