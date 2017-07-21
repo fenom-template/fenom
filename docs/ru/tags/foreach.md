@@ -25,7 +25,7 @@
  <div>{$value}</div>
 {/foreach}
 
-{foreach 1..7 as $value} {* так же хорошо работает и с интрвелами *}
+{foreach 1..7 as $value} {* так же хорошо работает и с интервалами *}
  <div>№{$value}</div>
 {/foreach}
 ```
