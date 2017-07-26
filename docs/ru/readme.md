@@ -73,7 +73,7 @@
 * [join](./mods/join.md) — объединяет массив в строку
 * так же разрешены функции: `json_encode`, `json_decode`, `count`, `is_string`, `is_array`, `is_numeric`, `is_int`, `is_object`,
 `strtotime`, `gettype`, `is_double`, `ip2long`, `long2ip`, `strip_tags`, `nl2br`
-* или [добавте](./ext/extend.md#Добавление-модификаторов) свои
+* или [добавьте](./ext/extend.md#Добавление-модификаторов) свои
 
 ***
 
