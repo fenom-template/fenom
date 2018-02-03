@@ -33,7 +33,7 @@
 ```smarty
 <div class="user">Hello, <a href="/users/{$user.id}">{$user.name}</a>.</div>
 ```
-`{$user.id}` and `{$user['id']}` are same:
+`{$user.id}` и `{$user['id']}` это одно и то же:
 ```smarty
 <div class="user">Hello, <a href="/users/{$user['id']}">{$user['name']}</a>.</div>
 ```
