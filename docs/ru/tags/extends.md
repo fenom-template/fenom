@@ -22,7 +22,7 @@
 Блок указывает фрагмент шаблона, который будет передан родителю. Имя блока должно быть задано явно:
 
 ```smarty
-{block bk1}content 1{/block}
+{block 'bk1'}content 1{/block}
 ...
 {block 'bk2'}content 2{/block}
 ```
