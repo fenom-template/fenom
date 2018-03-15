@@ -14,12 +14,12 @@
 ```smarty
 {var $ts = time()}
 
-{$ts|date_format:"%Y/%m/%d %H:%M:%s"} выведет 2013/02/08 21:01:43
+{$ts|date_format:"%Y/%m/%d %H:%M:%S"} выведет 2013/02/08 21:01:43
 {$ts|date_format:"-1 day"} выведет вчерашний день, например 2013/02/07 21:01:43
 
 {var $date = "2008-12-08"}
 
-{$ts|date_format:"%Y/%m/%d %H:%M:%s"} выведет 2008/12/08 00:00:00
+{$ts|date_format:"%Y/%m/%d %H:%M:%S"} выведет 2008/12/08 00:00:00
 ```
 
 [Конверсионные указатели](http://docs.php.net/ru/strftime#refsect1-function.strftime-parameters) в модификаторе **date_format**:
