@@ -950,6 +950,10 @@ class Template extends Render
             if ($tokens->is(T_OBJECT_OPERATOR) && $tokens->isNext(T_STRING)) {
                 $code .= '->' . $tokens->next()->getAndNext();
             }
+            if ($tokens->current() === "." || $tokens->current() === "[") {
+                $code = substr($code, 0, -strlen($tokens->prev[1]));
+                $code .= $this->parseVariable($tokens, $tokens->prev[1]);
+            }
         } while ($tokens->is('(', T_OBJECT_OPERATOR));
 
         return $code;
