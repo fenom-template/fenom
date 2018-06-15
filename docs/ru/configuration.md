@@ -43,7 +43,7 @@ $fenom->setOptions($options);
 
 ```php
 $fenom->setOptions(array(
-    "compile_check" => true,
+    "force_compile" => true,
     "force_include" => true
 ));
 // тоже самое что и

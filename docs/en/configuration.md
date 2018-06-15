@@ -38,7 +38,7 @@ Options may by associative array like `'option_name' => true` or bitwise mask.
 
 ```php
 $fenom->setOptions(array(
-    "compile_check" => true,
+    "force_compile" => true,
     "force_include" => true
 ));
 // same
