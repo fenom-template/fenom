@@ -534,7 +534,7 @@ class Fenom
      * Add modifier
      *
      * @param string $modifier the modifier name
-     * @param string $callback the modifier callback
+     * @param callable $callback the modifier callback
      * @return Fenom
      */
     public function addModifier($modifier, $callback)
