@@ -40,6 +40,7 @@ class Fenom
     const AUTO_TRIM         = 0x1000; // reserved
     const DENY_PHP_CALLS    = 0x2000;
     const AUTO_STRIP        = 0x4000;
+    const MODX_SOFT_MODE    = 0x8000; //This option for MODX, when compiling a Fenom tag error, enables the output of this tag as is. To inverse JS / JSON.
     /**
      * Use DENY_PHP_CALLS
      * @deprecated
@@ -87,6 +88,7 @@ class Fenom
         "disable_php_calls"    => self::DENY_PHP_CALLS,
         "disable_statics"      => self::DENY_STATICS,
         "strip"                => self::AUTO_STRIP,
+        "modx_soft_mode"       => self::MODX_SOFT_MODE,
     );
 
     /**
