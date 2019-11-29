@@ -376,7 +376,7 @@ class Template extends Render
         }
         if ($strip) {
             $text = preg_replace('/\s+/uS', ' ', str_replace(array("\r", "\n"), " ", $text));
-            $text = str_replace("> <", "><", $text);
+            $text = str_replace("> <", "><", trim($text));
         }
         $this->_body .= $text;
     }
