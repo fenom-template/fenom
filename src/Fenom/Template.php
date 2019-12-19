@@ -353,6 +353,7 @@ class Template extends Render
      */
     private function _appendText($text)
     {
+        $text = preg_replace('/<!--(.|\s)*?-->/', '', $text);
         $this->_line += substr_count($text, "\n");
         $strip = $this->_options & Fenom::AUTO_STRIP;
         if ($this->_filters) {
