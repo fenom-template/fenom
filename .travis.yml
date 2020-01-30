@@ -1,7 +1,5 @@
 language: php
 
-sudo: false
-
 php:
   - 5.4
   - 5.5
@@ -12,12 +10,10 @@ php:
   - 7.3
   - 7.4
 
-before_script:
-  - composer global require satooshi/php-coveralls
-#  - composer update --dev --quiet
+install: composer install --dev
 
 script:
-  - phpunit -c phpunit.xml.dist
+  - php vendor/bin/phpunit -c phpunit.xml.dist
 
-after_script:
-  - coveralls
+after_success:
+  - travis_retry php vendor/bin/php-coveralls
