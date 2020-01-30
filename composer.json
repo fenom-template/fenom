@@ -16,7 +16,7 @@
     },
     "require-dev": {
       "phpunit/phpunit": "*",
-      "phpunit/php-code-coverage": "^4"
+      "phpunit/php-code-coverage": "*"
     },
     "autoload": {
         "psr-0": { "Fenom\\": "src/" },
