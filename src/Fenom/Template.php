@@ -569,28 +569,34 @@ class Template extends Render
      * Tag router
      * @param Tokenizer $tokens
      *
-     * @throws SecurityException
-     * @throws CompileException
      * @return string executable PHP code
      */
     public function parseTag(Tokenizer $tokens)
     {
+
         try {
             if ($tokens->is(Tokenizer::MACRO_STRING)) {
                 return $this->parseAct($tokens);
-            } elseif ($tokens->is('/')) {
-                return $this->parseEndTag($tokens);
-            } else {
-                return $this->out($this->parseExpr($tokens));
             }
+
+            if ($tokens->is('/')) {
+                return $this->parseEndTag($tokens);
+            }
+
+            return $this->out($this->parseExpr($tokens));
+
         } catch (InvalidUsageException $e) {
-            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}", 0, E_ERROR,
+                $this->_name, $this->_line, $e);
         } catch (\LogicException $e) {
-            throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new SecurityException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0,
+                    0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Exception $e) {
-            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0,
+                    0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         } catch (\Throwable $e) {
-            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
+            throw new CompileException($e->getMessage() . " in {$this->_name} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0,
+                    0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line, $e);
         }
     }
 
@@ -621,26 +627,25 @@ class Template extends Render
      *
      * @static
      * @param Tokenizer $tokens
-     * @throws \LogicException
-     * @throws \RuntimeException
-     * @throws Error\TokenizeException
      * @return string
      */
     public function parseAct(Tokenizer $tokens)
     {
         $action = $tokens->get(Tokenizer::MACRO_STRING);
         $tokens->next();
-        if ($tokens->is("(", T_DOUBLE_COLON, T_NS_SEPARATOR) && !$tokens->isWhiteSpaced()
-        ) { // just invoke function or static method
+        if ($tokens->is("(", T_DOUBLE_COLON, T_NS_SEPARATOR) && !$tokens->isWhiteSpaced()) { // just invoke function or static method
             $tokens->back();
             return $this->out($this->parseExpr($tokens));
-        } elseif ($tokens->is('.')) {
+        }
+
+        if ($tokens->is('.')) {
             $name = $tokens->skip()->get(Tokenizer::MACRO_STRING);
             if ($action !== "macro") {
                 $name = $action . "." . $name;
             }
             return $this->parseMacroCall($tokens, $name);
         }
+
         if ($info = $this->_fenom->getTag($action, $this)) {
             $tag = new Tag($action, $this, $info, $this->_body);
             if ($tokens->is(':')) { // parse tag options
@@ -652,7 +657,7 @@ class Template extends Render
             if ($tag->isClosed()) {
                 $tag->restoreAll();
             } else {
-                array_push($this->_stack, $tag);
+                $this->_stack[] = $tag;
             }
             return $code;
         }
@@ -662,6 +667,7 @@ class Template extends Render
                 return $this->_stack[$i]->tag($action, $tokens);
             }
         }
+
         if ($tags = $this->_fenom->getTagOwners($action)) { // unknown template tag
             throw new TokenizeException(
                 "Unexpected tag '$action' (this tag can be used with '" . implode(
@@ -669,9 +675,9 @@ class Template extends Render
                     $tags
                 ) . "')"
             );
-        } else {
-            throw new TokenizeException("Unexpected tag '$action'");
         }
+
+        throw new TokenizeException("Unexpected tag '$action'");
     }
 
     /**

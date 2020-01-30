@@ -254,7 +254,11 @@ class Tokenizer
      */
     public function current()
     {
-        return $this->curr[1];
+        if ($this->curr) {
+            return $this->curr[1];
+        }
+
+        return null;
     }
 
     /**
@@ -349,9 +353,9 @@ class Tokenizer
             $cur = $this->curr[1];
             $this->next();
             return $cur;
-        } else {
-            throw new UnexpectedTokenException($this, func_get_args());
         }
+
+        throw new UnexpectedTokenException($this, func_get_args());
     }
 
     /**
@@ -395,9 +399,9 @@ class Tokenizer
     {
         if ($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
             return $this->curr[1];
-        } else {
-            throw new UnexpectedTokenException($this, func_get_args());
         }
+
+        throw new UnexpectedTokenException($this, func_get_args());
     }
 
     /**
@@ -478,20 +482,24 @@ class Tokenizer
     /**
      * Get token name
      * @static
-     * @param int|string $token
+     * @param int|string|array $token
      * @return string
      */
     public static function getName($token)
     {
         if (is_string($token)) {
             return $token;
-        } elseif (is_integer($token)) {
-            return token_name($token);
-        } elseif (is_array($token)) {
-            return token_name($token[0]);
-        } else {
-            return null;
         }
+
+        if (is_int($token)) {
+            return token_name($token);
+        }
+
+        if (is_array($token)) {
+            return token_name($token[0]);
+        }
+
+        return null;
     }
 
     /**
@@ -506,13 +514,13 @@ class Tokenizer
             if ($this->_valid(func_get_args(), $this->curr[0])) {
                 $this->next();
                 return $this;
-            } else {
-                throw new UnexpectedTokenException($this, func_get_args());
             }
-        } else {
-            $this->next();
-            return $this;
+
+            throw new UnexpectedTokenException($this, func_get_args());
         }
+
+        $this->next();
+        return $this;
     }
 
     /**
@@ -523,7 +531,7 @@ class Tokenizer
      */
     public function skipIf($token1 /*, $token2, ...*/)
     {
-        if ($this->_valid(func_get_args(), $this->curr[0])) {
+        if ($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
             $this->next();
         }
         return $this;
@@ -538,11 +546,11 @@ class Tokenizer
      */
     public function need($token1 /*, $token2, ...*/)
     {
-        if ($this->_valid(func_get_args(), $this->curr[0])) {
+        if ($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
             return $this;
-        } else {
-            throw new UnexpectedTokenException($this, func_get_args());
         }
+
+        throw new UnexpectedTokenException($this, func_get_args());
     }
 
     /**
