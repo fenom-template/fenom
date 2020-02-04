@@ -254,6 +254,9 @@ class Tokenizer
      */
     public function current()
     {
+        if (is_null($this->curr)) {
+            return null;
+        }
         return $this->curr[1];
     }
 
