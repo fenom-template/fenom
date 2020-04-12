@@ -19,7 +19,12 @@
         "satooshi/php-coveralls": "*"
     },
     "autoload": {
-        "psr-0": { "Fenom\\": "src/Fenom/", "Fenom": "src/" },
-        "classmap": [ "src/" ]
+        "psr-4": {
+            "Fenom\\": "src/Fenom/"
+        },
+        "psr-0": {
+            "Fenom": "src/"
+        },
+        "classmap": ["src/"]
     }
 }
