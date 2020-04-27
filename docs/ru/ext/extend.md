@@ -6,61 +6,72 @@
 В шаблонизаторе принято различать два типа тегов: _компиляторы_ и _функции_.
 Компиляторы вызываются во время преобразования кода шаблона в PHP код и возвращяют PHP код который будет вставлен вместо тега.
 А функции вызываются непременно в момент выполнения шаблона и возвращают непосредственно данные которые будут отображены.
-Среди тегов как и в HTML есть строчные и блоковые теги.
+Среди тегов, как и в HTML, есть строчные и блоковые теги.
 
 ## Линейные функции
 
-Примитивное добавление функции можно осуществить следующим образом:
+Добавление функции можно осуществить следующим образом:
 
 ```php
 $fenom->addFunction(string $function_name, callable $callback[, callable $parser]);
 ```
 
-В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML атрибутов и отдаст их в функцию ассоциативным массивом:
+В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега (которые должны быть в формате HTML атрибутов) и отдаст их в функцию ассоциативным массивом:
+
 ```php
 $fenom->addFunction("some_function", function (array $params) { /* ... */ });
 ```
-При необходимости можно переопределить парсер на произвольный:
+
+При необходимости можно переопределить парсер:
+
 ```php
 $fenom->addFunction("some_function", $some_function, function (Fenom\Tokenizer $tokenizer, Fenom\Template $template) { /* parse tag */});
 ```
+
 Существует более простой способ добавления произвольной функции:
 
 ```php
-$fenom->addFunctionSmarty(string $function_name, callable $callback);
+$fenom->addFunctionSmart(string $function_name, callable $callback);
 ```
 
 В данном случае парсер сканирует список аргументов коллбека и попробует сопоставить с аргументами тега.
 
 ```php
-// ... class XYCalcs ..
-public static function calc($x, $y = 5) { /* ... */}
+class XYCalcs {
+    public static function calc($x, $y = 5) {
+        return $x + $y;
+    }
+}
 // ...
 $fenom->addFunctionSmart('calc', 'XYCalcs::calc');
 ```
-пример выше позволяет объявить тег `{calc}` и спользовать его:
+
+пример выше позволяет объявить тег `{calc}` и использовать его:
+
 ```smarty
 {calc x=$top y=50} или {calc y=50 x=$top} вызовет XYCalcs::calc($top, 50)
 {calc x=$top} или {calc $top} вызовет XYCalcs::calc($top)
 ```
-Таким образом вы успешно можете добавлять Ваши функции или методы.
+
+Таким образом Вы легко можете добавлять свои функции или методы.
 
 ## Блоковые функции
 
-Добавление блоковой функции аналогичен добавлению строковой за исключением того что есть возможность указать парсер для закрывающего тега.
+Добавление блоковой функции аналогично добавлению строковой, за исключением того, что есть возможность указать парсер для закрывающего тега.
 
 ```php
 $fenom->addBlockFunction(string $function_name, callable $callback[, callable $parser_open[, callable $parser_close]]);
 ```
 
 Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега:
+
 ```php
-$fenom->addBlockFunction('some_block_function', function (array $params, $content) { /* ... */});
+$fenom->addBlockFunction('some_block_function', function ($content, array $params) { /* ... */ });
 ```
 
 ## Линейный компилятор
 
-Добавление строчного компилятора осуществляеться очень просто:
+Добавление строчного компилятора осуществляется очень просто:
 
 ```php
 $fenom->addCompiler(string $compiler, callable $parser);
@@ -73,17 +84,18 @@ $fenom->addCompiler(string $compiler, callable $parser);
 $fenom->addCompilerSmart(string $compiler, $storage);
 ```
 
-`$storage` может быть как классом так и объектом. В данном случае шаблонизатор будет искать метод `tag{$compiler}`, который будет взят в качестве парсера тега.
+`$storage` может быть как именем класса, так и объектом. В данном случае шаблонизатор будет искать метод `tag{$compiler}` и взят в качестве парсера тега.
 
 ## Блоковый компилятор
 
-Добавление блочного компилятора осуществяется двумя способами. Первый
+Добавление блочного компилятора осуществяется двумя способами. Первый:
 
 ```php
 $fenom->addBlockCompiler(string $compiler, array $parsers, array $tags);
 ```
 
 где `$parser` ассоциативный массив `["open" => parser, "close" => parser]`, сождержащий парсер на открывающий и на закрывающий тег, а `$tags` содержит список внутренних тегов в формате `["tag_name"] => parser`, которые могут быть использованы только с этим компилятором.
+
 Второй способ добавления парсера через импортирование из класса или объекта методов:
 
 ```php
@@ -107,7 +119,8 @@ $fenom->addModifier(string $modifier, callable $callback);
 
 ```php
 $fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
-    // ...
+    // изменение $variable
+    return $variable;
 });
 ```
 
@@ -116,19 +129,20 @@ $fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
 ```php
 $fenom->addTest(string $name, string $code);
 ```
-`$code` - PHP код для условия, с маркером для замены на значение или переменную. 
+
+`$code` - PHP код для условия с маркером для замены на значение или переменную. 
 Например, тест на целое число `is int` можно добавить как `$fenom->addTest('int', 'is_int(%s)')`. 
-В шаблоне тесты выглядит как `{$a is int}`, а после компиляции выглядит приблизительно так - `is_int($a)`.
+В шаблоне тест выглядит как `{$a is int}`, а после компиляции - `is_int($a)`.
 
 # Расширение глобальной переменной
 
 Fenom обладает определенным [набором глобальных переменных](../syntax.md#Системная-переменная).
-Однако их может не хватать для удобной работы и в этом случае потребуется добавить свои или переопределить/удалить существующие.
+Однако, их может не хватать для удобной работы и в этом случае потребуется добавить свои или переопределить/удалить существующие.
 Метод `Fenom::addAccessor(string $name, callable $parser)` позволяет добавить свой обработчик-парсер `$parser`,
 который будет вызван при встрече с глобальной переменной `$name` **во время компиляции шаблона**.
 
 ```php
-$fenom->addAccessor('project', function (Fenom\Tokenizer $tokens) { /* code */ }); 
+$fenom->addAccessor('project', function (Fenom\Tokenizer $tokens) { /* ... */ }); 
 ```
 
 Указанный вторым аргументом, парсер будет вызван при встречи компилятором конструкции `$.project`.
@@ -158,30 +172,38 @@ $fenom->addAccessor('project', function (Fenom\Tokenizer $tokens) { /* code */ }
         "support" => 'support@example.ru'
     ];
 ```
+
 В шаблоне появится глобальная переменная `$.site`:
+
 ```smarty
 <div class="copyright">© <a href="//{$.site.domain}">{$.site.domain}</a></div>
 <div class="support">Support <a href="mailto:{$.site.support}">{$.site.support}</a></div>
 ```
+
 Свойством может быть любое значение — масиив, объект и т.д.
 
 ### Доступ к методу
 
 Парсер `Fenom::ACCESSOR_METHOD` позволит обратится к указанному методу шаблонизатора из шаблона.
 Параметр `$accessor` выступает как **имя метода**:
+
 ```php
     $fenom->addAccessorSmart("fetch", "fetch", Fenom::ACCESSOR_METHOD);
 ```
+
 В шаблоне появится глобальная функция `$.fetch`:
+
 ```smarty
 {set $menu = $.fetch("site/menu.tpl")} {* $menu = $fenom->fetch("site/menu.tpl") *}
 ```
+
 Шаблонизатор не проверят количество и тип параметров которые передает в метод.
 
 ### Доступ к значению
 
 Парсер `Fenom::ACCESSOR_VAR` позволит обратится к указанному значению из шаблона.
 Параметр `$accessor` выступает как **PHP выражение**, описывающее значение:
+
 ```php
     $fenom->addAccessorSmart("storage", "App::getInstance()->storage", Fenom::ACCESSOR_VAR);
 ```
@@ -194,17 +216,23 @@ $fenom->addAccessor('project', function (Fenom\Tokenizer $tokens) { /* code */ }
 
 Парсер `Fenom::ACCESSOR_CALL` позволит вызвать указанную финкцию или метод из шаблона.
 Параметр `$accessor` выступает как **PHP выражение**, описывающее название функции или метод:
+
 ```php
     $fenom->addAccessorSmart("di", "App::getInstance()->di->get", Fenom::ACCESSOR_CALL);
 ```
-`App::getInstance()->di->get` доллжно быть callable, то есть
+
+`App::getInstance()->di->get` должно быть callable, то есть:
+
 ```php
 is_callable([App::getInstance()->di, "get"]) === true;
 ```
+
 В шаблоне появится глобальная переменная `$.di`:
+
 ```smarty
 {set $st = $.di("stamp")} {* $st = App::getInstance()->di->get("stamp") *}
 ```
+
 Шаблонизатор не проверят количество и тип параметров которые передает в метод или функцию.
 
 # Источники шаблонов
@@ -231,12 +259,11 @@ class DbProvider implements Fenom\ProviderInterface {
 Добавляем источник, указав удобное имя.
 
 ```php
-
 $provider = new DbProvider();
 $fenom->setProvider("db", $provider, "/tmp/cached/db");
 ```
 
-Теперь источник можно использовать.
+Теперь источник можно использовать:
 
 ```php
 $fenom->display("db:index.tpl", $vars);
@@ -269,7 +296,7 @@ $fenom->display("db:index.tpl", $vars);
 **Note**
 (On 2014-05-13) Zend OpCacher кроме `file://` и `phar://` не поддерживает другие протоколы.
 
-Пример работы кеша
+Пример работы кеша:
 
 ```php
 $this->setCacheDir("redis://hash/compiled/");
