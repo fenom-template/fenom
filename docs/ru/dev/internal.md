@@ -59,7 +59,7 @@ How it work
         * В конце проверяется токенайзер на наличие не используемых токенов, если таковые есть - выбрасывается ошибка.
     * [Проверяется](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L264) стек на наличие не закрытых блоковых тегов
 * PHP код проходит [post-фильтры](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L282)
-* Код шаблона [сохраняеться](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L799) на файлувую систему
+* Код шаблона [сохраняется](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L799) на файлувую систему
 * Код шаблона выполняется для использования
 
 ### Как работает токенайзер
@@ -78,7 +78,7 @@ How it work
 * Проверяет, не является выражение в токенайзере [тегом ignore](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L492).
 * Проверяет, не является выражение в токенайзере [закрывающим тегом](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L499).
 * Проверяет, не является выражение в токенайзере [скалярным значением](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L566).
-* По имени тега из [списка тегов](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L140) выбирается массив и запускается [соответсвующий](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L582) парсер.
+* По имени тега из [списка тегов](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom.php#L140) выбирается массив и запускается [соответствующий](https://github.com/bzick/fenom/blob/1.2.2/src/Fenom/Template.php#L582) парсер.
 * Парсер возвращает PHP код
 
 ### Как работают парсеры
