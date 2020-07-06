@@ -503,7 +503,7 @@ class Tokenizer
     public function skip( /*$token1, $token2, ...*/)
     {
         if (func_num_args()) {
-            if ($this->_valid(func_get_args(), $this->curr[0])) {
+            if ($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
                 $this->next();
                 return $this;
             } else {
@@ -538,7 +538,7 @@ class Tokenizer
      */
     public function need($token1 /*, $token2, ...*/)
     {
-        if ($this->_valid(func_get_args(), $this->curr[0])) {
+        if ($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
             return $this;
         } else {
             throw new UnexpectedTokenException($this, func_get_args());
