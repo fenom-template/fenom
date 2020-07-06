@@ -10,7 +10,7 @@ php:
 
 before_script:
   - composer global require satooshi/php-coveralls
-#  - composer update --dev --quiet
+  - composer update --quiet
 
 script:
   - phpunit -c phpunit.xml.dist
