@@ -523,7 +523,7 @@ class Tokenizer
      */
     public function skipIf($token1 /*, $token2, ...*/)
     {
-        if ($this->_valid(func_get_args(), $this->curr[0])) {
+        if ($this->curr && $this->_valid(func_get_args(), $this->curr[0])) {
             $this->next();
         }
         return $this;
