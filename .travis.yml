@@ -15,7 +15,7 @@ before_script:
   - composer update --quiet
 
 script:
-  - phpunit -c phpunit.xml.dist
+  - vendor/bin/phpunit phpunit -c phpunit.xml.dist
 
 after_script:
   - coveralls
