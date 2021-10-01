@@ -9,174 +9,192 @@
  */
 namespace Fenom;
 
+use InvalidArgumentException;
+use RecursiveIteratorIterator;
+use RecursiveDirectoryIterator;
+
 /**
- * Base template provider
+ * Base template provider.
+ * 
  * @author Ivan Shalganov
  */
 class Provider implements ProviderInterface
 {
-    private $_path;
-
-    protected $_clear_cache = false;
+    /**
+     * @var string template directory
+     */
+    protected $path;
+    
+    /**
+     * @var string template extension
+     */
+    protected $extension = 'tpl';
 
     /**
-     * Clean directory from files
+     * @var bool
+     */
+    protected $clear_cache = false;
+
+    /**
+     * Cleans directory from files and sub directories.
      *
      * @param string $path
+     * @return void
      */
     public static function clean($path)
     {
         if (is_file($path)) {
             unlink($path);
-        } elseif (is_dir($path)) {
-            $iterator = iterator_to_array(
-                new \RecursiveIteratorIterator(
-                    new \RecursiveDirectoryIterator($path,
-                        \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS),
-                    \RecursiveIteratorIterator::CHILD_FIRST
-                )
+        } else {
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $path,
+                    RecursiveDirectoryIterator::CURRENT_AS_FILEINFO | RecursiveDirectoryIterator::SKIP_DOTS
+                ),
+                RecursiveIteratorIterator::CHILD_FIRST
             );
-            foreach ($iterator as $file) {
-                /* @var \splFileInfo $file */
-                if ($file->isFile()) {
-                    if (strpos($file->getBasename(), ".") !== 0) {
-                        unlink($file->getRealPath());
-                    }
-                } elseif ($file->isDir()) {
-                    rmdir($file->getRealPath());
+            /* @var \SplFileInfo $info */
+            foreach ($iterator as $info) {
+                if ($info->isFile()) {
+                    unlink($info->getRealPath());
+                } else {
+                    rmdir($info->getRealPath());
                 }
             }
         }
     }
 
     /**
-     * Recursive remove directory
+     * Removes directory or file.
      *
-     * @param string $path
+     * @param string $path template directory
+     * @return void
      */
     public static function rm($path)
     {
-        self::clean($path);
+        static::clean($path);
         if (is_dir($path)) {
             rmdir($path);
         }
     }
 
     /**
-     * @param string $template_dir directory of templates
-     * @throws \LogicException if directory doesn't exists
+     * @param string $template_dir template directory
+     * @param string|null $extension template extension
+     * @throws InvalidArgumentException if directory doesn't exists
      */
-    public function __construct($template_dir)
+    public function __construct($template_dir, $extension = null)
     {
-        if ($_dir = realpath($template_dir)) {
-            $this->_path = $_dir;
-        } else {
-            throw new \LogicException("Template directory {$template_dir} doesn't exists");
+        $path = realpath($template_dir)
+        if (! $path) {
+            throw new InvalidArgumentException("Template directory {$template_dir} doesn't exists");
         }
+        $this->path = $path . DIRECTORY_SEPARATOR;
+        if ($extension !== null) {
+            $this->extension = strtolower($extension);
+        }
+        
     }
 
+    /**
+     * Get template path.
+     * @param string $tpl
+     * @param bool $throw
+     * @return string|null
+     * @throws InvalidArgumentException template not found
+     */
+    protected function getTemplatePath($tpl, $throw = true)
+    {
+        $path = realpath($this->path . $tpl);
+        if ($throw && ! $path) {
+            throw new InvalidArgumentException("Template $tpl not found");
+        }
+        return $path;
+    }
+    
     /**
      * Disable PHP cache for files. PHP cache some operations with files then script works.
-     * @see http://php.net/manual/en/function.clearstatcache.php
+     * @link https://www.php.net/manual/en/function.clearstatcache.php
      * @param bool $status
+     * @return $this
      */
-    public function setClearCachedStats($status = true) {
-        $this->_clear_cache = $status;
+    public function setClearCachedStats($status = true)
+    {
+        $this->clear_cache = (bool) $status;
+        return $this;
     }
 
     /**
-     * Get source and mtime of template by name
-     * @param string $tpl
-     * @param int $time load last modified time
-     * @return string
+     * @inheritDoc
      */
     public function getSource($tpl, &$time)
     {
-        $tpl = $this->_getTemplatePath($tpl);
-        if($this->_clear_cache) {
-            clearstatcache(true, $tpl);
+        $path = $this->getTemplatePath($tpl);
+        if ($this->clear_cache) {
+            clearstatcache(true, $path);
         }
-        $time = filemtime($tpl);
-        return file_get_contents($tpl);
+        $time = filemtime($path);
+        return file_get_contents($path);
     }
 
     /**
-     * Get last modified of template by name
-     * @param string $tpl
-     * @return int
+     * @inheritDoc
      */
     public function getLastModified($tpl)
     {
-        $tpl = $this->_getTemplatePath($tpl);
-        if($this->_clear_cache) {
-            clearstatcache(true, $tpl);
+        $path = $this->getTemplatePath($tpl);
+        if ($this->clear_cache) {
+            clearstatcache(true, $path);
         }
-        return filemtime($tpl);
+        return filemtime($path);
     }
 
     /**
-     * Get all names of templates from provider.
-     *
-     * @param string $extension all templates must have this extension, default .tpl
-     * @return array|\Iterator
+     * {@inheritDoc}
+     * @param string $extension deprecated, set extension in constructor
      */
-    public function getList($extension = "tpl")
+    public function getList($extension = null)
     {
-        $list     = array();
-        $iterator = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($this->_path,
-                \FilesystemIterator::CURRENT_AS_FILEINFO | \FilesystemIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
+        $list = array();
+        $path_len = strlen($this->path) + 1;
+        $extension = $extension ? strtolower($extension) : $this->extension;
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator(
+                $this->path,
+                RecursiveDirectoryIterator::CURRENT_AS_FILEINFO | RecursiveDirectoryIterator::SKIP_DOTS
+            )
         );
-        $path_len = strlen($this->_path);
-        foreach ($iterator as $file) {
-            /* @var \SplFileInfo $file */
-            if ($file->isFile() && $file->getExtension() == $extension) {
-                $list[] = substr($file->getPathname(), $path_len + 1);
+        /* @var \SplFileInfo $info */
+        foreach ($iterator as $info) {
+            if ($info->isFile() && strtolower($info->getExtension()) == $extension) {
+                $list[] = substr($info->getRealPath(), $path_len);
             }
         }
         return $list;
     }
 
     /**
-     * Get template path
-     * @param $tpl
-     * @return string
-     * @throws \RuntimeException
-     */
-    protected function _getTemplatePath($tpl)
-    {
-        $path = realpath($this->_path . "/" . $tpl);
-        if ($path && strpos($path, $this->_path) === 0) {
-            return $path;
-        } else {
-            throw new \RuntimeException("Template $tpl not found");
-        }
-    }
-
-    /**
-     * @param string $tpl
-     * @return bool
+     * @inheritDoc
      */
     public function templateExists($tpl)
     {
-        return ($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0;
+        return (bool) $this->getTemplatePath($tpl, false);
     }
 
     /**
-     * Verify templates (check change time)
-     *
-     * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
-     * @return bool
+     * @inheritDoc
      */
     public function verify(array $templates)
     {
         foreach ($templates as $template => $mtime) {
-            $template = $this->_path . '/' . $template;
-            if($this->_clear_cache) {
-                clearstatcache(true, $template);
+            $path = $this->getTemplatePath($template, false);
+            if (! $path) {
+                return false;
             }
-            if (@filemtime($template) !== $mtime) {
+            if ($this->clear_cache) {
+                clearstatcache(true, $path);
+            }
+            if (filemtime($path) != $mtime) {
                 return false;
             }
 
