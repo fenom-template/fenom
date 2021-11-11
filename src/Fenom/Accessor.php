@@ -185,8 +185,12 @@ class Accessor {
             }
         }
         if($tokens->is(',')) {
-            $tokens->skip()->need('[');
-            $vars = $tpl->parseArray($tokens) . ' + $var';
+            $tokens->next();
+            if($tokens->is('[')){
+                $vars = $tpl->parseArray($tokens) . ' + $var';
+            }elseif($tokens->is(T_VARIABLE)){
+                $vars = $tpl->parseExpr($tokens) . ' + $var';
+            }
         } else {
             $vars = '$var';
         }
