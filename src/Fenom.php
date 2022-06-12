@@ -782,16 +782,30 @@ class Fenom
     public function isAllowedFunction($function)
     {
         $function = (string) $function;
+        $allow = ($this->_options & self::DENY_NATIVE_FUNCS)
+            ? isset($this->_allowed_funcs[$function])
+            : function_exists($function);
+        return $allow && !in_array($function, $this->getDisabledFuncs(), true);
+    }
+
+    /**
+     * Returns the disabled PHP functions.
+     *
+     * @return string[]
+     */
+    protected function _getDisabledFuncs()
+    {
         if (!is_array($this->_disabled_funcs)) {
             $disabled = ini_get('disable_functions');
-            $this->_disabled_funcs = empty($disabled) ? [] : explode(',', $disabled);
+            // adds execution functions to disabled for security
+            $this->_disabled_funcs = array_merge(
+                empty($disabled) ? [] : explode(',', $disabled),
+                array('exec', 'system', 'passthru', 'shell_exec', 'pcntl_exec', 'proc_open', 'popen'),
+                array('call_user_func', 'call_user_func_array')
+            );
         }
 
-        if ($this->_options & self::DENY_NATIVE_FUNCS) {
-            return isset($this->_allowed_funcs[$function]) && !in_array($function, $this->_disabled_funcs, true);
-        }
-
-        return function_exists($function) && !in_array($function, $this->_disabled_funcs, true);
+        return $this->_disabled_funcs;
     }
 
     /**
