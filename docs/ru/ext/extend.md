@@ -27,7 +27,7 @@ $fenom->addFunction("some_function", $some_function, function (Fenom\Tokenizer $
 Существует более простой способ добавления произвольной функции:
 
 ```php
-$fenom->addFunctionSmarty(string $function_name, callable $callback);
+$fenom->addFunctionSmart(string $function_name, callable $callback);
 ```
 
 В данном случае парсер сканирует список аргументов коллбека и попробует сопоставить с аргументами тега.
