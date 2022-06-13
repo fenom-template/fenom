@@ -201,6 +201,11 @@ class Fenom
     );
 
     /**
+     * @var string[] the disabled functions by `disable_functions` PHP's option
+     */
+    protected $_disabled_funcs;
+
+    /**
      * @var array[] of compilers and functions
      */
     protected $_actions = array(
@@ -769,16 +774,38 @@ class Fenom
     }
 
     /**
-     * @param string $function
+     * Checks if is allowed PHP function for using in templates.
+     *
+     * @param string $function the function name
      * @return bool
      */
     public function isAllowedFunction($function)
     {
-        if ($this->_options & self::DENY_NATIVE_FUNCS) {
-            return isset($this->_allowed_funcs[$function]);
-        } else {
-            return is_callable($function);
+        $function = (string) $function;
+        $allow = ($this->_options & self::DENY_NATIVE_FUNCS)
+            ? isset($this->_allowed_funcs[$function])
+            : function_exists($function);
+        return $allow && !in_array($function, $this->getDisabledFuncs(), true);
+    }
+
+    /**
+     * Returns the disabled PHP functions.
+     *
+     * @return string[]
+     */
+    protected function _getDisabledFuncs()
+    {
+        if (!is_array($this->_disabled_funcs)) {
+            $disabled = ini_get('disable_functions');
+            // adds execution functions to disabled for security
+            $this->_disabled_funcs = array_merge(
+                empty($disabled) ? [] : explode(',', $disabled),
+                array('exec', 'system', 'passthru', 'shell_exec', 'pcntl_exec', 'proc_open', 'popen'),
+                array('call_user_func', 'call_user_func_array')
+            );
         }
+
+        return $this->_disabled_funcs;
     }
 
     /**
