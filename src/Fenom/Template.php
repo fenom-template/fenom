@@ -123,7 +123,9 @@ class Template extends Render
      * @var int crc32 of the template name
      */
     private $_crc = 0;
-
+    
+    private $_log = ""; //for MODX log in MODX_SOFT_MODE
+    
     /**
      * @param Fenom $fenom Template storage
      * @param int $options
@@ -137,7 +139,24 @@ class Template extends Render
         $this->_filters     = $this->_fenom->getFilters();
         $this->_tag_filters = $this->_fenom->getTagFilters();
     }
-
+    
+    /**
+     * Add log for MODX log in MODX_SOFT_MODE
+     * @param string $message
+     */
+    private function log($message)
+    {
+        $this->_log .= $message."\r\n";
+    }
+    
+    /**
+     * Get log for MODX log in MODX_SOFT_MODE
+     */
+    public function getError()
+    {
+        return $this->_log;
+    }
+    
     /**
      * Get tag stack size
      * @return int
@@ -271,9 +290,24 @@ class Template extends Render
                         if ($tokens->isIncomplete()) { // all strings finished?
                             $need_more = true;
                         } else {
-                            $this->_appendCode($this->parseTag($tokens), '{' . $tag . '}'); // start the tag lexer
-                            if ($tokens->key()) { // if tokenizer have tokens - throws exceptions
-                                throw new CompileException("Unexpected token '" . $tokens->current() . "' in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line);
+                            $soft_mode = $this->_options & Fenom::MODX_SOFT_MODE;
+                            if($soft_mode){
+                                 try{
+                                     $code = $this->parseTag($tokens);
+                                     if ($tokens->key()) { // if tokenizer have tokens - throws exceptions
+                                         throw new CompileException("Unexpected token '" . $tokens->current() . "' in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line);
+                                     }
+                                     $this->_appendCode($code, '{' . $tag . '}'); // start the tag lexer
+                                 }catch (\Exception $e){    
+                                     $this->_appendText('{' . $tag . '}');
+                                     $this->log($e->getMessage());
+                                 }
+                            }else{
+                                 $code = $this->parseTag($tokens);
+                                 $this->_appendCode($code, '{' . $tag . '}'); // start the tag lexer
+                                 if ($tokens->key()) { // if tokenizer have tokens - throws exceptions
+                                     throw new CompileException("Unexpected token '" . $tokens->current() . "' in {$this} line {$this->_line}, near '{" . $tokens->getSnippetAsString(0, 0) . "' <- there", 0, E_ERROR, $this->_name, $this->_line);
+                                 }
                             }
                         }
                     } while ($need_more);
