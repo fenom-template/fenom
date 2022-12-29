@@ -40,7 +40,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Return the current element
      */
-    public function current()
+    public function current(): mixed
     {
         return $this->current;
     }
@@ -48,7 +48,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Move forward to next element
      */
-    public function next()
+    public function next(): void
     {
         $this->current += $this->step;
         $this->index++;
@@ -58,7 +58,7 @@ class RangeIterator implements \Iterator, \Countable
      * Return the key of the current element
      * @return int
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->index;
     }
@@ -67,7 +67,7 @@ class RangeIterator implements \Iterator, \Countable
      * Checks if current position is valid
      * @return bool
      */
-    public function valid()
+    public function valid(): bool
     {
         return $this->current >= $this->min && $this->current <= $this->max;
     }
@@ -75,7 +75,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Rewind the Iterator to the first element
      */
-    public function rewind()
+    public function rewind(): void
     {
         if($this->step > 0) {
             $this->current = min($this->min, $this->max);
@@ -88,7 +88,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Count elements of an object
      */
-    public function count()
+    public function count(): int
     {
         return intval(($this->max - $this->min + 1) / $this->step);
     }
