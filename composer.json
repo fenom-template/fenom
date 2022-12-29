@@ -1,5 +1,5 @@
 {
-    "name": "fenom/fenom",
+    "name": "griva/fenom",
     "type": "library",
     "description": "Fenom - excellent template engine for PHP",
     "keywords": ["fenom", "template", "templating", "templater"],
