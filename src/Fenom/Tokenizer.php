@@ -171,6 +171,8 @@ class Tokenizer
         'NULL'  => 1
     );
 
+    public function __set(string $name, mixed $value): void {}
+
     /**
      * @param $query
      */
