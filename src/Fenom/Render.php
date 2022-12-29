@@ -245,6 +245,8 @@ class Render extends \ArrayObject
         throw new \BadMethodCallException("Unknown method " . $method);
     }
 
+    public function __set(string $name, mixed $value): void {}
+
     public function __get($name)
     {
         return $this->$name = null;
