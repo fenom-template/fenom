@@ -124,6 +124,8 @@ class Template extends Render
      */
     private $_crc = 0;
 
+    public function __set(string $name, mixed $value): void {}
+
     /**
      * @param Fenom $fenom Template storage
      * @param int $options
