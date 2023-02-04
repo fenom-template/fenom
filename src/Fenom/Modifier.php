@@ -23,7 +23,7 @@ class Modifier
      * @param string $format
      * @return string
      */
-    public static function dateFormat($date, $format = "%b %e, %Y")
+    public static function dateFormat($date, $format = "Y m d")
     {
         if (!is_numeric($date)) {
             $date = strtotime($date);
@@ -31,7 +31,7 @@ class Modifier
                 $date = time();
             }
         }
-        return strftime($format, $date);
+        return date($format, $date);
     }
 
     /**
