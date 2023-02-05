@@ -951,8 +951,8 @@ class Template extends Render
                 $code .= '->' . $tokens->next()->getAndNext();
             }
             if ($tokens->current() === "." || $tokens->current() === "[") {
-                $code = substr($code, 0, -strlen($tokens->prev[1]));
-                $code .= $this->parseVariable($tokens, $tokens->prev[1]);
+                $code = substr($code, 0, -strlen($tokens->prevToken()[1]));
+                $code .= $this->parseVariable($tokens, $tokens->prevToken()[1]);
             }
         } while ($tokens->is('(', T_OBJECT_OPERATOR));
 

@@ -24,7 +24,7 @@ class UnexpectedTokenException extends \RuntimeException
         } else {
             $expect = "";
         }
-        if (!$tokens->curr) {
+        if (!$tokens->currToken()) {
             $this->message = "Unexpected end of " . ($where ? : "expression") . "$expect";
         } else {
             $this->message = "Unexpected token '" . $tokens->current() . "' in " . ($where ? : "expression") . "$expect";

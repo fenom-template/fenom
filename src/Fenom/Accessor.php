@@ -84,7 +84,7 @@ class Accessor {
      */
     public static function getVar(Tokenizer $tokens, Template $tpl)
     {
-        $name = $tokens->prev[Tokenizer::TEXT];
+        $name = $tokens->prevToken()[Tokenizer::TEXT];
         if(isset(self::$vars[$name])) {
             $var = $tpl->parseVariable($tokens, self::$vars[$name]);
             return "(isset($var) ? $var : null)";

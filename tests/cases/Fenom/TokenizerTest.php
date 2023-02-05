@@ -45,7 +45,7 @@ class TokenizerTest extends TestCase
                 '  ',
                 1
             ),
-            $tokens->curr
+            $tokens->currToken()
         );
         $this->assertSame("resolve", $tokens->getNext($tokens::MACRO_UNARY, T_STRING));
 
@@ -106,7 +106,6 @@ class TokenizerTest extends TestCase
         $this->assertSame($tokens, $tokens->next());
         $tokens->p = -1000;
         $this->assertSame($tokens, $tokens->back());
-        $this->assertNull($tokens->undef);
     }
 
     public function testFixFloats() {

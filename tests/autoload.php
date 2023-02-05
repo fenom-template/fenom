@@ -1,11 +1,7 @@
 <?php
 
 require(__DIR__ . "/../src/Fenom.php");
-Fenom::registerAutoload();
-
-if(!class_exists('\PHPUnit_Framework_TestCase') && class_exists('\PHPUnit\Framework\TestCase')) {
-    class_alias('\PHPUnit\Framework\TestCase', '\PHPUnit_Framework_TestCase');
-}
+//Fenom::registerAutoload();
 
 define('FENOM_RESOURCES', __DIR__ . "/resources");
 

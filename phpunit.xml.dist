@@ -8,7 +8,6 @@
          convertWarningsToExceptions="true"
          processIsolation="false"
          stopOnFailure="false"
-         syntaxCheck="false"
          bootstrap="tests/autoload.php"
         >
     <php>
@@ -18,7 +17,7 @@
     </php>
 
     <testsuites>
-        <testsuite >
+        <testsuite name="tests">
             <directory>./tests/</directory>
         </testsuite>
     </testsuites>
@@ -29,14 +28,6 @@
         </exclude>
     </groups>
 
-    <filter>
-        <whitelist>
-            <directory>./src/</directory>
-        </whitelist>
-        <blacklist>
-            <directory>./tests/</directory>
-        </blacklist>
-    </filter>
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
     </logging>

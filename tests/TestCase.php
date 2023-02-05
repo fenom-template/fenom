@@ -53,7 +53,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return FENOM_RESOURCES . '/compile';
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         if (!file_exists($this->getCompilePath())) {
             mkdir($this->getCompilePath(), 0777, true);
@@ -89,7 +89,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     public static function inlineFunction($params)
     {
-        return isset($params["text"]) ? $params["text"] : "";
+        return $params["text"] ?? "";
     }
 
     public static function blockFunction($params, $text)
@@ -97,7 +97,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return $text;
     }
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         if (!file_exists(FENOM_RESOURCES . '/template')) {
             mkdir(FENOM_RESOURCES . '/template', 0777, true);
