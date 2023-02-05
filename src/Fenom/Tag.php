@@ -23,33 +23,34 @@ class Tag extends \ArrayObject
     /**
      * @var Template
      */
-    public $tpl;
-    public $name;
-    public $options = array();
-    public $line = 0;
-    public $level = 0;
-    public $callback;
-    public $escape;
+    public Template $tpl;
+    public string $name;
+    public array $options = [];
+    public int $line = 0;
+    public int $level = 0;
+    public mixed $callback;
+    public bool $escape;
 
-    private $_offset = 0;
-    private $_closed = true;
-    private $_body;
-    private $_type = 0;
-    private $_open;
-    private $_close;
-    private $_tags = array();
-    private $_floats = array();
-    private $_changed = array();
+    private int $_offset = 0;
+    private bool $_closed = true;
+    private string $_body;
+    private int $_type = 0;
+    private string $_open;
+    private string $_close;
+    private array $_tags = [];
+    private array $_floats = [];
+    private array $_changed = [];
 
     /**
      * Create tag entity
      * @param string $name the tag name
      * @param Template $tpl current template
-     * @param string $info tag's information
+     * @param array $info tag's information
      * @param string $body template's code
      */
-    public function __construct($name, Template $tpl, $info, &$body)
+    public function __construct(string $name, Template $tpl, array $info, string &$body)
     {
+        parent::__construct();
         $this->tpl     = $tpl;
         $this->name    = $name;
         $this->line    = $tpl->getLine();
@@ -62,8 +63,8 @@ class Tag extends \ArrayObject
         if ($this->_type & self::BLOCK) {
             $this->_open   = $info["open"];
             $this->_close  = $info["close"];
-            $this->_tags   = isset($info["tags"]) ? $info["tags"] : array();
-            $this->_floats = isset($info["float_tags"]) ? $info["float_tags"] : array();
+            $this->_tags   = $info["tags"] ?? [];
+            $this->_floats = $info["float_tags"] ?? [];
             $this->_closed = false;
         } else {
             $this->_open = $info["parser"];
@@ -79,7 +80,7 @@ class Tag extends \ArrayObject
      * @param string $option
      * @throws \RuntimeException
      */
-    public function tagOption($option)
+    public function tagOption(string $option)
     {
         if (method_exists($this, 'opt' . $option)) {
             $this->options[] = $option;
@@ -93,7 +94,7 @@ class Tag extends \ArrayObject
      * @param int $option option constant
      * @param bool $value true — add option, false — remove option
      */
-    public function setOption($option, $value)
+    public function setOption(int $option, bool $value)
     {
         $actual = (bool)($this->tpl->getOptions() & $option);
         if ($actual != $value) {
@@ -106,7 +107,7 @@ class Tag extends \ArrayObject
      * Restore the option
      * @param int $option
      */
-    public function restore($option)
+    public function restore(int $option)
     {
         if (isset($this->_changed[$option])) {
             $this->tpl->setOption($option, $this->_changed[$option]);
@@ -126,7 +127,7 @@ class Tag extends \ArrayObject
      * Check, if the tag closed
      * @return bool
      */
-    public function isClosed()
+    public function isClosed(): bool
     {
         return $this->_closed;
     }
@@ -137,7 +138,7 @@ class Tag extends \ArrayObject
      * @param Tokenizer $tokenizer
      * @return mixed
      */
-    public function start($tokenizer)
+    public function start(Tokenizer $tokenizer): mixed
     {
         foreach ($this->options as $option) {
             $option = 'opt' . $option;
@@ -153,7 +154,7 @@ class Tag extends \ArrayObject
      * @param int $level
      * @return bool
      */
-    public function hasTag($tag, $level)
+    public function hasTag(string $tag, int $level): bool
     {
         if (isset($this->_tags[$tag])) {
             if ($level) {
@@ -171,10 +172,10 @@ class Tag extends \ArrayObject
      *
      * @param string $tag
      * @param Tokenizer $tokenizer
-     * @throws \LogicException
      * @return string
+     * @throws \LogicException
      */
-    public function tag($tag, $tokenizer)
+    public function tag(string $tag, Tokenizer $tokenizer): string
     {
         if (isset($this->_tags[$tag])) {
             return call_user_func($this->_tags[$tag], $tokenizer, $this);
@@ -187,10 +188,10 @@ class Tag extends \ArrayObject
      * Close callback
      *
      * @param Tokenizer $tokenizer
-     * @throws \LogicException
      * @return string
+     * @throws \LogicException
      */
-    public function end($tokenizer)
+    public function end(Tokenizer $tokenizer): string
     {
         if ($this->_closed) {
             throw new \LogicException("Tag {$this->name} already closed");
@@ -224,7 +225,7 @@ class Tag extends \ArrayObject
      * @throws \LogicException
      * @return string
      */
-    public function getContent()
+    public function getContent(): string
     {
         return substr($this->_body, $this->_offset);
     }
@@ -235,7 +236,7 @@ class Tag extends \ArrayObject
      * @return string
      * @throws \LogicException
      */
-    public function cutContent()
+    public function cutContent(): string
     {
         $content     = substr($this->_body, $this->_offset);
         $this->_body = substr($this->_body, 0, $this->_offset);
@@ -258,7 +259,7 @@ class Tag extends \ArrayObject
      * @param string $code
      * @return string
      */
-    public function out($code)
+    public function out(string $code): string
     {
         return $this->tpl->out($code, $this->escape);
     }
