@@ -26,9 +26,9 @@ class Render extends \ArrayObject
         "macros"    => []
     ];
     /**
-     * @var \Closure
+     * @var \Closure|null
      */
-    protected \Closure $_code;
+    protected ?\Closure $_code = null;
     /**
      * Template name
      * @var string
@@ -38,7 +38,7 @@ class Render extends \ArrayObject
      * Provider's schema
      * @var string|null
      */
-    protected ?string $_scm;
+    protected ?string $_scm = null;
     /**
      * Basic template name
      * @var string

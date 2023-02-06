@@ -92,6 +92,7 @@ class Tokenizer
             \T_INCLUDE       => 1, \T_INCLUDE_ONCE  => 1, \T_INSTANCEOF    => 1, \T_INSTEADOF     => 1,
             \T_INTERFACE     => 1, \T_ISSET         => 1, \T_LINE          => 1, \T_LIST          => 1,
             \T_LOGICAL_AND   => 1, \T_LOGICAL_OR    => 1, \T_LOGICAL_XOR   => 1, \T_METHOD_C      => 1,
+            \T_MATCH         => 1,
             \T_NAMESPACE     => 1, \T_NS_C          => 1, \T_NEW           => 1, \T_PRINT         => 1,
             \T_PRIVATE       => 1, \T_PUBLIC        => 1, \T_PROTECTED     => 1, \T_REQUIRE       => 1,
             \T_REQUIRE_ONCE  => 1, \T_RETURN        => 1,                        \T_STRING        => 1,

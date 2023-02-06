@@ -30,7 +30,7 @@ class Compiler
      * @throws \LogicException
      * @return string
      */
-    public static function tagInclude(Tokenizer $tokens, Tag $tag)
+    public static function tagInclude(Tokenizer $tokens, Tag $tag): string
     {
         $tpl   = $tag->tpl;
         $name  = false;
@@ -72,10 +72,10 @@ class Compiler
      * Tag {insert ...}
      * @param Tokenizer $tokens
      * @param Tag $tag
-     * @throws Error\InvalidUsageException
      * @return string
+     * @throws Error\InvalidUsageException|CompileException
      */
-    public static function tagInsert(Tokenizer $tokens, Tag $tag)
+    public static function tagInsert(Tokenizer $tokens, Tag $tag): string
     {
         $tpl = $tag->tpl;
         $tpl->parsePlainArg($tokens, $name);
@@ -95,8 +95,9 @@ class Compiler
      * @param Tokenizer $tokens
      * @param Tag $scope
      * @return string
+     * @throws \Exception
      */
-    public static function ifOpen(Tokenizer $tokens, Tag $scope)
+    public static function ifOpen(Tokenizer $tokens, Tag $scope): string
     {
         $scope["else"] = false;
         return 'if(' . $scope->tpl->parseExpr($tokens) . ') {';

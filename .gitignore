@@ -6,3 +6,4 @@ tests/resources/compile/*
 !.gitkeep
 tests/resources/template/*
 sandbox/compiled/*
+/.phpunit.result.cache

@@ -19,11 +19,11 @@ class Modifier
     /**
      * Date format
      *
-     * @param string|int $date
+     * @param int|string $date
      * @param string $format
      * @return string
      */
-    public static function dateFormat($date, $format = "%b %e, %Y")
+    public static function dateFormat(int|string $date, string $format = "%b %e, %Y"): string
     {
         if (!is_numeric($date)) {
             $date = strtotime($date);
@@ -39,7 +39,7 @@ class Modifier
      * @param string $format
      * @return string
      */
-    public static function date($date, $format = "Y m d")
+    public static function date(string $date, string $format = "Y m d"): string
     {
         if (!is_numeric($date)) {
             $date = strtotime($date);
@@ -55,18 +55,18 @@ class Modifier
      *
      * @param string $text
      * @param string $type
-     * @param string $charset
+     * @param string|null $charset
      * @return string
      */
-    public static function escape($text, $type = 'html', $charset = null)
+    public static function escape(string $text, string $type = 'html', string $charset = null): string
     {
         switch (strtolower($type)) {
             case "url":
                 return urlencode($text);
             case "html";
-                return htmlspecialchars($text, ENT_COMPAT, $charset ? $charset : \Fenom::$charset);
+                return htmlspecialchars($text, ENT_COMPAT, $charset ?: \Fenom::$charset);
             case "js":
-                return json_encode($text, 64 | 256); // JSON_UNESCAPED_SLASHES = 64, JSON_UNESCAPED_UNICODE = 256
+                return json_encode($text, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
             default:
                 return $text;
         }
@@ -79,7 +79,7 @@ class Modifier
      * @param string $type
      * @return string
      */
-    public static function unescape($text, $type = 'html')
+    public static function unescape(string $text, string $type = 'html'): string
     {
         switch (strtolower($type)) {
             case "url":
@@ -96,12 +96,12 @@ class Modifier
      *
      * @param string $string text witch will be truncate
      * @param int $length maximum symbols of result string
-     * @param string $etc place holder truncated symbols
+     * @param string $etc placeholder truncated symbols
      * @param bool $by_words
      * @param bool $middle
      * @return string
      */
-    public static function truncate($string, $length = 80, $etc = '...', $by_words = false, $middle = false)
+    public static function truncate(string $string, int $length = 80, string $etc = '...', bool $by_words = false, bool $middle = false): string
     {
         if ($middle) {
             if (preg_match('#^(.{' . $length . '}).*?(.{' . $length . '})?$#usS', $string, $match)) {
@@ -134,7 +134,7 @@ class Modifier
      * @param bool $to_line strip line ends
      * @return string
      */
-    public static function strip($str, $to_line = false)
+    public static function strip(string $str, bool $to_line = false): string
     {
         $str = trim($str);
         if ($to_line) {
@@ -149,7 +149,7 @@ class Modifier
      * @param mixed $item
      * @return int
      */
-    public static function length($item)
+    public static function length(mixed $item): int
     {
         if (is_string($item)) {
             return strlen(preg_replace('#[\x00-\x7F]|[\x80-\xDF][\x00-\xBF]|[\xE0-\xEF][\x00-\xBF]{2}#s', ' ', $item));
@@ -168,13 +168,13 @@ class Modifier
      * @param mixed $haystack
      * @return bool
      */
-    public static function in($value, $haystack)
+    public static function in(mixed $value, mixed $haystack): bool
     {
         if(is_scalar($value)) {
             if (is_array($haystack)) {
                 return in_array($value, $haystack) || array_key_exists($value, $haystack);
             } elseif (is_string($haystack)) {
-                return strpos($haystack, $value) !== false;
+                return str_contains($haystack, $value);
             }
         }
         return false;
@@ -184,7 +184,7 @@ class Modifier
      * @param mixed $value
      * @return bool
      */
-    public static function isIterable($value)
+    public static function isIterable(mixed $value): bool
     {
         return is_array($value) || ($value instanceof \Iterator);
     }
@@ -196,7 +196,7 @@ class Modifier
      * @param string $replace The replacement value that replaces found search
      * @return mixed
      */
-    public static function replace($value, $search, $replace)
+    public static function replace(string $value, string $search, string $replace): string
     {
         return str_replace($search, $replace, $value);
     }
@@ -207,7 +207,7 @@ class Modifier
      * @param string $replacement
      * @return mixed
      */
-    public static function ereplace($value, $pattern, $replacement)
+    public static function ereplace(string $value, string $pattern, string $replacement): string
     {
         return preg_replace($pattern, $replacement, $value);
     }
@@ -217,7 +217,7 @@ class Modifier
      * @param string $pattern
      * @return bool
      */
-    public static function match($string, $pattern)
+    public static function match(string $string, string $pattern): bool
     {
         return fnmatch($pattern, $string);
     }
@@ -227,7 +227,7 @@ class Modifier
      * @param string $pattern
      * @return int
      */
-    public static function ematch($string, $pattern)
+    public static function ematch(string $string, string $pattern): int
     {
         return preg_match($pattern, $string);
     }
@@ -237,23 +237,23 @@ class Modifier
      * @param string $delimiter
      * @return array
      */
-    public static function split($value, $delimiter = ",")
+    public static function split(mixed $value, string $delimiter = ","): array
     {
         if(is_string($value)) {
             return explode($delimiter, $value);
         } elseif(is_array($value)) {
             return $value;
         } else {
-            return array();
+            return [];
         }
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      * @param string $pattern
      * @return array
      */
-    public static function esplit($value, $pattern = '/,\s*/S')
+    public static function esplit(mixed $value, string $pattern = '/,\s*/S'): array
     {
         if(is_string($value)) {
             return preg_split($pattern, $value);
@@ -265,11 +265,11 @@ class Modifier
     }
 
     /**
-     * @param $value
+     * @param mixed $value
      * @param string $glue
      * @return string
      */
-    public static function join($value, $glue = ",")
+    public static function join(mixed $value, string $glue = ","): string
     {
         if(is_array($value)) {
             return implode($glue, $value);
@@ -281,12 +281,13 @@ class Modifier
     }
 
     /**
-     * @param string|int $from
-     * @param string|int $to
+     * @param int $from
+     * @param int $to
      * @param int $step
      * @return RangeIterator
      */
-    public static function range($from, $to, $step = 1) {
+    public static function range(mixed $from, int $to, int $step = 1): RangeIterator
+    {
         if($from instanceof RangeIterator) {
             return $from->setStep($to);
         } else {

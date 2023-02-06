@@ -751,7 +751,7 @@ class Fenom
      * @param Template|null $template
      * @return mixed
      */
-    public function getModifier(string $modifier, Fenom\Template $template = null): static
+    public function getModifier(string $modifier, Fenom\Template $template = null): string
     {
         if (isset($this->_modifiers[$modifier])) {
             return $this->_modifiers[$modifier];
@@ -765,12 +765,12 @@ class Fenom
     /**
      * Modifier autoloader
      * @param string $modifier
-     * @param Fenom\Template $template
-     * @return bool
+     * @param Template $template
+     * @return string|null
      */
-    protected function _loadModifier(string $modifier, Fenom\Template $template): bool
+    protected function _loadModifier(string $modifier, Fenom\Template $template): ?string
     {
-        return false;
+        return null;
     }
 
     /**
