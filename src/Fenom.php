@@ -21,8 +21,8 @@ use Fenom\Template;
  */
 class Fenom
 {
-    const VERSION = '2.12';
-    const REV = 1;
+    const VERSION = '3.0';
+    const REV = 2;
     /* Actions */
     const INLINE_COMPILER = 1;
     const BLOCK_COMPILER  = 5;
@@ -64,18 +64,18 @@ class Fenom
     const ACCESSOR_METHOD   = 'Fenom\Accessor::parserMethod';
     const ACCESSOR_CHAIN    = 'Fenom\Accessor::parserChain';
 
-    public static $charset = "UTF-8";
+    public static string $charset = "UTF-8";
 
     /**
      * @var int maximum length of compiled filename (use sha1 of name if bigger)
      */
-    public static $filename_length = 200;
+    public static int $filename_length = 200;
 
     /**
      * @var int[] of possible options, as associative array
      * @see setOptions
      */
-    private static $_options_list = [
+    private static array $_options_list = [
         "disable_accessor"     => self::DENY_ACCESSOR,
         "disable_methods"      => self::DENY_METHODS,
         "disable_native_funcs" => self::DENY_NATIVE_FUNCS,
@@ -94,27 +94,27 @@ class Fenom
     /**
      * @var callable[]
      */
-    public array $pre_filters = [];
+    protected array $pre_filters = [];
 
     /**
      * @var callable[]
      */
-    public array $filters = [];
+    protected array $filters = [];
 
     /**
      * @var callable[]
      */
-    public array $tag_filters = [];
+    protected array $tag_filters = [];
 
     /**
      * @var string[]
      */
-    public array $call_filters = [];
+    protected array $call_filters = [];
 
     /**
      * @var callable[]
      */
-    public array $post_filters = [];
+    protected array $post_filters = [];
 
     /**
      * @var Fenom\Render[] Templates storage
@@ -129,7 +129,7 @@ class Fenom
     /**
      * @var string compile prefix ID template
      */
-    protected string $_compile_id;
+    protected string $_compile_id = "";
 
     /**
      * @var string[] compile directory for custom provider
@@ -749,9 +749,9 @@ class Fenom
      *
      * @param string $modifier
      * @param Template|null $template
-     * @return mixed
+     * @return callable|null
      */
-    public function getModifier(string $modifier, Fenom\Template $template = null): string
+    public function getModifier(string $modifier, Fenom\Template $template = null): ?callable
     {
         if (isset($this->_modifiers[$modifier])) {
             return $this->_modifiers[$modifier];
@@ -937,9 +937,9 @@ class Fenom
      * Get an accessor
      * @param string $name
      * @param string|null $key
-     * @return callable|null
+     * @return callable|array|null
      */
-    public function getAccessor(string $name,string $key = null): ?callable
+    public function getAccessor(string $name,string $key = null): mixed
     {
         if(isset($this->_accessors[$name])) {
             if($key) {
@@ -998,10 +998,10 @@ class Fenom
      * @param string|array $template name of template.
      * If it is array of names of templates they will be extended from left to right.
      * @param array $vars array of data for template
-     * @return Fenom\Render
+     * @return array
      * @throws CompileException
      */
-    public function display(string|array $template, array $vars = array()): Fenom\Render
+    public function display(string|array $template, array $vars = array()): array
     {
         return $this->getTemplate($template)->display($vars);
     }
@@ -1093,12 +1093,12 @@ class Fenom
     /**
      * Load template from cache or create cache if it doesn't exists.
      *
-     * @param string $template
+     * @param string[]|string $template
      * @param int $opts
      * @return Fenom\Render
      * @throws CompileException
      */
-    protected function _load(string $template, int $opts): Render
+    protected function _load(array|string $template, int $opts): Render
     {
         $file_name = $this->getCompileName($template, $opts);
         if (is_file($this->_compile_dir . "/" . $file_name)) {
@@ -1228,5 +1228,13 @@ class Fenom
             }
         }
         return $mask;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCallFilters(): array
+    {
+        return $this->call_filters;
     }
 }

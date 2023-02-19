@@ -6,7 +6,7 @@ namespace Fenom;
 class CustomProviderTest extends TestCase
 {
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->fenom->addProvider("my", new Provider(FENOM_RESOURCES . '/provider'));

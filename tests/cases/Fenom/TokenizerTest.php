@@ -80,6 +80,25 @@ class TokenizerTest extends TestCase
         $this->assertSame('}', $tokens->end()->current());
     }
 
+    public function testComplexTokens()
+    {
+        $text = "one\\two";
+        $tokens = new Tokenizer($text);
+        $this->assertSame("one", $tokens->current());
+        $this->assertSame("\\", $tokens->next()->current());
+        $this->assertSame("two", $tokens->next()->current());
+        $this->assertFalse($tokens->next()->valid());
+
+        $text = "\\one\\two";
+
+        $tokens = new Tokenizer($text);
+        $this->assertSame("\\", $tokens->current());
+        $this->assertSame("one", $tokens->next()->current());
+        $this->assertSame("\\", $tokens->next()->current());
+        $this->assertSame("two", $tokens->next()->current());
+        $this->assertFalse($tokens->next()->valid());
+    }
+
     public function testSkip()
     {
         $text   = "1 foo: bar ( 3 + double ) ";

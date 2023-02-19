@@ -205,7 +205,7 @@ class Tag extends \ArrayObject
             }
             $code = call_user_func($this->_close, $tokenizer, $this);
             $this->restoreAll();
-            return $code;
+            return (string)$code;
         } else {
             throw new \LogicException("Can not use a inline tag {$this->name} as a block");
         }

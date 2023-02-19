@@ -13,7 +13,7 @@ use Fenom\Template,
 class TemplateTest extends TestCase
 {
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->tpl('welcome.tpl', '<b>Welcome, {$username} ({$email})</b>');

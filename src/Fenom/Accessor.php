@@ -134,7 +134,7 @@ class Accessor {
         if($tokens->is(T_DOUBLE_COLON)) {
             $const .= '::'.$tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
         }
-        return '@constant('.var_export($const, true).')';
+        return '(defined('.var_export($const, true).') ? constant('.var_export($const, true).') : "")';
 
     }
 
@@ -153,7 +153,7 @@ class Accessor {
         if($tokens->is(T_DOUBLE_COLON)) {
             $callable .= '::'.$tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
         }
-        $call_filter = $tpl->getStorage()->call_filters;
+        $call_filter = $tpl->getStorage()->getCallFilters();
         if($call_filter) {
             foreach($call_filter as $filter) {
                 if(!fnmatch(addslashes($filter), $callable)) {

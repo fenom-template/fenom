@@ -3,13 +3,17 @@ namespace Fenom;
 
 use Fenom, Fenom\Provider as FS;
 
+class CustomFenom extends Fenom {
+    public mixed $prop;
+}
+
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     public $template_path = 'template';
     /**
-     * @var Fenom
+     * @var CustomFenom
      */
-    public $fenom;
+    public CustomFenom $fenom;
 
     public $values;
 
@@ -61,7 +65,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             FS::clean($this->getCompilePath());
         }
 
-        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/' . $this->template_path, $this->getCompilePath());
+        $this->fenom = CustomFenom::factory(FENOM_RESOURCES . '/' . $this->template_path, $this->getCompilePath());
         $this->fenom->addProvider('persist', new Provider(FENOM_RESOURCES . '/provider'));
         $this->fenom->addModifier('dots', __CLASS__ . '::dots');
         $this->fenom->addModifier('concat', __CLASS__ . '::concat');
@@ -168,7 +172,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $this->fenom->setOptions($options);
         try {
             $this->fenom->compileCode($code, "inline.tpl");
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertSame($exception, get_class($e), "Exception $code");
             $this->assertStringStartsWith($message, $e->getMessage());
             $this->fenom->setOptions($opt);
@@ -180,7 +184,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     public function assertRender($tpl, $result, array $vars = array(), $debug = false)
     {
-        $template = $this->fenom->compileCode($tpl);
+        try {
+            $template = $this->fenom->compileCode($tpl);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Template failed: $tpl",0 , $e);
+        }
         if ($debug) {
             print_r("\nDEBUG $tpl:\n" . $template->getBody());
         }
@@ -300,7 +308,8 @@ class Helper
 
     const CONSTANT = "helper.class.const";
 
-    public $word = 'helper';
+    public string $word = 'helper';
+    public Helper $self;
 
     public function __construct($word)
     {

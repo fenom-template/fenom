@@ -12,7 +12,7 @@ class RenderTest extends TestCase
      */
     public static $render;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$render = new Render(Fenom::factory("."), function ($tpl) {
             echo "It is render's function " . $tpl["render"];
@@ -50,6 +50,8 @@ class RenderTest extends TestCase
      */
     public function testFetchException()
     {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage("template error");
         $render = new Render(Fenom::factory("."), function () {
             echo "error";
             throw new \RuntimeException("template error");

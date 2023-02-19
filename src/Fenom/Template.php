@@ -66,7 +66,7 @@ class Template extends Render
     /**
      * @var string|null
      */
-    public ?string $extends;
+    public ?string $extends = null;
 
     /**
      * @var string|null
@@ -80,6 +80,7 @@ class Template extends Render
     public array $ext_stack = [];
 
     public bool $extend_body = false;
+    public string $dynamic_extends = "";
 
     /**
      * Parent template
@@ -483,7 +484,7 @@ class Template extends Render
      */
     private function _getClosureSource(): string
     {
-        return "function (\$var, \$tpl) {\n?>{$this->_body}<?php\n}";
+        return "function (mixed \$var, mixed \$tpl) {\n?>{$this->_body}<?php\n}";
     }
 
     /**
@@ -669,7 +670,7 @@ class Template extends Render
             } else {
                 $this->_stack[] = $tag;
             }
-            return $code;
+            return (string)$code;
         }
 
         for ($j = $i = count($this->_stack) - 1; $i >= 0; $i--) { // call function's internal tag
@@ -705,7 +706,7 @@ class Template extends Render
      * @param bool $is_var
      * @return string
      */
-    public function parseExpr(Tokenizer $tokens, bool &$is_var = false): string
+    public function parseExpr(Tokenizer $tokens, ?bool &$is_var = false): string
     {
         $exp  = array();
         $var  = false; // last term was: true - variable, false - mixed
@@ -714,7 +715,7 @@ class Template extends Render
         while ($tokens->valid()) {
             // parse term
             $term = $this->parseTerm($tokens, $var, -1); // term of the expression
-            if ($term !== false) {
+            if ($term !== "") {
                 if ($tokens->is('?', '!')) {
                     if ($cond) {
                         $term = array_pop($exp) . ' ' . $term;
@@ -910,7 +911,7 @@ class Template extends Render
                     $args   = $this->parseArgs($tokens);
                     $code   = $unary . $this->parseChain($tokens, $method . $args);
                 } else {
-                    return false;
+                    return "";
                 }
                 break;
             case T_ISSET:
@@ -933,7 +934,7 @@ class Template extends Render
                 if ($unary) {
                     throw new UnexpectedTokenException($tokens->back());
                 } else {
-                    return false;
+                    return "";
                 }
         }
         if (($allows & self::TERM_MODS) && $tokens->is('|')) {
@@ -1050,7 +1051,7 @@ class Template extends Render
      * @param bool $is_var
      * @return string
      */
-    public function parseAccessor(Tokenizer $tokens, bool &$is_var = false): string
+    public function parseAccessor(Tokenizer $tokens, ?bool &$is_var = false): string
     {
         $accessor = $tokens->need('$')->next()->need('.')->next()->current();
         $parser   = $this->getStorage()->getAccessor($accessor);
@@ -1356,9 +1357,8 @@ class Template extends Render
      *
      * @param Tokenizer $tokens
      * @param                    $value
-     * @throws \LogicException
-     * @throws \Exception
      * @return string
+     * @throws CompileException
      */
     public function parseModifier(Tokenizer $tokens, $value): string
     {
@@ -1369,7 +1369,7 @@ class Template extends Render
             } else {
                 $mods = $this->_fenom->getModifier($modifier, $this);
                 if (!$mods) {
-                    throw new \Exception("Modifier " . $tokens->current() . " not found");
+                    throw new CompileException("Modifier " . $tokens->current() . " not found");
                 }
                 $tokens->next();
             }
@@ -1563,10 +1563,10 @@ class Template extends Render
      * Parse first unnamed argument
      *
      * @param Tokenizer $tokens
-     * @param string $static
-     * @return mixed|string
+     * @param string|null $static
+     * @return string
      */
-    public function parsePlainArg(Tokenizer $tokens, string &$static): mixed
+    public function parsePlainArg(Tokenizer $tokens, ?string &$static = null): string
     {
         if ($tokens->is(T_CONSTANT_ENCAPSED_STRING)) {
             if ($tokens->isNext('|')) {

@@ -15,16 +15,16 @@ namespace Fenom;
  */
 class Provider implements ProviderInterface
 {
-    private $_path;
+    private string $_path;
 
-    protected $_clear_cache = false;
+    protected bool $_clear_cache = false;
 
     /**
      * Clean directory from files
      *
      * @param string $path
      */
-    public static function clean($path)
+    public static function clean(string $path)
     {
         if (is_file($path)) {
             unlink($path);
@@ -39,7 +39,7 @@ class Provider implements ProviderInterface
             foreach ($iterator as $file) {
                 /* @var \splFileInfo $file */
                 if ($file->isFile()) {
-                    if (strpos($file->getBasename(), ".") !== 0) {
+                    if (!str_starts_with($file->getBasename(), ".")) {
                         unlink($file->getRealPath());
                     }
                 } elseif ($file->isDir()) {
@@ -54,7 +54,7 @@ class Provider implements ProviderInterface
      *
      * @param string $path
      */
-    public static function rm($path)
+    public static function rm(string $path)
     {
         self::clean($path);
         if (is_dir($path)) {
@@ -64,9 +64,9 @@ class Provider implements ProviderInterface
 
     /**
      * @param string $template_dir directory of templates
-     * @throws \LogicException if directory doesn't exists
+     * @throws \LogicException if directory doesn't exist
      */
-    public function __construct($template_dir)
+    public function __construct(string $template_dir)
     {
         if ($_dir = realpath($template_dir)) {
             $this->_path = $_dir;
@@ -80,17 +80,17 @@ class Provider implements ProviderInterface
      * @see http://php.net/manual/en/function.clearstatcache.php
      * @param bool $status
      */
-    public function setClearCachedStats($status = true) {
+    public function setClearCachedStats(bool $status = true) {
         $this->_clear_cache = $status;
     }
 
     /**
      * Get source and mtime of template by name
      * @param string $tpl
-     * @param int $time load last modified time
+     * @param float|null $time load last modified time
      * @return string
      */
-    public function getSource($tpl, &$time)
+    public function getSource(string $tpl, ?float &$time): string
     {
         $tpl = $this->_getTemplatePath($tpl);
         if($this->_clear_cache) {
@@ -103,24 +103,24 @@ class Provider implements ProviderInterface
     /**
      * Get last modified of template by name
      * @param string $tpl
-     * @return int
+     * @return float
      */
-    public function getLastModified($tpl)
+    public function getLastModified(string $tpl): float
     {
         $tpl = $this->_getTemplatePath($tpl);
         if($this->_clear_cache) {
             clearstatcache(true, $tpl);
         }
-        return filemtime($tpl);
+        return (float)filemtime($tpl);
     }
 
     /**
      * Get all names of templates from provider.
      *
      * @param string $extension all templates must have this extension, default .tpl
-     * @return array|\Iterator
+     * @return iterable
      */
-    public function getList($extension = "tpl")
+    public function getList(string $extension = "tpl"): iterable
     {
         $list     = array();
         $iterator = new \RecursiveIteratorIterator(
@@ -140,14 +140,14 @@ class Provider implements ProviderInterface
 
     /**
      * Get template path
-     * @param $tpl
+     * @param string $tpl
      * @return string
      * @throws \RuntimeException
      */
-    protected function _getTemplatePath($tpl)
+    protected function _getTemplatePath(string $tpl): string
     {
         $path = realpath($this->_path . "/" . $tpl);
-        if ($path && strpos($path, $this->_path) === 0) {
+        if ($path && str_starts_with($path, $this->_path)) {
             return $path;
         } else {
             throw new \RuntimeException("Template $tpl not found");
@@ -158,9 +158,9 @@ class Provider implements ProviderInterface
      * @param string $tpl
      * @return bool
      */
-    public function templateExists($tpl)
+    public function templateExists(string $tpl): bool
     {
-        return ($path = realpath($this->_path . "/" . $tpl)) && strpos($path, $this->_path) === 0;
+        return ($path = realpath($this->_path . "/" . $tpl)) && str_starts_with($path, $this->_path);
     }
 
     /**
@@ -169,7 +169,7 @@ class Provider implements ProviderInterface
      * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
      * @return bool
      */
-    public function verify(array $templates)
+    public function verify(array $templates): bool
     {
         foreach ($templates as $template => $mtime) {
             $template = $this->_path . '/' . $template;

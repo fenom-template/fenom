@@ -181,7 +181,7 @@ class Tokenizer
         $this->_curr = null;
         $this->_next = null;
         $this->_prev = null;
-        $tokens  = array(-1 => array(\T_WHITESPACE, '', '', 1));
+        $tokens  = [-1 => [\T_WHITESPACE, '', '', 1]];
         $_tokens = token_get_all("<?php " . $query);
         $line    = 1;
         array_shift($_tokens);
@@ -191,13 +191,36 @@ class Tokenizer
                 if ($token === '"' || $token === "'" || $token === "`") {
                     $this->quotes++;
                 }
-                $token = array(
+                $token = [
                     $token,
                     $token,
                     $line,
-                );
+                ];
             } elseif ($token[0] === \T_WHITESPACE) {
                 $tokens[$i - 1][2] = $token[1];
+                continue;
+            } elseif ($token[0] === \T_NAME_FULLY_QUALIFIED || $token[0] === \T_NAME_QUALIFIED || $token[0] === \T_NAME_RELATIVE) {
+                $parts = explode("\\", $token[1]);
+                for ($k = 0; $k < count($parts); $k++) {
+                    if ($parts[$k] !== "") {
+                        $tokens[] = [
+                            T_STRING,
+                            $parts[$k],
+                            "",
+                            $line = $token[2]
+                        ];
+                        $i++;
+                    }
+                    if (isset($parts[$k], $parts[$k+1])) {
+                        $tokens[] = [
+                            "\\",
+                            "\\",
+                            "",
+                            $line = $token[2]
+                        ];
+                        $i++;
+                    }
+                }
                 continue;
             } elseif ($token[0] === \T_DNUMBER) { // fix .1 and 1.
                 if(str_starts_with($token[1], '.')) {
