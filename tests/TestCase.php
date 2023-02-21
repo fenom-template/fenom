@@ -110,7 +110,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function tpl($name, $code)
+    public function tpl($name, $code): float
     {
         $dir = dirname($name);
         if ($dir != "." && !is_dir(FENOM_RESOURCES . '/template/' . $dir)) {

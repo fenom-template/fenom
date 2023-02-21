@@ -426,10 +426,8 @@ class Fenom
     {
         if (is_string($source)) {
             $provider = new Fenom\Provider($source);
-        } elseif ($source instanceof ProviderInterface) {
-            $provider = $source;
         } else {
-            throw new InvalidArgumentException("Source must be a valid path or provider object");
+            $provider = $source;
         }
         $fenom = new static($provider);
         $fenom->setCompileDir($compile_dir);

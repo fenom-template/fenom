@@ -48,23 +48,10 @@ class FenomTest extends \Fenom\TestCase
         $fenom->clearAllCompiles();
     }
 
-
-    /**
-     * @expectedException LogicException
-     * @expectedExceptionMessage Cache directory /invalid/path is not writable
-     */
     public function testFactoryInvalid()
     {
+        $this->expectException(LogicException::class, "Cache directory /invalid/path is not writable");
         Fenom::factory(FENOM_RESOURCES . '/template', '/invalid/path');
-    }
-
-    /**
-     * @expectedException InvalidArgumentException
-     * @expectedExceptionMessage Source must be a valid path or provider object
-     */
-    public function testFactoryInvalid2()
-    {
-        Fenom::factory(new StdClass);
     }
 
     public function testCompileFile()

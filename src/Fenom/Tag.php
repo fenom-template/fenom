@@ -35,8 +35,8 @@ class Tag extends \ArrayObject
     private bool $_closed = true;
     private string $_body;
     private int $_type = 0;
-    private string $_open;
-    private string $_close;
+    private mixed $_open;
+    private mixed $_close;
     private array $_tags = [];
     private array $_floats = [];
     private array $_changed = [];

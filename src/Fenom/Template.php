@@ -646,7 +646,7 @@ class Template extends Render
     {
         $action = $tokens->get(Tokenizer::MACRO_STRING);
         $tokens->next();
-        if ($tokens->is("(", T_DOUBLE_COLON, T_NS_SEPARATOR) && !$tokens->isWhiteSpaced()) {
+        if ($tokens->is("(", T_DOUBLE_COLON, "\\") && !$tokens->isWhiteSpaced()) {
             // just invoke function or static method
             $tokens->back();
             return $this->out($this->parseExpr($tokens));
@@ -906,7 +906,7 @@ class Template extends Render
                         $call = $func . $this->parseArgs($tokens->next());
                     }
                     $code = $unary . $this->parseChain($tokens, $call);
-                } elseif ($tokens->isNext(T_NS_SEPARATOR, T_DOUBLE_COLON)) {
+                } elseif ($tokens->isNext("\\", T_DOUBLE_COLON)) {
                     $method = $this->parseStatic($tokens);
                     $args   = $this->parseArgs($tokens);
                     $code   = $unary . $this->parseChain($tokens, $method . $args);
@@ -1178,7 +1178,7 @@ class Template extends Render
             return $invert . '(' . $value . ' instanceof \\' . $this->parseName($tokens) . ')';
         } elseif ($tokens->is(T_VARIABLE, '[', Tokenizer::MACRO_SCALAR, '"')) {
             return '(' . $value . ' ' . $equal . '= ' . $this->parseTerm($tokens) . ')';
-        } elseif ($tokens->is(T_NS_SEPARATOR)) { //
+        } elseif ($tokens->is("\\")) { //
             return $invert . '(' . $value . ' instanceof \\' . $this->parseName($tokens) . ')';
         } else {
             throw new InvalidUsageException("Unknown argument");
@@ -1250,11 +1250,11 @@ class Template extends Render
      */
     public function parseName(Tokenizer $tokens): string
     {
-        $tokens->skipIf(T_NS_SEPARATOR);
+        $tokens->skipIf("\\");
         $name = "";
         if ($tokens->is(T_STRING)) {
             $name .= $tokens->getAndNext();
-            while ($tokens->is(T_NS_SEPARATOR)) {
+            while ($tokens->is("\\")) {
                 $name .= '\\' . $tokens->next()->get(T_STRING);
                 $tokens->next();
             }
@@ -1364,7 +1364,7 @@ class Template extends Render
     {
         while ($tokens->is("|")) {
             $modifier = $tokens->getNext(Tokenizer::MACRO_STRING);
-            if ($tokens->isNext(T_DOUBLE_COLON, T_NS_SEPARATOR)) {
+            if ($tokens->isNext(T_DOUBLE_COLON, "\\")) {
                 $mods = $this->parseStatic($tokens);
             } else {
                 $mods = $this->_fenom->getModifier($modifier, $this);
@@ -1376,9 +1376,11 @@ class Template extends Render
 
             $args = array();
             while ($tokens->is(":")) {
-                if (($args[] = $this->parseTerm($tokens->next(), $is_var, 0)) === false) {
+                $term = $this->parseTerm($tokens->next(), $is_var, 0);
+                if ($term === "") {
                     throw new UnexpectedTokenException($tokens);
                 }
+                $args[] = $term;
             }
 
             if (!is_string($mods)) { // dynamic modifier
@@ -1496,11 +1498,11 @@ class Template extends Render
         if ($this->_options & Fenom::DENY_STATICS) {
             throw new \LogicException("Static methods are disabled");
         }
-        $tokens->skipIf(T_NS_SEPARATOR);
+        $tokens->skipIf("\\");
         $name = "";
         if ($tokens->is(T_STRING)) {
             $name .= $tokens->getAndNext();
-            while ($tokens->is(T_NS_SEPARATOR)) {
+            while ($tokens->is("\\")) {
                 $name .= '\\' . $tokens->next()->get(T_STRING);
                 $tokens->next();
             }

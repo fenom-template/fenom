@@ -176,7 +176,7 @@ class Provider implements ProviderInterface
             if($this->_clear_cache) {
                 clearstatcache(true, $template);
             }
-            if (@filemtime($template) !== $mtime) {
+            if (@filemtime($template) != $mtime) {
                 return false;
             }
 
