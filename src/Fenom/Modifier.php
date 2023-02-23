@@ -23,15 +23,57 @@ class Modifier
      * @param string $format
      * @return string
      */
-    public static function dateFormat(int|string $date, string $format = "%b %e, %Y"): string
+    public static function dateFormat(mixed $date, string $format = "%b %e, %Y"): string
     {
         if (!is_numeric($date)) {
-            $date = strtotime($date);
+            if ($date instanceof \DateTime) {
+                $date = $date->getTimestamp();
+            } else {
+                $date = strtotime($date);
+            }
             if (!$date) {
                 $date = time();
             }
         }
-        return strftime($format, $date);
+        if (str_contains($format, "%")) {
+            // fallback mode
+            $from = [
+                // Day - no strf eq : S (created one called %O)
+                '%O', '%d', '%a', '%e', '%A', '%u', '%w', '%j',
+                // Week - no date eq : %U, %W
+                '%V',
+                // Month - no strf eq : n, t
+                '%B', '%m', '%b', '%-m',
+                // Year - no strf eq : L; no date eq : %C, %g
+                '%G', '%Y', '%y',
+                // Time - no strf eq : B, G, u; no date eq : %r, %R, %T, %X
+                '%P', '%p', '%l', '%I', '%H', '%M', '%S',
+                // Timezone - no strf eq : e, I, P, Z
+                '%z', '%Z',
+                // Full Date / Time - no strf eq : c, r; no date eq : %c, %D, %F, %x
+                '%s'
+            ];
+
+            $to = [
+                'S', 'd', 'D', 'j', 'l', 'N', 'w', 'z',
+                'W',
+                'F', 'm', 'M', 'n',
+                'o', 'Y', 'y',
+                'a', 'A', 'g', 'h', 'H', 'i', 's',
+                'O', 'T',
+                'U'
+            ];
+            $pattern = array_map(
+                function ( $s ) {
+                    return '/(?<!\\\\|\%)' . $s . '/';
+                },
+                $from
+            );
+
+            $format = preg_replace($pattern, $to, $format);
+        }
+
+        return date($format, $date);
     }
 
     /**
