@@ -422,7 +422,7 @@ class Fenom
         string|Fenom\ProviderInterface $source,
         string $compile_dir = '/tmp',
         int|array $options = 0
-    ): Fenom
+    ): static
     {
         if (is_string($source)) {
             $provider = new Fenom\Provider($source);
@@ -1056,11 +1056,12 @@ class Fenom
             /** @var Fenom\Template $tpl */
             $tpl = $this->_storage[$key];
             if (($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
-                return $this->_storage[$key] = $this->compile($template, true, $options);
+                $this->compile($template, true, $options);
+                return $this->_storage[$key] = $this->_load($template, $options);
             } else {
                 return $tpl;
             }
-        } elseif ($this->_options & (self::FORCE_COMPILE |  self::DISABLE_CACHE)) {
+        } elseif ($this->_options & (self::FORCE_COMPILE | self::DISABLE_CACHE)) {
             return $this->compile($template, !($this->_options & self::DISABLE_CACHE), $options);
         } else {
             return $this->_storage[$key] = $this->_load($template, $options);
@@ -1099,6 +1100,10 @@ class Fenom
     protected function _load(array|string $template, int $opts): Render
     {
         $file_name = $this->getCompileName($template, $opts);
+        $tpl = null;
+        if (!is_file($this->_compile_dir . "/" . $file_name)) {
+            $tpl = $this->compile($template, true, $opts);
+        }
         if (is_file($this->_compile_dir . "/" . $file_name)) {
             $fenom = $this; // used in template
             $_tpl  = include($this->_compile_dir . "/" . $file_name);
@@ -1108,9 +1113,12 @@ class Fenom
                 && $_tpl instanceof Fenom\Render
                 && $_tpl->isValid()) {
                 return $_tpl;
+            } else if ($tpl) {
+                return $tpl;
             }
         }
-        return $this->compile($template, true, $opts);
+        throw new CompileException("failed to store cache of " . var_export($template, true) .
+            " to {$file_name}");
     }
 
     /**

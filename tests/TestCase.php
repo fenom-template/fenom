@@ -241,7 +241,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function providerVariables()
+    public static function providerVariables()
     {
         return array(
             array('$one', 1),
@@ -333,6 +333,13 @@ class Helper
 
     public function getArray() {
         return array(1,2,3);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function throws() {
+        throw new \Exception("helper exception");
     }
 }
 

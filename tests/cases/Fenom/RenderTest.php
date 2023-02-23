@@ -44,14 +44,9 @@ class RenderTest extends TestCase
         $this->assertSame("It is render's function fetch", self::$render->fetch(array("render" => "fetch")));
     }
 
-    /**
-     * @expectedException     \RuntimeException
-     * @expectedExceptionMessage template error
-     */
     public function testFetchException()
     {
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessage("template error");
+        $this->expectException(Fenom\Error\TemplateException::class);
         $render = new Render(Fenom::factory("."), function () {
             echo "error";
             throw new \RuntimeException("template error");

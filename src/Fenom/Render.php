@@ -10,6 +10,7 @@
 namespace Fenom;
 
 use Fenom;
+use Fenom\Error\TemplateException;
 
 /**
  * Primitive template
@@ -210,10 +211,15 @@ class Render extends \ArrayObject
      * Execute template and write into output
      * @param array $values for template
      * @return array
+     * @throws TemplateException
      */
     public function display(array $values): array
     {
-        $this->_code->__invoke($values, $this);
+        try {
+            $this->_code->__invoke($values, $this);
+        } catch (\Throwable $e) {
+            throw new Fenom\Error\TemplateException("unhandled exception in the template `{$this->getName()}`: {$e->getMessage()}", 0, $e);
+        }
         return $values;
     }
 

@@ -24,7 +24,7 @@ class FenomTest extends \Fenom\TestCase
         $time  = $this->tpl('temp.tpl', 'Template 1 a');
         $fenom = new Fenom($provider = new \Fenom\Provider(FENOM_RESOURCES . '/template'));
         $fenom->setCompileDir(FENOM_RESOURCES . '/compile');
-        $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
+        $this->assertInstanceOf('Fenom\Render', $tpl = $fenom->getTemplate('temp.tpl'));
         $this->assertSame($provider, $tpl->getProvider());
         $this->assertSame('temp.tpl', $tpl->getBaseName());
         $this->assertSame('temp.tpl', $tpl->getName());
@@ -40,7 +40,7 @@ class FenomTest extends \Fenom\TestCase
             FENOM_RESOURCES . '/compile',
             Fenom::AUTO_ESCAPE
         );
-        $this->assertInstanceOf('Fenom\Template', $tpl = $fenom->getTemplate('temp.tpl'));
+        $this->assertInstanceOf('Fenom\Render', $tpl = $fenom->getTemplate('temp.tpl'));
         $this->assertSame($provider, $tpl->getProvider());
         $this->assertSame('temp.tpl', $tpl->getBaseName());
         $this->assertSame('temp.tpl', $tpl->getName());
