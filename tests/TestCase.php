@@ -3,13 +3,17 @@ namespace Fenom;
 
 use Fenom, Fenom\Provider as FS;
 
+class CustomFenom extends Fenom {
+    public mixed $prop;
+}
+
 class TestCase extends \PHPUnit\Framework\TestCase
 {
     public $template_path = 'template';
     /**
-     * @var Fenom
+     * @var CustomFenom
      */
-    public $fenom;
+    public CustomFenom $fenom;
 
     public $values;
 
@@ -53,7 +57,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return FENOM_RESOURCES . '/compile';
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         if (!file_exists($this->getCompilePath())) {
             mkdir($this->getCompilePath(), 0777, true);
@@ -61,7 +65,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             FS::clean($this->getCompilePath());
         }
 
-        $this->fenom = Fenom::factory(FENOM_RESOURCES . '/' . $this->template_path, $this->getCompilePath());
+        $this->fenom = CustomFenom::factory(FENOM_RESOURCES . '/' . $this->template_path, $this->getCompilePath());
         $this->fenom->addProvider('persist', new Provider(FENOM_RESOURCES . '/provider'));
         $this->fenom->addModifier('dots', __CLASS__ . '::dots');
         $this->fenom->addModifier('concat', __CLASS__ . '::concat');
@@ -89,7 +93,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     public static function inlineFunction($params)
     {
-        return isset($params["text"]) ? $params["text"] : "";
+        return $params["text"] ?? "";
     }
 
     public static function blockFunction($params, $text)
@@ -97,7 +101,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         return $text;
     }
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         if (!file_exists(FENOM_RESOURCES . '/template')) {
             mkdir(FENOM_RESOURCES . '/template', 0777, true);
@@ -106,7 +110,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         }
     }
 
-    public function tpl($name, $code)
+    public function tpl($name, $code): float
     {
         $dir = dirname($name);
         if ($dir != "." && !is_dir(FENOM_RESOURCES . '/template/' . $dir)) {
@@ -168,7 +172,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         $this->fenom->setOptions($options);
         try {
             $this->fenom->compileCode($code, "inline.tpl");
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             $this->assertSame($exception, get_class($e), "Exception $code");
             $this->assertStringStartsWith($message, $e->getMessage());
             $this->fenom->setOptions($opt);
@@ -180,7 +184,11 @@ class TestCase extends \PHPUnit\Framework\TestCase
 
     public function assertRender($tpl, $result, array $vars = array(), $debug = false)
     {
-        $template = $this->fenom->compileCode($tpl);
+        try {
+            $template = $this->fenom->compileCode($tpl);
+        } catch (\Throwable $e) {
+            throw new \RuntimeException("Template failed: $tpl",0 , $e);
+        }
         if ($debug) {
             print_r("\nDEBUG $tpl:\n" . $template->getBody());
         }
@@ -233,7 +241,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function providerVariables()
+    public static function providerVariables()
     {
         return array(
             array('$one', 1),
@@ -300,7 +308,8 @@ class Helper
 
     const CONSTANT = "helper.class.const";
 
-    public $word = 'helper';
+    public string $word = 'helper';
+    public Helper $self;
 
     public function __construct($word)
     {
@@ -324,6 +333,13 @@ class Helper
 
     public function getArray() {
         return array(1,2,3);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function throws() {
+        throw new \Exception("helper exception");
     }
 }
 

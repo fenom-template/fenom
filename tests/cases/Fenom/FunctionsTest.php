@@ -21,7 +21,7 @@ class FunctionsTest extends TestCase
         return $a + $i;
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->fenom->addFunctionSmart('sum', __CLASS__ . '::functionSum');

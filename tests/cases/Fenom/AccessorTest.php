@@ -132,7 +132,8 @@ class AccessorTest  extends TestCase
      * @group issue260
      */
     public function testBug260() {
-        $this->fenom->compileCode('{$.php.Fenom::factory()->addModifier("intval", "intval")}');
+        $t = $this->fenom->compileCode('{$.php.Fenom::factory()->addModifier("intval", "intval")}');
+        $this->assertInstanceOf(Template::class, $t);
     }
 
 
@@ -236,15 +237,28 @@ class AccessorTest  extends TestCase
         $this->execError($tpl, $exception, $message);
     }
 
-    public function getThree() {
+    public static function getThree(): int
+    {
         return 3;
     }
 
+    public static function getThreeArray(): array
+    {
+        return ["three" => 3];
+    }
+
+    public static function getThreeCb(): callable
+    {
+        return fn() => 3;
+    }
+
+    public static int $three = 3;
+
     public static function providerSmartAccessor() {
         return array(
-            array('acc', '$tpl->getStorage()->test->values', \Fenom::ACCESSOR_VAR, '{$.acc.three}', '3'),
-            array('acc', '$tpl->getStorage()->test->getThree', \Fenom::ACCESSOR_CALL, '{$.acc()}', '3'),
-            array('acc', 'three', \Fenom::ACCESSOR_PROPERTY, '{$.acc}', '3'),
+            array('acc', '\Fenom\AccessorTest::getThreeArray()', \Fenom::ACCESSOR_VAR, '{$.acc.three}', '3'),
+            array('acc', '\Fenom\AccessorTest::getThreeCb()', \Fenom::ACCESSOR_CALL, '{$.acc()}', '3'),
+            array('acc', 'prop', \Fenom::ACCESSOR_PROPERTY, '{$.acc}', 'something'),
             array('acc', 'templateExists', \Fenom::ACCESSOR_METHOD, '{$.acc("persist:pipe.tpl")}', '1')
         );
     }
@@ -259,8 +273,7 @@ class AccessorTest  extends TestCase
      * @param $result
      */
     public function testSmartAccessor($name, $accessor, $type, $code, $result) {
-        $this->fenom->test = $this;
-        $this->fenom->three = 3;
+        $this->fenom->prop = "something";
         $this->fenom->addAccessorSmart($name, $accessor, $type);
         $this->assertRender($code, $result, $this->getVars());
     }

@@ -4,7 +4,7 @@ namespace Fenom;
 class MacrosTest extends TestCase
 {
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->tpl("math.tpl",
@@ -115,12 +115,10 @@ class MacrosTest extends TestCase
         );
     }
 
-    /**
-     * @expectedExceptionMessage Undefined macro 'plus'
-     * @expectedException \Fenom\Error\CompileException
-     */
     public function testImportMiss()
     {
+        $this->expectException(exception: \Fenom\Error\CompileException::class);
+        $this->expectExceptionMessage("Undefined macro 'plus'");
         $tpl = $this->fenom->compile('import_miss.tpl');
 
         $this->assertSame(

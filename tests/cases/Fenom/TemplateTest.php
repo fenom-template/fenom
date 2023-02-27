@@ -13,7 +13,7 @@ use Fenom\Template,
 class TemplateTest extends TestCase
 {
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->tpl('welcome.tpl', '<b>Welcome, {$username} ({$email})</b>');
@@ -1202,8 +1202,8 @@ class TemplateTest extends TestCase
         $this->values = $vars;
         $this->tpl("insert.tpl", $code);
         $tpl = $this->fenom->getTemplate('insert.tpl');
-        $this->assertSame($result, $tpl->fetch($vars));
-        $this->assertTrue($tpl->isValid());
+        $this->assertSame($result, $tpl->fetch($vars), $code);
+        $this->assertTrue($tpl->isValid(), $code);
     }
 
     /**

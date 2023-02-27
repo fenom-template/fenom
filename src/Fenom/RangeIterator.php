@@ -2,17 +2,19 @@
 
 namespace Fenom;
 
+use Countable;
+use Iterator;
 
-class RangeIterator implements \Iterator, \Countable
+class RangeIterator implements Iterator, Countable
 {
 
-    public $current;
-    public $index = 0;
-    public $min;
-    public $max;
-    public $step;
+    public int $current;
+    public int $index = 0;
+    public int $min;
+    public int $max;
+    public int $step;
 
-    public function __construct($min, $max, $step = 1)
+    public function __construct(int $min, int $max, int $step = 1)
     {
         $this->min = $min;
         $this->max = $max;
@@ -23,7 +25,7 @@ class RangeIterator implements \Iterator, \Countable
      * @param int $step
      * @return $this
      */
-    public function setStep($step)
+    public function setStep(int $step): static
     {
         if($step > 0) {
             $this->current = min($this->min, $this->max);
@@ -40,7 +42,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Return the current element
      */
-    public function current()
+    public function current(): mixed
     {
         return $this->current;
     }
@@ -48,7 +50,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Move forward to next element
      */
-    public function next()
+    public function next(): void
     {
         $this->current += $this->step;
         $this->index++;
@@ -56,9 +58,9 @@ class RangeIterator implements \Iterator, \Countable
 
     /**
      * Return the key of the current element
-     * @return int
+     * @return mixed
      */
-    public function key()
+    public function key(): mixed
     {
         return $this->index;
     }
@@ -67,7 +69,7 @@ class RangeIterator implements \Iterator, \Countable
      * Checks if current position is valid
      * @return bool
      */
-    public function valid()
+    public function valid(): bool
     {
         return $this->current >= $this->min && $this->current <= $this->max;
     }
@@ -75,7 +77,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Rewind the Iterator to the first element
      */
-    public function rewind()
+    public function rewind(): void
     {
         if($this->step > 0) {
             $this->current = min($this->min, $this->max);
@@ -88,7 +90,7 @@ class RangeIterator implements \Iterator, \Countable
     /**
      * Count elements of an object
      */
-    public function count()
+    public function count(): int
     {
         return intval(($this->max - $this->min + 1) / $this->step);
     }

@@ -1,5 +1,12 @@
 Changelog
 =========
+## 3.0.0 (2023-02-23)
+
+- Fenom supported php8+
+- Remove `eval` from template compiler
+- `strftime` -> `date` with fallback support.
+- update tokenizer
+- bugfixes and optimizations 
 
 ## 2.11.0 (2016-06-09)
 

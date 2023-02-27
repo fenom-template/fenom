@@ -11,7 +11,7 @@ class ProviderTest extends TestCase
      */
     public $provider;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         $this->tpl("template1.tpl", 'Template 1 {$a}');
@@ -30,6 +30,7 @@ class ProviderTest extends TestCase
 
     public function testGetSource()
     {
+        $time = 0.0;
         clearstatcache();
         $src = $this->provider->getSource("template1.tpl", $time);
         clearstatcache();
@@ -37,11 +38,9 @@ class ProviderTest extends TestCase
         $this->assertEquals(filemtime(FENOM_RESOURCES . '/template/template1.tpl'), $time);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testGetSourceInvalid()
     {
+        $this->expectException(\RuntimeException::class);
         $this->provider->getSource("unexists.tpl", $time);
     }
 
@@ -52,11 +51,9 @@ class ProviderTest extends TestCase
         $this->assertEquals(filemtime(FENOM_RESOURCES . '/template/template1.tpl'), $time);
     }
 
-    /**
-     * @expectedException \RuntimeException
-     */
     public function testGetLastModifiedInvalid()
     {
+        $this->expectException(\RuntimeException::class);
         $this->provider->getLastModified("unexists.tpl");
     }
 

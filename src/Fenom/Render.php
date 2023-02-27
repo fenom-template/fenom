@@ -10,6 +10,7 @@
 namespace Fenom;
 
 use Fenom;
+use Fenom\Error\TemplateException;
 
 /**
  * Primitive template
@@ -17,71 +18,72 @@ use Fenom;
  */
 class Render extends \ArrayObject
 {
-    private static $_props = array(
+    private static array $_props = [
         "name"      => "runtime",
         "base_name" => "",
         "scm"       => false,
         "time"      => 0,
-        "depends"   => array(),
-        "macros"    => array()
-    );
+        "depends"   => [],
+        "macros"    => []
+    ];
     /**
-     * @var \Closure
+     * @var \Closure|null
      */
-    protected $_code;
+    protected ?\Closure $_code = null;
     /**
      * Template name
      * @var string
      */
-    protected $_name = 'runtime';
+    protected mixed $_name = 'runtime';
     /**
      * Provider's schema
-     * @var bool
+     * @var string|null
      */
-    protected $_scm = false;
+    protected ?string $_scm = null;
     /**
      * Basic template name
      * @var string
      */
-    protected $_base_name = 'runtime';
+    protected string $_base_name = 'runtime';
     /**
      * @var Fenom
      */
-    protected $_fenom;
+    protected Fenom $_fenom;
     /**
      * Timestamp of compilation
      * @var float
      */
-    protected $_time = 0.0;
+    protected float $_time = 0.0;
 
     /**
      * @var array depends list
      */
-    protected $_depends = array();
+    protected array $_depends = [];
 
     /**
      * @var int template options (see Fenom options)
      */
-    protected $_options = 0;
+    protected int $_options = 0;
 
     /**
      * Template provider
      * @var ProviderInterface
      */
-    protected $_provider;
+    protected ProviderInterface $_provider;
 
     /**
      * @var \Closure[]
      */
-    protected $_macros;
+    protected array $_macros;
 
     /**
      * @param Fenom $fenom
-     * @param callable $code template body
+     * @param \Closure $code template body
      * @param array $props
      */
     public function __construct(Fenom $fenom, \Closure $code, array $props = array())
     {
+        parent::__construct();
         $this->_fenom = $fenom;
         $props += self::$_props;
         $this->_name      = $props["name"];
@@ -97,25 +99,25 @@ class Render extends \ArrayObject
      * Get template storage
      * @return \Fenom
      */
-    public function getStorage()
+    public function getStorage(): Fenom
     {
         return $this->_fenom;
     }
 
     /**
-     * Get depends list
+     * Get list of dependencies.
      * @return array
      */
-    public function getDepends()
+    public function getDepends(): array
     {
         return $this->_depends;
     }
 
     /**
      * Get schema name
-     * @return string
+     * @return string|null
      */
-    public function getScm()
+    public function getScm(): ?string
     {
         return $this->_scm;
     }
@@ -124,7 +126,7 @@ class Render extends \ArrayObject
      * Get provider of template source
      * @return ProviderInterface
      */
-    public function getProvider()
+    public function getProvider(): ProviderInterface
     {
         return $this->_fenom->getProvider($this->_scm);
     }
@@ -133,7 +135,7 @@ class Render extends \ArrayObject
      * Get name without schema
      * @return string
      */
-    public function getBaseName()
+    public function getBaseName(): string
     {
         return $this->_base_name;
     }
@@ -142,7 +144,7 @@ class Render extends \ArrayObject
      * Get parse options
      * @return int
      */
-    public function getOptions()
+    public function getOptions(): int
     {
         return $this->_options;
     }
@@ -159,7 +161,7 @@ class Render extends \ArrayObject
      * Get template name
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->_name;
     }
@@ -174,7 +176,7 @@ class Render extends \ArrayObject
      * Validate template
      * @return bool
      */
-    public function isValid()
+    public function isValid(): bool
     {
         foreach ($this->_depends as $scm => $templates) {
             $provider = $this->_fenom->getProvider($scm);
@@ -197,7 +199,7 @@ class Render extends \ArrayObject
      * @throws \RuntimeException
      * @return mixed
      */
-    public function getMacro($name)
+    public function getMacro($name): mixed
     {
         if (empty($this->_macros[$name])) {
             throw new \RuntimeException('macro ' . $name . ' not found');
@@ -208,11 +210,16 @@ class Render extends \ArrayObject
     /**
      * Execute template and write into output
      * @param array $values for template
-     * @return Render
+     * @return array
+     * @throws TemplateException
      */
-    public function display(array $values)
+    public function display(array $values): array
     {
-        $this->_code->__invoke($values, $this);
+        try {
+            $this->_code->__invoke($values, $this);
+        } catch (\Throwable $e) {
+            throw new Fenom\Error\TemplateException("unhandled exception in the template `{$this->getName()}`: {$e->getMessage()}", 0, $e);
+        }
         return $values;
     }
 
@@ -222,7 +229,7 @@ class Render extends \ArrayObject
      * @return string
      * @throws \Exception
      */
-    public function fetch(array $values)
+    public function fetch(array $values): string
     {
         ob_start();
         try {
@@ -236,17 +243,12 @@ class Render extends \ArrayObject
 
     /**
      * Stub
-     * @param $method
-     * @param $args
+     * @param string $method
+     * @param mixed $args
      * @throws \BadMethodCallException
      */
-    public function __call($method, $args)
+    public function __call(string $method, mixed $args)
     {
         throw new \BadMethodCallException("Unknown method " . $method);
-    }
-
-    public function __get($name)
-    {
-        return $this->$name = null;
     }
 }

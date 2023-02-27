@@ -45,7 +45,7 @@ class TokenizerTest extends TestCase
                 '  ',
                 1
             ),
-            $tokens->curr
+            $tokens->currToken()
         );
         $this->assertSame("resolve", $tokens->getNext($tokens::MACRO_UNARY, T_STRING));
 
@@ -80,6 +80,25 @@ class TokenizerTest extends TestCase
         $this->assertSame('}', $tokens->end()->current());
     }
 
+    public function testComplexTokens()
+    {
+        $text = "one\\two";
+        $tokens = new Tokenizer($text);
+        $this->assertSame("one", $tokens->current());
+        $this->assertSame("\\", $tokens->next()->current());
+        $this->assertSame("two", $tokens->next()->current());
+        $this->assertFalse($tokens->next()->valid());
+
+        $text = "\\one\\two";
+
+        $tokens = new Tokenizer($text);
+        $this->assertSame("\\", $tokens->current());
+        $this->assertSame("one", $tokens->next()->current());
+        $this->assertSame("\\", $tokens->next()->current());
+        $this->assertSame("two", $tokens->next()->current());
+        $this->assertFalse($tokens->next()->valid());
+    }
+
     public function testSkip()
     {
         $text   = "1 foo: bar ( 3 + double ) ";
@@ -106,7 +125,6 @@ class TokenizerTest extends TestCase
         $this->assertSame($tokens, $tokens->next());
         $tokens->p = -1000;
         $this->assertSame($tokens, $tokens->back());
-        $this->assertNull($tokens->undef);
     }
 
     public function testFixFloats() {

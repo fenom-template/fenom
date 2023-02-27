@@ -20,20 +20,20 @@ interface ProviderInterface
      * @param string $tpl
      * @return bool
      */
-    public function templateExists($tpl);
+    public function templateExists(string $tpl): bool;
 
     /**
      * @param string $tpl
-     * @param int $time
+     * @param float $time seconds with micro
      * @return string
      */
-    public function getSource($tpl, &$time);
+    public function getSource(string $tpl, float &$time): string;
 
     /**
      * @param string $tpl
-     * @return int
+     * @return float seconds with micro
      */
-    public function getLastModified($tpl);
+    public function getLastModified(string $tpl): float;
 
     /**
      * Verify templates (check mtime)
@@ -41,11 +41,11 @@ interface ProviderInterface
      * @param array $templates [template_name => modified, ...] By conversation, you may trust the template's name
      * @return bool if true - all templates are valid else some templates are invalid
      */
-    public function verify(array $templates);
+    public function verify(array $templates): bool;
 
     /**
      * Get all names of template from provider
-     * @return array|\Iterator
+     * @return iterable
      */
-    public function getList();
+    public function getList(): iterable;
 }
