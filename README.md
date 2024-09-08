@@ -1,3 +1,7 @@
+MAINTAINERS WANTED
+=== 
+Create issue if you want to be a maintainer of Fenom
+
 Fenom - Template Engine for PHP
 ===============================
 
