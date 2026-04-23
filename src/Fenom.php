@@ -1056,8 +1056,8 @@ class Fenom
             /** @var Fenom\Template $tpl */
             $tpl = $this->_storage[$key];
             if (($this->_options & self::AUTO_RELOAD) && !$tpl->isValid()) {
-                $this->compile($template, true, $options);
-                return $this->_storage[$key] = $this->_load($template, $options);
+                $compiled = $this->compile($template, true, $options);
+                return $this->_storage[$key] = $this->_load($template, $options, $compiled);
             } else {
                 return $tpl;
             }
@@ -1097,7 +1097,7 @@ class Fenom
      * @return Fenom\Render
      * @throws CompileException
      */
-    protected function _load(array|string $template, int $opts): Render
+    protected function _load(array|string $template, int $opts, ?Template $compiled = null): Render
     {
         $file_name = $this->getCompileName($template, $opts);
         $tpl = null;
@@ -1115,6 +1115,8 @@ class Fenom
                 return $_tpl;
             } else if ($tpl) {
                 return $tpl;
+            } else if ($compiled) {
+                return $compiled;
             }
         }
         throw new CompileException("failed to store cache of " . var_export($template, true) .
