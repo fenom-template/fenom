@@ -412,9 +412,9 @@ class Template extends Render
     }
 
     /**
-     * @param string $tag_name
+     * @param string|null $tag_name
      */
-    public function ignore(string $tag_name)
+    public function ignore(?string $tag_name): void
     {
         $this->_ignore = $tag_name;
     }

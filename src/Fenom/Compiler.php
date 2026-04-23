@@ -959,7 +959,7 @@ class Compiler
      */
     public static function ignoreOpen(Tokenizer $tokens, Tag $tag): void
     {
-        $tag->tpl->ignore('ignore');
+        $tag->tpl->ignore($tag->name);
     }
 
     /**

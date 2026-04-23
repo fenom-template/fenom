@@ -297,4 +297,9 @@ class Tag extends \ArrayObject
             $this->tpl->ignore($this->name);
         }
     }
+
+    public function optIgnoreEnd()
+    {
+        $this->tpl->ignore(null);
+    }
 }
