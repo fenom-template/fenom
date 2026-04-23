@@ -693,9 +693,9 @@ class Compiler
         } else {
             $scope["name"] = $var;
             if ($tokens->is('|')) {
-                $scope["value"] = $before . $scope->tpl->parseModifier($tokens, "ob_get_clean()").';'.$after;
+                $scope["value"] = $scope->tpl->parseModifier($tokens, "ob_get_clean()").';';
             } else {
-                $scope["value"] = $before . "ob_get_clean();" . $after;
+                $scope["value"] = "ob_get_clean();";
             }
             return 'ob_start();';
         }
@@ -708,6 +708,9 @@ class Compiler
      */
     public static function setClose(Tokenizer $tokens, Tag $scope): string
     {
+        if ($scope->name === 'add') {
+            return "if(!isset(" . $scope["name"] . ")) {\n" . $scope["name"] . '=' . $scope["value"] . ";\n} else {\n    ob_end_clean();\n}";
+        }
         return $scope["name"] . '=' . $scope["value"] . ';';
     }
 
