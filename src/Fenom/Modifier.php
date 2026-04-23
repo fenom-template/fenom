@@ -100,7 +100,7 @@ class Modifier
      * @param string|null $charset
      * @return string
      */
-    public static function escape(string $text, string $type = 'html', string $charset = null): string
+    public static function escape(string $text, string $type = 'html', ?string $charset = null): string
     {
         switch (strtolower($type)) {
             case "url":

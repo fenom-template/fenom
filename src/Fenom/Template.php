@@ -1592,7 +1592,7 @@ class Template extends Render
      * @param array|null $defaults
      * @return array
      */
-    public function parseParams(Tokenizer $tokens, array $defaults = null)
+    public function parseParams(Tokenizer $tokens, ?array $defaults = null)
     {
         $params = array();
         while ($tokens->valid()) {
