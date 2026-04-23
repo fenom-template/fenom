@@ -1099,14 +1099,23 @@ class Fenom
      */
     protected function _load(array|string $template, int $opts, ?Template $compiled = null): Render
     {
+        $scm = null;
+        if (is_string($template)) {
+            if ($provider = strstr($template, ':', true)) {
+                $scm = $provider;
+            }
+        } elseif (is_array($template) && ($provider = strstr($template[0], ':', true))) {
+            $scm = $provider;
+        }
+        $compile_dir = $this->getCompileDir($scm);
         $file_name = $this->getCompileName($template, $opts);
         $tpl = null;
-        if (!is_file($this->_compile_dir . "/" . $file_name)) {
+        if (!is_file($compile_dir . "/" . $file_name)) {
             $tpl = $this->compile($template, true, $opts);
         }
-        if (is_file($this->_compile_dir . "/" . $file_name)) {
+        if (is_file($compile_dir . "/" . $file_name)) {
             $fenom = $this; // used in template
-            $_tpl  = include($this->_compile_dir . "/" . $file_name);
+            $_tpl  = include($compile_dir . "/" . $file_name);
             /* @var Fenom\Render $_tpl */
 
             if (!($this->_options & self::AUTO_RELOAD) || ($this->_options & self::AUTO_RELOAD)
@@ -1150,6 +1159,20 @@ class Fenom
     }
 
     /**
+     * Get compile directory for a provider or default
+     *
+     * @param string|null $scm provider schema, null for default
+     * @return string compile directory path
+     */
+    public function getCompileDir(?string $scm = null): string
+    {
+        if ($scm && isset($this->_compiles[$scm])) {
+            return $this->_compiles[$scm];
+        }
+        return $this->_compile_dir;
+    }
+
+    /**
      * Compile and save template
      *
      * @param array|string $tpl
@@ -1160,6 +1183,16 @@ class Fenom
      */
     public function compile(array|string $tpl, bool $store = true, int $options = 0): Template
     {
+        $scm = null;
+        if (is_string($tpl)) {
+            if ($provider = strstr($tpl, ':', true)) {
+                $scm = $provider;
+            }
+        } elseif (is_array($tpl) && ($provider = strstr($tpl[0], ':', true))) {
+            $scm = $provider;
+        }
+        $compile_dir = $this->getCompileDir($scm);
+
         if (is_string($tpl)) {
             $template = $this->getRawTemplate()->load($tpl);
         } else {
@@ -1170,11 +1203,11 @@ class Fenom
         }
         if ($store) {
             $cache_name   = $this->getCompileName($tpl, $options);
-            $compile_path = $this->_compile_dir . "/" . $cache_name . "." . mt_rand(0, 100000) . ".tmp";
+            $compile_path = $compile_dir . "/" . $cache_name . "." . mt_rand(0, 100000) . ".tmp";
             if(!file_put_contents($compile_path, $template->getTemplateCode())) {
-                throw new CompileException("Can't to write to the file $compile_path. Directory " . $this->_compile_dir . " is writable?");
+                throw new CompileException("Can't to write to the file $compile_path. Directory " . $compile_dir . " is writable?");
             }
-            $cache_path = $this->_compile_dir . "/" . $cache_name;
+            $cache_path = $compile_dir . "/" . $cache_name;
             if (!rename($compile_path, $cache_path)) {
                 unlink($compile_path);
                 throw new CompileException("Can't to move the file $compile_path -> $cache_path");
@@ -1197,6 +1230,11 @@ class Fenom
     public function clearAllCompiles(): void
     {
         Provider::clean($this->_compile_dir);
+        foreach ($this->_compiles as $compile_dir) {
+            if ($compile_dir !== $this->_compile_dir) {
+                Provider::clean($compile_dir);
+            }
+        }
         $this->flush();
     }
 
