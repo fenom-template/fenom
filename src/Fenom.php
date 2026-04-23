@@ -749,7 +749,7 @@ class Fenom
      * @param Template|null $template
      * @return callable|null
      */
-    public function getModifier(string $modifier, Fenom\Template $template = null): ?callable
+    public function getModifier(string $modifier, ?Fenom\Template $template = null): ?callable
     {
         if (isset($this->_modifiers[$modifier])) {
             return $this->_modifiers[$modifier];
@@ -778,7 +778,7 @@ class Fenom
      * @param Template|null $template
      * @return array|null
      */
-    public function getTag(string $tag, Template $template = null): ?array
+    public function getTag(string $tag, ?Template $template = null): ?array
     {
         if (isset($this->_actions[$tag])) {
             return $this->_actions[$tag];
@@ -845,7 +845,7 @@ class Fenom
      * @param string|null $compile_path
      * @return $this
      */
-    public function addProvider(string $scm, ProviderInterface $provider, string $compile_path = null): static
+    public function addProvider(string $scm, ProviderInterface $provider, ?string $compile_path = null): static
     {
         $this->_providers[$scm] = $provider;
         if ($compile_path) {
@@ -937,7 +937,7 @@ class Fenom
      * @param string|null $key
      * @return callable|array|null
      */
-    public function getAccessor(string $name,string $key = null): mixed
+    public function getAccessor(string $name, ?string $key = null): mixed
     {
         if(isset($this->_accessors[$name])) {
             if($key) {
@@ -967,7 +967,7 @@ class Fenom
      * @return ProviderInterface
      * @throws InvalidArgumentException
      */
-    public function getProvider(string $scm = null): Fenom\ProviderInterface
+    public function getProvider(?string $scm = null): Fenom\ProviderInterface
     {
         if ($scm) {
             if (isset($this->_providers[$scm])) {
@@ -985,7 +985,7 @@ class Fenom
      *
      * @return Fenom\Template
      */
-    public function getRawTemplate(Template $parent = null): Template
+    public function getRawTemplate(?Template $parent = null): Template
     {
         return new Template($this, $this->_options, $parent);
     }

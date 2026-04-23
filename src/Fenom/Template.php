@@ -140,7 +140,7 @@ class Template extends Render
      * @param int $options
      * @param Template $parent
      */
-    public function __construct(Fenom $fenom, $options, Template $parent = null)
+    public function __construct(Fenom $fenom, $options, ?Template $parent = null)
     {
         $this->parent       = $parent;
         $this->_fenom       = $fenom;
@@ -1592,7 +1592,7 @@ class Template extends Render
      * @param array|null $defaults
      * @return array
      */
-    public function parseParams(Tokenizer $tokens, array $defaults = null)
+    public function parseParams(Tokenizer $tokens, ?array $defaults = null)
     {
         $params = array();
         while ($tokens->valid()) {

@@ -26,7 +26,7 @@ class TestCase extends \PHPUnit\Framework\TestCase
             "three" => 3,
             "float" => 4.5,
             "bool"  => true,
-            "obj"   => new \StdClass,
+            "obj"   => new \stdClass,
             "list"  => array(
                 "a"   => 1,
                 "one" => 1,
