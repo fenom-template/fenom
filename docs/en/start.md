@@ -1,5 +1,5 @@
 Basic usage
-===========
+==========
 
 ## Install Fenom
 
@@ -9,22 +9,21 @@ Add package Fenom in your require-list in `composer.json`:
 ```json
 {
     "require": {
-        "fenom/fenom": "2.*"
+        "fenom/fenom": "^3.0"
     }
 }
 ```
 and update project's dependencies: `composer update`.
 
-### Custom loader
+### Manual Installation
 
-Clone Fenom to any directory: `git clone https://github.com/bzick/fenom.git`. Recommended use latest tag.
-Fenom use [psr-0](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-0.md#autoloading-standard) autoloading standard. Therefore you can
-* use `psr-0` format in your project loader for loading Fenom's classes
-* or register Fenom's autoloader: `Fenom::registerAutoload();` for loading itself.
+Clone Fenom to any directory: `git clone https://github.com/fenom-template/fenom.git`.
 
-Also you can use this autoloader for loading any library with `psr-0` file naming:
+Fenom uses [PSR-4](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md) autoloading standard.
+Include Composer's autoloader or use any PSR-4 compatible autoloader:
+
 ```php
-Fenom::registerAutoload(PROJECT_DIR."/src");
+require_once '/path/to/vendor/autoload.php';
 ```
 
 ## Setup Fenom
@@ -36,7 +35,7 @@ $fenom = Fenom::factory('/path/to/templates', '/path/to/compiled/template', $opt
 
 Create an object via `new` operator
 ```php
-$fenom = new Fenom(new Provider('/path/to/templates'));
+$fenom = new Fenom(new Fenom\Provider('/path/to/templates'));
 $fenom->setCompileDir('/path/to/template/cache');
 $fenom->setOptions($options);
 ```
