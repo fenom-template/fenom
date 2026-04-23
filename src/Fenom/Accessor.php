@@ -124,18 +124,43 @@ class Accessor {
      * @param Tokenizer $tokens
      * @return string
      */
-    public static function constant(Tokenizer $tokens): string
+    public static function constant(Tokenizer $tokens, Template $tpl, bool &$is_var): string
     {
-        $const = [$tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext()];
-        while($tokens->is('.')) {
-            $const[] = $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
-        }
-        $const = implode('\\', $const);
-        if($tokens->is(T_DOUBLE_COLON)) {
-            $const .= '::'.$tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
-        }
-        return '(defined('.var_export($const, true).') ? constant('.var_export($const, true).') : "")';
+        $parts = [];
+        $firstPart = $tokens->skip('.')->need(Tokenizer::MACRO_STRING)->getAndNext();
+        $parts[] = $firstPart;
+        $is_var = false;
 
+        while ($tokens->is('.')) {
+            $parts[] = $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
+        }
+
+        if ($tokens->is(T_DOUBLE_COLON)) {
+            $fullConstName = implode('\\', $parts);
+            $fullConstName .= '::' . $tokens->next()->need(Tokenizer::MACRO_STRING)->getAndNext();
+            return '(defined(' . var_export($fullConstName, true) . ') ? constant(' . var_export($fullConstName, true) . ') : "")';
+        }
+
+        $fullConstName = implode('\\', $parts);
+        if (defined($fullConstName)) {
+            $result = '(defined(' . var_export($fullConstName, true) . ') ? constant(' . var_export($fullConstName, true) . ') : "")';
+            if ($tokens->is('.')) {
+                return $tpl->parseChain($tokens, $result);
+            }
+            return $result;
+        }
+
+        $baseName = array_shift($parts);
+        if ($parts) {
+            $result = '(defined(' . var_export($baseName, true) . ') ? constant(' . var_export($baseName, true) . ')';
+            foreach ($parts as $part) {
+                $result .= '["' . $part . '"]';
+            }
+            $result .= ' : "")';
+            return $result;
+        }
+
+        return '(defined(' . var_export($baseName, true) . ') ? constant(' . var_export($baseName, true) . ') : "")';
     }
 
     /**
