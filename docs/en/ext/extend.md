@@ -20,13 +20,21 @@ $fenom->addFunction(string $function_name, callable $callback[, callable $parser
 ```
 
 В данном случае запускается стандартный парсер, который автоматически разберет аргументы тега, которые должны быть в формате HTML аттрибутов и отдаст их в функцию ассоциативным массивом:
+
 ```php
-$fenom->addFunction("some_function", function (array $params) { /* ... */ });
+$fenom->addFunction("some_function", function (array $params) {
+    /* ... */
+});
 ```
+
 При необходимости можно переопределить парсер на произвольный:
+
 ```php
-$fenom->addFunction("some_function", $some_function, function (Fenom\Tokenizer $tokenizer, Fenom\Template $template) { /* parse tag */});
+$fenom->addFunction("some_function", $some_function, function (Fenom\Tokenizer $tokenizer, Fenom\Template $template) {
+    /* parse tag */
+});
 ```
+
 Существует более простой способ добавления произвольной функции:
 
 ```php
@@ -36,12 +44,19 @@ $fenom->addFunctionSmarty(string $function_name, callable $callback);
 В данном случае парсер сканирует список аргументов коллбека и попробует сопоставить с аргументами тега.
 
 ```php
-// ... class XYCalcs ..
-public static function calc($x, $y = 5) { /* ... */}
-// ...
+class XYCalcs
+{
+    public static function calc($x, $y = 5)
+    {
+        /* ... */
+    }
+}
+
 $fenom->addFunctionSmart('calc', 'XYCalcs::calc');
 ```
+
 then
+
 ```smarty
 {calc x=$top y=50} or {calc y=50 x=$top} is XYCalcs::calc($top, 50)
 {calc x=$top} or {calc $top} is XYCalcs::calc($top)
@@ -57,8 +72,11 @@ $fenom->addBlockFunction(string $function_name, callable $callback[, callable $p
 ```
 
 Сам коллбек принимает первым аргументом контент между открывающим и закрывающим тегом, а вторым аргументом - ассоциативный массив из аргуметов тега:
+
 ```php
-$fenom->addBlockFunction('some_block_function', function ($content, array $params) { /* ... */});
+$fenom->addBlockFunction('some_block_function', function ($content, array $params) {
+    /* ... */
+});
 ```
 
 ## Inline compiler
@@ -80,13 +98,15 @@ $fenom->addCompilerSmart(string $compiler, $storage);
 
 ## Block compiler
 
-Добавление блочного компилятора осуществяется двумя способами. Первый
+Добавление блочного компилятора осуществяется двумя способами.
+
+Первый:
 
 ```php
 $fenom->addBlockCompiler(string $compiler, array $parsers, array $tags);
 ```
-
 где `$parser` ассоциативный массив `["open" => parser, "close" => parser]`, сождержащий парсер на открывающий и на закрывающий тег, а `$tags` содержит список внутренних тегов в формате `["tag_name"] => parser`, которые могут быть использованы только с этим компилятором.
+
 Второй способ добавления парсера через импортирование из класса или объекта методов:
 
 ```php
@@ -95,7 +115,7 @@ $fenom->addBlockCompilerSmart(string $compiler, $storage, array $tags, array $fl
 
 # Add modifiers
 
-```
+```php
 $fenom->addModifier(string $modifier, callable $callback);
 ```
 
@@ -118,7 +138,6 @@ $fenom->addModifier('my_modifier', function ($variable, $param1, $param2) {
 
 ```php
 $fenom->addTest($name, $code);
-?>
 ```
 
 # Add template provider
