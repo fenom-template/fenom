@@ -31,10 +31,4 @@
             <directory suffix=".php">src</directory>
         </include>
     </source>
-
-    <coverage>
-        <report>
-            <clover outputFile="build/logs/clover.xml"/>
-        </report>
-    </coverage>
 </phpunit>
