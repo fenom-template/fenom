@@ -65,18 +65,32 @@ Fetch the output of the template into variable
 
 ### {add}
 
-The tag {add} the same tag as {set} except that sets the value of the variable if it does not exist.
+The tag {add} is similar to {set}, but it only sets the variable if the variable is not already set or is empty.
 
 ```smarty
 {add $var = 'value'}
 ```
 
-instead of
-
+This is equivalent to:
 ```smarty
-{if $var is not set}
+{if !$var}
     {set $var = 'value'}
 {/if}
+```
+
+The {add} tag also supports block content:
+
+```smarty
+{add $var}
+    This content will be assigned to $var only if $var is not set
+{/add}
+```
+
+Or with modifiers:
+```smarty
+{add $var|trim}
+    Content with extra whitespace
+{/add}
 ```
 
 ### {var}

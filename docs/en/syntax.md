@@ -99,32 +99,14 @@ Unnamed system variable starts with `$.` and allows access to global system vari
 ```
 
 
-Безименная системная переменная начинается с `$.` и предоставляет доступ к глобальным системным переменным и системной информации:
-
-* `$.env` — array `$_ENV`.
-* `$.get` — array `$_GET`.
-* `$.post` — array `$_POST`.
-* `$.files` — array `$_FILES`.
-* `$.cookie` — array `$_COOKIE`.
-* `$.server` — array `$_SERVER`.
-* `$.session` — array `$_SESSION`.
-* `$.globals` — array `$GLOBALS`.
-* `$.request` — array `$_REQUEST`.
-* `$.tpl.name` returns name for current template.
-* `$.tpl.basename` returns name without schema for current template.
-* `$.tpl.scm` returns schema for current template.
-* `$.tpl.options` returns options as integer for current template.
-* `$.tpl.depends` <!-- возвращает массив шаблонов на которые ссылается текущий шаблон.-->
-* `$.tpl.time` returns last modified timestamp for current template
-* `$.version` returns Fenom version.
-* `$.const` returns the value of a PHP constant: `$.const.PHP_EOL` get value of constant `PHP_EOL`. 
-   Supported namespace for constants, use dot instead of back-slash for namespace separators: `$.const.Storage.FS::DIR_SEPARATOR`  get value of constant `Storage\FS::DIR_SEPARATOR`.
-   But if constant `Storage\FS::DIR_SEPARATOR` does not exists then constant `Storage\FS\DIR_SEPARATOR` will be taken.
-* `$.php`call PHP static method. `$.php.Storage.FS::put($filename, $data)` calls method `Storage\FS::put($filename, $data)`.
-  `$.php.Storage.FS.put($filename, $data)` `Storage\FS\put($filename, $data)`
-* System function `$.fetch($name, $values)` calls Fenom::fetch() in template. `$name` — template name, 
-  `$values` — additional variables.
-* also you may [add](./ext/extend.md#Extends-system-variable) yours system variables and functions.
+* `$.const` returns the value of a PHP constant:
+  * `$.const.PHP_EOL` — returns the value of constant `PHP_EOL`
+  * Namespace constants: use dot instead of backslash: `$.const.Storage.FS::DIR_SEPARATOR` returns `Storage\FS::DIR_SEPARATOR`
+  * Array constants: access array elements with dot notation: `$.const.GEO.id` where `GEO` is `define('GEO', ['id' => 123])`
+* `$.php` call PHP static methods: `$.php.Storage.FS::put($filename, $data)`
+* `$.fetch($name, $values)` render another template inline
+* `$.block.name` access template block content
+* [Add your own](./ext/extend.md#Extends-system-variable)
  
 
 ## Scalar values
